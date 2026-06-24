@@ -37,3 +37,4 @@ yarn-error.log*
 
 # vercel
 .vercel
+supabase/apply-to-dev.generated.sql

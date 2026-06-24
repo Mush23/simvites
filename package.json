@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:apply": "node --env-file=.env.local scripts/db-apply.mjs",
+    "db:verify": "node --env-file=.env.local scripts/db-verify.mjs"
   },
   "dependencies": {
     "@puckeditor/core": "^0.21.3",
@@ -17,6 +19,7 @@
     "@supabase/supabase-js": "^2.49.1",
     "clsx": "2.1.1",
     "next": "^16.2.7",
+    "pg": "^8.22.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "stripe": "^17.7.0",
@@ -26,6 +29,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "22.10.7",
+    "@types/pg": "^8.20.0",
     "@types/react": "19.0.7",
     "@types/react-dom": "19.0.3",
     "postcss": "8.5.1",
