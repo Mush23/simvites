@@ -67,14 +67,22 @@ supabase/
 
 See [`supabase/README.md`](supabase/README.md) to apply the schema.
 
-## Roadmap (MVP, ruthless)
+## Roadmap (build order — brief §10)
 
-1. ✅ Scaffold · data model · multi-tenant routing · light/dark theming · Template #1
-2. Supabase Auth + dashboard + site list
-3. Puck editor wired to `pages.content_json`
-4. RSVP / guest engine on Supabase (per-event caps, disappearing events, history)
-5. Invite delivery (Resend email) + personalised tokens
-6. Publish → subdomain (draft/publish snapshots)
-7. Stripe billing
+Schema is built fully now (migrations-later is painful); UI/logic ships in phases.
 
-Deferred: custom domains, more templates, seating/galleries polish, WhatsApp, AI.
+- **Phase 0 — foundation** ✅ Next.js, Tailwind v4, Supabase clients, migrations + RLS, theming, multi-tenant proxy, Template #1
+- **Phase 1 — site creation:** Supabase Auth, org bootstrap, create-site-from-template, dashboard, settings, theme + events CRUD
+- **Phase 2 — editor + publishing:** Puck (block library), draft pages, publish RPC, public renderer from `site_versions` only
+- **Phase 3 — guests + RSVP:** households/guests CRUD, two-level invite matrices, public RSVP flow + RSVP RPC (caps/deadline/supersede)
+- **Phase 4 — invite sending:** hashed token gen, `/i/:token` → HttpOnly guest cookie → clean URL, Resend batches, idempotent webhooks
+- **Phase 5 — payment unlock:** Stripe one-time checkout, idempotent webhooks, `purchases`, unlock paid features
+
+**Security non-negotiables (already in the schema):** `org_id` + RLS on every
+tenant table; invitation tokens stored **hashed** (`token_hash`, never raw, no
+`?g=`); public renderer reads **only** published `site_versions` snapshots;
+RSVP submission via a transactional RPC; idempotent Stripe **and** email webhooks.
+
+Deferred (designed to add cleanly): custom domains, WhatsApp/SMS, seating
+drag-and-drop, full galleries, guest uploads, AI guest-list parsing, more
+templates, corporate flows, subscriptions, advanced analytics, guest accounts.

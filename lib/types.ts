@@ -23,7 +23,7 @@ export type SendStatus =
   | 'failed'
   | 'opened'
 export type RsvpStatus = 'active' | 'superseded'
-export type DomainType = 'subdomain' | 'custom'
+export type DomainType = 'platform_subdomain' | 'custom'
 export type SslStatus = 'pending' | 'provisioning' | 'active' | 'error'
 
 // ── Theme tokens ──────────────────────────────────────────────────────────
@@ -105,11 +105,20 @@ export interface Guest {
   isChild: boolean
 }
 
-/** Per-household, per-event invite + capacity. cap 0 ⇒ event hidden. */
-export interface GuestEventInvite {
+// Two-level invites (brief §10). Household level controls visibility + capacity;
+// per-guest level supports exceptions (MVP auto-derives it from the household).
+export interface HouseholdEventInvite {
   householdId: string
   eventId: string
-  cap: number
+  invited: boolean
+  visible: boolean
+  householdCap: number // 0 / not-invited ⇒ event hidden for this household
+}
+
+export interface GuestEventInvite {
+  guestId: string
+  eventId: string
+  invited: boolean
 }
 
 export interface RsvpEventResponse {
@@ -118,12 +127,12 @@ export interface RsvpEventResponse {
   attending: boolean
 }
 
-export interface Rsvp {
+/** A guest's RSVP. Non-destructive: a new active submission supersedes the prior. */
+export interface RsvpSubmission {
   id: string
   householdId: string
   status: RsvpStatus
   submittedBy?: string
-  dietary?: string
   message?: string
   submittedAt: string
   responses: RsvpEventResponse[]

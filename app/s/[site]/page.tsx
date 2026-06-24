@@ -3,18 +3,19 @@ import { TemplateOne } from '@/components/template-one'
 import { resolveSiteBySlug } from '@/lib/sites'
 
 /**
- * Tenant site route. The middleware rewrites `<slug>.simvites.co.uk/*` here.
- * `?g=<token>` carries the guest's opaque invitation token for personalisation.
+ * Tenant site route. The proxy rewrites `<slug>.simvites.co.uk/*` here.
+ *
+ * Guest personalisation does NOT use a `?g=` token (brief §10 security): the
+ * public entry route `/i/<token>` validates a hashed token server-side, sets an
+ * HttpOnly guest-session cookie, then redirects to the clean URL. This page
+ * later reads that cookie to resolve the household — no token in the URL.
  */
 export default async function TenantSitePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ site: string }>
-  searchParams: Promise<{ g?: string }>
 }) {
   const { site: slug } = await params
-  await searchParams // guest token resolution wired in a later sprint
 
   const resolved = await resolveSiteBySlug(slug)
   if (!resolved) notFound()
