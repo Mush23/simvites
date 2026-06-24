@@ -10,7 +10,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "db:apply": "node --env-file=.env.local scripts/db-apply.mjs",
-    "db:verify": "node --env-file=.env.local scripts/db-verify.mjs"
+    "db:verify": "node --env-file=.env.local scripts/db-verify.mjs",
+    "user:create": "node --env-file=.env.local scripts/create-test-user.mjs"
   },
   "dependencies": {
     "@puckeditor/core": "^0.21.3",

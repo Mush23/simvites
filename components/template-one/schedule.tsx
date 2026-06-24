@@ -1,4 +1,5 @@
 import type { EventRecord } from '@/lib/types'
+import { formatEventDate } from '@/lib/utils'
 import { Reveal } from './reveal'
 import { SectionHeading } from './section-heading'
 
@@ -25,7 +26,7 @@ export function Schedule({ events }: { events: EventRecord[] }) {
               </h3>
               {event.eventDate && (
                 <span className="text-[0.7rem] uppercase tracking-wide-soft text-muted-foreground">
-                  {event.eventDate}
+                  {formatEventDate(event.eventDate)}
                 </span>
               )}
             </div>

@@ -1,4 +1,5 @@
 import type { EventRecord } from '@/lib/types'
+import { formatEventDate } from '@/lib/utils'
 import { Reveal } from './reveal'
 import { SectionHeading } from './section-heading'
 
@@ -43,7 +44,7 @@ function EventCard({ event }: { event: EventRecord }) {
             <dt className="w-16 shrink-0 text-[0.7rem] uppercase tracking-wide-soft text-gold-ink">
               Date
             </dt>
-            <dd className="text-card-foreground">{event.eventDate}</dd>
+            <dd className="text-card-foreground">{formatEventDate(event.eventDate)}</dd>
           </div>
         )}
         {event.venue && (

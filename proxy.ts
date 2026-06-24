@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { getSubdomain } from '@/lib/tenant'
+import { updateSession } from '@/lib/supabase/middleware'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Multi-tenant edge proxy (Next 16's successor to `middleware`).
@@ -17,18 +18,20 @@ export const config = {
   matcher: ['/((?!_next/|_static/|_vercel/|favicon.ico|.*\\..*).*)'],
 }
 
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const url = req.nextUrl
   const host = req.headers.get('host')
   const subdomain = getSubdomain(host)
 
-  // Apex / reserved → marketing + dashboard, served as-is.
-  if (!subdomain) {
-    return NextResponse.next()
+  // Tenant → rewrite into the /s/[site] route group, preserving path + query.
+  // Public site; no auth-session work needed here.
+  if (subdomain) {
+    const rewriteUrl = new URL(`/s/${subdomain}${url.pathname}`, req.url)
+    rewriteUrl.search = url.search
+    return NextResponse.rewrite(rewriteUrl)
   }
 
-  // Tenant → rewrite into the /s/[site] route group, preserving path + query.
-  const rewriteUrl = new URL(`/s/${subdomain}${url.pathname}`, req.url)
-  rewriteUrl.search = url.search
-  return NextResponse.rewrite(rewriteUrl)
+  // Apex / reserved → marketing + dashboard. Refresh the Supabase session so
+  // the dashboard's server components see a valid (rotated) auth cookie.
+  return updateSession(req)
 }

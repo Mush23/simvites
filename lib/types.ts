@@ -76,7 +76,7 @@ export interface EventRecord {
   key: string
   name: string
   tagline?: string
-  eventDate?: string // ISO date
+  eventDate?: string // ISO date "YYYY-MM-DD"; format with formatEventDate() for display
   startTime?: string // 24h "HH:mm"
   durationHours?: number
   venue?: string

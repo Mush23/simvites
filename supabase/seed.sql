@@ -23,7 +23,7 @@ values (
   '[
     {
       "key": "sangeet", "name": "Sangeet & Jago", "tagline": "An evening of music, dance & joy",
-      "eventDate": "Wednesday, 21 October 2026", "startTime": "19:00", "durationHours": 5,
+      "eventDate": "2026-10-21", "startTime": "19:00", "durationHours": 5,
       "venue": "Horizons Bar & Banqueting", "address": "39 Whitton Road, Hounslow TW3 2DB",
       "themeLabel": "Blue · Red · Orange", "accentToken": "ev-sangeet",
       "palette": ["oklch(0.5 0.16 250)", "oklch(0.5 0.2 28)", "oklch(0.68 0.17 55)"],
@@ -36,7 +36,7 @@ values (
     },
     {
       "key": "vidhi", "name": "Vidhi", "tagline": "Ganesh Stapna, Haldi & family blessings",
-      "eventDate": "Friday, 23 October 2026", "startTime": "12:15", "durationHours": 4,
+      "eventDate": "2026-10-23", "startTime": "12:15", "durationHours": 4,
       "venue": "Beechside", "address": "Oldfield Road, Maidenhead SL6 1UA",
       "themeLabel": "Yellow · Gold", "accentToken": "ev-vidhi",
       "palette": ["oklch(0.85 0.15 95)", "oklch(0.72 0.13 80)"],
@@ -49,7 +49,7 @@ values (
     },
     {
       "key": "wedding", "name": "Wedding Ceremony", "tagline": "Beneath the mandap, the sacred vows",
-      "eventDate": "Saturday, 24 October 2026", "startTime": "10:00", "durationHours": 4,
+      "eventDate": "2026-10-24", "startTime": "10:00", "durationHours": 4,
       "venue": "Radisson Blu London Heathrow", "address": "140 Bath Road, Harlington, Hayes UB3 5AW",
       "themeLabel": "Red · Gold", "accentToken": "ev-wedding",
       "palette": ["oklch(0.45 0.18 28)", "oklch(0.72 0.13 80)"],
@@ -62,7 +62,7 @@ values (
     },
     {
       "key": "reception", "name": "Reception", "tagline": "Dinner, dancing & an evening to remember",
-      "eventDate": "Saturday, 24 October 2026", "startTime": "18:00", "durationHours": 5,
+      "eventDate": "2026-10-24", "startTime": "18:00", "durationHours": 5,
       "venue": "Radisson Blu London Heathrow", "address": "140 Bath Road, Harlington, Hayes UB3 5AW",
       "themeLabel": "Navy · Gold", "accentToken": "ev-reception",
       "palette": ["oklch(0.34 0.08 265)", "oklch(0.72 0.13 80)"],
