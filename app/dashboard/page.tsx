@@ -2,7 +2,9 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getUser } from '@/lib/auth'
 import { siteUrl } from '@/lib/tenant'
+import { paidSiteIds } from '@/lib/billing'
 import { CreateSiteForm } from './create-site-form'
+import { UpgradeButton } from './upgrade-button'
 
 export const metadata = { title: 'Dashboard · Simvites' }
 
@@ -33,6 +35,8 @@ export default async function DashboardPage() {
       .order('created_at', { ascending: false })
     sites = data ?? []
   }
+
+  const paid = orgId ? await paidSiteIds(orgId) : new Set<string>()
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
@@ -85,6 +89,13 @@ export default async function DashboardPage() {
                     >
                       View
                     </a>
+                  )}
+                  {paid.has(s.id) ? (
+                    <span className="text-[0.7rem] uppercase tracking-wide-soft text-gold-ink">
+                      Upgraded ✓
+                    </span>
+                  ) : (
+                    <UpgradeButton siteId={s.id} />
                   )}
                 </div>
               </li>
