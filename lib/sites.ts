@@ -1,15 +1,14 @@
 import type { EventRecord, Site, SiteTheme } from '@/lib/types'
-import type { TemplateOneContent } from '@/components/template-one'
-import { defaultContent } from '@/templates/template-one'
+import type { SimvitesData } from '@/lib/puck/config'
 import { createAdminClient } from '@/lib/supabase/server'
-import { formatEventDate } from '@/lib/utils'
 
 export interface ResolvedSite {
   site: Site
-  content: TemplateOneContent
+  /** The published Puck document for the home page. */
+  pageData: SimvitesData
+  coupleInitials: string
 }
 
-/** Split "Maharshi & Simran" → ["Maharshi", "Simran"]; tolerant of no "&". */
 function splitNames(name: string): [string, string] {
   const parts = name.split(/\s*&\s*|\s+and\s+/i)
   if (parts.length >= 2) return [parts[0].trim(), parts.slice(1).join(' & ').trim()]
@@ -22,63 +21,9 @@ function initials(name: string): string {
   return b ? `${i(a)} & ${i(b)}` : i(a)
 }
 
-/** Build the Template #1 render content from a site record (until Puck editing). */
-function deriveContent(siteName: string, events: EventRecord[], deadline?: string): TemplateOneContent {
-  const [titleLeft, titleRight] = splitNames(siteName)
-  const wedding = events.find((e) => e.key === 'wedding') ?? events[0]
+function mapEvent(e: Record<string, unknown>): EventRecord {
   return {
-    kicker: 'Together with their families',
-    titleLeft: titleLeft || siteName,
-    titleRight: titleRight || '',
-    coupleInitials: initials(siteName),
-    dateDisplay: formatEventDate(wedding?.eventDate) ?? '',
-    location: defaultContent.location,
-    heroImage: defaultContent.heroImage,
-    story: {
-      kicker: 'Our Story',
-      title: 'How we got here',
-      paragraphs: [
-        `${siteName} would be honoured to have you celebrate with them.`,
-        'Explore the events below and let us know which you can join.',
-      ],
-    },
-    rsvpDeadlineDisplay: deadline ? (formatEventDate(deadline) ?? undefined) : undefined,
-  }
-}
-
-/**
- * Resolve a site by its subdomain slug, reading live data with the service-role
- * client (public guest reads never use the anon client against tenant tables).
- *
- * Phase 1 reads the live draft tables directly so a freshly created site is
- * viewable immediately. Phase 2 switches the public renderer to read ONLY the
- * published `site_versions.snapshot_json`.
- */
-export async function resolveSiteBySlug(slug: string): Promise<ResolvedSite | null> {
-  const supabase = createAdminClient()
-
-  const { data: siteRow } = await supabase
-    .from('sites')
-    .select('id, org_id, event_type, name, slug, status, timezone, rsvp_deadline')
-    .eq('slug', slug.toLowerCase())
-    .is('deleted_at', null)
-    .limit(1)
-    .maybeSingle()
-
-  if (!siteRow) return null
-
-  const [{ data: eventRows }, { data: themeRow }] = await Promise.all([
-    supabase
-      .from('events')
-      .select('*')
-      .eq('site_id', siteRow.id)
-      .is('deleted_at', null)
-      .order('order', { ascending: true }),
-    supabase.from('themes').select('*').eq('site_id', siteRow.id).maybeSingle(),
-  ])
-
-  const events: EventRecord[] = (eventRows ?? []).map((e: Record<string, unknown>) => ({
-    id: e.id as string,
+    id: (e.id as string) ?? '',
     key: e.key as string,
     name: e.name as string,
     tagline: (e.tagline as string) ?? undefined,
@@ -94,13 +39,50 @@ export async function resolveSiteBySlug(slug: string): Promise<ResolvedSite | nu
     schedule: (e.schedule_json as { time: string; label: string }[]) ?? [],
     order: (e.order as number) ?? 0,
     visible: (e.visible as boolean) ?? true,
-  }))
+  }
+}
+
+/**
+ * Resolve a PUBLISHED site by subdomain slug from its immutable snapshot
+ * (brief §10: the public renderer never reads the mutable draft tables).
+ * Uses the service-role client — guests never hold a Supabase session.
+ * Returns null when the slug is unknown or the site isn't published yet.
+ */
+export async function resolveSiteBySlug(slug: string): Promise<ResolvedSite | null> {
+  const supabase = createAdminClient()
+
+  const { data: siteRow } = await supabase
+    .from('sites')
+    .select('id, org_id, event_type, name, slug, status, timezone, rsvp_deadline, published_version_id')
+    .eq('slug', slug.toLowerCase())
+    .eq('status', 'published')
+    .is('deleted_at', null)
+    .maybeSingle()
+
+  if (!siteRow || !siteRow.published_version_id) return null
+
+  const { data: version } = await supabase
+    .from('site_versions')
+    .select('snapshot_json')
+    .eq('id', siteRow.published_version_id)
+    .maybeSingle()
+
+  if (!version) return null
+
+  const snap = version.snapshot_json as {
+    page?: SimvitesData
+    events?: Record<string, unknown>[]
+    theme?: Record<string, unknown>
+    name?: string
+  }
+
+  const events = (snap.events ?? []).map(mapEvent)
 
   const theme: SiteTheme = {
-    fontHeading: (themeRow?.font_heading as string) ?? 'Cormorant Garamond',
-    fontBody: (themeRow?.font_body as string) ?? 'Jost',
-    modeDefault: (themeRow?.mode_default as SiteTheme['modeDefault']) ?? 'system',
-    colors: (themeRow?.color_tokens_jsonb as SiteTheme['colors']) ?? { light: {}, dark: {} },
+    fontHeading: (snap.theme?.font_heading as string) ?? 'Cormorant Garamond',
+    fontBody: (snap.theme?.font_body as string) ?? 'Jost',
+    modeDefault: (snap.theme?.mode_default as SiteTheme['modeDefault']) ?? 'system',
+    colors: (snap.theme?.color_tokens_jsonb as SiteTheme['colors']) ?? { light: {}, dark: {} },
   }
 
   const site: Site = {
@@ -116,5 +98,9 @@ export async function resolveSiteBySlug(slug: string): Promise<ResolvedSite | nu
     events,
   }
 
-  return { site, content: deriveContent(siteRow.name, events, siteRow.rsvp_deadline ?? undefined) }
+  return {
+    site,
+    pageData: snap.page ?? { root: { props: {} }, content: [] },
+    coupleInitials: initials(snap.name ?? siteRow.name),
+  }
 }

@@ -63,14 +63,24 @@ export default async function DashboardPage() {
                     </span>
                   </p>
                 </div>
-                <a
-                  href={siteUrl(s.slug)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-[0.7rem] uppercase tracking-wide-soft text-gold-ink underline underline-offset-4"
-                >
-                  View
-                </a>
+                <div className="flex items-center gap-4">
+                  <Link
+                    href={`/dashboard/sites/${s.id}/edit`}
+                    className="text-[0.7rem] uppercase tracking-wide-soft text-gold-ink underline underline-offset-4"
+                  >
+                    Edit
+                  </Link>
+                  {s.status === 'published' && (
+                    <a
+                      href={siteUrl(s.slug)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[0.7rem] uppercase tracking-wide-soft text-muted-foreground underline underline-offset-4"
+                    >
+                      View
+                    </a>
+                  )}
+                </div>
               </li>
             ))}
           </ul>

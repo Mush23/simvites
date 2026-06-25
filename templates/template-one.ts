@@ -5,6 +5,7 @@ import type {
   TemplateDefinition,
 } from '@/lib/types'
 import type { TemplateOneContent } from '@/components/template-one'
+import { editorialLuxeDoc } from '@/lib/puck/default-content'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Template #1 — "Editorial Luxe" (ported from the Maharshi & Simran wedding
@@ -133,7 +134,7 @@ export const templateOne: TemplateDefinition = {
   name: 'Editorial Luxe',
   eventType: 'wedding',
   previewImage: '/templates/editorial-luxe.jpg',
-  content: { '/': { content: [], root: {} } }, // Puck data filled in a later sprint
+  content: { '/': editorialLuxeDoc }, // starter Puck document for the home page
   defaultTheme,
   defaultEvents,
 }
