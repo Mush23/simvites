@@ -70,6 +70,12 @@ export default async function DashboardPage() {
                   >
                     Edit
                   </Link>
+                  <Link
+                    href={`/dashboard/sites/${s.id}/guests`}
+                    className="text-[0.7rem] uppercase tracking-wide-soft text-gold-ink underline underline-offset-4"
+                  >
+                    Guests
+                  </Link>
                   {s.status === 'published' && (
                     <a
                       href={siteUrl(s.slug)}

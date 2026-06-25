@@ -93,10 +93,10 @@ begin
 
   -- Cap check: attending count per event must not exceed the household cap.
   for rec in
-    select (r ->> 'event_id')::uuid as event_id,
-           count(*) filter (where coalesce((r ->> 'attending')::boolean, false)) as attending
-    from jsonb_array_elements(p_responses) as r
-    group by (r ->> 'event_id')::uuid
+    select (je ->> 'event_id')::uuid as event_id,
+           count(*) filter (where coalesce((je ->> 'attending')::boolean, false)) as attending
+    from jsonb_array_elements(p_responses) as je
+    group by (je ->> 'event_id')::uuid
   loop
     select household_cap into v_cap
     from public.household_event_invites
@@ -121,9 +121,9 @@ begin
   insert into public.rsvp_event_responses
     (org_id, site_id, rsvp_submission_id, guest_id, event_id, attending)
   select v_org, p_site_id, v_submission,
-         (r ->> 'guest_id')::uuid, (r ->> 'event_id')::uuid,
-         coalesce((r ->> 'attending')::boolean, false)
-  from jsonb_array_elements(p_responses) as r;
+         (je ->> 'guest_id')::uuid, (je ->> 'event_id')::uuid,
+         coalesce((je ->> 'attending')::boolean, false)
+  from jsonb_array_elements(p_responses) as je;
 
   insert into public.audit_logs (org_id, actor_type, action, target_table, target_id, metadata)
   values (v_org, 'guest', 'rsvp_submit', 'rsvp_submissions', v_submission,

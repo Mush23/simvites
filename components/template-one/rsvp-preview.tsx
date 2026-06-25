@@ -29,7 +29,7 @@ export function RsvpPreview({
             </p>
           )}
           <a
-            href="#top"
+            href="/rsvp"
             className="mt-10 inline-flex min-h-11 items-center gap-2 rounded-full border border-gold bg-gold/10 px-8 py-3 text-[0.7rem] uppercase tracking-wide-soft text-gold-ink ring-1 ring-gold/30 transition-colors hover:bg-gold hover:text-primary-foreground"
           >
             Open Your Invitation
