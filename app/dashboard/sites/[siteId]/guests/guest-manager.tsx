@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { addGuest, addHousehold, setHouseholdInvite } from './actions'
+import { generateInviteLink, sendInvitation } from './invite-actions'
 
 export interface ManagedEvent {
   id: string
@@ -54,6 +55,7 @@ export function GuestManager({
         >
           <Field name="name" label="Household name" placeholder="The Patel Family" />
           <Field name="code" label="Invite code" placeholder="patel-family" />
+          <Field name="email" label="Email (optional)" placeholder="patel@example.com" />
           <button
             type="submit"
             className="rounded-full bg-primary px-5 py-2.5 text-[0.7rem] uppercase tracking-wide-soft text-primary-foreground hover:opacity-90"
@@ -92,9 +94,31 @@ function HouseholdCard({
   events: ManagedEvent[]
   onChanged: () => void
 }) {
+  const [link, setLink] = useState<string | null>(null)
+  const [note, setNote] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
   async function onAddGuest(formData: FormData) {
     await addGuest(siteId, household.id, formData)
     onChanged()
+  }
+
+  async function onGenerateLink() {
+    setBusy(true)
+    setNote(null)
+    const res = await generateInviteLink(siteId, household.id)
+    setBusy(false)
+    if ('error' in res && res.error) setNote(res.error)
+    else setLink((res as { link: string }).link)
+  }
+
+  async function onSend() {
+    setBusy(true)
+    setNote(null)
+    const res = await sendInvitation(siteId, household.id)
+    setBusy(false)
+    if ('error' in res && res.error) setNote(res.error)
+    else setNote((res as { note?: string }).note ?? 'Sent.')
   }
 
   return (
@@ -152,6 +176,38 @@ function HouseholdCard({
             />
           ))}
         </div>
+      </div>
+
+      {/* Invitation link / send */}
+      <div className="mt-6 border-t border-border pt-4">
+        <p className="mb-2 text-[0.7rem] uppercase tracking-wide-soft text-gold-ink">Invitation</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={onGenerateLink}
+            disabled={busy}
+            className="rounded-full border border-border px-4 py-2 text-[0.65rem] uppercase tracking-wide-soft hover:border-gold hover:text-gold-ink disabled:opacity-50"
+          >
+            {link ? 'Regenerate link' : 'Generate invite link'}
+          </button>
+          <button
+            type="button"
+            onClick={onSend}
+            disabled={busy}
+            className="rounded-full border border-border px-4 py-2 text-[0.65rem] uppercase tracking-wide-soft hover:border-gold hover:text-gold-ink disabled:opacity-50"
+          >
+            Email invite
+          </button>
+        </div>
+        {link && (
+          <input
+            readOnly
+            value={link}
+            onFocus={(e) => e.currentTarget.select()}
+            className="mt-3 w-full rounded border border-border bg-secondary/40 px-3 py-2 text-xs text-foreground outline-none"
+          />
+        )}
+        {note && <p className="mt-2 text-xs text-muted-foreground">{note}</p>}
       </div>
     </section>
   )

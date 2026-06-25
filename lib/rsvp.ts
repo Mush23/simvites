@@ -79,7 +79,6 @@ export async function lookupHouseholdContext(
   code: string,
 ): Promise<HouseholdRsvpContext | null> {
   const supabase = createAdminClient()
-
   const { data: household } = await supabase
     .from('households')
     .select('id, name')
@@ -88,6 +87,31 @@ export async function lookupHouseholdContext(
     .is('deleted_at', null)
     .maybeSingle()
   if (!household) return null
+  return buildContext(site, household as { id: string; name: string })
+}
+
+/** Resolve by household id — used when a guest is identified by their cookie. */
+export async function lookupHouseholdContextById(
+  site: PublishedSite,
+  householdId: string,
+): Promise<HouseholdRsvpContext | null> {
+  const supabase = createAdminClient()
+  const { data: household } = await supabase
+    .from('households')
+    .select('id, name')
+    .eq('site_id', site.id)
+    .eq('id', householdId)
+    .is('deleted_at', null)
+    .maybeSingle()
+  if (!household) return null
+  return buildContext(site, household as { id: string; name: string })
+}
+
+async function buildContext(
+  site: PublishedSite,
+  household: { id: string; name: string },
+): Promise<HouseholdRsvpContext> {
+  const supabase = createAdminClient()
 
   const [{ data: guests }, { data: invites }, { data: active }] = await Promise.all([
     supabase.from('guests').select('id, name, is_child').eq('household_id', household.id).is('deleted_at', null).order('created_at'),

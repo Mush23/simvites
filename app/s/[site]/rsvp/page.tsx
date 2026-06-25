@@ -1,5 +1,11 @@
+import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
-import { getPublishedSite, lookupHouseholdContext } from '@/lib/rsvp'
+import {
+  getPublishedSite,
+  lookupHouseholdContext,
+  lookupHouseholdContextById,
+} from '@/lib/rsvp'
+import { GUEST_COOKIE, verifyGuestSession } from '@/lib/guest-session'
 import { CodeForm } from './code-form'
 import { RsvpForm } from './rsvp-form'
 
@@ -18,7 +24,13 @@ export default async function RsvpPage({
   const site = await getPublishedSite(slug)
   if (!site) notFound()
 
-  const ctx = code ? await lookupHouseholdContext(site, code) : null
+  // Prefer the HttpOnly guest-session cookie set by /i/<token>; fall back to a
+  // typed invite code.
+  const guest = verifyGuestSession((await cookies()).get(GUEST_COOKIE)?.value)
+  let ctx = guest && guest.siteId === site.id
+    ? await lookupHouseholdContextById(site, guest.householdId)
+    : null
+  if (!ctx && code) ctx = await lookupHouseholdContext(site, code)
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -30,7 +42,7 @@ export default async function RsvpPage({
           <h1 className="font-heading text-4xl font-light sm:text-5xl">RSVP</h1>
         </div>
 
-        {!code && (
+        {!ctx && !code && (
           <div className="mt-12">
             <p className="mb-8 text-center text-muted-foreground">
               Please enter the invitation code from your personal invitation to continue.
@@ -39,7 +51,7 @@ export default async function RsvpPage({
           </div>
         )}
 
-        {code && !ctx && (
+        {!ctx && code && (
           <div className="mt-12 text-center">
             <p className="text-destructive">
               We couldn&apos;t find an invitation for that code. Please check and try again.

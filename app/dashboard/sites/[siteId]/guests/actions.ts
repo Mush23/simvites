@@ -13,6 +13,7 @@ async function siteOrg(siteId: string) {
 export async function addHousehold(siteId: string, formData: FormData) {
   const name = String(formData.get('name') ?? '').trim()
   const code = String(formData.get('code') ?? '').trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-')
+  const email = String(formData.get('email') ?? '').trim() || null
   if (!name || !code) return { error: 'Name and code are required.' }
 
   const { supabase, orgId } = await siteOrg(siteId)
@@ -23,6 +24,7 @@ export async function addHousehold(siteId: string, formData: FormData) {
     site_id: siteId,
     name,
     code,
+    email,
   })
   if (error) return { error: /duplicate|unique/i.test(error.message) ? 'That code is already used.' : error.message }
 
