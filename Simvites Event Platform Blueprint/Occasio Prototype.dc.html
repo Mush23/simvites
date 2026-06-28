@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Libre+Caslon+Display&family=Hanken+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="image-slot.js"></script>
+<style>
+:root{
+--paper:oklch(0.992 0.004 85);--paper-2:oklch(0.972 0.005 80);--surface:oklch(1 0 0);--surface-2:oklch(0.976 0.004 80);
+--ink:oklch(0.23 0.014 55);--ink-2:oklch(0.44 0.013 55);--ink-3:oklch(0.60 0.010 55);
+--line:oklch(0.915 0.006 70);--line-2:oklch(0.86 0.008 65);
+--accent:oklch(0.56 0.155 33);--accent-ink:oklch(0.47 0.15 33);--accent-soft:oklch(0.955 0.026 45);--accent-line:oklch(0.86 0.06 40);
+--ok:oklch(0.56 0.11 155);--warn:oklch(0.66 0.13 65);--bad:oklch(0.57 0.17 27);--info:oklch(0.55 0.10 250);
+--ok-soft:oklch(0.95 0.04 155);--warn-soft:oklch(0.95 0.06 75);--bad-soft:oklch(0.95 0.04 30);--info-soft:oklch(0.95 0.03 250);
+--shadow:0 1px 2px rgba(40,22,10,.05),0 10px 34px -12px rgba(40,22,10,.10);
+--shadow-lg:0 40px 80px -28px rgba(40,22,10,.22);
+}
+:root[data-theme="dark"]{
+--paper:oklch(0.175 0.009 60);--paper-2:oklch(0.205 0.010 60);--surface:oklch(0.215 0.011 60);--surface-2:oklch(0.245 0.012 60);
+--ink:oklch(0.95 0.006 85);--ink-2:oklch(0.77 0.010 78);--ink-3:oklch(0.60 0.010 70);
+--line:oklch(0.30 0.012 62);--line-2:oklch(0.37 0.014 62);
+--accent:oklch(0.74 0.145 42);--accent-ink:oklch(0.82 0.13 44);--accent-soft:oklch(0.30 0.055 38);--accent-line:oklch(0.42 0.08 40);
+--ok:oklch(0.74 0.13 158);--warn:oklch(0.80 0.12 80);--bad:oklch(0.70 0.16 30);--info:oklch(0.72 0.10 250);
+--ok-soft:oklch(0.30 0.05 158);--warn-soft:oklch(0.32 0.05 80);--bad-soft:oklch(0.32 0.06 30);--info-soft:oklch(0.30 0.04 250);
+--shadow:0 1px 2px rgba(0,0,0,.35),0 12px 34px -12px rgba(0,0,0,.5);
+--shadow-lg:0 40px 80px -28px rgba(0,0,0,.66);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+#proto-root button{transition:transform .15s ease,box-shadow .22s ease}
+#proto-root button:hover{transform:translateY(-1px)}
+button[style*="var(--accent)"]:hover{box-shadow:0 8px 22px -8px var(--accent)}
+::selection{background:var(--accent);color:#fff}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:20px;border:3px solid var(--paper)}
+nav::-webkit-scrollbar{height:0}
+@keyframes proto-in{from{transform:translateY(8px)}to{transform:none}}
+@keyframes proto-in-lively{0%{transform:translateY(22px) scale(.985);opacity:.3}60%{opacity:1}100%{transform:none;opacity:1}}
+@keyframes proto-rise{from{transform:translateY(14px)}to{transform:none}}
+.proto-screen{animation:proto-rise .5s cubic-bezier(.22,1,.36,1)}
+@keyframes occ-drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(5%,-4%) scale(1.18)}}
+#proto-root{position:relative;isolation:isolate}
+#proto-root::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.42;mix-blend-mode:soft-light;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:220px 220px}
+#proto-root::after{content:'';position:fixed;top:-22%;right:-12%;width:60vw;height:60vw;z-index:0;pointer-events:none;background:radial-gradient(circle,var(--accent-soft),transparent 60%);opacity:.6;filter:blur(24px);animation:occ-drift 22s ease-in-out infinite}
+#proto-root>header,#proto-root>main,#proto-root>div:last-child{position:relative;z-index:2}
+#proto-root>header{backdrop-filter:blur(12px) saturate(1.3);-webkit-backdrop-filter:blur(12px) saturate(1.3);background:color-mix(in oklab,var(--paper-2) 78%,transparent)!important}
+.proto-screen [style*="border-radius:16px"],.proto-screen [style*="border-radius:14px"],.proto-screen [style*="border-radius:13px"],.proto-screen [style*="border-radius:18px"]{transition:transform .28s cubic-bezier(.22,1,.36,1),box-shadow .28s ease}
+.proto-screen [style*="border-radius:16px"]:hover,.proto-screen [style*="border-radius:14px"]:hover,.proto-screen [style*="border-radius:13px"]:hover,.proto-screen [style*="border-radius:18px"]:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+@media (prefers-reduced-motion:reduce){#proto-root::after{animation:none}}
+</style>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#b3502f"/><circle cx="50" cy="50" r="20" fill="none" stroke="#fdf6ef" stroke-width="4"/><circle cx="50" cy="50" r="7" fill="#fdf6ef"/></svg>
+</template>
+</helmet>
+
+<div id="proto-root" style="min-height:100vh;background:var(--paper);color:var(--ink)">
+
+  <header style="position:fixed;top:0;left:0;right:0;height:60px;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 20px;background:var(--paper-2);border-bottom:1px solid var(--line)">
+    <div style="display:flex;align-items:center;gap:10px;flex:none">
+      <span style="width:24px;height:24px;border-radius:50%;border:1.5px solid var(--accent);display:inline-flex;align-items:center;justify-content:center"><span style="width:8px;height:8px;border-radius:50%;background:var(--accent)"></span></span>
+      <span style="font-family:'Instrument Serif',serif;font-size:21px;color:var(--ink)">Occasio</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink);border:1px solid var(--accent-line);background:var(--accent-soft);border-radius:5px;padding:2px 6px">Command Centre</span>
+    </div>
+    <nav style="display:flex;gap:3px;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:3px;overflow-x:auto;scrollbar-width:none">
+      <button onClick="{{ goDashboard }}" style="white-space:nowrap;font-family:inherit;font-size:12.5px;font-weight:600;border:none;border-radius:8px;padding:7px 13px;cursor:pointer;color:{{ tabColor.dashboard }};background:{{ tabBg.dashboard }}">Dashboard</button>
+      <button onClick="{{ goEventhub }}" style="white-space:nowrap;font-family:inherit;font-size:12.5px;font-weight:600;border:none;border-radius:8px;padding:7px 13px;cursor:pointer;color:{{ tabColor.eventhub }};background:{{ tabBg.eventhub }}">Event Hub</button>
+      <button onClick="{{ goGuests }}" style="white-space:nowrap;font-family:inherit;font-size:12.5px;font-weight:600;border:none;border-radius:8px;padding:7px 13px;cursor:pointer;color:{{ tabColor.guests }};background:{{ tabBg.guests }}">Guests &amp; RSVP</button>
+      <button onClick="{{ goVendors }}" style="white-space:nowrap;font-family:inherit;font-size:12.5px;font-weight:600;border:none;border-radius:8px;padding:7px 13px;cursor:pointer;color:{{ tabColor.vendors }};background:{{ tabBg.vendors }}">Vendors &amp; Budget</button>
+      <button onClick="{{ goSite }}" style="white-space:nowrap;font-family:inherit;font-size:12.5px;font-weight:600;border:none;border-radius:8px;padding:7px 13px;cursor:pointer;color:{{ tabColor.site }};background:{{ tabBg.site }}">Public site</button>
+    </nav>
+    <button onClick="{{ toggleTheme }}" style="flex:none;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 12px;cursor:pointer;min-width:62px"><span data-theme-label>Dark</span></button>
+  </header>
+
+  <main style="padding-top:60px">
+
+    <div style="display:{{ appDisp }}">
+      <div style="display:flex;min-height:calc(100vh - 60px)">
+        <aside style="width:208px;flex:none;border-right:1px solid var(--line);background:var(--paper-2);padding:18px 12px;display:flex;flex-direction:column;gap:2px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:0 10px 8px">Aanya &amp; Dev · Nov 2026</div>
+          <button onClick="{{ goDashboard }}" style="text-align:left;font-family:inherit;display:flex;align-items:center;gap:9px;padding:8px 11px;border:none;border-radius:8px;font-size:13px;cursor:pointer;color:{{ sbColor.dashboard }};background:{{ sbBg.dashboard }}">Overview</button>
+          <button onClick="{{ goSite }}" style="text-align:left;font-family:inherit;display:flex;align-items:center;gap:9px;padding:8px 11px;border:none;border-radius:8px;font-size:13px;cursor:pointer;color:{{ sbColor.site }};background:{{ sbBg.site }}">Website</button>
+          <button onClick="{{ goEventhub }}" style="text-align:left;font-family:inherit;display:flex;align-items:center;gap:9px;padding:8px 11px;border:none;border-radius:8px;font-size:13px;cursor:pointer;color:{{ sbColor.eventhub }};background:{{ sbBg.eventhub }}">Events</button>
+          <button onClick="{{ goGuests }}" style="text-align:left;font-family:inherit;display:flex;align-items:center;gap:9px;padding:8px 11px;border:none;border-radius:8px;font-size:13px;cursor:pointer;color:{{ sbColor.guests }};background:{{ sbBg.guests }}">Guests</button>
+          <div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;font-size:13px;color:var(--ink-3)">Invitations</div>
+          <div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;font-size:13px;color:var(--ink-3)">RSVPs</div>
+          <button onClick="{{ goVendors }}" style="text-align:left;font-family:inherit;display:flex;align-items:center;gap:9px;padding:8px 11px;border:none;border-radius:8px;font-size:13px;cursor:pointer;color:{{ sbColor.vendors }};background:{{ sbBg.vendors }}">Budget</button>
+          <button onClick="{{ goVendors }}" style="text-align:left;font-family:inherit;display:flex;align-items:center;gap:9px;padding:8px 11px;border:none;border-radius:8px;font-size:13px;cursor:pointer;color:{{ sbColor.vendors }};background:{{ sbBg.vendors }}">Vendors</button>
+          <div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;font-size:13px;color:var(--ink-3)">Tasks</div>
+          <div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;font-size:13px;color:var(--ink-3)">Files</div>
+          <div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;font-size:13px;color:var(--ink-3)">Reports</div>
+          <div style="margin-top:auto;display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;font-size:13px;color:var(--ink-3)">Settings</div>
+        </aside>
+
+        <div style="flex:1;min-width:0">
+
+          <div style="display:{{ disp.dashboard }}">
+            <div class="proto-screen" style="padding:28px 34px;max-width:1060px">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+                <div>
+                  <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:33px;color:var(--ink);margin:0 0 4px">Good evening, Aanya</h1>
+                  <p style="font-size:13.5px;color:var(--ink-3);margin:0">2 ceremonies need attention · invitations ready to send · RSVPs close in 12 days</p>
+                </div>
+                <button onClick="{{ doToastSend }}" style="font-family:inherit;font-size:13px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:9px;padding:10px 15px;cursor:pointer">Send invitations</button>
+              </div>
+
+              <div style="display:grid;grid-template-columns:248px 1fr;gap:16px;margin-bottom:16px">
+                <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+                  <div style="position:relative;width:128px;height:128px">
+                    <div style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--accent) 0 72%, var(--paper-2) 72% 100%)"></div>
+                    <div style="position:absolute;inset:11px;border-radius:50%;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center">
+                      <div style="font-family:'Instrument Serif',serif;font-size:38px;color:var(--ink);line-height:1">72%</div>
+                      <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)">Ready</div>
+                    </div>
+                  </div>
+                  <div style="font-size:12.5px;color:var(--ink-2);margin-top:14px;line-height:1.45">You're on track. 3 things need a quick look.</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                  <div style="background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">RSVPs</div><div style="font-family:'Instrument Serif',serif;font-size:27px;color:var(--ink);line-height:1">142 <span style="font-size:15px;color:var(--ink-3)">/ 214</span></div><div style="height:5px;background:var(--paper-2);border-radius:3px;margin-top:9px;overflow:hidden"><div style="width:66%;height:100%;background:var(--ok)"></div></div></div>
+                  <div style="background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">Budget</div><div style="font-family:'Instrument Serif',serif;font-size:27px;color:var(--ink);line-height:1">£30.5k <span style="font-size:15px;color:var(--ink-3)">/ 55k</span></div><div style="height:5px;background:var(--paper-2);border-radius:3px;margin-top:9px;overflow:hidden"><div style="width:55%;height:100%;background:var(--accent)"></div></div></div>
+                  <div style="background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">Vendors booked</div><div style="font-family:'Instrument Serif',serif;font-size:27px;color:var(--ink);line-height:1">4 <span style="font-size:15px;color:var(--ink-3)">/ 7</span></div><div style="height:5px;background:var(--paper-2);border-radius:3px;margin-top:9px;overflow:hidden"><div style="width:57%;height:100%;background:var(--info)"></div></div></div>
+                  <div style="background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">Tasks due</div><div style="font-family:'Instrument Serif',serif;font-size:27px;color:var(--ink);line-height:1">6 <span style="font-size:15px;color:var(--warn)">· 1 overdue</span></div><div style="height:5px;background:var(--paper-2);border-radius:3px;margin-top:9px;overflow:hidden"><div style="width:40%;height:100%;background:var(--warn)"></div></div></div>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px">
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:13px">Needs attention</div>
+                  <div style="display:flex;flex-direction:column;gap:9px">
+                    <sc-for list="{{ attention }}" as="a" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:var(--paper-2);border:1px solid var(--line);border-radius:10px">
+                        <span style="width:7px;height:7px;border-radius:50%;flex:none;background:{{ a.color }}"></span>
+                        <span style="flex:1;font-size:12.5px;color:var(--ink-2)">{{ a.text }}</span>
+                        <span style="font-size:11px;font-weight:600;color:var(--accent-ink)">{{ a.cta }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px"><div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">Readiness by ceremony</div><span onClick="{{ goEventhub }}" style="font-size:11px;color:var(--accent-ink);cursor:pointer;font-weight:600">Open hub →</span></div>
+                  <div style="display:flex;flex-direction:column;gap:12px">
+                    <sc-for list="{{ ceremonies }}" as="c" hint-placeholder-count="4">
+                      <div onClick="{{ c.onClick }}" style="cursor:pointer">
+                        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px"><span style="color:var(--ink);font-weight:500">{{ c.name }}</span><span style="color:var(--ink-3)">{{ c.label }}</span></div>
+                        <div style="height:6px;background:var(--paper-2);border-radius:3px;overflow:hidden"><div style="height:100%;background:{{ c.color }};width:{{ c.w }}"></div></div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:{{ disp.eventhub }}"><div class="proto-screen" style="padding:26px 34px;max-width:1060px">
+  <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);margin-bottom:8px"><span onClick="{{ goEventhub }}" style="cursor:pointer">Events</span><span>›</span><span style="color:var(--ink-2)">Sangeet</span></div>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px">
+    <div>
+      <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:32px;color:var(--ink);margin:0 0 6px">Sangeet</h1>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink-2)"><span>Fri 14 Nov · 7:30 PM</span><span style="color:var(--line-2)">|</span><span>The Roundhouse, London</span><span style="color:var(--line-2)">|</span><span>Dress: Glamorous</span><span style="color:var(--line-2)">|</span><span style="color:var(--warn)">74% ready</span></div>
+    </div>
+    <div style="display:flex;gap:8px"><button style="font-family:inherit;font-size:12.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 13px;cursor:pointer">Edit event</button><button onClick="{{ goSite }}" style="font-family:inherit;font-size:12.5px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:9px;padding:9px 13px;cursor:pointer">View on site</button></div>
+  </div>
+
+  <div style="display:flex;gap:3px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto;scrollbar-width:none">
+    <button onClick="{{ ehOverview }}" style="white-space:nowrap;font-family:inherit;font-size:12.5px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;padding:8px 13px;cursor:pointer;color:{{ etColor.overview }};border-bottom-color:{{ etBg.overview }}">Overview</button>
+    <button onClick="{{ ehGuestsTab }}" style="white-space:nowrap;font-family:inherit;font-size:12.5px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;padding:8px 13px;cursor:pointer;color:{{ etColor.guests }};border-bottom-color:{{ etBg.guests }}">Guests</button>
+    <button onClick="{{ ehRsvpTab }}" style="white-space:nowrap;font-family:inherit;font-size:12.5px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;padding:8px 13px;cursor:pointer;color:{{ etColor.rsvp }};border-bottom-color:{{ etBg.rsvp }}">RSVP</button>
+    <button onClick="{{ ehVendorsTab }}" style="white-space:nowrap;font-family:inherit;font-size:12.5px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;padding:8px 13px;cursor:pointer;color:{{ etColor.vendors }};border-bottom-color:{{ etBg.vendors }}">Vendors</button>
+    <button onClick="{{ ehBudgetTab }}" style="white-space:nowrap;font-family:inherit;font-size:12.5px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;padding:8px 13px;cursor:pointer;color:{{ etColor.budget }};border-bottom-color:{{ etBg.budget }}">Budget</button>
+    <button onClick="{{ ehTasksTab }}" style="white-space:nowrap;font-family:inherit;font-size:12.5px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;padding:8px 13px;cursor:pointer;color:{{ etColor.tasks }};border-bottom-color:{{ etBg.tasks }}">Tasks</button>
+    <button onClick="{{ ehFilesTab }}" style="white-space:nowrap;font-family:inherit;font-size:12.5px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;padding:8px 13px;cursor:pointer;color:{{ etColor.files }};border-bottom-color:{{ etBg.files }}">Files</button>
+  </div>
+
+  <div style="display:{{ etDisp.overview }}">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px">
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:16px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px">Guests invited</div><div style="font-family:'Instrument Serif',serif;font-size:25px;color:var(--ink)">160</div><div style="font-size:11px;color:var(--ink-3)">104 replied · 88 attending</div></div>
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:16px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px">Budget</div><div style="font-family:'Instrument Serif',serif;font-size:25px;color:var(--ink)">£18k</div><div style="font-size:11px;color:var(--ink-3)">£8k paid · £10k due</div></div>
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:16px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px">Vendors</div><div style="font-family:'Instrument Serif',serif;font-size:25px;color:var(--ink)">4</div><div style="font-size:11px;color:var(--ink-3)">2 booked · 2 pending</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:var(--warn-soft);border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:13px;color:var(--ink-2)"><span style="color:var(--warn);font-weight:700">!</span> Missing: confirm the performance running order and the final headcount for catering.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:16px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3);margin-bottom:11px">Open tasks</div><sc-for list="{{ ehTasks }}" as="t" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)"><span style="width:15px;height:15px;border-radius:5px;border:1.5px solid var(--line-2);flex:none"></span><span style="flex:1;font-size:12.5px;color:var(--ink-2)">{{ t.title }}</span><span style="font-size:10.5px;color:{{ t.prio }}">{{ t.due }}</span></div></sc-for></div>
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:16px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3);margin-bottom:11px">Website section</div><div style="font-size:13px;color:var(--ink-2);line-height:1.6">This ceremony is <strong style="color:var(--ink)">published</strong> on your site with venue, time and dress code. Editing the time here updates the site draft — publish to push it live.</div><button onClick="{{ goSite }}" style="margin-top:12px;font-family:inherit;font-size:12px;font-weight:600;color:var(--accent-ink);background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:8px;padding:8px 12px;cursor:pointer">Preview website →</button></div>
+    </div>
+  </div>
+
+  <div style="display:{{ etDisp.vendors }}">
+    <sc-for list="{{ ehVendors }}" as="v" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:9px"><div style="flex:1"><div style="font-weight:600;font-size:14px;color:var(--ink)">{{ v.name }}</div><div style="font-size:11.5px;color:var(--ink-3)">{{ v.cat }}</div></div><span style="font-size:11px;font-weight:600;border-radius:6px;padding:4px 10px;background:{{ v.sBg }};color:{{ v.sFg }}">{{ v.status }}</span></div></sc-for>
+    <div style="font-size:12px;color:var(--ink-3);margin-top:8px">These vendors are linked to the Sangeet — added once in Vendors, shown everywhere they're assigned.</div>
+  </div>
+
+  <div style="display:{{ etDisp.budget }}">
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;overflow:hidden">
+      <div style="display:flex;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--paper-2);font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3)"><div style="flex:1">Item</div><div style="width:90px;text-align:right">Estimate</div><div style="width:80px;text-align:right">Paid</div><div style="width:120px;text-align:right">Status</div></div>
+      <sc-for list="{{ ehBudget }}" as="b" hint-placeholder-count="4"><div style="display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)"><div style="flex:1"><div style="font-weight:600;font-size:13px;color:var(--ink)">{{ b.name }}</div><div style="font-size:11px;color:var(--ink-3)">{{ b.cat }}</div></div><div style="width:90px;text-align:right;font-size:13px;color:var(--ink)">{{ b.est }}</div><div style="width:80px;text-align:right;font-size:13px;color:var(--ink-2)">{{ b.paid }}</div><div style="width:120px;text-align:right;font-size:11px;color:var(--ink-3)">{{ b.due }}</div></div></sc-for>
+    </div>
+  </div>
+
+  <div style="display:{{ etDisp.guests }}"><div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:18px;font-size:13.5px;color:var(--ink-2);line-height:1.6">160 guests are invited to the Sangeet. <span onClick="{{ goGuests }}" style="color:var(--accent-ink);font-weight:600;cursor:pointer">Open the invitation matrix →</span> to change who's invited — this event's column updates instantly, and uninvited guests never see it.</div></div>
+  <div style="display:{{ etDisp.rsvp }}"><div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:18px;font-size:13.5px;color:var(--ink-2);line-height:1.6">104 of 160 have responded · 88 attending · 16 declined. RSVPs for this event flow straight into the dietary list, headcount for catering, and your exports.</div></div>
+  <div style="display:{{ etDisp.files }}"><div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:18px;font-size:13.5px;color:var(--ink-2);line-height:1.6">5 files linked to the Sangeet — venue layout, AV spec, run sheet and two supplier contracts. Files attach to the event, vendor, budget item or task they belong to.</div></div>
+</div></div>
+          <div style="display:{{ disp.guests }}"><div class="proto-screen" style="padding:26px 34px;max-width:1060px">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px">
+    <div><h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:32px;color:var(--ink);margin:0 0 4px">Guests &amp; RSVP</h1><p style="font-size:13.5px;color:var(--ink-3);margin:0">Tap a cell to invite a household to a ceremony. Guests only ever see what they're invited to.</p></div>
+    <div style="display:flex;gap:8px"><button style="font-family:inherit;font-size:12.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 13px;cursor:pointer">Import / paste</button><button style="font-family:inherit;font-size:12.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 13px;cursor:pointer">Export</button><button style="font-family:inherit;font-size:12.5px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:9px;padding:9px 13px;cursor:pointer">+ Household</button></div>
+  </div>
+  <div style="display:flex;gap:7px;flex-wrap:wrap;margin:16px 0 12px">
+    <span style="background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:5px 12px;font-size:12px;color:var(--accent-ink);font-weight:600">All · 5</span>
+    <span style="border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12px;color:var(--ink-2)">Awaiting · 2</span>
+    <span style="border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12px;color:var(--ink-2)">Dietary · 4</span>
+    <span style="border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12px;color:var(--ink-2)">No email · 1</span>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;overflow-x:auto">
+    <div style="display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line);background:var(--paper-2);min-width:680px">
+      <div style="width:190px;flex:none;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3)">Household</div>
+      <div style="flex:1;display:flex;justify-content:space-around;gap:6px;min-width:240px"><div style="flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3)">Mehndi</div><div style="flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3)">Sangeet</div><div style="flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3)">Ceremony</div><div style="flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3)">Reception</div></div>
+      <div style="width:96px;flex:none;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3)">Dietary</div>
+      <div style="width:96px;flex:none;text-align:right;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3)">RSVP</div>
+    </div>
+    <sc-for list="{{ matrixRows }}" as="row" hint-placeholder-count="5">
+      <div style="display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);min-width:680px">
+        <div style="width:190px;flex:none"><div style="font-weight:600;font-size:13px;color:var(--ink)">{{ row.name }}</div><div style="font-size:11px;color:var(--ink-3)">{{ row.sub }}</div></div>
+        <div style="flex:1;display:flex;justify-content:space-around;gap:6px;min-width:240px">
+          <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="4"><div style="flex:1;display:flex;justify-content:center"><button onClick="{{ cell.onClick }}" style="width:29px;height:29px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;background:{{ cell.bg }};color:{{ cell.fg }};border:{{ cell.border }}">{{ cell.mark }}</button></div></sc-for>
+        </div>
+        <div style="width:96px;flex:none;font-size:11.5px;color:var(--ink-3)">{{ row.diet }}</div>
+        <div style="width:96px;flex:none;text-align:right"><span style="font-size:10.5px;font-weight:600;color:{{ row.rsvpColor }}">{{ row.rsvp }}</span></div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:flex;align-items:center;gap:18px;margin-top:13px;font-size:12px;color:var(--ink-3)"><span style="display:inline-flex;align-items:center;gap:7px"><span style="width:15px;height:15px;border-radius:5px;background:var(--accent)"></span> Invited</span><span style="display:inline-flex;align-items:center;gap:7px"><span style="width:15px;height:15px;border-radius:5px;border:1px dashed var(--line-2)"></span> Hidden from this guest</span><span style="margin-left:auto">Enter once — RSVP, dietary &amp; counts flow to catering exports automatically.</span></div>
+</div></div>
+          <div style="display:{{ disp.vendors }}"><div class="proto-screen" style="padding:26px 34px;max-width:1060px">
+  <div style="margin-bottom:16px"><h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:32px;color:var(--ink);margin:0 0 4px">Vendors &amp; Budget</h1><p style="font-size:13.5px;color:var(--ink-3);margin:0">Every vendor's quote, payments, events, tasks and files — connected in one place.</p></div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:15px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Total budget</div><div style="font-family:'Instrument Serif',serif;font-size:24px;color:var(--ink)">{{ budTotal }}</div></div>
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:15px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Contracted</div><div style="font-family:'Instrument Serif',serif;font-size:24px;color:var(--ink)">{{ budContracted }}</div></div>
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:15px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Paid to date</div><div style="font-family:'Instrument Serif',serif;font-size:24px;color:var(--ok)">{{ budPaid }}</div></div>
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:15px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Due in 30 days</div><div style="font-family:'Instrument Serif',serif;font-size:24px;color:var(--warn)">{{ budDue }}</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1.05fr;gap:16px;align-items:start">
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border-bottom:1px solid var(--line);background:var(--paper-2)"><span style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3)">Vendor pipeline · 7</span><span style="font-size:11px;font-weight:600;color:var(--accent-ink)">+ Add</span></div>
+      <sc-for list="{{ vList }}" as="v" hint-placeholder-count="7">
+        <div onClick="{{ v.onClick }}" style="display:flex;align-items:center;gap:12px;padding:12px 15px;border-bottom:1px solid var(--line);cursor:pointer;background:{{ v.rowBg }};border-left:{{ v.rowBd }}">
+          <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px;color:var(--ink)">{{ v.name }}</div><div style="font-size:11px;color:var(--ink-3)">{{ v.cat }} · {{ v.balance }}</div></div>
+          <span style="font-size:10px;font-weight:600;border-radius:6px;padding:3px 8px;flex:none;background:{{ v.sBg }};color:{{ v.sFg }}">{{ v.status }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px">
+        <div><div style="font-family:'Instrument Serif',serif;font-size:24px;color:var(--ink);line-height:1.1">{{ selName }}</div><div style="font-size:12px;color:var(--ink-3);margin-top:3px">{{ selCat }} · {{ selContact }}</div></div>
+        <span style="font-size:11px;font-weight:600;border-radius:6px;padding:4px 10px;flex:none;background:{{ selStatusBg }};color:{{ selStatusFg }}">{{ selStatus }}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px">
+        <div style="background:var(--paper-2);border-radius:10px;padding:11px"><div style="font-size:9.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em">Quote</div><div style="font-size:15px;font-weight:600;color:var(--ink);margin-top:2px">{{ selQuote }}</div></div>
+        <div style="background:var(--paper-2);border-radius:10px;padding:11px"><div style="font-size:9.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em">Contract</div><div style="font-size:15px;font-weight:600;color:var(--ink);margin-top:2px">{{ selContracted }}</div></div>
+        <div style="background:var(--paper-2);border-radius:10px;padding:11px"><div style="font-size:9.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em">Paid</div><div style="font-size:15px;font-weight:600;color:var(--ok);margin-top:2px">{{ selPaid }}</div></div>
+        <div style="background:var(--paper-2);border-radius:10px;padding:11px"><div style="font-size:9.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em">Balance</div><div style="font-size:15px;font-weight:600;color:var(--warn);margin-top:2px">{{ selBalance }}</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">Events covered</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"><sc-for list="{{ selEvents }}" as="e" hint-placeholder-count="3"><span style="font-size:11.5px;color:var(--ink-2);background:var(--paper-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px">{{ e.name }}</span></sc-for></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">Linked tasks</div>
+          <sc-for list="{{ selTasks }}" as="t" hint-placeholder-count="2"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="width:14px;height:14px;border-radius:5px;border:1.5px solid var(--line-2);flex:none"></span><span style="font-size:12px;color:var(--ink-2)">{{ t.title }}</span></div></sc-for>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">Files &amp; contracts</div>
+          <sc-for list="{{ selFiles }}" as="f" hint-placeholder-count="2"><div style="display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--paper-2);border:1px solid var(--line);border-radius:9px;margin-bottom:7px"><span style="width:20px;height:20px;border-radius:5px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink-3);flex:none">↓</span><span style="font-size:12px;color:var(--ink-2)">{{ f.name }}</span></div></sc-for>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink-3)"><span style="color:var(--accent-ink);font-weight:700">✦</span> Mark this vendor "Booked" and the dashboard, budget and linked tasks all update.</div>
+    </div>
+  </div>
+</div></div>
+
+        </div>
+      </div>
+    </div>
+
+    <div style="display:{{ disp.site }}"><div class="proto-screen" style="min-height:calc(100vh - 60px);padding:30px 24px;background:var(--paper-2)">
+  <div style="max-width:1040px;margin:0 auto;border:1px solid var(--line-2);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-lg);background:var(--paper)">
+    <div style="display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--line);background:var(--paper-2)">
+      <span style="width:10px;height:10px;border-radius:50%;background:var(--line-2)"></span><span style="width:10px;height:10px;border-radius:50%;background:var(--line-2)"></span><span style="width:10px;height:10px;border-radius:50%;background:var(--line-2)"></span>
+      <span style="margin-left:10px;flex:1;max-width:320px;background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-3)">aanya-dev.occasio.events</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);border:1px solid var(--accent-line);background:var(--accent-soft);border-radius:5px;padding:3px 7px">Live · guest view</span>
+    </div>
+    <div style="background:var(--paper)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 34px;border-bottom:1px solid var(--line)">
+        <span style="font-family:'Instrument Serif',serif;font-size:20px;color:var(--ink)">A &amp; D</span>
+        <div style="display:flex;gap:22px;font-size:12.5px;color:var(--ink-2)"><span>Home</span><span>Our Story</span><span>Schedule</span><span>Travel</span><span style="color:var(--accent-ink);font-weight:600">RSVP</span></div>
+      </div>
+      <div style="padding:60px 34px 48px;text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:20px">Together with their families</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:clamp(50px,9vw,90px);line-height:0.96;color:var(--ink);margin-bottom:16px">Aanya <span style="font-style:italic;color:var(--ink-3)">&amp;</span> Dev</div>
+        <div style="font-size:14px;letter-spacing:.05em;color:var(--ink-2);margin-bottom:14px">14–16 November 2026 · London</div>
+        <div style="display:inline-flex;align-items:center;gap:8px;background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:6px 14px;font-size:12px;color:var(--accent-ink);margin-bottom:30px">Hello, Shah family — you're invited to all four celebrations</div>
+        <image-slot id="occ-hero" style="display:block;width:100%;height:300px;margin-bottom:28px" shape="rounded" radius="16" placeholder="Drag in your couple photo — double-click to reframe"></image-slot>
+        <button onClick="{{ doToastSend }}" style="background:var(--accent);color:#fff;border:none;border-radius:11px;padding:14px 30px;font-size:14.5px;font-weight:600;font-family:inherit;cursor:pointer">RSVP to your events</button>
+      </div>
+      <div style="padding:54px 34px;border-top:1px solid var(--line)">
+        <div style="text-align:center;margin-bottom:30px"><div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:12px">Your invitation</div><h3 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:34px;color:var(--ink);margin:0">Four celebrations, two days</h3></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div style="border:1px solid var(--line);border-radius:14px;padding:22px;background:var(--surface)"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--accent-ink);margin-bottom:9px">Fri 14 Nov · 4:00 PM</div><div style="font-family:'Instrument Serif',serif;font-size:24px;color:var(--ink);margin-bottom:5px">Mehndi</div><div style="font-size:12.5px;color:var(--ink-2)">The Glasshouse, Kew · festive colour</div></div>
+          <div style="border:1px solid var(--line);border-radius:14px;padding:22px;background:var(--surface)"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--accent-ink);margin-bottom:9px">Fri 14 Nov · 7:30 PM</div><div style="font-family:'Instrument Serif',serif;font-size:24px;color:var(--ink);margin-bottom:5px">Sangeet</div><div style="font-size:12.5px;color:var(--ink-2)">The Roundhouse · dinner &amp; dancing</div></div>
+          <div style="border:1px solid var(--line);border-radius:14px;padding:22px;background:var(--surface)"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--accent-ink);margin-bottom:9px">Sat 15 Nov · 11:00 AM</div><div style="font-family:'Instrument Serif',serif;font-size:24px;color:var(--ink);margin-bottom:5px">Ceremony</div><div style="font-size:12.5px;color:var(--ink-2)">Lansdowne Club · be seated by 10:45</div></div>
+          <div style="border:1px solid var(--line);border-radius:14px;padding:22px;background:var(--surface)"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--accent-ink);margin-bottom:9px">Sat 15 Nov · 6:00 PM</div><div style="font-family:'Instrument Serif',serif;font-size:24px;color:var(--ink);margin-bottom:5px">Reception</div><div style="font-size:12.5px;color:var(--ink-2)">Lansdowne Ballroom · black tie</div></div>
+        </div>
+      </div>
+      <div style="padding:50px 34px;border-top:1px solid var(--line)">
+        <div style="text-align:center;margin-bottom:24px"><div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:10px">A glimpse of us</div><h3 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;color:var(--ink);margin:0">Moments</h3></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+          <image-slot id="occ-gal-1" style="display:block;width:100%;height:200px" shape="rounded" radius="14" placeholder="Drop a photo"></image-slot>
+          <image-slot id="occ-gal-2" style="display:block;width:100%;height:200px" shape="rounded" radius="14" placeholder="Drop a photo"></image-slot>
+          <image-slot id="occ-gal-3" style="display:block;width:100%;height:200px" shape="rounded" radius="14" placeholder="Drop a photo"></image-slot>
+        </div>
+      </div>
+      <div style="padding:60px 34px;text-align:center;background:var(--ink)">
+        <div style="font-family:'Instrument Serif',serif;font-size:clamp(28px,5vw,42px);line-height:1.1;color:var(--paper);margin-bottom:10px">Will you celebrate with us?</div>
+        <p style="font-size:14px;color:var(--paper);opacity:.8;margin:0 0 24px">You're invited to all four events — let us know by 12 August.</p>
+        <button onClick="{{ doToastSend }}" style="background:var(--accent);color:#fff;border:none;border-radius:11px;padding:13px 30px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer">RSVP now</button>
+      </div>
+      <div style="padding:24px 34px;text-align:center;border-top:1px solid var(--line)"><span style="font-family:'Instrument Serif',serif;font-size:18px;color:var(--ink)">Aanya &amp; Dev</span><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);margin-top:5px">Made with Occasio</div></div>
+    </div>
+  </div>
+</div></div>
+
+  </main>
+
+  <div style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;display:{{ toastDisp }};align-items:center;gap:10px;background:var(--ink);color:var(--paper);border-radius:11px;padding:12px 18px;box-shadow:var(--shadow-lg);font-size:13.5px;font-weight:500">
+    <span style="width:7px;height:7px;border-radius:50%;background:var(--ok)"></span><span>{{ toast }}</span>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#3a5bd0&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;,&quot;options&quot;:[&quot;#b3502f&quot;,&quot;#1f7a52&quot;,&quot;#3a5bd0&quot;,&quot;#7a3b86&quot;]},&quot;fontStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Caslon&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;,&quot;options&quot;:[&quot;Editorial&quot;,&quot;Modern&quot;,&quot;Caslon&quot;]},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Lively&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Motion&quot;,&quot;options&quot;:[&quot;Subtle&quot;,&quot;Lively&quot;,&quot;Off&quot;]}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'dashboard',
+    ehTab: 'overview',
+    vendorSel: 'saffron',
+    invited: {
+      shah:  { mehndi:1, sangeet:1, ceremony:1, reception:1 },
+      priya: { mehndi:0, sangeet:1, ceremony:1, reception:1 },
+      meena: { mehndi:1, sangeet:0, ceremony:1, reception:1 },
+      khan:  { mehndi:0, sangeet:0, ceremony:1, reception:0 },
+      das:   { mehndi:0, sangeet:1, ceremony:1, reception:1 },
+    },
+    toast: null,
+  };
+
+  households = [
+    { id:'shah',  name:'The Shah Family',   sub:'4 guests · bride side', rsvp:'All in',       rsvpColor:'var(--ok)',   diet:'2 veg' },
+    { id:'priya', name:'Priya Patel',       sub:'+1 · friends',          rsvp:'Awaiting',     rsvpColor:'var(--warn)', diet:'—' },
+    { id:'meena', name:'Auntie Meena',      sub:'1 guest · no email',    rsvp:'Manual',       rsvpColor:'var(--ink-3)',diet:'Jain' },
+    { id:'khan',  name:'R. Khan & Family',  sub:'2 guests · groom side', rsvp:'Part-declined',rsvpColor:'var(--bad)',  diet:'Halal' },
+    { id:'das',   name:'The Das Family',    sub:'3 guests · friends',    rsvp:'Awaiting',     rsvpColor:'var(--warn)', diet:'1 nut allergy' },
+  ];
+  events = [
+    { id:'mehndi',    name:'Mehndi' },
+    { id:'sangeet',   name:'Sangeet' },
+    { id:'ceremony',  name:'Ceremony' },
+    { id:'reception', name:'Reception' },
+  ];
+  vendors = [
+    { id:'saffron',  name:'Saffron Catering',  cat:'Catering',        status:'Booked',     quote:22000, contracted:21000, paid:7000, events:['sangeet','ceremony','reception'], contact:'Imran Khan',  tasks:['Confirm final menu & headcount','Pay 2nd instalment (£7,000)'], files:['Contract.pdf','Menu_v3.pdf','Invoice_01.pdf'] },
+    { id:'glass',    name:'The Glasshouse',    cat:'Venue',           status:'Booked',     quote:9000,  contracted:9000,  paid:4500, events:['mehndi'],                          contact:'Sarah Lyle',  tasks:['Share final guest count'], files:['Venue_contract.pdf','Floorplan.pdf'] },
+    { id:'lens',     name:'Lens & Light',      cat:'Photography',     status:'Booked',     quote:6500,  contracted:6500,  paid:2000, events:['ceremony','reception'],            contact:'Priya R.',    tasks:['Send shot list'], files:['Photo_agreement.pdf'] },
+    { id:'round',    name:'Roundhouse Events', cat:'Venue',           status:'Booked',     quote:12000, contracted:12000, paid:6000, events:['sangeet'],                         contact:'Mark D.',     tasks:['Confirm AV & stage'], files:['Hire_terms.pdf','Layout.pdf'] },
+    { id:'meher',    name:'Meher MUA',         cat:'Makeup & hair',   status:'Quote in',   quote:1800,  contracted:0,     paid:0,    events:['mehndi','ceremony','reception'],   contact:'Meher S.',    tasks:['Book trial'], files:[] },
+    { id:'bloom',    name:'Bloom & Co',        cat:'Florist & décor', status:'Shortlisted',quote:0,     contracted:0,     paid:0,    events:['sangeet','reception'],             contact:'—',           tasks:['Request quote'], files:[] },
+    { id:'dhol',     name:'Dhol Brothers',     cat:'Live music',      status:'Contacted',  quote:0,     contracted:0,     paid:0,    events:['ceremony'],                        contact:'—',           tasks:['Check Baraat availability'], files:[] },
+  ];
+  ehBudget = [
+    { name:'Roundhouse Events', cat:'Venue',    est:12000, paid:6000, due:'Bal. due 1 Oct' },
+    { name:'Saffron Catering',  cat:'Catering', est:6000,  paid:2000, due:'On track' },
+    { name:'Bloom & Co',        cat:'Décor',    est:2500,  paid:0,    due:'Quote pending' },
+    { name:'Live band + AV',    cat:'Music',    est:1500,  paid:0,    due:'Not booked' },
+  ];
+  ehTasks = [
+    { title:'Pay Roundhouse balance', due:'Due in 5 days',  prio:'var(--warn)' },
+    { title:'Send Sangeet reminders', due:'Due in 2 days',  prio:'var(--warn)' },
+    { title:'Confirm running order',  due:'Overdue 1 day',  prio:'var(--bad)' },
+  ];
+
+  componentDidMount(){
+    let t = null; try { t = localStorage.getItem('occ-theme'); } catch(e){}
+    if(!t) t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    this.applyTheme(t);
+    try { const s = localStorage.getItem('occ-proto2-screen'); if(s) this.setState({ screen: s }); } catch(e){}
+    this.applyTweaks();
+    setTimeout(() => this.animateScreen(), 60);
+  }
+  componentDidUpdate(prev){ this.applyTweaks(); }
+  animateScreen(){
+    const m = (this.props && this.props.motion) || 'Subtle';
+    if(m === 'Off' || !window.Element || !Element.prototype.animate) return;
+    const scr = Array.from(document.querySelectorAll('.proto-screen')).find(s => s.offsetParent !== null);
+    if(!scr) return;
+    const lively = m === 'Lively';
+    // Transform-only stagger (opacity stays 1 — content never hides even if a frame freezes)
+    try {
+      let blocks = Array.from(scr.children);
+      if(blocks.length <= 1 && blocks[0]) blocks = Array.from(blocks[0].children);
+      const dy = lively ? 26 : 16;
+      blocks.slice(0, 14).forEach((b, i) => {
+        b.animate([{transform:'translateY('+dy+'px)'},{transform:'none'}], {duration: lively?620:460, delay: i*(lively?80:52), easing:'cubic-bezier(.22,1,.36,1)', fill:'backwards'});
+      });
+    } catch(e){}
+    // Progress bars / ring fills (decorative — safe if frozen)
+    try {
+      scr.querySelectorAll('[style*="height:6px"]>div,[style*="height:5px"]>div,[style*="height:7px"]>div').forEach((bar, i) => {
+        const w = bar.style.width || '100%';
+        bar.animate([{width:'0%'},{width:w}], {duration:850, delay:200 + i*55, easing:'cubic-bezier(.22,1,.36,1)', fill:'backwards'});
+      });
+    } catch(e){}
+  }
+  applyTweaks(){
+    const p = this.props || {};
+    let css = '';
+    const acc = p.accent;
+    if(acc){ const d = '--accent:'+acc+';--accent-ink:'+acc+';--accent-line:color-mix(in oklab, '+acc+' 50%, transparent);--accent-soft:color-mix(in oklab, '+acc+' 13%, var(--paper));'; css += ':root{'+d+'}:root[data-theme="dark"]{'+d+'}:root[data-theme="light"]{'+d+'}'; }
+    const fs = p.fontStyle || 'Editorial';
+    if(fs === 'Modern'){ css += '[style*="Instrument Serif"]{font-family:\'Hanken Grotesk\',system-ui,sans-serif!important;font-weight:700!important;letter-spacing:-.025em!important}'; }
+    else if(fs === 'Caslon'){ css += '[style*="Instrument Serif"]{font-family:\'Libre Caslon Display\',Georgia,serif!important}'; }
+    const m = p.motion || 'Subtle';
+    if(m === 'Off'){ css += '.proto-screen{animation:none!important}'; }
+    if(this._lastTweakCss === css) return;
+    this._lastTweakCss = css;
+    let el = document.getElementById('occ-tweaks');
+    if(!el){ el = document.createElement('style'); el.id = 'occ-tweaks'; document.head.appendChild(el); }
+    el.textContent = css;
+  }
+  applyTheme(t){
+    this._theme = t;
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('occ-theme', t); } catch(e){}
+    const lbl = document.querySelector('[data-theme-label]');
+    if(lbl) lbl.textContent = (t === 'dark') ? 'Light' : 'Dark';
+  }
+  toggleTheme = () => this.applyTheme(this._theme === 'dark' ? 'light' : 'dark');
+
+  go = (s) => { this.setState({ screen: s }); try { localStorage.setItem('occ-proto2-screen', s); } catch(e){} window.scrollTo(0,0); setTimeout(() => this.animateScreen(), 30); };
+  goDashboard = () => this.go('dashboard');
+  goEventhub = () => this.go('eventhub');
+  goGuests = () => this.go('guests');
+  goVendors = () => this.go('vendors');
+  goSite = () => this.go('site');
+
+  setEhTab = (t) => this.setState({ ehTab: t });
+  selectVendor = (id) => this.setState({ vendorSel: id });
+  toggleInvite = (hh, ev) => this.setState(st => ({ invited: { ...st.invited, [hh]: { ...st.invited[hh], [ev]: st.invited[hh][ev] ? 0 : 1 } } }));
+  showToast = (m) => { this.setState({ toast: m }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: null }), 2600); };
+  doToastSend = () => this.showToast('Test invitation sent to you');
+
+  gbp(n){ return '£' + n.toLocaleString('en-GB'); }
+  _statusColors(s){
+    if(s==='Booked') return { bg:'var(--ok-soft)', fg:'var(--ok)' };
+    if(s==='Quote in') return { bg:'var(--warn-soft)', fg:'var(--warn)' };
+    if(s==='Shortlisted') return { bg:'var(--info-soft)', fg:'var(--info)' };
+    return { bg:'var(--paper-2)', fg:'var(--ink-3)' };
+  }
+
+  renderVals(){
+    const sc = this.state.screen;
+    const names = ['dashboard','eventhub','guests','vendors','site'];
+    const tabBg = {}, tabColor = {}, sbBg = {}, sbColor = {}, disp = {};
+    names.forEach(n => {
+      const on = sc===n;
+      tabBg[n] = on ? 'var(--accent)' : 'transparent';
+      tabColor[n] = on ? '#fff' : 'var(--ink-2)';
+      sbBg[n] = on ? 'var(--surface-2)' : 'transparent';
+      sbColor[n] = on ? 'var(--ink)' : 'var(--ink-3)';
+      disp[n] = on ? 'block' : 'none';
+    });
+    const appDisp = sc==='site' ? 'none' : 'block';
+
+    // Dashboard
+    const attention = [
+      { color:'var(--bad)',  text:'Lens & Light contract is unsigned — upload before deposit',  cta:'Upload' },
+      { color:'var(--warn)', text:'£8,200 in vendor balances due within 30 days',               cta:'Review' },
+      { color:'var(--warn)', text:'54 guests haven\u2019t replied to the Ceremony',              cta:'Remind' },
+      { color:'var(--info)', text:'2 invitations bounced — fix email addresses',                 cta:'Fix' },
+    ];
+    const ceremonies = [
+      { name:'Mehndi',    pct:82, label:'82% ready', color:'var(--ok)' },
+      { name:'Sangeet',   pct:74, label:'74% ready', color:'var(--ok)' },
+      { name:'Ceremony',  pct:68, label:'68% ready', color:'var(--warn)' },
+      { name:'Reception', pct:60, label:'60% · vendors', color:'var(--warn)' },
+    ].map(c => ({ ...c, w: c.pct + '%', onClick: this.goEventhub }));
+
+    // Event Hub (Sangeet)
+    const ehTabs = ['overview','guests','rsvp','vendors','budget','tasks','files'];
+    const etDisp = {}, etBg = {}, etColor = {};
+    ehTabs.forEach(t => { const on = this.state.ehTab===t; etDisp[t] = on?'block':'none'; etBg[t] = on?'var(--surface)':'transparent'; etColor[t] = on?'var(--ink)':'var(--ink-3)'; });
+    const ehVendors = this.vendors.filter(v => v.events.includes('sangeet')).map(v => { const c=this._statusColors(v.status); return { name:v.name, cat:v.cat, status:v.status, sBg:c.bg, sFg:c.fg }; });
+    const ehBudget = this.ehBudget.map(b => ({ name:b.name, cat:b.cat, est:this.gbp(b.est), paid:this.gbp(b.paid), due:b.due }));
+    const ehTasks = this.ehTasks;
+
+    // Vendors + Budget
+    const vList = this.vendors.map(v => { const c=this._statusColors(v.status); const on=this.state.vendorSel===v.id; return {
+      name:v.name, cat:v.cat, status:v.status, sBg:c.bg, sFg:c.fg,
+      balance: v.contracted>v.paid ? this.gbp(v.contracted - v.paid) + ' due' : (v.contracted? 'Paid up':'No quote'),
+      rowBg: on ? 'var(--surface-2)' : 'transparent', rowBd: on ? '1px solid var(--accent-line)' : '1px solid transparent',
+      onClick: () => this.selectVendor(v.id),
+    }; });
+    const v = this.vendors.find(x => x.id === this.state.vendorSel) || this.vendors[0];
+    const vc = this._statusColors(v.status);
+    const selEvents = v.events.map(id => { const e = this.events.find(x=>x.id===id); return { name: e ? e.name : id }; });
+    const selTasks = v.tasks.map(t => ({ title: t }));
+    const selFiles = v.files.length ? v.files.map(f => ({ name: f })) : [{ name:'No files yet — upload a contract' }];
+    const totalPaid = this.vendors.reduce((a,x)=>a+x.paid,0);
+    const totalContracted = this.vendors.reduce((a,x)=>a+x.contracted,0);
+
+    return {
+      tabBg, tabColor, sbBg, sbColor, disp, appDisp,
+      toggleTheme:this.toggleTheme, doToastSend:this.doToastSend,
+      goDashboard:this.goDashboard, goEventhub:this.goEventhub, goGuests:this.goGuests, goVendors:this.goVendors, goSite:this.goSite,
+      toast: this.state.toast || '', toastDisp: this.state.toast ? 'flex' : 'none',
+      attention, ceremonies,
+      etDisp, etBg, etColor,
+      ehOverview:()=>this.setEhTab('overview'), ehGuestsTab:()=>this.setEhTab('guests'), ehRsvpTab:()=>this.setEhTab('rsvp'),
+      ehVendorsTab:()=>this.setEhTab('vendors'), ehBudgetTab:()=>this.setEhTab('budget'), ehTasksTab:()=>this.setEhTab('tasks'), ehFilesTab:()=>this.setEhTab('files'),
+      ehVendors, ehBudget, ehTasks,
+      vList,
+      selName:v.name, selCat:v.cat, selContact:v.contact, selStatus:v.status, selStatusBg:vc.bg, selStatusFg:vc.fg,
+      selQuote:this.gbp(v.quote), selContracted:this.gbp(v.contracted), selPaid:this.gbp(v.paid), selBalance:this.gbp(Math.max(0,v.contracted - v.paid)),
+      selEvents, selTasks, selFiles,
+      budTotal:'£55,000', budContracted:this.gbp(totalContracted), budPaid:this.gbp(totalPaid), budPaidW: Math.round(totalPaid/55000*100)+'%', budDue:'£8,200',
+      matrixRows: this.households.map(hh => {
+        const inv = this.state.invited[hh.id];
+        const cells = this.events.map(ev => { const on=!!inv[ev.id]; return { mark:on?'✓':'+', bg:on?'var(--accent)':'transparent', fg:on?'#fff':'var(--ink-3)', border:on?'1px solid var(--accent)':'1px dashed var(--line-2)', onClick:()=>this.toggleInvite(hh.id,ev.id) }; });
+        return { name:hh.name, sub:hh.sub, rsvp:hh.rsvp, rsvpColor:hh.rsvpColor, diet:hh.diet, cells };
+      }),
+    };
+  }
+}
+</script>
+</body>
+</html>

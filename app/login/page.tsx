@@ -5,168 +5,119 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
+import { BRAND_NAME } from '@/lib/brand'
 
-type Mode = 'signin' | 'signup'
+type Tab = 'link' | 'password'
 
 export default function LoginPage() {
   const router = useRouter()
   const supabase = createClient()
-
-  const [mode, setMode] = useState<Mode>('signin')
+  const [tab, setTab] = useState<Tab>('link')
+  const [signup, setSignup] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
 
-  async function onSubmit(e: React.FormEvent) {
+  async function sendLink(e: React.FormEvent) {
     e.preventDefault()
-    setPending(true)
-    setError(null)
-    setNotice(null)
+    setPending(true); setError(null); setNotice(null)
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    })
+    setPending(false)
+    if (error) setError(error.message)
+    else setNotice('Check your email for a sign-in link.')
+  }
 
-    if (mode === 'signin') {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) {
-        setError(error.message)
-        setPending(false)
-        return
-      }
-      router.push('/dashboard')
-      router.refresh()
-    } else {
+  async function withPassword(e: React.FormEvent) {
+    e.preventDefault()
+    setPending(true); setError(null); setNotice(null)
+    if (signup) {
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { name },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+        email, password,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       })
-      if (error) {
-        setError(error.message)
-        setPending(false)
-        return
-      }
-      // If confirmations are off, a session is returned and we go straight in.
-      if (data.session) {
-        router.push('/dashboard')
-        router.refresh()
-      } else {
-        setNotice('Check your email to confirm your account, then sign in.')
-        setMode('signin')
-        setPending(false)
-      }
+      if (error) { setError(error.message); setPending(false); return }
+      if (data.session) { router.push('/dashboard'); router.refresh() }
+      else { setNotice('Check your email to confirm, then sign in.'); setSignup(false); setPending(false) }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) { setError(error.message); setPending(false); return }
+      router.push('/dashboard'); router.refresh()
     }
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <header className="flex items-center justify-between px-6 py-5">
-        <Link href="/" className="font-heading text-2xl tracking-wide-soft">
-          Simvites
-        </Link>
+    <div className="flex min-h-screen flex-col bg-paper text-ink">
+      <header className="mx-auto flex w-full max-w-[1060px] items-center justify-between px-6 py-6">
+        <Link href="/" className="font-display text-2xl">{BRAND_NAME}</Link>
         <ThemeToggle />
       </header>
 
-      <main className="flex flex-1 items-center justify-center px-6 pb-20">
+      <main className="flex flex-1 items-center justify-center px-6 pb-24">
         <div className="w-full max-w-sm">
-          <div className="text-center">
-            <p className="mb-2 text-[0.7rem] uppercase tracking-luxury text-gold-ink">
-              {mode === 'signin' ? 'Welcome back' : 'Get started'}
-            </p>
-            <h1 className="font-heading text-4xl font-light">
-              {mode === 'signin' ? 'Sign in' : 'Create your account'}
-            </h1>
+          <p className="eyebrow mb-3 text-center">Welcome</p>
+          <h1 className="text-center font-display text-4xl">Sign in to {BRAND_NAME}</h1>
+
+          <div className="mt-8 flex rounded-md border border-line bg-paper-2 p-1 text-center">
+            {(['link', 'password'] as Tab[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => { setTab(t); setError(null); setNotice(null) }}
+                className={`flex-1 rounded-[6px] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] transition-colors ${
+                  tab === t ? 'bg-surface text-ink shadow-card' : 'text-ink-3'
+                }`}
+              >
+                {t === 'link' ? 'Email link' : 'Password'}
+              </button>
+            ))}
           </div>
 
-          <form onSubmit={onSubmit} className="mt-10 space-y-5">
-            {mode === 'signup' && (
+          <form onSubmit={tab === 'link' ? sendLink : withPassword} className="mt-7 space-y-5">
+            <Field label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" />
+            {tab === 'password' && (
               <Field
-                label="Name"
-                type="text"
-                value={name}
-                onChange={setName}
-                autoComplete="name"
+                label="Password" type="password" value={password} onChange={setPassword}
+                autoComplete={signup ? 'new-password' : 'current-password'}
               />
             )}
-            <Field
-              label="Email"
-              type="email"
-              value={email}
-              onChange={setEmail}
-              autoComplete="email"
-              required
-            />
-            <Field
-              label="Password"
-              type="password"
-              value={password}
-              onChange={setPassword}
-              autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-              required
-            />
-
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            {notice && <p className="text-sm text-gold-ink">{notice}</p>}
-
+            {error && <p className="text-sm text-bad">{error}</p>}
+            {notice && <p className="text-sm text-accent-ink">{notice}</p>}
             <button
-              type="submit"
-              disabled={pending}
-              className="w-full rounded-full bg-primary px-6 py-3 text-[0.7rem] uppercase tracking-wide-soft text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+              type="submit" disabled={pending}
+              className="w-full rounded-md bg-accent px-6 py-3 font-semibold text-white transition-transform hover:-translate-y-px disabled:opacity-50"
             >
-              {pending ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Create account'}
+              {pending ? 'Please wait…' : tab === 'link' ? 'Send sign-in link' : signup ? 'Create account' : 'Sign in'}
             </button>
           </form>
 
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-            <button
-              type="button"
-              onClick={() => {
-                setMode(mode === 'signin' ? 'signup' : 'signin')
-                setError(null)
-                setNotice(null)
-              }}
-              className="text-gold-ink underline underline-offset-4"
-            >
-              {mode === 'signin' ? 'Create one' : 'Sign in'}
-            </button>
-          </p>
+          {tab === 'password' && (
+            <p className="mt-6 text-center text-sm text-ink-3">
+              {signup ? 'Already have an account? ' : 'New here? '}
+              <button onClick={() => { setSignup(!signup); setError(null) }} className="text-accent-ink underline underline-offset-4">
+                {signup ? 'Sign in' : 'Create one'}
+              </button>
+            </p>
+          )}
         </div>
       </main>
     </div>
   )
 }
 
-function Field({
-  label,
-  type,
-  value,
-  onChange,
-  autoComplete,
-  required,
-}: {
-  label: string
-  type: string
-  value: string
-  onChange: (v: string) => void
-  autoComplete?: string
-  required?: boolean
+function Field({ label, type, value, onChange, autoComplete }: {
+  label: string; type: string; value: string; onChange: (v: string) => void; autoComplete?: string
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[0.7rem] uppercase tracking-wide-soft text-muted-foreground">
-        {label}
-      </span>
+      <span className="eyebrow mb-1.5 block">{label}</span>
       <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        autoComplete={autoComplete}
-        required={required}
-        className="w-full border-b border-border bg-transparent pb-2 text-foreground outline-none"
+        type={type} value={value} onChange={(e) => onChange(e.target.value)}
+        autoComplete={autoComplete} required
+        className="w-full rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-accent"
       />
     </label>
   )

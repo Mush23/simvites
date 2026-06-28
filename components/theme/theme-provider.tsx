@@ -22,7 +22,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-const STORAGE_KEY = 'simvites-theme'
+const STORAGE_KEY = 'occasio-theme'
 
 function systemPrefersDark() {
   return (

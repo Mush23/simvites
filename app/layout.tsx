@@ -1,33 +1,41 @@
 import type { Metadata } from 'next'
-import { Cormorant_Garamond, Jost } from 'next/font/google'
+import { Instrument_Serif, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider, ThemeScript } from '@/components/theme/theme-provider'
+import { BRAND_NAME } from '@/lib/brand'
 
-const heading = Cormorant_Garamond({
-  variable: '--font-heading',
+const display = Instrument_Serif({
+  variable: '--font-instrument',
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400'],
   display: 'swap',
 })
-
-const body = Jost({
-  variable: '--font-body',
+const sans = Hanken_Grotesk({
+  variable: '--font-hanken',
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
+  display: 'swap',
+})
+const mono = JetBrains_Mono({
+  variable: '--font-jetbrains',
+  subsets: ['latin'],
   display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: 'Simvites — beautiful event websites',
+  title: `${BRAND_NAME} — your wedding, beautifully in hand`,
   description:
-    'Build a stunning multi-event wedding website, manage your guest list and RSVPs, and send personalised invitations — all in one place.',
+    'One calm command centre for a multi-event wedding: website, guest list, RSVPs, vendors and budget — connected.',
 }
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${heading.variable} ${body.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <ThemeScript />
       </head>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Libre+Caslon+Display&family=Hanken+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="image-slot.js"></script>
+<style>
+:root{
+--paper:oklch(0.992 0.004 85);--paper-2:oklch(0.972 0.005 80);--surface:oklch(1 0 0);--surface-2:oklch(0.976 0.004 80);
+--ink:oklch(0.23 0.014 55);--ink-2:oklch(0.44 0.013 55);--ink-3:oklch(0.60 0.010 55);
+--line:oklch(0.915 0.006 70);--line-2:oklch(0.86 0.008 65);
+--accent:oklch(0.56 0.155 33);--accent-ink:oklch(0.47 0.15 33);--accent-soft:oklch(0.955 0.026 45);--accent-line:oklch(0.86 0.06 40);
+--ok:oklch(0.56 0.11 155);--shadow:0 1px 2px rgba(40,22,10,.05),0 10px 34px -12px rgba(40,22,10,.10);--shadow-lg:0 40px 80px -28px rgba(40,22,10,.22);
+}
+:root[data-theme="dark"]{
+--paper:oklch(0.175 0.009 60);--paper-2:oklch(0.205 0.010 60);--surface:oklch(0.215 0.011 60);--surface-2:oklch(0.245 0.012 60);
+--ink:oklch(0.95 0.006 85);--ink-2:oklch(0.77 0.010 78);--ink-3:oklch(0.60 0.010 70);
+--line:oklch(0.30 0.012 62);--line-2:oklch(0.37 0.014 62);
+--accent:oklch(0.74 0.145 42);--accent-ink:oklch(0.82 0.13 44);--accent-soft:oklch(0.30 0.055 38);--accent-line:oklch(0.42 0.08 40);
+--ok:oklch(0.74 0.13 158);--shadow:0 1px 2px rgba(0,0,0,.35),0 12px 34px -12px rgba(0,0,0,.5);--shadow-lg:0 40px 80px -28px rgba(0,0,0,.66);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper-2);color:var(--ink);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+::selection{background:var(--accent);color:#fff}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:20px;border:3px solid var(--paper-2)}
+button{font-family:inherit;cursor:pointer}
+/* editable affordances */
+[data-edit="text"]{outline:1.5px dashed transparent;outline-offset:3px;border-radius:2px;transition:outline-color .15s ease;cursor:text}
+[data-edit="text"]:hover{outline-color:var(--accent-line)}
+[data-edit="text"]:focus{outline:2px solid var(--accent);outline-offset:3px}
+[data-block]{position:relative}
+.blk-ctl{position:absolute;top:8px;right:8px;display:flex;gap:3px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:3px;box-shadow:var(--shadow);opacity:0;transform:translateY(-3px);transition:opacity .16s ease,transform .16s ease;z-index:5}
+[data-block]:hover>.blk-ctl{opacity:1;transform:none}
+.blk-ctl button{width:26px;height:26px;border:none;background:transparent;border-radius:6px;color:var(--ink-2);font-size:13px;display:flex;align-items:center;justify-content:center}
+.blk-ctl button:hover{background:var(--surface-2);color:var(--accent-ink)}
+.blk-tag{position:absolute;top:8px;left:8px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 7px;opacity:0;transition:opacity .16s ease;z-index:5}
+[data-block]:hover>.blk-tag{opacity:1}
+/* preview mode hides chrome */
+.previewing [data-chrome]{display:none!important}
+.previewing [data-edit="text"]{outline:none!important;cursor:default}
+.previewing [data-block]:hover>.blk-ctl,.previewing [data-block]:hover>.blk-tag{opacity:0}
+.seg{display:flex;gap:2px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:2px}
+.seg button{flex:1;border:none;background:transparent;border-radius:7px;padding:6px 8px;font-size:11.5px;font-weight:600;color:var(--ink-3)}
+.seg button[data-on="1"]{background:var(--accent);color:#fff}
+.rail-row{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;font-size:12.5px;color:var(--ink-2);cursor:pointer;border:1px solid transparent}
+.rail-row:hover{background:var(--surface-2);border-color:var(--line)}
+@keyframes toast-in{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes pop{from{transform:scale(.96);opacity:.4}to{transform:none;opacity:1}}
+.tb-pop{animation:pop .14s ease}
+</style>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#b3502f"/><rect x="34" y="30" width="32" height="5" rx="2.5" fill="#fdf6ef"/><rect x="28" y="44" width="44" height="4" rx="2" fill="#fdf6ef" opacity=".7"/><rect x="28" y="54" width="38" height="4" rx="2" fill="#fdf6ef" opacity=".5"/></svg>
+</template>
+</helmet>
+
+<div id="ed-root" style="height:100vh;display:flex;flex-direction:column;background:var(--paper-2);overflow:hidden">
+
+  <!-- TOP BAR -->
+  <header data-chrome style="flex:none;height:54px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 16px;background:var(--surface);border-bottom:1px solid var(--line);z-index:20">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;flex:none"><span style="width:7px;height:7px;border-radius:50%;background:var(--accent)"></span></span>
+      <span style="font-family:'Instrument Serif',serif;font-size:19px;color:var(--ink)">Occasio</span>
+      <span style="width:1px;height:20px;background:var(--line)"></span>
+      <span style="font-size:12.5px;color:var(--ink-3)">Aanya &amp; Dev</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);border:1px solid var(--accent-line);background:var(--accent-soft);border-radius:5px;padding:2px 6px">Editing</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div class="seg" style="margin-right:4px">
+        <button data-action="device" data-dev="desktop" data-on="1" title="Desktop">▭</button>
+        <button data-action="device" data-dev="tablet" title="Tablet">▯</button>
+        <button data-action="device" data-dev="mobile" title="Mobile">▪</button>
+      </div>
+      <button data-action="undo" title="Undo" style="width:34px;height:34px;border:1px solid var(--line);background:var(--surface);border-radius:9px;color:var(--ink-2);font-size:14px">↶</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button data-action="theme" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 11px;min-width:58px"><span data-theme-label>Dark</span></button>
+      <button data-action="preview" style="font-size:12.5px;font-weight:600;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 14px"><span data-preview-label>Preview</span></button>
+      <button data-action="publish" style="font-size:12.5px;font-weight:700;color:#fff;background:var(--accent);border:none;border-radius:9px;padding:8px 16px">Publish</button>
+    </div>
+  </header>
+
+  <div style="flex:1;display:flex;min-height:0">
+
+    <!-- LEFT RAIL -->
+    <aside data-chrome style="width:210px;flex:none;border-right:1px solid var(--line);background:var(--surface);padding:16px 12px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;z-index:10">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:0 10px 6px">Sections</div>
+      <div id="ed-blocklist" style="display:flex;flex-direction:column;gap:2px"></div>
+      <button data-action="open-add" style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px dashed var(--line-2);background:transparent;border-radius:9px;padding:10px;font-size:12px;font-weight:600;color:var(--accent-ink)">+ Add section</button>
+      <div id="ed-addmenu" style="display:none;margin-top:6px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:6px;box-shadow:var(--shadow)">
+        <button data-action="add" data-kind="heading" class="rail-row" style="width:100%;text-align:left">✶ &nbsp;Heading + text</button>
+        <button data-action="add" data-kind="image" class="rail-row" style="width:100%;text-align:left">▣ &nbsp;Image band</button>
+        <button data-action="add" data-kind="quote" class="rail-row" style="width:100%;text-align:left">❝ &nbsp;Quote</button>
+        <button data-action="add" data-kind="event" class="rail-row" style="width:100%;text-align:left">◷ &nbsp;Event card</button>
+      </div>
+      <div style="margin-top:auto;padding:10px;font-size:11px;line-height:1.5;color:var(--ink-3)">Click any text to edit it. Hover a section for controls.</div>
+    </aside>
+
+    <!-- CANVAS -->
+    <div id="ed-scroll" style="flex:1;min-width:0;overflow-y:auto;padding:26px;display:flex;justify-content:center;background:var(--paper-2)">
+      <div id="ed-canvas" style="width:100%;max-width:980px;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden;transition:max-width .3s cubic-bezier(.22,1,.36,1);align-self:flex-start">
+
+        <section data-block data-name="Hero" style="padding:54px 40px 46px;text-align:center;background:var(--paper)">
+          <span data-chrome class="blk-tag">Hero</span>
+          <div data-chrome class="blk-ctl"><button data-action="up" title="Move up">↑</button><button data-action="down" title="Move down">↓</button><button data-action="dup" title="Duplicate">⧉</button><button data-action="del" title="Delete">🗑</button></div>
+          <div data-edit="text" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:18px">Together with their families</div>
+          <div data-edit="text" style="font-family:'Instrument Serif',serif;font-size:64px;line-height:0.98;color:var(--ink);margin-bottom:14px">Aanya &amp; Dev</div>
+          <div data-edit="text" style="font-size:14px;letter-spacing:.05em;color:var(--ink-2);margin-bottom:26px">14–16 November 2026 · London</div>
+          <image-slot id="ed-hero-img" style="display:block;width:100%;height:260px;margin-bottom:24px" shape="rounded" radius="14" placeholder="Drag in a photo — or click Replace"></image-slot>
+          <button data-edit="text" style="display:inline-block;background:var(--accent);color:#fff;border:none;border-radius:11px;padding:13px 28px;font-size:14px;font-weight:600">RSVP to our celebrations</button>
+        </section>
+
+        <section data-block data-name="Story" style="padding:46px 40px;border-top:1px solid var(--line);background:var(--paper-2);display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center">
+          <span data-chrome class="blk-tag">Story</span>
+          <div data-chrome class="blk-ctl"><button data-action="up" title="Move up">↑</button><button data-action="down" title="Move down">↓</button><button data-action="dup" title="Duplicate">⧉</button><button data-action="del" title="Delete">🗑</button></div>
+          <image-slot id="ed-story-img" style="display:block;width:100%;height:240px" shape="rounded" radius="12" placeholder="Drop a photo"></image-slot>
+          <div>
+            <div data-edit="text" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:13px">Our story</div>
+            <div data-edit="text" style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1.12;color:var(--ink);margin-bottom:13px">From a Sunday in Shoreditch to forever.</div>
+            <div data-edit="text" style="font-size:14.5px;line-height:1.7;color:var(--ink-2)">We met over chai at a friend's Diwali party, argued about the best biryani in London, and never really stopped talking. We'd love nothing more than to celebrate with the people we love.</div>
+          </div>
+        </section>
+
+        <section data-block data-name="Schedule" style="padding:48px 40px;border-top:1px solid var(--line);background:var(--paper)">
+          <span data-chrome class="blk-tag">Schedule</span>
+          <div data-chrome class="blk-ctl"><button data-action="up" title="Move up">↑</button><button data-action="down" title="Move down">↓</button><button data-action="dup" title="Duplicate">⧉</button><button data-action="del" title="Delete">🗑</button></div>
+          <div style="text-align:center;margin-bottom:26px">
+            <div data-edit="text" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:11px">The celebrations</div>
+            <div data-edit="text" style="font-family:'Instrument Serif',serif;font-size:34px;color:var(--ink)">Four events, two days</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+            <div style="border:1px solid var(--line);border-radius:13px;padding:20px;background:var(--surface)"><div data-edit="text" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--accent-ink);margin-bottom:8px">Fri 14 Nov · 7:30 PM</div><div data-edit="text" style="font-family:'Instrument Serif',serif;font-size:23px;color:var(--ink);margin-bottom:4px">Sangeet</div><div data-edit="text" style="font-size:12.5px;color:var(--ink-2)">The Roundhouse · dinner &amp; dancing</div></div>
+            <div style="border:1px solid var(--line);border-radius:13px;padding:20px;background:var(--surface)"><div data-edit="text" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--accent-ink);margin-bottom:8px">Sat 15 Nov · 11:00 AM</div><div data-edit="text" style="font-family:'Instrument Serif',serif;font-size:23px;color:var(--ink);margin-bottom:4px">Ceremony</div><div data-edit="text" style="font-size:12.5px;color:var(--ink-2)">Lansdowne Club · be seated by 10:45</div></div>
+          </div>
+        </section>
+
+        <section data-block data-name="RSVP" style="padding:54px 40px;border-top:1px solid var(--line);text-align:center;background:var(--ink)">
+          <span data-chrome class="blk-tag">RSVP</span>
+          <div data-chrome class="blk-ctl"><button data-action="up" title="Move up">↑</button><button data-action="down" title="Move down">↓</button><button data-action="dup" title="Duplicate">⧉</button><button data-action="del" title="Delete">🗑</button></div>
+          <div data-edit="text" style="font-family:'Instrument Serif',serif;font-size:38px;line-height:1.1;color:var(--paper);margin-bottom:10px">Will you celebrate with us?</div>
+          <div data-edit="text" style="font-size:14px;color:var(--paper);opacity:.8;margin-bottom:22px">Let us know by 12 August.</div>
+          <button data-edit="text" style="display:inline-block;background:var(--accent);color:#fff;border:none;border-radius:11px;padding:13px 30px;font-size:14px;font-weight:600">RSVP now</button>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- RIGHT RAIL -->
+    <aside data-chrome style="width:264px;flex:none;border-left:1px solid var(--line);background:var(--surface);padding:16px 14px;overflow-y:auto;z-index:10">
+      <div id="ed-panel-selected" style="display:none;margin-bottom:16px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:11px">Selected · <span data-sel-kind>Text</span></div>
+        <div style="font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Font</div>
+        <div class="seg" style="margin-bottom:12px"><button data-action="font" data-font="serif">Serif</button><button data-action="font" data-font="sans">Sans</button></div>
+        <div style="font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Size</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button data-action="size" data-dir="-1" style="width:34px;height:32px;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;font-size:15px;color:var(--ink-2)">−</button><div data-size-readout style="flex:1;text-align:center;font-size:12.5px;color:var(--ink-2)">—</div><button data-action="size" data-dir="1" style="width:34px;height:32px;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;font-size:15px;color:var(--ink-2)">+</button></div>
+        <div style="font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Weight &amp; align</div>
+        <div style="display:flex;gap:6px;margin-bottom:12px"><button data-action="bold" style="flex:1;height:32px;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;font-weight:800;color:var(--ink-2)">B</button><button data-action="align" data-al="left" style="flex:1;height:32px;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;color:var(--ink-2)">⇤</button><button data-action="align" data-al="center" style="flex:1;height:32px;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;color:var(--ink-2)">≡</button><button data-action="align" data-al="right" style="flex:1;height:32px;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;color:var(--ink-2)">⇥</button></div>
+        <div style="font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Text colour</div>
+        <div id="ed-textcolors" style="display:flex;gap:7px"></div>
+      </div>
+
+      <div id="ed-panel-theme">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:11px">Theme</div>
+        <div style="font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px">Accent</div>
+        <div id="ed-accents" style="display:flex;gap:8px;margin-bottom:16px"></div>
+        <div style="font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px">Headline font</div>
+        <div class="seg" style="margin-bottom:16px"><button data-action="hfont" data-font="Instrument Serif" data-on="1">Editorial</button><button data-action="hfont" data-font="Libre Caslon Display">Caslon</button><button data-action="hfont" data-font="Hanken Grotesk">Modern</button></div>
+        <div style="font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px">Mode</div>
+        <div class="seg" style="margin-bottom:8px"><button data-action="mode" data-mode="light" data-on="1">Light</button><button data-action="mode" data-mode="dark">Dark</button></div>
+        <div style="margin-top:18px;padding:13px;background:var(--paper-2);border:1px solid var(--line);border-radius:11px;font-size:11.5px;line-height:1.55;color:var(--ink-3)">Everything you change here updates the live site. Your guests see it after you press <strong style="color:var(--ink-2)">Publish</strong>.</div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- FLOATING TEXT TOOLBAR -->
+  <div id="ed-toolbar" data-chrome style="position:fixed;display:none;z-index:60;align-items:center;gap:3px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:5px;box-shadow:var(--shadow-lg)">
+    <button data-action="font" data-font="serif" style="height:30px;padding:0 10px;border:none;background:transparent;border-radius:7px;font-family:'Instrument Serif',serif;font-size:16px;color:var(--ink-2)">Aa</button>
+    <button data-action="font" data-font="sans" style="height:30px;padding:0 10px;border:none;background:transparent;border-radius:7px;font-size:13px;font-weight:700;color:var(--ink-2)">Aa</button>
+    <span style="width:1px;height:20px;background:var(--line)"></span>
+    <button data-action="size" data-dir="-1" style="width:28px;height:30px;border:none;background:transparent;border-radius:7px;font-size:14px;color:var(--ink-2)">−</button>
+    <button data-action="size" data-dir="1" style="width:28px;height:30px;border:none;background:transparent;border-radius:7px;font-size:16px;color:var(--ink-2)">+</button>
+    <button data-action="bold" style="width:30px;height:30px;border:none;background:transparent;border-radius:7px;font-weight:800;color:var(--ink-2)">B</button>
+    <span style="width:1px;height:20px;background:var(--line)"></span>
+    <button data-action="align" data-al="left" style="width:28px;height:30px;border:none;background:transparent;border-radius:7px;color:var(--ink-2)">⇤</button>
+    <button data-action="align" data-al="center" style="width:28px;height:30px;border:none;background:transparent;border-radius:7px;color:var(--ink-2)">≡</button>
+    <button data-action="align" data-al="right" style="width:28px;height:30px;border:none;background:transparent;border-radius:7px;color:var(--ink-2)">⇥</button>
+    <span style="width:1px;height:20px;background:var(--line)"></span>
+    <div id="ed-tbcolors" style="display:flex;gap:5px;padding:0 4px"></div>
+  </div>
+
+  <div id="ed-toast" data-chrome style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);display:none;align-items:center;gap:10px;background:var(--ink);color:var(--paper);border-radius:11px;padding:12px 18px;box-shadow:var(--shadow-lg);font-size:13.5px;font-weight:500;z-index:80"><span style="width:7px;height:7px;border-radius:50%;background:var(--ok)"></span><span data-toast-msg></span></div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}">
+class Component extends DCLogic {
+  componentDidMount(){
+    this.root = document.getElementById('ed-root');
+    this.canvas = document.getElementById('ed-canvas');
+    this.scroll = document.getElementById('ed-scroll');
+    this.toolbar = document.getElementById('ed-toolbar');
+    this.activeEl = null;
+    this.undoStack = [];
+    this.ACCENTS = ['#b3502f','#1f7a52','#3a5bd0','#7a3b86','#1d1d1f'];
+    this.TEXTCOLORS = ['var(--ink)','var(--ink-3)','var(--accent-ink)','#ffffff'];
+
+    // theme init
+    let t=null; try{t=localStorage.getItem('occ-theme');}catch(e){}
+    if(!t) t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+    this.setTheme(t);
+
+    this.buildSwatches();
+    this.buildBlockList();
+    this.wireText();
+    this.restore();
+
+    // delegated clicks
+    this.root.addEventListener('click', (e)=>this.onClick(e));
+    // keep focus when using toolbar
+    this.toolbar.addEventListener('mousedown',(e)=>e.preventDefault());
+    document.querySelector('#ed-panel-selected').addEventListener('mousedown',(e)=>{ if(e.target.closest('button')) e.preventDefault(); });
+    // reposition toolbar
+    this.scroll.addEventListener('scroll',()=>this.placeToolbar());
+    window.addEventListener('resize',()=>this.placeToolbar());
+  }
+
+  // ---- theme & swatches ----
+  setTheme(t){ this.theme=t; document.documentElement.setAttribute('data-theme',t); try{localStorage.setItem('occ-theme',t);}catch(e){}
+    const l=document.querySelector('[data-theme-label]'); if(l) l.textContent=t==='dark'?'Light':'Dark';
+    this.syncSeg('mode', t);
+  }
+  buildSwatches(){
+    const mk=(c)=>{ const b=document.createElement('button'); b.style.cssText='width:30px;height:30px;border-radius:8px;border:2px solid var(--line);cursor:pointer;background:'+c; return b; };
+    const acc=document.getElementById('ed-accents');
+    this.ACCENTS.forEach(c=>{ const b=mk(c); b.dataset.action='accent'; b.dataset.color=c; acc.appendChild(b); });
+    const tc=document.getElementById('ed-textcolors');
+    const tcMini=(c)=>{ const b=document.createElement('button'); b.style.cssText='width:28px;height:28px;border-radius:8px;border:2px solid var(--line);cursor:pointer;background:'+(c==='var(--ink)'?'#222':c==='var(--ink-3)'?'#999':c==='var(--accent-ink)'?'var(--accent)':c); b.dataset.action='color'; b.dataset.color=c; return b; };
+    this.TEXTCOLORS.forEach(c=>tc.appendChild(tcMini(c)));
+    const tb=document.getElementById('ed-tbcolors');
+    this.TEXTCOLORS.forEach(c=>{ const b=tcMini(c); b.style.width='22px'; b.style.height='22px'; tb.appendChild(b); });
+  }
+  setAccent(c){ document.documentElement.style.setProperty('--accent',c); document.documentElement.style.setProperty('--accent-ink',c);
+    document.documentElement.style.setProperty('--accent-line','color-mix(in oklab,'+c+' 50%,transparent)');
+    document.documentElement.style.setProperty('--accent-soft','color-mix(in oklab,'+c+' 14%,var(--paper))');
+    [...document.querySelectorAll('#ed-accents button')].forEach(b=>b.style.borderColor=b.dataset.color===c?'var(--ink)':'var(--line)');
+    this.save();
+  }
+  setHFont(f){ document.querySelectorAll('#ed-canvas [style*="Instrument Serif"]').forEach(el=>el.style.fontFamily="'"+f+"'"+(f==='Hanken Grotesk'?',sans-serif':',serif'));
+    // remember by tagging
+    this._hfont=f; this.syncSeg('hfont',f); this.save(); }
+  syncSeg(action,val){ document.querySelectorAll('[data-action="'+action+'"]').forEach(b=>{ const v=b.dataset.mode||b.dataset.font; b.dataset.on=(v===val)?'1':''; }); }
+
+  // ---- block list (left rail) ----
+  buildBlockList(){
+    const list=document.getElementById('ed-blocklist'); list.innerHTML='';
+    [...this.canvas.querySelectorAll(':scope > [data-block]')].forEach((sec,i)=>{
+      const row=document.createElement('div'); row.className='rail-row'; row.dataset.action='nav'; row.dataset.idx=i;
+      row.innerHTML='<span style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:var(--ink-3)">'+String(i+1).padStart(2,'0')+'</span><span>'+(sec.dataset.name||'Section')+'</span>';
+      list.appendChild(row);
+    });
+  }
+
+  // ---- text editing ----
+  wireText(){
+    this.canvas.querySelectorAll('[data-edit="text"]').forEach(el=>{
+      if(el._wired) return; el._wired=true;
+      el.setAttribute('contenteditable','true'); el.spellcheck=false;
+      el.addEventListener('focus',()=>{ this.activeEl=el; this.showSelPanel(true); this.placeToolbar(); this.syncSizeReadout(); });
+      el.addEventListener('blur',()=>{ setTimeout(()=>{ if(document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-edit')==='text') return; this.hideToolbar(); this.showSelPanel(false); this.activeEl=null; this.save(); }, 120); });
+      el.addEventListener('input',()=>this.placeToolbar());
+    });
+  }
+  showSelPanel(on){ document.getElementById('ed-panel-selected').style.display=on?'block':'none'; document.getElementById('ed-panel-theme').style.display=on?'none':'block';
+    if(on){ const k=this.activeEl.closest('[data-block]'); document.querySelector('[data-sel-kind]').textContent=(this.activeEl.dataset.name||'Text'); } }
+  placeToolbar(){ if(!this.activeEl){ this.hideToolbar(); return; } const r=this.activeEl.getBoundingClientRect();
+    if(r.bottom<60||r.top>window.innerHeight-40){ this.toolbar.style.display='none'; return; }
+    this.toolbar.style.display='flex'; this.toolbar.classList.add('tb-pop');
+    const tw=this.toolbar.offsetWidth||360; let left=r.left+r.width/2-tw/2; left=Math.max(12,Math.min(left,window.innerWidth-tw-12));
+    let top=r.top-46; if(top<58) top=r.bottom+10; this.toolbar.style.left=left+'px'; this.toolbar.style.top=top+'px';
+    setTimeout(()=>this.toolbar.classList.remove('tb-pop'),160); }
+  hideToolbar(){ this.toolbar.style.display='none'; }
+  syncSizeReadout(){ if(!this.activeEl) return; const px=Math.round(parseFloat(getComputedStyle(this.activeEl).fontSize)); const r=document.querySelector('[data-size-readout]'); if(r) r.textContent=px+'px'; }
+
+  applyText(action,ds){ const el=this.activeEl; if(!el) return;
+    if(action==='font'){ el.style.fontFamily = ds.font==='serif' ? "'Instrument Serif',serif" : "'Hanken Grotesk',sans-serif"; }
+    if(action==='size'){ const cur=parseFloat(getComputedStyle(el).fontSize); el.style.fontSize=Math.max(10,cur+ (ds.dir*1*Math.max(2,Math.round(cur*0.08))))+'px'; this.syncSizeReadout(); }
+    if(action==='bold'){ const w=getComputedStyle(el).fontWeight; el.style.fontWeight=(parseInt(w)>=600)?'400':'700'; }
+    if(action==='align'){ el.style.textAlign=ds.al; }
+    if(action==='color'){ el.style.color=ds.color; }
+    el.focus(); this.placeToolbar(); this.save();
+  }
+
+  // ---- structural ops ----
+  snapshot(){ this.undoStack.push(this.canvas.innerHTML); if(this.undoStack.length>40) this.undoStack.shift(); }
+  afterStructure(){ this.wireText(); this.buildBlockList(); this.save(); }
+  undo(){ if(!this.undoStack.length){ this.toast('Nothing to undo'); return; } this.canvas.innerHTML=this.undoStack.pop();
+    this.canvas.querySelectorAll('[data-edit="text"]').forEach(el=>el._wired=false); this.wireText(); this.buildBlockList(); this.hideToolbar(); this.save(); }
+  moveBlock(sec,dir){ this.snapshot(); if(dir<0&&sec.previousElementSibling) sec.parentNode.insertBefore(sec,sec.previousElementSibling);
+    else if(dir>0&&sec.nextElementSibling) sec.parentNode.insertBefore(sec.nextElementSibling,sec); this.afterStructure(); }
+  dupBlock(sec){ this.snapshot(); const c=sec.cloneNode(true); c.querySelectorAll('[data-edit="text"]').forEach(el=>el._wired=false);
+    c.querySelectorAll('image-slot').forEach(s=>s.id=s.id+'-'+Math.random().toString(36).slice(2,6)); sec.parentNode.insertBefore(c,sec.nextElementSibling); this.afterStructure(); this.toast('Section duplicated'); }
+  delBlock(sec){ if(this.canvas.querySelectorAll(':scope > [data-block]').length<=1){ this.toast('Keep at least one section'); return; } this.snapshot(); sec.remove(); this.afterStructure(); this.toast('Section deleted'); }
+  addBlock(kind){ this.snapshot(); const html=this.preset(kind); this.canvas.insertAdjacentHTML('beforeend',html);
+    this.afterStructure(); document.getElementById('ed-addmenu').style.display='none';
+    const last=this.canvas.querySelector(':scope > [data-block]:last-child'); this.scroll.scrollTo({top:last.offsetTop-20,behavior:'smooth'}); this.toast('Section added'); }
+  ctl(){ return '<span data-chrome class="blk-tag">'+'Section'+'</span><div data-chrome class="blk-ctl"><button data-action="up">↑</button><button data-action="down">↓</button><button data-action="dup">⧉</button><button data-action="del">🗑</button></div>'; }
+  preset(kind){
+    const base='padding:46px 40px;border-top:1px solid var(--line);background:var(--paper)';
+    if(kind==='heading') return '<section data-block data-name="Heading" style="'+base+';text-align:center">'+this.ctl()+'<div data-edit="text" style="font-family:\'Instrument Serif\',serif;font-size:34px;color:var(--ink);margin-bottom:12px">A new heading</div><div data-edit="text" style="font-size:14.5px;line-height:1.7;color:var(--ink-2);max-width:60ch;margin:0 auto">Click to write something lovely here — it edits just like this.</div></section>';
+    if(kind==='image') return '<section data-block data-name="Image" style="'+base+'">'+this.ctl()+'<image-slot id="ed-img-'+Math.random().toString(36).slice(2,7)+'" style="display:block;width:100%;height:280px" shape="rounded" radius="14" placeholder="Drop a photo"></image-slot></section>';
+    if(kind==='quote') return '<section data-block data-name="Quote" style="'+base+';text-align:center">'+this.ctl()+'<div data-edit="text" style="font-family:\'Instrument Serif\',serif;font-style:italic;font-size:30px;line-height:1.3;color:var(--ink);max-width:24ch;margin:0 auto">A line you\u2019ll want to remember.</div></section>';
+    if(kind==='event') return '<section data-block data-name="Event" style="'+base+'">'+this.ctl()+'<div style="max-width:420px;margin:0 auto;border:1px solid var(--line);border-radius:13px;padding:22px;background:var(--surface);text-align:center"><div data-edit="text" style="font-family:\'JetBrains Mono\',monospace;font-size:10px;text-transform:uppercase;color:var(--accent-ink);margin-bottom:8px">Day · Time</div><div data-edit="text" style="font-family:\'Instrument Serif\',serif;font-size:24px;color:var(--ink);margin-bottom:5px">Event name</div><div data-edit="text" style="font-size:12.5px;color:var(--ink-2)">Venue · a detail or two</div></div></section>';
+    return '';
+  }
+
+  // ---- device / preview / publish ----
+  device(d){ const w=d==='mobile'?'400px':d==='tablet'?'800px':'980px'; this.canvas.style.maxWidth=w;
+    document.querySelectorAll('[data-action="device"]').forEach(b=>b.dataset.on=(b.dataset.dev===d)?'1':''); }
+  preview(){ const on=this.root.classList.toggle('previewing'); document.querySelector('[data-preview-label]').textContent=on?'Editing':'Preview';
+    this.canvas.querySelectorAll('[data-edit="text"]').forEach(el=>el.setAttribute('contenteditable',on?'false':'true'));
+    if(on){ this.hideToolbar(); this.activeEl=null; } }
+  toast(m){ const t=document.getElementById('ed-toast'); document.querySelector('[data-toast-msg]').textContent=m; t.style.display='flex'; t.style.animation='toast-in .3s ease';
+    clearTimeout(this._tt); this._tt=setTimeout(()=>t.style.display='none',2400); }
+
+  // ---- persistence ----
+  save(){ try{ const data={ html:this.canvas.innerHTML, theme:this.theme, accent:document.documentElement.style.getPropertyValue('--accent'), hfont:this._hfont, max:this.canvas.style.maxWidth }; localStorage.setItem('occ-editor-v2', JSON.stringify(data)); }catch(e){} }
+  restore(){ let d=null; try{ d=JSON.parse(localStorage.getItem('occ-editor-v2')); }catch(e){}
+    if(!d) return;
+    if(d.html){ this.canvas.innerHTML=d.html; this.canvas.querySelectorAll('[data-edit="text"]').forEach(el=>el._wired=false); this.wireText(); this.buildBlockList(); }
+    if(d.accent){ this.setAccent(d.accent.trim()); }
+    if(d.hfont){ this._hfont=d.hfont; this.syncSeg('hfont',d.hfont); }
+    if(d.max){ this.canvas.style.maxWidth=d.max; }
+  }
+
+  // ---- delegated click router ----
+  onClick(e){
+    const btn=e.target.closest('button,[data-action]'); if(!btn) return; const a=btn.dataset.action; if(!a) return;
+    const ds=btn.dataset;
+    if(['font','size','bold','align','color'].includes(a)){ this.applyText(a,ds); return; }
+    if(a==='accent'){ this.setAccent(ds.color); return; }
+    if(a==='hfont'){ this.setHFont(ds.font); return; }
+    if(a==='mode'){ this.setTheme(ds.mode); this.save(); return; }
+    if(a==='theme'){ this.setTheme(this.theme==='dark'?'light':'dark'); this.save(); return; }
+    if(a==='device'){ this.device(ds.dev); return; }
+    if(a==='preview'){ this.preview(); return; }
+    if(a==='publish'){ this.toast('Published — your guests can see this now'); return; }
+    if(a==='undo'){ this.undo(); return; }
+    if(a==='open-add'){ const m=document.getElementById('ed-addmenu'); m.style.display=m.style.display==='none'?'block':'none'; return; }
+    if(a==='add'){ this.addBlock(ds.kind); return; }
+    if(a==='nav'){ const sec=this.canvas.querySelectorAll(':scope > [data-block]')[+ds.idx]; if(sec) this.scroll.scrollTo({top:sec.offsetTop-20,behavior:'smooth'}); return; }
+    const sec=btn.closest('[data-block]');
+    if(a==='up'){ this.moveBlock(sec,-1); return; }
+    if(a==='down'){ this.moveBlock(sec,1); return; }
+    if(a==='dup'){ this.dupBlock(sec); return; }
+    if(a==='del'){ this.delBlock(sec); return; }
+  }
+
+  renderVals(){ return {}; }
+}
+</script>
+</body>
+</html>
