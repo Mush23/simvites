@@ -44,6 +44,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
       host_side: str(formData, 'host_side'),
       visibility: str(formData, 'visibility') ?? 'invite_only',
       capacity: capacityRaw ? Number(capacityRaw) : null,
+      rsvp_deadline: str(formData, 'rsvp_deadline'),
       on_website: formData.get('on_website') === 'on',
     })
     .eq('id', eventId)

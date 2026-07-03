@@ -13,6 +13,8 @@
     "db:verify": "node --env-file=.env.local scripts/db-verify.mjs",
     "user:create": "node --env-file=.env.local scripts/create-test-user.mjs",
     "test:isolation": "node --env-file=.env.local scripts/isolation-test.mjs",
+    "test:rsvp": "node --env-file=.env.local scripts/test-rsvp.mjs",
+    "test:all": "npm run test:isolation && npm run test:rsvp",
     "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs"
   },
   "dependencies": {

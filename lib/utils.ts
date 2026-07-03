@@ -22,14 +22,3 @@ export function formatEventDateTime(iso?: string | null): string | undefined {
   }).format(d).replace(',', ' ·')
 }
 
-export function formatEventDate(iso?: string | null): string | undefined {
-  if (!iso) return undefined
-  const d = new Date(`${iso}T00:00:00`)
-  if (Number.isNaN(d.getTime())) return iso
-  return new Intl.DateTimeFormat('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(d)
-}

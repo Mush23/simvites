@@ -1,12 +1,12 @@
 // ─────────────────────────────────────────────────────────────────────────
 // Tenant resolution — subdomain ↔ site, modelled on vercel/platforms.
 //
-// Production: sites live at `<slug>.simvites.co.uk` via wildcard DNS.
+// Production: sites live at `<slug>.occasio.events` via wildcard DNS.
 // Local dev:  use lvh.me (resolves *.lvh.me → 127.0.0.1), so a site is at
 //             http://<slug>.lvh.me:3000 and the apex is http://lvh.me:3000.
 // ─────────────────────────────────────────────────────────────────────────
 
-/** Root domain incl. port in dev, e.g. "lvh.me:3000" or "simvites.co.uk". */
+/** Root domain incl. port in dev, e.g. "lvh.me:3000" or "occasio.events". */
 export const ROOT_DOMAIN =
   process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'
 

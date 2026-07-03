@@ -12,11 +12,11 @@ interface GuestSession {
 }
 
 function secret(): string {
-  return (
-    process.env.GUEST_SESSION_SECRET ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    'dev-insecure-secret'
-  )
+  const s = process.env.GUEST_SESSION_SECRET
+  // Fail loudly: silently signing guest cookies with a fallback secret is a
+  // security bug (audit finding #2). Set GUEST_SESSION_SECRET everywhere.
+  if (!s) throw new Error('GUEST_SESSION_SECRET is not set — refusing to sign guest sessions without it.')
+  return s
 }
 
 export function signGuestSession(session: GuestSession): string {

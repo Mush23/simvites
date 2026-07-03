@@ -8,6 +8,7 @@ interface EventRow {
   name: string
   starts_at: string | null
   ends_at: string | null
+  rsvp_deadline: string | null
   venue_name: string | null
   address: string | null
   description: string | null
@@ -59,6 +60,7 @@ export function EventForm({ event }: { event: EventRow }) {
           </select>
         </label>
         <Field label="Capacity (blank = uncapped)" name="capacity" type="number" defaultValue={event.capacity?.toString() ?? ''} />
+        <Field label="RSVP deadline (blank = site default)" name="rsvp_deadline" type="datetime-local" defaultValue={toLocal(event.rsvp_deadline)} />
       </div>
 
       <label className="block">

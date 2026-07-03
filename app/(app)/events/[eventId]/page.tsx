@@ -16,7 +16,7 @@ export default async function EventHubPage({
   const supabase = await createClient()
   const { data: event } = await supabase
     .from('events')
-    .select('id, name, starts_at, ends_at, venue_name, address, description, dress_code, host_side, visibility, capacity, on_website')
+    .select('id, name, starts_at, ends_at, rsvp_deadline, venue_name, address, description, dress_code, host_side, visibility, capacity, on_website')
     .eq('id', eventId)
     .is('archived_at', null)
     .maybeSingle()
