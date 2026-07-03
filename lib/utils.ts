@@ -11,6 +11,17 @@ export function cn(...inputs: ClassValue[]) {
  * "Saturday, 24 October 2026". Returns undefined for empty input and echoes
  * non-ISO strings unchanged.
  */
+/** Format a timestamptz for display, e.g. "Sat 19 Sep 2026 · 10:30". */
+export function formatEventDateTime(iso?: string | null): string | undefined {
+  if (!iso) return undefined
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return undefined
+  return new Intl.DateTimeFormat('en-GB', {
+    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  }).format(d).replace(',', ' ·')
+}
+
 export function formatEventDate(iso?: string | null): string | undefined {
   if (!iso) return undefined
   const d = new Date(`${iso}T00:00:00`)
