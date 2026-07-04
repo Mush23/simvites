@@ -53,6 +53,7 @@ const text = (label: string) => ({ type: 'text' as const, label })
 const area = (label: string) => ({ type: 'textarea' as const, label })
 
 import { ImageFieldInput } from './image-field'
+import { Styled, styleField, DEFAULT_STYLE, type StyleOpts } from './styled'
 const image = (label: string) => ({
   type: 'custom' as const,
   label,
@@ -185,6 +186,23 @@ export const siteConfig: Config<SiteBlocks> = {
       render: (p) => <SiteFooter {...p} />,
     },
   },
+}
+
+// ── Sprint A injection: EVERY block gains the Style group (5 variants +
+// accent/corners/shading/glow/hover/appear) via one generic wrapper. Values
+// live in the page doc → frozen into snapshots like all content. ──────────
+for (const key of Object.keys(siteConfig.components)) {
+  const comp = siteConfig.components[key as keyof SiteBlocks] as unknown as {
+    fields: Record<string, unknown>
+    defaultProps: Record<string, unknown>
+    render: (p: Record<string, unknown>) => React.ReactNode
+  }
+  comp.fields.styleOpts = styleField
+  comp.defaultProps = { ...comp.defaultProps, styleOpts: { ...DEFAULT_STYLE } }
+  const orig = comp.render
+  comp.render = (p) => (
+    <Styled opts={p.styleOpts as StyleOpts | undefined}>{orig(p)}</Styled>
+  )
 }
 
 export type SiteData = Data<SiteBlocks>

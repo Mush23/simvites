@@ -150,6 +150,50 @@ a[class*='bg-primary']:hover {
 }
 button:active:not(:disabled) { transform: translateY(0); }
 
+/* ── Sprint A: per-BLOCK variants, shading and appear animations ─────────
+   The Styled wrapper sets data-variant / data-banim / data-shadow (plus the
+   existing data-glow / data-hover, which cascade per block because the
+   selectors below match the nearest wrapper). */
+
+/* Variants — 5 looks every block can wear */
+[data-variant='framed'] {
+  margin: 1.25rem auto;
+  max-width: min(64rem, calc(100% - 2rem));
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius-card, 13px);
+  overflow: hidden;
+  background: var(--surface);
+}
+[data-variant='banded'] {
+  background: var(--paper-2);
+  border-block: 1px solid var(--line);
+}
+[data-variant='minimal'] .shadow-card {
+  box-shadow: none;
+  border-color: transparent;
+  background: transparent;
+}
+[data-variant='minimal'] { border-block: 1px solid var(--line); }
+[data-variant='grand'] { font-size: 1.09em; padding-block: 2.25rem; }
+[data-variant='grand'] .font-display { letter-spacing: -0.015em; }
+
+/* Per-block shading override */
+[data-shadow='none'] .shadow-card { box-shadow: none; }
+[data-shadow='soft'] .shadow-card { box-shadow: var(--shadow); }
+[data-shadow='deep'] .shadow-card { box-shadow: var(--shadow-lg, 0 24px 60px -18px rgba(33,29,24,0.25)); }
+
+/* Appear animations — scroll-driven, reduced-motion safe via global rule */
+@keyframes b-rise { from { opacity: 0.001; transform: translateY(26px) } to { opacity: 1; transform: none } }
+@keyframes b-fade { from { opacity: 0.001 } to { opacity: 1 } }
+@keyframes b-zoom { from { opacity: 0.001; transform: scale(0.94) } to { opacity: 1; transform: none } }
+@keyframes b-slide { from { opacity: 0.001; transform: translateX(-34px) } to { opacity: 1; transform: none } }
+@supports (animation-timeline: view()) {
+  [data-banim='rise'] { animation: b-rise 0.9s cubic-bezier(0.16,1,0.3,1) both; animation-timeline: view(); animation-range: entry 0% entry 35%; }
+  [data-banim='fade'] { animation: b-fade 1s ease both; animation-timeline: view(); animation-range: entry 0% entry 40%; }
+  [data-banim='zoom'] { animation: b-zoom 0.9s cubic-bezier(0.16,1,0.3,1) both; animation-timeline: view(); animation-range: entry 0% entry 35%; }
+  [data-banim='slide'] { animation: b-slide 0.9s cubic-bezier(0.16,1,0.3,1) both; animation-timeline: view(); animation-range: entry 0% entry 35%; }
+}
+
 /* ── Site Style engine: couple-chosen glow + hover on public site cards ── */
 [data-glow='soft'] .shadow-card { box-shadow: var(--shadow), 0 0 28px -8px var(--accent-line); }
 [data-glow='strong'] .shadow-card { box-shadow: var(--shadow), 0 0 44px -6px var(--accent-line), 0 0 12px -4px var(--accent-line); }
@@ -175,14 +219,8 @@ aside a:hover { transform: translateX(3px); }
   from { opacity: 0.001; transform: translateY(22px); }
   to { opacity: 1; transform: none; }
 }
-@supports (animation-timeline: view()) {
-  [data-site-root] main section,
-  [data-site-root] > section {
-    animation: site-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 35%;
-  }
-}
+/* (Superseded by per-block appear animations — each block now carries its
+   own data-banim; the default 'rise' preserves this behaviour.) */
 @keyframes kenburns {
   from { transform: scale(1); }
   to { transform: scale(1.08); }
