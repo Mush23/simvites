@@ -20,6 +20,8 @@ export interface GuestView {
   guestId: string
   fullName: string
   isChild: boolean
+  /** "Find your table" — assigned seating, shown once the hosts publish it. */
+  tableName?: string
   events: GuestEventView[]
 }
 export interface QuestionView {
@@ -87,6 +89,16 @@ export async function getGuestRsvpContext(siteSlug: string): Promise<GuestRsvpCo
       db.from('rsvp_answers').select('guest_id, question_id, value').eq('site_id', site.id),
     ])
 
+  // Seating: table name per guest (if the hosts have seated them).
+  const { data: seatRows } = await db
+    .from('seat_assignments')
+    .select('guest_id, seating_tables!inner(name)')
+    .eq('site_id', site.id)
+  const tableByGuest = new Map(
+    ((seatRows ?? []) as unknown as { guest_id: string; seating_tables: { name: string } }[])
+      .map((s) => [s.guest_id, s.seating_tables.name]),
+  )
+
   const guests = (guestsRaw ?? []) as GuestRow[]
   const invitations = (invitationsRaw ?? []) as InviteRow[]
   const events = (eventsRaw ?? []) as EventRow[]
@@ -116,6 +128,7 @@ export async function getGuestRsvpContext(siteSlug: string): Promise<GuestRsvpCo
       guestId: g.id,
       fullName: g.full_name,
       isChild: g.is_child,
+      tableName: tableByGuest.get(g.id),
       events: invited.map((e) => {
         invitedEventIds.add(e.id)
         const deadline = e.rsvp_deadline ?? site.rsvp_deadline_default

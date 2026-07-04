@@ -22,11 +22,19 @@ export default async function SeatingPage() {
 
   return (
     <div className="mx-auto max-w-[1060px] px-6 py-10">
-      <PageHeader
-        eyebrow="Seating"
-        title="Who sits where"
-        description="Create tables, then place each guest. One seat per guest, capacity enforced."
-      />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader
+          eyebrow="Seating"
+          title="Who sits where"
+          description="Create tables, then place each guest. Guests see their table on their personal RSVP page."
+        />
+        <form action={async () => { 'use server'; await (await import('./actions')).sendSeatingUpdate() }}>
+          <button type="submit" title="Email every seated household a fresh personal link — opening it shows their table"
+            className="bg-accent px-4 py-2 text-sm font-semibold text-white">
+            Send seating plan to guests
+          </button>
+        </form>
+      </div>
       <SeatingManager
         tables={(tables ?? []).map((t) => ({
           id: t.id, name: t.name, capacity: t.capacity,

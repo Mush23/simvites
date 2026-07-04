@@ -26,6 +26,54 @@ export async function deleteTable(tableId: string) {
   return { ok: true }
 }
 
+/**
+ * Push the seating plan to every seated household: an email with a fresh
+ * personal link — opening it shows each guest their table on the RSVP page.
+ * The founder's "live post-publish updates" promise, delivered.
+ */
+export async function sendSeatingUpdate() {
+  const site = await getPrimarySite()
+  if (!site) return { error: 'No site.' }
+  if (!site.isUnlocked) return { error: 'Sending is part of the unlock — see Settings.' }
+  const supabase = await createClient()
+  const { sendEmail, emailConfigured } = await import('@/lib/email')
+  const { generateGuestToken } = await import('@/lib/tokens')
+  const { siteUrl } = await import('@/lib/tenant')
+
+  const [{ data: seats }, { data: guests }] = await Promise.all([
+    supabase.from('seat_assignments').select('guest_id').eq('site_id', site.siteId),
+    supabase.from('guests').select('id, household_id, email').eq('site_id', site.siteId).is('archived_at', null),
+  ])
+  const seated = new Set((seats ?? []).map((s) => s.guest_id))
+  const householdIds = [...new Set((guests ?? []).filter((g) => seated.has(g.id)).map((g) => g.household_id))]
+
+  let sent = 0
+  for (const hid of householdIds) {
+    const emails = [...new Set((guests ?? []).filter((g) => g.household_id === hid && g.email).map((g) => g.email as string))]
+    if (!emails.length) continue
+    const { raw, hash } = generateGuestToken()
+    await supabase.from('guest_access_tokens').insert({ site_id: site.siteId, household_id: hid, token_hash: hash })
+    const link = `${siteUrl(site.slug)}/i/${raw}`
+    for (const to of emails) {
+      const res = await sendEmail({
+        to,
+        subject: `Your table is ready — ${site.title}`,
+        html: `<div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;padding:32px;color:#2a241d"><h1 style="font-weight:400">The seating plan is live.</h1><p style="line-height:1.65">Open your invitation to see which table you're at:</p><p style="margin:26px 0"><a href="${link}" style="background:#b4552d;color:#fff;text-decoration:none;padding:12px 28px;border-radius:999px;font-weight:600">Find your table</a></p></div>`,
+      })
+      if (!res.error && !res.skipped) sent++
+    }
+  }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  await supabase.from('activity_log').insert({
+    site_id: site.siteId, actor_id: user?.id ?? null, verb: 'sent_seating_update',
+    entity_type: 'site', entity_id: site.siteId,
+    meta: { households: householdIds.length, delivered: sent, configured: emailConfigured() },
+  })
+  revalidatePath('/seating')
+  return { ok: true }
+}
+
 /** Seat a guest (tableId null = unseat). One seat per guest, capacity enforced. */
 export async function seatGuest(guestId: string, tableId: string | null) {
   const site = await getPrimarySite()

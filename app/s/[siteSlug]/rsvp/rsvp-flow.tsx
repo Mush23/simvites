@@ -161,6 +161,12 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
                 {g.fullName}
                 {g.isChild && <span className="ml-2 font-mono text-[10px] uppercase text-ink-3">child</span>}
               </h2>
+              {g.tableName && (
+                <p className="mt-1 inline-block rounded-pill px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-accent-ink"
+                  style={{ background: 'var(--accent-soft)' }}>
+                  Your table: {g.tableName}
+                </p>
+              )}
 
               {g.events.length === 0 && (
                 <p className="mt-3 text-sm text-ink-3">No events to respond to.</p>
