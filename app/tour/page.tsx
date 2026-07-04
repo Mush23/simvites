@@ -44,7 +44,7 @@ export default function TourPage() {
         <section className="mx-auto max-w-2xl">
           <FlowPlayer />
           <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3">
-            Auto-plays · tap a bar to jump · pause any time
+            Auto plays. Tap a bar to jump, pause any time.
           </p>
         </section>
 
