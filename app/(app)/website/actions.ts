@@ -29,6 +29,39 @@ export async function uploadSiteImage(formData: FormData): Promise<{ url?: strin
   return { url: data.publicUrl }
 }
 
+/**
+ * Import a photo picked from search into OUR site-assets bucket (never
+ * hotlinked: external hosts fail next/image's allowlist and can rot).
+ * https only, no IP-literal/localhost hosts, image content-type, 15 MB cap.
+ */
+export async function importImageFromUrl(url: string): Promise<{ url?: string; error?: string }> {
+  const workspace = await getPrimarySite()
+  if (!workspace) return { error: 'No site.' }
+
+  let parsed: URL
+  try { parsed = new URL(url) } catch { return { error: 'That is not a valid link.' } }
+  if (parsed.protocol !== 'https:') return { error: 'Only https image links are allowed.' }
+  if (/^(localhost$|\d+\.\d+\.\d+\.\d+$|\[)/i.test(parsed.hostname)) return { error: 'That host is not allowed.' }
+
+  let res: Response
+  try {
+    res = await fetch(parsed, { redirect: 'follow', signal: AbortSignal.timeout(15_000) })
+  } catch { return { error: 'Could not fetch that photo — try another one.' } }
+  const type = res.headers.get('content-type')?.split(';')[0] ?? ''
+  if (!res.ok || !type.startsWith('image/')) return { error: 'That link is not an image.' }
+  const buf = await res.arrayBuffer()
+  if (buf.byteLength > 15 * 1024 * 1024) return { error: 'That image is too large (15 MB max).' }
+
+  const { createAdminClient } = await import('@/lib/supabase/server')
+  const admin = createAdminClient()
+  const ext = type.slice(6).replace('jpeg', 'jpg').replace(/[^a-z0-9]/g, '') || 'jpg'
+  const path = `${workspace.siteId}/${crypto.randomUUID()}.${ext}`
+  const { error } = await admin.storage.from('site-assets').upload(path, buf, { contentType: type })
+  if (error) return { error: error.message }
+  const { data } = admin.storage.from('site-assets').getPublicUrl(path)
+  return { url: data.publicUrl }
+}
+
 /** Save the couple's style choices (fonts, background, accent, glow, hover). */
 export async function updateSiteStyle(style: Record<string, string>) {
   const workspace = await getPrimarySite()

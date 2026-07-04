@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
-import { Puck, usePuck, type Overrides } from '@puckeditor/core'
+import { Puck, createUsePuck, type Overrides } from '@puckeditor/core'
 import '@puckeditor/core/puck.css'
 import { siteConfig, type SiteData } from '@/lib/puck/config'
 import type { SiteEvent } from '@/components/site/blocks'
@@ -77,9 +77,11 @@ function ImageUploader() {
   )
 }
 
+const usePuckSel = createUsePuck()
+
 /** Undo / redo, surfaced from Puck's built-in history (also on Ctrl+Z / Ctrl+Y). */
 function HistoryButtons() {
-  const { history } = usePuck()
+  const history = usePuckSel((s) => s.history)
   const cls = 'rounded-pill border border-line bg-paper-2 px-3 py-1.5 text-sm text-ink hover:border-accent disabled:opacity-35 disabled:hover:border-line'
   return (
     <div className="mr-1 flex items-center gap-1.5">

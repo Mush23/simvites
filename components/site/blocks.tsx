@@ -15,22 +15,31 @@ export interface SiteEvent {
   accent?: string | null
 }
 
+/** Overlay depth → black alpha; keeps hero text readable over photos. */
+const HERO_OVERLAYS: Record<string, number> = { none: 0, soft: 0.25, balanced: 0.45, deep: 0.65 }
+
 export function SiteHero({
-  kicker, title, subtitle, dateText, location, imageUrl, guestName,
+  kicker, title, subtitle, dateText, location, imageUrl, overlay, guestName,
 }: {
-  kicker?: string; title?: string; subtitle?: string; dateText?: string; location?: string; imageUrl?: string
+  kicker?: string; title?: string; subtitle?: string; dateText?: string; location?: string
+  /** Plain URL (legacy) or { url, focal } — focal is a CSS object-position from the editor's focus-point picker. */
+  imageUrl?: string | { url: string; focal?: string }
+  overlay?: 'none' | 'soft' | 'balanced' | 'deep'
   /** Set from the guest-session cookie — "Welcome, The Shah Family". */
   guestName?: string
 }) {
+  const img = typeof imageUrl === 'string' ? { url: imageUrl, focal: undefined } : imageUrl
+  const alpha = HERO_OVERLAYS[overlay ?? 'balanced'] ?? 0.45
   return (
     <section className="relative flex min-h-[72vh] items-center justify-center overflow-hidden bg-paper-2 px-6 py-24 text-center">
-      {imageUrl && (
+      {img?.url && (
         <>
-          <Image src={imageUrl} alt={typeof title === 'string' ? title : ''} fill priority sizes="100vw" className="object-cover" data-hero />
-          <div className="absolute inset-0 bg-black/45" />
+          <Image src={img.url} alt={typeof title === 'string' ? title : ''} fill priority sizes="100vw"
+            className="object-cover" style={img.focal ? { objectPosition: img.focal } : undefined} data-hero />
+          {alpha > 0 && <div className="absolute inset-0" style={{ background: `rgba(0, 0, 0, ${alpha})` }} />}
         </>
       )}
-      <div className={`relative max-w-2xl ${imageUrl ? 'text-white' : 'text-ink'}`}>
+      <div className={`relative max-w-2xl ${img?.url ? 'text-white' : 'text-ink'}`}>
         {kicker && <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.22em] opacity-90">{kicker}</p>}
         <h1 className="font-display text-5xl leading-[1.02] sm:text-7xl">{title ?? 'Your Names'}</h1>
         {subtitle && <p className="mt-5 text-lg opacity-90">{subtitle}</p>}
@@ -41,8 +50,8 @@ export function SiteHero({
         </div>
         {guestName && (
           <p className={`mx-auto mt-8 inline-block rounded-pill border px-5 py-2 font-mono text-[10px] uppercase tracking-[0.16em] ${
-            imageUrl ? 'border-white/40 text-white/90' : 'text-ink-2'
-          }`} style={imageUrl ? undefined : { borderColor: 'var(--accent-line)' }}>
+            img?.url ? 'border-white/40 text-white/90' : 'text-ink-2'
+          }`} style={img?.url ? undefined : { borderColor: 'var(--accent-line)' }}>
             Welcome, {guestName}
           </p>
         )}

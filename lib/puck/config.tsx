@@ -19,7 +19,12 @@ function metaEvents(puck: unknown): SiteEvent[] {
   return meta(puck).events ?? []
 }
 
-interface HeroProps { kicker: string; title: string; subtitle: string; dateText: string; location: string; imageUrl: string }
+interface HeroProps {
+  kicker: string; title: string; subtitle: string; dateText: string; location: string
+  imageUrl: ImageValue
+  /** Optional: docs created before Sprint C lack it — renderer defaults to 'balanced'. */
+  overlay?: 'none' | 'soft' | 'balanced' | 'deep'
+}
 interface ScheduleProps { heading: string }
 interface EventDetailProps { title: string; body: string; meta: string }
 interface RsvpProps { heading: string; body: string; buttonText: string }
@@ -55,13 +60,16 @@ export interface SiteBlocks {
 const text = (label: string, inline = false) => ({ type: 'text' as const, label, contentEditable: inline })
 const area = (label: string, inline = false) => ({ type: 'textarea' as const, label, contentEditable: inline })
 
-import { ImageFieldInput } from './image-field'
+import { ImageFieldInput, type ImageValue } from './image-field'
 import { Styled, styleField, DEFAULT_STYLE, type StyleOpts } from './styled'
-const image = (label: string) => ({
+// `focal: true` adds the click-to-set focus point (hero-style full-bleed images).
+const image = (label: string, focal = false) => ({
   type: 'custom' as const,
   label,
-  render: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
-    <ImageFieldInput value={value ?? ''} onChange={onChange} />
+  // `never` param keeps this helper usable for string fields (Gallery) and
+  // ImageValue fields (Hero) alike; the component only emits what fits.
+  render: ({ value, onChange }: { value: ImageValue; onChange: (v: never) => void }) => (
+    <ImageFieldInput value={value ?? ''} onChange={onChange as (v: ImageValue) => void} focal={focal} />
   ),
 })
 
@@ -72,9 +80,19 @@ export const siteConfig: Config<SiteBlocks> = {
       label: 'Hero',
       fields: {
         kicker: text('Kicker', true), title: text('Title', true), subtitle: text('Subtitle', true),
-        dateText: text('Date', true), location: text('Location', true), imageUrl: image('Background photo'),
+        dateText: text('Date', true), location: text('Location', true),
+        imageUrl: image('Background photo', true),
+        overlay: {
+          type: 'select' as const, label: 'Photo overlay (text readability)',
+          options: [
+            { label: 'None', value: 'none' },
+            { label: 'Soft', value: 'soft' },
+            { label: 'Balanced', value: 'balanced' },
+            { label: 'Deep', value: 'deep' },
+          ],
+        },
       },
-      defaultProps: { kicker: 'Together with our families', title: 'Aanya & Dev', subtitle: '', dateText: '19 September 2026', location: 'Manchester, UK', imageUrl: '' },
+      defaultProps: { kicker: 'Together with our families', title: 'Aanya & Dev', subtitle: '', dateText: '19 September 2026', location: 'Manchester, UK', imageUrl: '', overlay: 'balanced' },
       render: ({ puck, ...p }) => <SiteHero {...p} guestName={meta(puck).guestName} />,
     },
     CountdownBlock: {
