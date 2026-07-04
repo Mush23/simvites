@@ -1,5 +1,7 @@
 import { getGuestRsvpContext } from '@/lib/guest-rsvp'
 import { getPublishedSnapshot } from '@/lib/public-site'
+import { getTemplate } from '@/lib/templates/registry'
+import { createAdminClient } from '@/lib/supabase/server'
 import { RsvpFlow } from './rsvp-flow'
 
 export const metadata = { title: 'RSVP' }
@@ -20,11 +22,21 @@ export default async function GuestRsvpPage({
   const { siteSlug } = await params
   const { link } = await searchParams
 
+  // Theme the money path like the site itself — the guest should never feel
+  // they left the couple's website (typography/dark-mode review finding).
+  const db = createAdminClient()
+  const { data: siteRow } = await db.from('sites')
+    .select('theme').eq('slug', siteSlug.toLowerCase()).maybeSingle()
+  const template = getTemplate((siteRow?.theme as { template?: string } | null)?.template)
+  const themed = (children: React.ReactNode) => (
+    <div data-site-root style={template.vars as React.CSSProperties}>{children}</div>
+  )
+
   const ctx = await getGuestRsvpContext(siteSlug)
 
   if (!ctx) {
     const snap = await getPublishedSnapshot(siteSlug)
-    return (
+    return themed(
       <div className="flex min-h-screen items-center justify-center bg-paper px-6 text-center text-ink">
         <div className="max-w-md">
           <p className="eyebrow mb-3">{snap?.title ?? 'RSVP'}</p>
@@ -38,5 +50,5 @@ export default async function GuestRsvpPage({
     )
   }
 
-  return <RsvpFlow ctx={ctx} />
+  return themed(<RsvpFlow ctx={ctx} />)
 }
