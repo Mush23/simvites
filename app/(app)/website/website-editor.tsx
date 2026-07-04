@@ -5,7 +5,34 @@ import { Puck } from '@puckeditor/core'
 import '@puckeditor/core/puck.css'
 import { siteConfig, type SiteData } from '@/lib/puck/config'
 import type { SiteEvent } from '@/components/site/blocks'
-import { savePageDraft, saveAndPublish } from './actions'
+import { savePageDraft, saveAndPublish, uploadSiteImage } from './actions'
+
+/** Upload → URL copied to clipboard, ready to paste into any image field. */
+function ImageUploader() {
+  const [note, setNote] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  return (
+    <label title="Upload a photo, then paste the copied link into any image field"
+      className="cursor-pointer rounded-pill border border-line bg-paper-2 px-3.5 py-2 text-sm text-ink transition-colors hover:border-accent">
+      {busy ? 'Uploading…' : note ?? 'Upload image'}
+      <input type="file" accept="image/*" className="hidden"
+        onChange={async (e) => {
+          const f = e.target.files?.[0]
+          if (!f) return
+          setBusy(true); setNote(null)
+          const fd = new FormData(); fd.set('file', f)
+          const res = await uploadSiteImage(fd)
+          setBusy(false)
+          if (res.url) {
+            try { await navigator.clipboard.writeText(res.url) } catch {}
+            setNote('Link copied — paste it ✓')
+            setTimeout(() => setNote(null), 4000)
+          } else setNote(res.error ?? 'Failed')
+          e.target.value = ''
+        }} />
+    </label>
+  )
+}
 
 type Status = 'idle' | 'saving' | 'saved' | 'publishing' | 'published' | 'error' | 'locked'
 
@@ -49,6 +76,7 @@ export function WebsiteEditor({
           <StatusPill status={status} />
         </div>
         <div className="flex items-center gap-4">
+          <ImageUploader />
           {status === 'locked' && (
             <a href="/settings" id="unlock-cta"
               className="rounded-md border border-accent-line bg-accent-soft px-3.5 py-2 text-sm text-accent-ink transition-colors hover:border-accent">

@@ -13,6 +13,7 @@ const MODULES: { href: string; label: string }[] = [
   { href: '/guests', label: 'Guests' },
   { href: '/invitations', label: 'Invitations' },
   { href: '/rsvps', label: 'RSVPs' },
+  { href: '/seating', label: 'Seating' },
   { href: '/budget', label: 'Budget' },
   { href: '/vendors', label: 'Vendors' },
   { href: '/tasks', label: 'Tasks' },

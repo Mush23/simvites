@@ -51,6 +51,26 @@ export default async function SettingsPage({
           unlocked={!!row?.is_unlocked}
           priceDisplay={formatPence(UNLOCK_AMOUNT)}
         />
+
+        <section className="rounded-card border border-line bg-surface p-7 shadow-card">
+          <p className="eyebrow mb-2">Collaborators</p>
+          <p className="mb-4 text-sm text-ink-2">
+            Weddings are planned together. Add your partner, a parent or your planner —
+            they get full access to plan, and sign in with a magic link (no password to share).
+          </p>
+          <form action={async (fd) => { 'use server'; await (await import('./actions')).addCollaborator(fd) }}
+            className="flex flex-wrap items-end gap-3">
+            <label className="block">
+              <span className="eyebrow mb-1.5 block">Their email</span>
+              <input name="email" type="email" required placeholder="partner@example.com"
+                className="w-64 rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-accent" />
+            </label>
+            <button type="submit" title="They'll sign in via the Email link tab on the login page"
+              className="bg-accent px-5 py-3 font-semibold text-white">
+              Add collaborator
+            </button>
+          </form>
+        </section>
       </div>
     </div>
   )

@@ -41,6 +41,13 @@ function HouseholdRow({ row, onChanged }: { row: HouseholdInviteRow; onChanged: 
   const [note, setNote] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [qr, setQr] = useState<string | null>(null)
+
+  async function onQr() {
+    if (!link) return
+    const QRCode = (await import('qrcode')).default
+    setQr(await QRCode.toDataURL(link, { margin: 1, width: 480, color: { dark: '#211D18', light: '#FFFFFF' } }))
+  }
 
   async function onGenerate() {
     setBusy(true); setNote(null)
@@ -125,6 +132,21 @@ function HouseholdRow({ row, onChanged }: { row: HouseholdInviteRow; onChanged: 
             title="Share on WhatsApp — how South Asian families actually send invites">
             WhatsApp
           </a>
+          <button type="button" onClick={onQr} title="Show a QR code for printed invitations"
+            className="shrink-0 border border-line bg-paper-2 px-3 py-2 text-sm hover:border-accent">
+            QR
+          </button>
+        </div>
+      )}
+      {qr && (
+        <div className="mt-3 flex items-center gap-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={qr} alt={`QR code for ${row.name}'s invitation link`} className="h-28 w-28 rounded-md border border-line bg-white p-1.5" />
+          <div className="text-sm text-ink-2">
+            <p>Print this on the paper invitation — scanning opens their personal RSVP.</p>
+            <a href={qr} download={`invite-qr-${row.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`}
+              className="mt-1 inline-block text-accent-ink underline underline-offset-4">Download PNG</a>
+          </div>
         </div>
       )}
       {note && <p className="mt-2 text-sm text-ink-2">{note}</p>}

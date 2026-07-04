@@ -6,6 +6,29 @@ import { getPrimarySite } from '@/lib/workspace'
 import { track } from '@/lib/analytics'
 import type { SiteData } from '@/lib/puck/config'
 
+/**
+ * Upload an image to the PUBLIC site-assets bucket and return its URL —
+ * paste it into any image field in the editor. 10MB cap, images only.
+ */
+export async function uploadSiteImage(formData: FormData): Promise<{ url?: string; error?: string }> {
+  const workspace = await getPrimarySite()
+  if (!workspace) return { error: 'No site.' }
+  const file = formData.get('file') as File | null
+  if (!file || file.size === 0) return { error: 'Choose an image first.' }
+  if (file.size > 10 * 1024 * 1024) return { error: 'Images are limited to 10 MB.' }
+  if (!file.type.startsWith('image/')) return { error: 'That file is not an image.' }
+
+  const { createAdminClient } = await import('@/lib/supabase/server')
+  const admin = createAdminClient()
+  const safe = file.name.replace(/[^\w.\-]+/g, '_').slice(-80)
+  const path = `${workspace.siteId}/${crypto.randomUUID()}-${safe}`
+  const { error } = await admin.storage.from('site-assets')
+    .upload(path, file, { contentType: file.type })
+  if (error) return { error: error.message }
+  const { data } = admin.storage.from('site-assets').getPublicUrl(path)
+  return { url: data.publicUrl }
+}
+
 /** Persist a page's Puck document as the draft (RLS: can_write_site). */
 export async function savePageDraft(pageId: string, data: SiteData) {
   const supabase = await createClient()

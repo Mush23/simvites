@@ -79,7 +79,13 @@ export default async function RsvpsPage() {
           title="Who's coming"
           description={`${respondedHouseholds.size} of ${hhById.size} households have responded.`}
         />
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
+          <form action={async () => { 'use server'; await (await import('./actions')).sendReminders() }}>
+            <button type="submit" title="Email every household that hasn't responded, with a fresh personal link"
+              className="bg-accent px-4 py-2 text-sm font-semibold text-white">
+              Remind pending households
+            </button>
+          </form>
           <a href="/rsvps/export" className="rounded-md border border-line bg-paper-2 px-4 py-2 text-sm hover:border-accent">
             Export RSVPs (CSV)
           </a>

@@ -41,6 +41,38 @@ export async function startUnlockCheckout(): Promise<{ url?: string; error?: str
   return { url: session.url ?? undefined }
 }
 
+/**
+ * Invite a collaborator (partner, parent, planner) into the org. Creates the
+ * auth user if new; they sign in with the magic-link tab on /login.
+ */
+export async function addCollaborator(formData: FormData) {
+  const site = await getPrimarySite()
+  if (!site) return { error: 'No site.' }
+  const email = String(formData.get('email') ?? '').trim().toLowerCase()
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: 'Enter a valid email.' }
+
+  const { createAdminClient } = await import('@/lib/supabase/server')
+  const admin = createAdminClient()
+
+  // Find or create the auth user (confirmed; they use magic-link to sign in).
+  let userId: string | undefined
+  const { data: created, error: cErr } = await admin.auth.admin.createUser({ email, email_confirm: true })
+  if (!cErr) userId = created.user?.id
+  else {
+    const { data: list } = await admin.auth.admin.listUsers()
+    userId = list?.users.find((u: { email?: string; id: string }) => u.email === email)?.id
+  }
+  if (!userId) return { error: 'Could not create that account.' }
+
+  await admin.from('profiles').upsert({ id: userId, email })
+  const { error } = await admin.from('memberships')
+    .upsert({ org_id: site.orgId, user_id: userId, role: 'collaborator' }, { onConflict: 'org_id,user_id' })
+  if (error) return { error: error.message }
+
+  revalidatePath('/settings')
+  return { ok: true, note: `${email} added — they sign in at /login with the "Email link" tab.` }
+}
+
 /** Site defaults (title + site-wide RSVP deadline + template). */
 export async function updateSiteSettings(formData: FormData) {
   const site = await getPrimarySite()
