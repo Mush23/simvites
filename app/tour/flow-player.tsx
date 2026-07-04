@@ -3,15 +3,15 @@
 import { useEffect, useRef, useState } from 'react'
 
 // A simulated SCREEN RECORDING of the editor: a browser frame, a moving
-// cursor, click pulses, live "typing" — showing exactly where to click and
+// cursor, click pulses, live "typing", showing exactly where to click and
 // how to edit, with zero code. Always up to date, nothing to re-record.
 
 const STEPS = [
-  { title: 'Step 1: Meet your editor', help: 'This is your website in edit mode. No code, ever — if you can click and type, you can build this.' },
+  { title: 'Step 1: Meet your editor', help: 'This is your website in edit mode. No code, ever, if you can click and type, you can build this.' },
   { title: 'Step 2: Click any text to edit', help: 'Click straight on a heading or paragraph. It opens in the side panel, ready to change.' },
   { title: 'Step 3: Type, and watch it update', help: 'Type in the panel and the page updates instantly. What you see is exactly what guests get.' },
   { title: 'Step 4: Drag to reorder and resize', help: 'Grab a block to move it up or down. Sections size themselves for phones automatically.' },
-  { title: 'Step 5: Add blocks from the library', help: 'Countdown, gallery, hotel card, RSVP — click one and it drops onto your page.' },
+  { title: 'Step 5: Add blocks from the library', help: 'Countdown, gallery, hotel card, RSVP, click one and it drops onto your page.' },
   { title: 'Step 6: Press Publish', help: 'Nothing goes live until you say so. One click and your site is out in the world.' },
 ] as const
 
@@ -25,7 +25,7 @@ export function FlowPlayer() {
   const frame = useRef<HTMLDivElement>(null)
   const [fs, setFs] = useState(false)
 
-  // Fullscreen demo mode — on phones this pairs with rotating to landscape,
+  // Fullscreen demo mode, on phones this pairs with rotating to landscape,
   // giving the walkthrough the whole screen like a real video.
   async function toggleFullscreen() {
     const el = frame.current
@@ -59,10 +59,10 @@ export function FlowPlayer() {
       {/* Browser chrome */}
       <div className="flex items-center gap-2 border-b border-line bg-paper-2 px-4 py-2.5">
         <span className="flex gap-1.5">{[0, 1, 2].map((i) => <span key={i} className="h-2.5 w-2.5 rounded-pill bg-line-2" />)}</span>
-        <span className="mx-auto rounded-pill bg-surface px-4 py-1 font-mono text-[10px] text-ink-3">yoursite.occasio.events — editing</span>
+        <span className="mx-auto rounded-pill bg-surface px-4 py-1 font-mono text-[10px] text-ink-3">yoursite.simvites.co.uk, editing</span>
       </div>
 
-      {/* Stage — fills the screen in fullscreen/landscape demo mode */}
+      {/* Stage, fills the screen in fullscreen/landscape demo mode */}
       <div className={`relative select-none bg-paper-2 ${fs ? 'min-h-0 flex-1' : 'h-72 sm:h-80'}`} aria-live="polite">
         {/* Block library (left) */}
         <div className="absolute left-2 top-3 bottom-3 w-[18%] rounded-md border border-line bg-surface p-2">
@@ -90,7 +90,7 @@ export function FlowPlayer() {
           </div>
           {step === 5 && (
             <div className="absolute inset-x-8 top-1/3 rounded-md bg-ink px-3 py-2 text-center text-xs text-paper shadow-lift">
-              Published — your site is live ✓
+              Published, your site is live ✓
             </div>
           )}
         </div>
@@ -99,7 +99,7 @@ export function FlowPlayer() {
         <div className="absolute right-2 top-3 bottom-3 w-[23%] rounded-md border border-line bg-surface p-2">
           <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">Hero</p>
           <p className="mt-2 text-[10px] text-ink-2">Title</p>
-          <div title="Type here — the page updates live"
+          <div title="Type here, the page updates live"
             className={`mt-1 rounded-md border px-2 py-1.5 text-[10px] text-ink transition-all duration-500 ${step === 2 ? 'border-accent bg-accent-soft' : 'border-line'}`}>
             {typed}
           </div>
@@ -132,7 +132,7 @@ export function FlowPlayer() {
             </button>
             <button type="button" onClick={toggleFullscreen}
               aria-label={fs ? 'Exit fullscreen' : 'Watch fullscreen'}
-              title={fs ? 'Exit fullscreen' : 'Fullscreen — rotate to landscape on your phone'}
+              title={fs ? 'Exit fullscreen' : 'Fullscreen, rotate to landscape on your phone'}
               className="flex h-11 w-11 items-center justify-center rounded-pill border border-line text-ink">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d={fs ? 'M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5' : 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5'} /></svg>
             </button>

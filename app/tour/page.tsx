@@ -7,14 +7,14 @@ export const metadata = { title: `How it works · ${BRAND_NAME}` }
 
 // Beginner tutorial: every element of the platform, in plain English.
 const ELEMENTS = [
-  { name: 'Templates & website', what: 'Your public wedding site. Pick a look (Editorial Gold or Editorial Luxury), then click any block — hero, story, schedule, gallery, hotel — and edit it like a document. Nothing goes live until you press Publish.' },
-  { name: 'Events', what: 'One entry per celebration — Mehndi, Sangeet, Ceremony, Reception, anything. Each has its own date, venue, colour and RSVP deadline. Every other part of the product reuses these.' },
+  { name: 'Templates & website', what: 'Your public wedding site. Pick a look (Editorial Gold or Editorial Luxury), then click any block, hero, story, schedule, gallery, hotel, and edit it like a document. Nothing goes live until you press Publish.' },
+  { name: 'Events', what: 'One entry per celebration, Mehndi, Sangeet, Ceremony, Reception, anything. Each has its own date, venue, colour and RSVP deadline. Every other part of the product reuses these.' },
   { name: 'Guests & the invite matrix', what: 'Households and named guests, with one checkbox per guest per event. That checkbox is the whole magic: it decides what each guest can see and answer. Paste your list in from a spreadsheet.' },
-  { name: 'Invitations', what: 'Every household gets one private link — no accounts, no codes to mistype. Copy it, WhatsApp it, or email it. You can see who has opened theirs.' },
-  { name: 'RSVPs', what: 'Guests answer per event on their phone — with your questions (meals, dietary, songs) — and download a keepsake PDF. You watch live counts, chase non-responders, and export one sheet for the caterer.' },
-  { name: 'Budget, Vendors, Tasks & Files', what: 'The planning side. A vendor marked "booked" shows up in your budget, your tasks and your dashboard — enter things once, see them everywhere.' },
-  { name: 'Reports', what: 'One-click CSVs of everything — guest list, RSVPs by event, budget, vendors, tasks. Open in Excel or hand straight to a supplier.' },
-  { name: 'The unlock', what: 'Build everything free. One payment unlocks publishing your site and sending invitations — no subscription, yours for the whole wedding.' },
+  { name: 'Invitations', what: 'Every household gets one private link, no accounts, no codes to mistype. Copy it, WhatsApp it, or email it. You can see who has opened theirs.' },
+  { name: 'RSVPs', what: 'Guests answer per event on their phone, with your questions (meals, dietary, songs), and download a keepsake PDF. You watch live counts, chase non-responders, and export one sheet for the caterer.' },
+  { name: 'Budget, Vendors, Tasks & Files', what: 'The planning side. A vendor marked "booked" shows up in your budget, your tasks and your dashboard, enter things once, see them everywhere.' },
+  { name: 'Reports', what: 'One-click CSVs of everything, guest list, RSVPs by event, budget, vendors, tasks. Open in Excel or hand straight to a supplier.' },
+  { name: 'The unlock', what: 'Build everything free. One payment unlocks publishing your site and sending invitations, no subscription, yours for the whole wedding.' },
 ]
 
 export default function TourPage() {
@@ -35,7 +35,7 @@ export default function TourPage() {
             From “we’re engaged” to final headcount.
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-ink-2">
-            Watch the whole flow in sixty seconds, then read what each part does — written for
+            Watch the whole flow in sixty seconds, then read what each part does, written for
             someone who has never used a wedding tool before.
           </p>
         </section>
@@ -64,7 +64,7 @@ export default function TourPage() {
         <section className="mt-16 text-center">
           <Link href="/login"
             className="inline-block rounded-md bg-accent px-8 py-3.5 font-semibold text-white shadow-card transition-transform hover:-translate-y-px">
-            Try it yourself — free
+            Try it yourself, free
           </Link>
           <p className="mt-3 text-sm text-ink-3">
             Or see a finished site: <Link href="/s/aanya-and-dev" className="text-accent-ink underline underline-offset-4">Aanya &amp; Dev</Link>
