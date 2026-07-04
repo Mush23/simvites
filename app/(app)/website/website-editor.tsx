@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
-import { Puck } from '@puckeditor/core'
+import { Puck, usePuck, type Overrides } from '@puckeditor/core'
 import '@puckeditor/core/puck.css'
 import { siteConfig, type SiteData } from '@/lib/puck/config'
 import type { SiteEvent } from '@/components/site/blocks'
@@ -77,6 +77,39 @@ function ImageUploader() {
   )
 }
 
+/** Undo / redo, surfaced from Puck's built-in history (also on Ctrl+Z / Ctrl+Y). */
+function HistoryButtons() {
+  const { history } = usePuck()
+  const cls = 'rounded-pill border border-line bg-paper-2 px-3 py-1.5 text-sm text-ink hover:border-accent disabled:opacity-35 disabled:hover:border-line'
+  return (
+    <div className="mr-1 flex items-center gap-1.5">
+      <button type="button" className={cls} title="Undo (Ctrl+Z)" aria-label="Undo"
+        disabled={!history.hasPast} onClick={() => history.back()}>↺ Undo</button>
+      <button type="button" className={cls} title="Redo (Ctrl+Y)" aria-label="Redo"
+        disabled={!history.hasFuture} onClick={() => history.forward()}>↻ Redo</button>
+    </div>
+  )
+}
+
+// Stable identities (Puck re-mounts its UI if overrides change). The preview
+// width is driven by a CSS variable set on the wrapper, so the device toggle
+// never touches this object.
+const puckOverrides: Partial<Overrides> = {
+  headerActions: ({ children }) => (<><HistoryButtons />{children}</>),
+  preview: ({ children }) => (
+    <div className="editor-vp" style={{ maxWidth: 'var(--editor-vw, 100%)', margin: '0 auto' }}>
+      {children}
+    </div>
+  ),
+}
+
+const DEVICES = [
+  { key: 'desktop', label: '🖥 Desktop', width: '100%', help: 'Full width, as guests see it on a laptop' },
+  { key: 'tablet', label: '⬛ Tablet', width: '768px', help: 'Preview how the page flows at tablet width' },
+  { key: 'mobile', label: '📱 Phone', width: '390px', help: 'Preview how the page flows at phone width' },
+] as const
+type DeviceKey = (typeof DEVICES)[number]['key']
+
 type Status = 'idle' | 'saving' | 'saved' | 'publishing' | 'published' | 'error' | 'locked'
 
 export function WebsiteEditor({
@@ -89,6 +122,7 @@ export function WebsiteEditor({
 }) {
   const [status, setStatus] = useState<Status>('idle')
   const [isPublished, setIsPublished] = useState(published)
+  const [device, setDevice] = useState<DeviceKey>('desktop')
   const latest = useRef<SiteData>(data)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -121,6 +155,16 @@ export function WebsiteEditor({
           <StatusPill status={status} />
         </div>
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 rounded-pill border border-line bg-paper-2 p-1" role="group" aria-label="Preview width">
+            {DEVICES.map((d) => (
+              <button key={d.key} type="button" title={d.help} onClick={() => setDevice(d.key)}
+                className={`rounded-pill px-2.5 py-1 text-xs transition-colors ${
+                  device === d.key ? 'bg-accent-soft text-accent-ink' : 'text-ink-3 hover:text-ink'
+                }`}>
+                {d.label}
+              </button>
+            ))}
+          </div>
           <StylePanel current={currentStyle} />
           <ImageUploader />
           {status === 'locked' && (
@@ -142,7 +186,9 @@ export function WebsiteEditor({
         </div>
       </div>
       {/* iframe disabled + style-engine vars on the wrapper = true WYSIWYG canvas */}
-      <div className="min-h-0 flex-1" data-site-root {...styleProps}>
+      <div className="min-h-0 flex-1" data-site-root data-device={device}
+        {...styleProps}
+        style={{ ...styleProps.style, '--editor-vw': DEVICES.find((d) => d.key === device)!.width } as React.CSSProperties}>
         <Puck
           config={siteConfig}
           data={data}
@@ -150,6 +196,7 @@ export function WebsiteEditor({
           onChange={onChange}
           onPublish={publish}
           iframe={{ enabled: false }}
+          overrides={puckOverrides}
         />
       </div>
     </div>

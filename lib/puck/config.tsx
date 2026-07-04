@@ -49,8 +49,11 @@ export interface SiteBlocks {
   SiteFooterBlock: FooterProps
 }
 
-const text = (label: string) => ({ type: 'text' as const, label })
-const area = (label: string) => ({ type: 'textarea' as const, label })
+// `inline: true` = editable by clicking the text ON the canvas (Sprint B).
+// Keep it OFF for values used in logic or attributes (URLs, ISO dates,
+// image alts/captions, phone numbers) — those stay in the side panel.
+const text = (label: string, inline = false) => ({ type: 'text' as const, label, contentEditable: inline })
+const area = (label: string, inline = false) => ({ type: 'textarea' as const, label, contentEditable: inline })
 
 import { ImageFieldInput } from './image-field'
 import { Styled, styleField, DEFAULT_STYLE, type StyleOpts } from './styled'
@@ -68,15 +71,15 @@ export const siteConfig: Config<SiteBlocks> = {
     Hero: {
       label: 'Hero',
       fields: {
-        kicker: text('Kicker'), title: text('Title'), subtitle: text('Subtitle'),
-        dateText: text('Date'), location: text('Location'), imageUrl: image('Background photo'),
+        kicker: text('Kicker', true), title: text('Title', true), subtitle: text('Subtitle', true),
+        dateText: text('Date', true), location: text('Location', true), imageUrl: image('Background photo'),
       },
       defaultProps: { kicker: 'Together with our families', title: 'Aanya & Dev', subtitle: '', dateText: '19 September 2026', location: 'Manchester, UK', imageUrl: '' },
       render: ({ puck, ...p }) => <SiteHero {...p} guestName={meta(puck).guestName} />,
     },
     CountdownBlock: {
       label: 'Countdown',
-      fields: { heading: text('Heading'), dateISO: text('Date/time (ISO, e.g. 2026-09-19T10:30)') },
+      fields: { heading: text('Heading', true), dateISO: text('Date/time (ISO, e.g. 2026-09-19T10:30)') },
       defaultProps: { heading: 'The celebrations begin in', dateISO: '' },
       // Client component: pass ONLY serialisable props (never Puck's `puck` object).
       render: ({ heading, dateISO }) => <Countdown heading={heading} dateISO={dateISO} />,
@@ -84,10 +87,10 @@ export const siteConfig: Config<SiteBlocks> = {
     StoryBlock: {
       label: 'Story',
       fields: {
-        kicker: text('Kicker'), title: text('Title'),
+        kicker: text('Kicker', true), title: text('Title', true),
         paragraphs: {
           type: 'array', label: 'Paragraphs',
-          arrayFields: { text: area('Text') },
+          arrayFields: { text: area('Text', true) },
           getItemSummary: (i) => i.text?.slice(0, 40) || 'Paragraph',
         },
       },
@@ -97,10 +100,10 @@ export const siteConfig: Config<SiteBlocks> = {
     FamilyBlock: {
       label: 'Families',
       fields: {
-        heading: text('Heading'),
+        heading: text('Heading', true),
         sides: {
           type: 'array', label: 'Sides',
-          arrayFields: { side: text('Side label'), name: text('Name'), parents: text('Parents line') },
+          arrayFields: { side: text('Side label', true), name: text('Name', true), parents: text('Parents line', true) },
           getItemSummary: (i) => i.name || 'Side',
         },
       },
@@ -116,7 +119,7 @@ export const siteConfig: Config<SiteBlocks> = {
     GalleryBlock: {
       label: 'Gallery',
       fields: {
-        heading: text('Heading'),
+        heading: text('Heading', true),
         images: {
           type: 'array', label: 'Photos',
           arrayFields: { url: image('Photo'), caption: text('Caption') },
@@ -129,50 +132,50 @@ export const siteConfig: Config<SiteBlocks> = {
     HotelTravel: {
       label: 'Hotel & travel',
       fields: {
-        heading: text('Heading'), hotelName: text('Hotel name'), address: text('Address'),
+        heading: text('Heading', true), hotelName: text('Hotel name'), address: text('Address'),
         blockCode: text('Room-block code'), phone: text('Phone'),
-        bookingUrl: text('Booking URL'), notes: area('Notes'),
+        bookingUrl: text('Booking URL'), notes: area('Notes', true),
       },
       defaultProps: { heading: 'Stay & Travel', hotelName: '', address: '', blockCode: '', phone: '', bookingUrl: '', notes: '' },
       render: (p) => <SiteHotelTravel {...p} />,
     },
     GiftsNote: {
       label: 'Gifts note',
-      fields: { heading: text('Heading'), body: area('Body') },
+      fields: { heading: text('Heading', true), body: area('Body', true) },
       defaultProps: { heading: 'Your presence is the present', body: '' },
       render: (p) => <SiteGiftsNote {...p} />,
     },
     Schedule: {
       label: 'Schedule',
-      fields: { heading: text('Heading') },
+      fields: { heading: text('Heading', true) },
       defaultProps: { heading: 'The Celebrations' },
       render: ({ heading, puck }) => <SiteSchedule heading={heading} events={metaEvents(puck)} />,
     },
     EventDetail: {
       label: 'Event detail',
-      fields: { title: text('Title'), meta: text('Date / venue'), body: area('Description') },
+      fields: { title: text('Title', true), meta: text('Date / venue', true), body: area('Description', true) },
       defaultProps: { title: 'Sangeet', meta: '', body: '' },
       render: (p) => <SiteEventDetail {...p} />,
     },
     RsvpCta: {
       label: 'RSVP call-to-action',
-      fields: { heading: text('Heading'), body: area('Body'), buttonText: text('Button') },
+      fields: { heading: text('Heading', true), body: area('Body', true), buttonText: text('Button', true) },
       defaultProps: { heading: 'Kindly RSVP', body: 'We can’t wait to celebrate with you.', buttonText: 'Open your invitation' },
       render: (p) => <SiteRsvpCta {...p} />,
     },
     Travel: {
       label: 'Travel & stay',
-      fields: { heading: text('Heading'), body: area('Body') },
+      fields: { heading: text('Heading', true), body: area('Body', true) },
       defaultProps: { heading: 'Travel & Stay', body: '' },
       render: (p) => <SiteTravel {...p} />,
     },
     Faq: {
       label: 'FAQ',
       fields: {
-        heading: text('Heading'),
+        heading: text('Heading', true),
         items: {
           type: 'array', label: 'Questions',
-          arrayFields: { q: text('Question'), a: area('Answer') },
+          arrayFields: { q: text('Question', true), a: area('Answer', true) },
           getItemSummary: (i) => i.q || 'Question',
         },
       },
@@ -181,7 +184,7 @@ export const siteConfig: Config<SiteBlocks> = {
     },
     SiteFooterBlock: {
       label: 'Footer',
-      fields: { names: text('Names'), note: text('Note') },
+      fields: { names: text('Names', true), note: text('Note', true) },
       defaultProps: { names: 'Aanya & Dev', note: 'Made with Occasio' },
       render: (p) => <SiteFooter {...p} />,
     },

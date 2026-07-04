@@ -26,7 +26,7 @@ export function SiteHero({
     <section className="relative flex min-h-[72vh] items-center justify-center overflow-hidden bg-paper-2 px-6 py-24 text-center">
       {imageUrl && (
         <>
-          <Image src={imageUrl} alt={title ?? ''} fill priority sizes="100vw" className="object-cover" data-hero />
+          <Image src={imageUrl} alt={typeof title === 'string' ? title : ''} fill priority sizes="100vw" className="object-cover" data-hero />
           <div className="absolute inset-0 bg-black/45" />
         </>
       )}

@@ -194,6 +194,16 @@ button:active:not(:disabled) { transform: translateY(0); }
   [data-banim='slide'] { animation: b-slide 0.9s cubic-bezier(0.16,1,0.3,1) both; animation-timeline: view(); animation-range: entry 0% entry 35%; }
 }
 
+/* ── Sprint B: editor preview-width toggle (desktop / tablet / phone) ────
+   The .editor-vp wrapper (Puck preview override) reads --editor-vw from the
+   editor wrapper; at narrow widths it gets a device-style frame. */
+.editor-vp { transition: max-width 350ms cubic-bezier(0.16, 1, 0.3, 1); }
+[data-device='tablet'] .editor-vp,
+[data-device='mobile'] .editor-vp {
+  border-inline: 1px solid var(--line-2);
+  box-shadow: var(--shadow-lg);
+}
+
 /* ── Site Style engine: couple-chosen glow + hover on public site cards ── */
 [data-glow='soft'] .shadow-card { box-shadow: var(--shadow), 0 0 28px -8px var(--accent-line); }
 [data-glow='strong'] .shadow-card { box-shadow: var(--shadow), 0 0 44px -6px var(--accent-line), 0 0 12px -4px var(--accent-line); }
