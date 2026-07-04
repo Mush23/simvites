@@ -160,6 +160,11 @@ must(await db.from('invitations')
   check('required answer stored + attend succeeds', !error && data?.[0]?.value === 'halal', error?.message ?? JSON.stringify(data))
 }
 {
+  // Choice answers must be one of the question's options (tamper-proof).
+  const { error } = await rpc({ p_guest: g('Bob'), p_event: ev('Dinner'), p_status: 'declined', p_answers: [{ question_id: q('meal'), value: 'Pizza' }] })
+  expectError('answer outside the option list is rejected', error, /invalid option/)
+}
+{
   // Dinner-scoped meal question cannot be answered against Ceremony.
   const { error } = await rpc({ p_guest: g('Bob'), p_event: ev('Ceremony'), p_status: 'attending', p_answers: [{ question_id: q('meal'), value: 'Paneer' }] })
   expectError('event-scoped question rejected on wrong event', error, /not for this event/)

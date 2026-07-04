@@ -41,7 +41,7 @@ export async function startUnlockCheckout(): Promise<{ url?: string; error?: str
   return { url: session.url ?? undefined }
 }
 
-/** Site defaults (title + site-wide RSVP deadline). */
+/** Site defaults (title + site-wide RSVP deadline + template). */
 export async function updateSiteSettings(formData: FormData) {
   const site = await getPrimarySite()
   if (!site) return { error: 'No site.' }
@@ -49,13 +49,17 @@ export async function updateSiteSettings(formData: FormData) {
   const deadline = String(formData.get('rsvp_deadline_default') ?? '').trim() || null
   if (!title) return { error: 'Site name is required.' }
 
+  const { getTemplate } = await import('@/lib/templates/registry')
+  const template = getTemplate(String(formData.get('template') ?? ''))
+
   const supabase = await createClient()
   const { error } = await supabase
     .from('sites')
-    .update({ title, rsvp_deadline_default: deadline })
+    .update({ title, rsvp_deadline_default: deadline, theme: { template: template.key } })
     .eq('id', site.siteId)
   if (error) return { error: error.message }
   revalidatePath('/settings')
   revalidatePath('/dashboard')
-  return { ok: true }
+  revalidatePath('/website')
+  return { ok: true, note: 'Saved. Re-publish your website to apply the look to the live site.' }
 }

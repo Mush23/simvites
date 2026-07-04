@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/auth'
 import { getPrimarySite } from '@/lib/workspace'
-import { Sidebar } from '@/components/app/sidebar'
+import { Sidebar, MobileNav } from '@/components/app/sidebar'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -14,7 +14,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-line bg-paper px-6 py-3.5">
-          <div className="flex items-baseline gap-3">
+          <div className="flex items-center gap-3">
+            <MobileNav />
             <span className="font-display text-lg text-ink">{site.title}</span>
             <span className="rounded-pill border border-line px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-ink-3">
               {site.status}

@@ -11,9 +11,15 @@ function toLocal(v: string | null) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-export function SiteSettingsForm({ title, deadlineDefault }: {
+const TEMPLATE_OPTIONS = [
+  { key: 'editorial-gold', name: 'Editorial Gold — cream, gold & deep red' },
+  { key: 'editorial-luxury', name: 'Editorial Luxury — ivory, ink & brass' },
+]
+
+export function SiteSettingsForm({ title, deadlineDefault, templateKey }: {
   title: string
   deadlineDefault: string | null
+  templateKey: string
 }) {
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -30,6 +36,16 @@ export function SiteSettingsForm({ title, deadlineDefault }: {
         <span className="eyebrow mb-1.5 block">Site name</span>
         <input name="title" defaultValue={title} required
           className="w-full rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-accent" />
+      </label>
+      <label className="block">
+        <span className="eyebrow mb-1.5 block">Template</span>
+        <select name="template" defaultValue={templateKey}
+          className="w-full rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-accent">
+          {TEMPLATE_OPTIONS.map((t) => <option key={t.key} value={t.key}>{t.name}</option>)}
+        </select>
+        <span className="mt-1.5 block text-xs text-ink-3">
+          Changes apply to the live site on your next publish.
+        </span>
       </label>
       <label className="block">
         <span className="eyebrow mb-1.5 block">RSVP deadline (site-wide default)</span>

@@ -19,9 +19,10 @@ export default async function SettingsPage({
   const supabase = await createClient()
   const { data: row } = await supabase
     .from('sites')
-    .select('title, slug, status, is_unlocked, rsvp_deadline_default')
+    .select('title, slug, status, is_unlocked, rsvp_deadline_default, theme')
     .eq('id', site!.siteId)
     .maybeSingle()
+  const templateKey = (row?.theme as { template?: string } | null)?.template ?? 'editorial-gold'
 
   return (
     <div className="mx-auto max-w-[1060px] px-6 py-10">
@@ -39,6 +40,7 @@ export default async function SettingsPage({
           <SiteSettingsForm
             title={row?.title ?? ''}
             deadlineDefault={row?.rsvp_deadline_default ?? null}
+            templateKey={templateKey}
           />
           <p className="mt-5 border-t border-line pt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3">
             Address: {row?.slug}.{BASE_DOMAIN} · Status: {row?.status}
