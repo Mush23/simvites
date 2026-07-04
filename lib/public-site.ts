@@ -20,11 +20,14 @@ export async function getPublishedSnapshot(slug: string): Promise<PublishedSnaps
 
   const { data: site } = await supabase
     .from('sites')
-    .select('id')
+    .select('id, expires_at, archived_at')
     .eq('slug', slug.toLowerCase())
     .eq('status', 'published')
     .maybeSingle()
   if (!site) return null
+  // Lifecycle: archived or past-expiry sites are offline (data retained).
+  if (site.archived_at) return null
+  if (site.expires_at && new Date(site.expires_at) < new Date()) return null
 
   const { data: version } = await supabase
     .from('published_versions')

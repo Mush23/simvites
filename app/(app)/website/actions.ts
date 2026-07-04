@@ -85,7 +85,13 @@ export async function saveAndPublish(siteId: string, pageId: string, data: SiteD
     .insert({ site_id: siteId, snapshot, summary: 'Published from the editor', published_by: user?.id ?? null })
   if (insErr) return { error: insErr.message }
 
-  const { error: updErr } = await supabase.from('sites').update({ status: 'published' }).eq('id', siteId)
+  // Lifecycle: first publish starts the included-hosting clock (~18 months);
+  // renewals/extensions are managed in platform admin (and later, billing).
+  const { data: cur } = await supabase.from('sites').select('expires_at').eq('id', siteId).maybeSingle()
+  const expiry = new Date(); expiry.setMonth(expiry.getMonth() + 18)
+  const { error: updErr } = await supabase.from('sites')
+    .update({ status: 'published', ...(cur?.expires_at ? {} : { expires_at: expiry.toISOString() }) })
+    .eq('id', siteId)
   if (updErr) return { error: updErr.message }
 
   await supabase.from('activity_log').insert({
