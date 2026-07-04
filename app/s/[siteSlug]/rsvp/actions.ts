@@ -41,6 +41,11 @@ export async function submitGuestRsvp(submissions: GuestSubmission[]): Promise<S
   if (!session) return { error: 'Your session has expired — please reopen your invitation link.' }
   if (!submissions.length) return { error: 'Nothing to submit.' }
 
+  const { rateLimit } = await import('@/lib/rate-limit')
+  if (!rateLimit(`rsvp:${session.householdId}`, 10, 60_000)) {
+    return { error: 'Too many attempts — please wait a minute and try again.' }
+  }
+
   const db = createAdminClient()
 
   // Every submitted guest must belong to the cookie's household. A forged

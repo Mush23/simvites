@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { hashToken } from '@/lib/tokens'
 import { GUEST_COOKIE, signGuestSession } from '@/lib/guest-session'
 import { getSubdomain } from '@/lib/tenant'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 /**
  * Guest entry (handoff §5). Personalised link = /i/<raw>. We hash (peppered)
@@ -23,6 +24,12 @@ export async function GET(
   const cleanPath = onSubdomain ? '/rsvp' : `/s/${siteSlug}/rsvp`
   const redirect = (state?: string) =>
     NextResponse.redirect(new URL(state ? `${cleanPath}?link=${state}` : cleanPath, request.url))
+
+  // Token validation is rate-limited per IP (defence-in-depth on top of the
+  // 2^256 token space): 20 attempts/minute, then invalid.
+  if (!rateLimit(`token:${clientIp(request.headers)}`, 20, 60_000)) {
+    return redirect('invalid')
+  }
 
   const supabase = createAdminClient()
   const { data: row } = await supabase

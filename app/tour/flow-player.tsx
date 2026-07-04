@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // A simulated SCREEN RECORDING of the editor: a browser frame, a moving
 // cursor, click pulses, live "typing" — showing exactly where to click and
@@ -22,6 +22,26 @@ const CURSOR: [number, number][] = [[50, 55], [46, 34], [82, 30], [46, 62], [12,
 export function FlowPlayer() {
   const [step, setStep] = useState(0)
   const [playing, setPlaying] = useState(true)
+  const frame = useRef<HTMLDivElement>(null)
+  const [fs, setFs] = useState(false)
+
+  // Fullscreen demo mode — on phones this pairs with rotating to landscape,
+  // giving the walkthrough the whole screen like a real video.
+  async function toggleFullscreen() {
+    const el = frame.current
+    if (!el) return
+    if (!document.fullscreenElement) {
+      await el.requestFullscreen?.().catch(() => {})
+      try { await (screen.orientation as unknown as { lock?: (o: string) => Promise<void> })?.lock?.('landscape') } catch {}
+    } else {
+      await document.exitFullscreen?.().catch(() => {})
+    }
+  }
+  useEffect(() => {
+    const onFs = () => setFs(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onFs)
+    return () => document.removeEventListener('fullscreenchange', onFs)
+  }, [])
 
   useEffect(() => {
     if (!playing) return
@@ -34,15 +54,16 @@ export function FlowPlayer() {
   const typed = step >= 2 ? 'Aanya & Dev' : 'Your names'
 
   return (
-    <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
+    <div ref={frame} data-demo
+      className={`overflow-hidden rounded-card border border-line bg-surface shadow-card ${fs ? 'flex h-full flex-col rounded-none' : ''}`}>
       {/* Browser chrome */}
       <div className="flex items-center gap-2 border-b border-line bg-paper-2 px-4 py-2.5">
         <span className="flex gap-1.5">{[0, 1, 2].map((i) => <span key={i} className="h-2.5 w-2.5 rounded-pill bg-line-2" />)}</span>
         <span className="mx-auto rounded-pill bg-surface px-4 py-1 font-mono text-[10px] text-ink-3">yoursite.occasio.events — editing</span>
       </div>
 
-      {/* Stage */}
-      <div className="relative h-72 select-none bg-paper-2 sm:h-80" aria-live="polite">
+      {/* Stage — fills the screen in fullscreen/landscape demo mode */}
+      <div className={`relative select-none bg-paper-2 ${fs ? 'min-h-0 flex-1' : 'h-72 sm:h-80'}`} aria-live="polite">
         {/* Block library (left) */}
         <div className="absolute left-2 top-3 bottom-3 w-[18%] rounded-md border border-line bg-surface p-2">
           {['Hero', 'Countdown', 'Gallery', 'Hotel', 'RSVP'].map((b, i) => (
@@ -102,12 +123,20 @@ export function FlowPlayer() {
             <p className="font-display text-xl text-ink">{s.title}</p>
             <p className="mt-1 text-sm text-ink-2">{s.help}</p>
           </div>
-          <button type="button" onClick={() => setPlaying((p) => !p)}
-            aria-label={playing ? 'Pause walkthrough' : 'Play walkthrough'}
-            title={playing ? 'Pause' : 'Play'}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-pill border border-line text-ink">
-            {playing ? '❚❚' : '▶'}
-          </button>
+          <span className="flex shrink-0 gap-2">
+            <button type="button" onClick={() => setPlaying((p) => !p)}
+              aria-label={playing ? 'Pause walkthrough' : 'Play walkthrough'}
+              title={playing ? 'Pause' : 'Play'}
+              className="flex h-11 w-11 items-center justify-center rounded-pill border border-line text-ink">
+              {playing ? '❚❚' : '▶'}
+            </button>
+            <button type="button" onClick={toggleFullscreen}
+              aria-label={fs ? 'Exit fullscreen' : 'Watch fullscreen'}
+              title={fs ? 'Exit fullscreen' : 'Fullscreen — rotate to landscape on your phone'}
+              className="flex h-11 w-11 items-center justify-center rounded-pill border border-line text-ink">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d={fs ? 'M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5' : 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5'} /></svg>
+            </button>
+          </span>
         </div>
         <div className="mt-4 flex gap-2">
           {STEPS.map((_, i) => (
