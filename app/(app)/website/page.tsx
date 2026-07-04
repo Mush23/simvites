@@ -37,6 +37,7 @@ export default async function WebsitePage() {
   }
 
   const { getTemplate } = await import('@/lib/templates/registry')
+  const { siteStyleProps } = await import('@/lib/site-style')
   const template = getTemplate(templateKey)
   const data: SiteData = isEmpty(page?.puck_data) ? template.starterDoc : (page!.puck_data as SiteData)
   const events: SiteEvent[] = (eventRows ?? []) as SiteEvent[]
@@ -53,7 +54,8 @@ export default async function WebsitePage() {
         events={events}
         published={site!.status === 'published'}
         templateName={template.name}
-        templateVars={template.vars}
+        styleProps={siteStyleProps(siteRow?.theme)}
+        currentStyle={(siteRow?.theme ?? {}) as import('@/lib/site-style').SiteStyle}
       />
     </div>
   )

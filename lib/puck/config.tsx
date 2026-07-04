@@ -52,6 +52,15 @@ export interface SiteBlocks {
 const text = (label: string) => ({ type: 'text' as const, label })
 const area = (label: string) => ({ type: 'textarea' as const, label })
 
+import { ImageFieldInput } from './image-field'
+const image = (label: string) => ({
+  type: 'custom' as const,
+  label,
+  render: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <ImageFieldInput value={value ?? ''} onChange={onChange} />
+  ),
+})
+
 // Locked block library — no freeform canvas (handoff §1, §10).
 export const siteConfig: Config<SiteBlocks> = {
   components: {
@@ -59,7 +68,7 @@ export const siteConfig: Config<SiteBlocks> = {
       label: 'Hero',
       fields: {
         kicker: text('Kicker'), title: text('Title'), subtitle: text('Subtitle'),
-        dateText: text('Date'), location: text('Location'), imageUrl: text('Background image URL'),
+        dateText: text('Date'), location: text('Location'), imageUrl: image('Background photo'),
       },
       defaultProps: { kicker: 'Together with our families', title: 'Aanya & Dev', subtitle: '', dateText: '19 September 2026', location: 'Manchester, UK', imageUrl: '' },
       render: ({ puck, ...p }) => <SiteHero {...p} guestName={meta(puck).guestName} />,
@@ -109,7 +118,7 @@ export const siteConfig: Config<SiteBlocks> = {
         heading: text('Heading'),
         images: {
           type: 'array', label: 'Photos',
-          arrayFields: { url: text('Image URL'), caption: text('Caption') },
+          arrayFields: { url: image('Photo'), caption: text('Caption') },
           getItemSummary: (i) => i.caption || i.url?.slice(-24) || 'Photo',
         },
       },

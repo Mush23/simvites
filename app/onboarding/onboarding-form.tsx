@@ -44,8 +44,8 @@ export function OnboardingForm() {
         <legend className="eyebrow mb-2">Choose your look</legend>
         <div className="grid gap-2.5 sm:grid-cols-2">
           {[
-            { key: 'editorial-gold', name: 'Editorial Gold', desc: 'Cream, gold & deep red — warm, ceremonial. The original.', swatches: ['#F5EFE3', '#C9A227', '#7A1F1F'] },
-            { key: 'editorial-luxury', name: 'Editorial Luxury', desc: 'Ivory & ink with brass hairlines — quiet, modern.', swatches: ['#F6F1E9', '#211D18', '#B08D57'] },
+            { key: 'editorial-gold', name: 'Editorial Gold', desc: 'Cream, gold and deep red. Warm, ceremonial. The original.', swatches: ['#F5EFE3', '#C9A227', '#7A1F1F'], preview: '/s/aanya-and-dev' },
+            { key: 'editorial-luxury', name: 'Editorial Luxury', desc: 'Ivory and ink with brass hairlines. Quiet, modern.', swatches: ['#F6F1E9', '#211D18', '#B08D57'], preview: '/s/riya-and-arjun' },
           ].map((t, i) => (
             <label key={t.key}
               className="flex cursor-pointer flex-col gap-2 rounded-md border border-line bg-paper-2 p-3.5 transition-colors has-checked:border-accent has-checked:bg-accent-soft">
@@ -59,6 +59,11 @@ export function OnboardingForm() {
                 </span>
               </span>
               <span className="text-xs text-ink-3">{t.desc}</span>
+              <a href={t.preview} target="_blank" rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-xs text-accent-ink underline underline-offset-4">
+                Preview this template ↗
+              </a>
             </label>
           ))}
         </div>

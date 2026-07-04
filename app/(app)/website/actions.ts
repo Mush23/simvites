@@ -29,6 +29,19 @@ export async function uploadSiteImage(formData: FormData): Promise<{ url?: strin
   return { url: data.publicUrl }
 }
 
+/** Save the couple's style choices (fonts, background, accent, glow, hover). */
+export async function updateSiteStyle(style: Record<string, string>) {
+  const workspace = await getPrimarySite()
+  if (!workspace) return { error: 'No site.' }
+  const supabase = await createClient()
+  const { data: cur } = await supabase.from('sites').select('theme').eq('id', workspace.siteId).maybeSingle()
+  const theme = { ...((cur?.theme as Record<string, unknown>) ?? {}), ...style }
+  const { error } = await supabase.from('sites').update({ theme }).eq('id', workspace.siteId)
+  if (error) return { error: error.message }
+  revalidatePath('/website')
+  return { ok: true }
+}
+
 /** Persist a page's Puck document as the draft (RLS: can_write_site). */
 export async function savePageDraft(pageId: string, data: SiteData) {
   const supabase = await createClient()

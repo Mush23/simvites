@@ -1,6 +1,6 @@
 import { getGuestRsvpContext } from '@/lib/guest-rsvp'
 import { getPublishedSnapshot } from '@/lib/public-site'
-import { getTemplate } from '@/lib/templates/registry'
+import { siteStyleProps } from '@/lib/site-style'
 import { createAdminClient } from '@/lib/supabase/server'
 import { RsvpFlow } from './rsvp-flow'
 
@@ -27,9 +27,9 @@ export default async function GuestRsvpPage({
   const db = createAdminClient()
   const { data: siteRow } = await db.from('sites')
     .select('theme').eq('slug', siteSlug.toLowerCase()).maybeSingle()
-  const template = getTemplate((siteRow?.theme as { template?: string } | null)?.template)
+  const styleProps = siteStyleProps(siteRow?.theme)
   const themed = (children: React.ReactNode) => (
-    <div data-site-root style={template.vars as React.CSSProperties}>{children}</div>
+    <div data-site-root {...styleProps}>{children}</div>
   )
 
   const ctx = await getGuestRsvpContext(siteSlug)

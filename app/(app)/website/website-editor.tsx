@@ -5,7 +5,50 @@ import { Puck } from '@puckeditor/core'
 import '@puckeditor/core/puck.css'
 import { siteConfig, type SiteData } from '@/lib/puck/config'
 import type { SiteEvent } from '@/components/site/blocks'
-import { savePageDraft, saveAndPublish, uploadSiteImage } from './actions'
+import { useRouter } from 'next/navigation'
+import { savePageDraft, saveAndPublish, uploadSiteImage, updateSiteStyle } from './actions'
+import { FONT_PAIRS, BACKGROUNDS, ACCENTS, GLOWS, HOVERS, type SiteStyle } from '@/lib/site-style'
+
+/** The customisation panel stakeholders asked for: fonts, colours, glow, motion. */
+function StylePanel({ current }: { current: SiteStyle }) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  async function set(key: string, value: string) {
+    await updateSiteStyle({ [key]: value })
+    router.refresh()
+  }
+  const Sel = ({ k, label, options }: { k: keyof SiteStyle; label: string; options: Record<string, { label: string } | string> }) => (
+    <label className="block text-xs">
+      <span className="eyebrow mb-1 block">{label}</span>
+      <select defaultValue={(current[k] as string) ?? Object.keys(options)[0]}
+        onChange={(e) => set(k, e.target.value)}
+        className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent">
+        {Object.entries(options).map(([v, o]) => (
+          <option key={v} value={v}>{typeof o === 'string' ? o : o.label}</option>
+        ))}
+      </select>
+    </label>
+  )
+  return (
+    <div className="relative">
+      <button type="button" onClick={() => setOpen((o) => !o)}
+        title="Fonts, colours, glow and hover animation"
+        className="rounded-pill border border-line bg-paper-2 px-3.5 py-2 text-sm text-ink hover:border-accent">
+        ✨ Style
+      </button>
+      {open && (
+        <div className="absolute right-0 top-12 z-50 w-64 space-y-3 rounded-card border border-line bg-surface p-4 shadow-lift">
+          <Sel k="fontPair" label="Fonts" options={FONT_PAIRS} />
+          <Sel k="background" label="Background" options={BACKGROUNDS} />
+          <Sel k="accent" label="Accent colour" options={ACCENTS} />
+          <Sel k="glow" label="Card glow" options={GLOWS} />
+          <Sel k="hover" label="Hover animation" options={HOVERS} />
+          <p className="text-[10px] text-ink-3">Changes preview instantly. Publish to make them live.</p>
+        </div>
+      )}
+    </div>
+  )
+}
 
 /** Upload → URL copied to clipboard, ready to paste into any image field. */
 function ImageUploader() {
@@ -37,10 +80,12 @@ function ImageUploader() {
 type Status = 'idle' | 'saving' | 'saved' | 'publishing' | 'published' | 'error' | 'locked'
 
 export function WebsiteEditor({
-  siteId, pageId, slug, data, events, published, templateName, templateVars,
+  siteId, pageId, slug, data, events, published, templateName, styleProps, currentStyle,
 }: {
   siteId: string; pageId: string; slug: string; data: SiteData; events: SiteEvent[]; published: boolean
-  templateName: string; templateVars: Record<string, string>
+  templateName: string
+  styleProps: { style: React.CSSProperties; 'data-glow': string; 'data-hover': string }
+  currentStyle: SiteStyle
 }) {
   const [status, setStatus] = useState<Status>('idle')
   const [isPublished, setIsPublished] = useState(published)
@@ -76,6 +121,7 @@ export function WebsiteEditor({
           <StatusPill status={status} />
         </div>
         <div className="flex items-center gap-4">
+          <StylePanel current={currentStyle} />
           <ImageUploader />
           {status === 'locked' && (
             <a href="/settings" id="unlock-cta"
@@ -95,8 +141,8 @@ export function WebsiteEditor({
           </button>
         </div>
       </div>
-      {/* iframe disabled + template vars on the wrapper = true WYSIWYG canvas */}
-      <div className="min-h-0 flex-1" data-site-root style={templateVars as React.CSSProperties}>
+      {/* iframe disabled + style-engine vars on the wrapper = true WYSIWYG canvas */}
+      <div className="min-h-0 flex-1" data-site-root {...styleProps}>
         <Puck
           config={siteConfig}
           data={data}

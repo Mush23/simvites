@@ -13,7 +13,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="flex min-h-screen bg-paper text-ink">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-line bg-paper px-6 py-3.5">
+        <header className="app-header sticky top-0 z-40 flex items-center justify-between border-b border-line px-6 py-3.5">
           <div className="flex items-center gap-3">
             <MobileNav />
             <span className="font-display text-lg text-ink">{site.title}</span>

@@ -150,6 +150,23 @@ a[class*='bg-primary']:hover {
 }
 button:active:not(:disabled) { transform: translateY(0); }
 
+/* ── Site Style engine: couple-chosen glow + hover on public site cards ── */
+[data-glow='soft'] .shadow-card { box-shadow: var(--shadow), 0 0 28px -8px var(--accent-line); }
+[data-glow='strong'] .shadow-card { box-shadow: var(--shadow), 0 0 44px -6px var(--accent-line), 0 0 12px -4px var(--accent-line); }
+[data-hover='lift'] .shadow-card { transition: transform 300ms cubic-bezier(0.16,1,0.3,1), box-shadow 300ms; }
+[data-hover='lift'] .shadow-card:hover { transform: translateY(-4px); }
+[data-hover='grow'] .shadow-card { transition: transform 300ms cubic-bezier(0.16,1,0.3,1); }
+[data-hover='grow'] .shadow-card:hover { transform: scale(1.02); }
+[data-hover='tilt'] .shadow-card { transition: transform 300ms cubic-bezier(0.16,1,0.3,1); }
+[data-hover='tilt'] .shadow-card:hover { transform: rotate(0.6deg) translateY(-3px); }
+
+/* ── App chrome polish (feedback: "stiff and stocky") ────────────────────
+   Softer surfaces, glassy header, breathing sidebar. */
+.app-header { backdrop-filter: blur(10px); background: color-mix(in oklab, var(--paper) 82%, transparent); }
+aside a { transition: transform 200ms cubic-bezier(0.16,1,0.3,1), background-color 200ms, color 200ms; }
+aside a:hover { transform: translateX(3px); }
+.shadow-card { transition: box-shadow 300ms cubic-bezier(0.16,1,0.3,1), transform 300ms cubic-bezier(0.16,1,0.3,1); }
+
 /* ── Public-site motion (animations review) ─────────────────────────────
    Scroll-driven reveals on template sections + a slow Ken Burns on hero
    imagery — the wedding site's signature calm. Pure CSS (animation-timeline),

@@ -1,0 +1,67 @@
+import { getTemplate } from '@/lib/templates/registry'
+
+// ═══════════════════════════════════════════════════════════════════════
+// Site Style engine — per-couple customisation on top of the template:
+// font pairing, background, accent, card glow and hover animation, all
+// stored in sites.theme and frozen into publish snapshots like everything
+// else. Applied as CSS vars + data attributes at [data-site-root].
+// ═══════════════════════════════════════════════════════════════════════
+
+export const FONT_PAIRS = {
+  classic: { label: 'Cormorant + Jost', display: 'var(--f-cormorant)', sans: 'var(--f-jost)' },
+  gallery: { label: 'Fraunces + Inter', display: 'var(--f-fraunces)', sans: 'var(--f-inter)' },
+  editorial: { label: 'Cormorant + Inter', display: 'var(--f-cormorant)', sans: 'var(--f-inter)' },
+  warm: { label: 'Fraunces + Jost', display: 'var(--f-fraunces)', sans: 'var(--f-jost)' },
+} as const
+
+export const BACKGROUNDS = {
+  template: { label: 'Template default', vars: {} },
+  pearl: { label: 'Pearl', vars: { '--paper': '#FBF8F3', '--paper-2': '#F3EDE2', '--surface': '#FFFFFF', '--surface-2': '#F3EDE2' } },
+  ivory: { label: 'Ivory', vars: { '--paper': '#F6F1E9', '--paper-2': '#EFE8DC', '--surface': '#FBF8F3', '--surface-2': '#EFE8DC' } },
+  blush: { label: 'Blush mist', vars: { '--paper': '#F9F0ED', '--paper-2': '#F3E4E1', '--surface': '#FDF8F6', '--surface-2': '#F3E4E1' } },
+  sage: { label: 'Sage mist', vars: { '--paper': '#F1F4EC', '--paper-2': '#E6EBDE', '--surface': '#F9FBF6', '--surface-2': '#E6EBDE' } },
+  night: { label: 'Midnight', vars: { '--paper': '#1E1B16', '--paper-2': '#181512', '--surface': '#26221C', '--surface-2': '#2B2721', '--ink': '#F2EDE4', '--ink-2': '#C7BEB0', '--ink-3': '#948B7C', '--line': '#37322A', '--line-2': '#4A4237' } },
+} as const
+
+export const ACCENTS = {
+  template: { label: 'Template default', vars: {} },
+  gold: { label: 'Gold', vars: { '--accent': 'oklch(0.62 0.12 78)', '--accent-ink': 'oklch(0.53 0.105 70)', '--accent-line': 'oklch(0.72 0.11 75)', '--accent-soft': 'oklch(0.95 0.03 80)' } },
+  terracotta: { label: 'Terracotta', vars: { '--accent': '#B4552D', '--accent-ink': '#A04A26', '--accent-line': '#CFA093', '--accent-soft': '#F6E7DF' } },
+  oxblood: { label: 'Oxblood', vars: { '--accent': '#7E3232', '--accent-ink': '#6E2B2B', '--accent-line': '#C99C93', '--accent-soft': '#F3E4E1' } },
+  sageDeep: { label: 'Sage', vars: { '--accent': '#6E7A63', '--accent-ink': '#5C6852', '--accent-line': '#A9B29E', '--accent-soft': '#E9EDE2' } },
+  ink: { label: 'Ink', vars: { '--accent': '#211D18', '--accent-ink': '#3A342C', '--accent-line': '#C4BAAA', '--accent-soft': '#EFE8DC' } },
+} as const
+
+export const GLOWS = { none: 'None', soft: 'Soft', strong: 'Strong' } as const
+export const HOVERS = { lift: 'Lift', grow: 'Grow', tilt: 'Tilt', none: 'Still' } as const
+
+export interface SiteStyle {
+  template?: string
+  fontPair?: keyof typeof FONT_PAIRS
+  background?: keyof typeof BACKGROUNDS
+  accent?: keyof typeof ACCENTS
+  glow?: keyof typeof GLOWS
+  hover?: keyof typeof HOVERS
+}
+
+/** Merge template vars + couple's overrides → wrapper props for the site root. */
+export function siteStyleProps(theme: unknown) {
+  const t = (theme ?? {}) as SiteStyle
+  const template = getTemplate(t.template)
+  const vars: Record<string, string> = { ...template.vars }
+  const bg = BACKGROUNDS[t.background ?? 'template']
+  Object.assign(vars, bg.vars)
+  Object.assign(vars, ACCENTS[t.accent ?? 'template'].vars)
+  if (t.fontPair && FONT_PAIRS[t.fontPair]) {
+    const fp = FONT_PAIRS[t.fontPair]
+    vars['--font-display'] = `${fp.display}, Georgia, serif`
+    vars['--font-sans'] = `${fp.sans}, system-ui, sans-serif`
+    vars['--font-instrument'] = fp.display
+    vars['--font-hanken'] = fp.sans
+  }
+  return {
+    style: vars as React.CSSProperties,
+    'data-glow': t.glow ?? 'none',
+    'data-hover': t.hover ?? 'lift',
+  }
+}

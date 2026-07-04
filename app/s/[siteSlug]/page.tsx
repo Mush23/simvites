@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { Render } from '@puckeditor/core/rsc'
 import { getPublishedSnapshot } from '@/lib/public-site'
 import { siteConfig, starterDoc } from '@/lib/puck/config'
-import { getTemplate } from '@/lib/templates/registry'
+import { siteStyleProps } from '@/lib/site-style'
 import { GUEST_COOKIE, verifyGuestSession } from '@/lib/guest-session'
 import { createAdminClient } from '@/lib/supabase/server'
 
@@ -19,7 +19,7 @@ export default async function PublicSitePage({
   const snap = await getPublishedSnapshot(siteSlug)
   if (!snap) notFound()
 
-  const template = getTemplate((snap.theme as { template?: string } | null)?.template)
+  const styleProps = siteStyleProps(snap.theme)
   const home = snap.pages.find((p) => p.is_home) ?? snap.pages[0]
   const data = home?.puck_data ?? starterDoc
 
@@ -35,7 +35,7 @@ export default async function PublicSitePage({
   }
 
   return (
-    <div data-site-root className="min-h-screen bg-paper text-ink" style={template.vars as React.CSSProperties}>
+    <div data-site-root className="min-h-screen bg-paper text-ink" {...styleProps}>
       <Render config={siteConfig} data={data} metadata={{ events: snap.events, guestName }} />
     </div>
   )
