@@ -43,15 +43,19 @@ export function invitationEmailHtml(opts: {
   householdName: string
   link: string
 }) {
+  // Occasio design language: warm ivory, ink text, one terracotta accent, serif.
   return `
-  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;padding:32px;color:#2b2018">
-    <p style="letter-spacing:.2em;text-transform:uppercase;font-size:12px;color:#9a7b3f">${opts.siteName}</p>
-    <h1 style="font-weight:400;font-size:30px;margin:8px 0 16px">You're invited</h1>
-    <p style="font-size:16px;line-height:1.6">Dear ${opts.householdName}, we would be honoured to celebrate with you.</p>
-    <p style="font-size:16px;line-height:1.6">Open your personalised invitation to view the events and RSVP:</p>
-    <p style="margin:28px 0">
-      <a href="${opts.link}" style="background:#7a1f1f;color:#fff;text-decoration:none;padding:12px 28px;border-radius:999px;letter-spacing:.12em;text-transform:uppercase;font-size:13px">View your invitation</a>
-    </p>
-    <p style="font-size:13px;color:#888">If the button doesn't work, paste this link into your browser:<br>${opts.link}</p>
+  <div style="background:#fbf9f5;padding:36px 16px">
+    <div style="font-family:Georgia,'Times New Roman',serif;max-width:520px;margin:0 auto;background:#ffffff;border:1px solid #e8e2d8;border-radius:13px;padding:36px;color:#2a241d">
+      <p style="font-family:Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;font-size:11px;color:#8a8072;margin:0">${opts.siteName}</p>
+      <h1 style="font-weight:400;font-size:32px;line-height:1.1;margin:10px 0 18px">You're invited.</h1>
+      <p style="font-size:16px;line-height:1.65;margin:0 0 8px">Dear ${opts.householdName},</p>
+      <p style="font-size:16px;line-height:1.65;margin:0">We would be honoured to celebrate with you. Open your personal invitation to see your events and let us know you're coming.</p>
+      <p style="margin:30px 0">
+        <a href="${opts.link}" style="background:#b4552d;color:#fff;text-decoration:none;padding:13px 30px;border-radius:9px;font-weight:600;font-size:15px">Open your invitation</a>
+      </p>
+      <p style="font-size:12.5px;color:#8a8072;line-height:1.6">This link is personal to your household — please don't forward it.<br>If the button doesn't work, paste this into your browser:<br><span style="word-break:break-all">${opts.link}</span></p>
+    </div>
+    <p style="font-family:Consolas,monospace;text-align:center;letter-spacing:.18em;text-transform:uppercase;font-size:10px;color:#a49a8a;margin-top:18px">Made with Occasio</p>
   </div>`
 }
