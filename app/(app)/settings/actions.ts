@@ -41,6 +41,26 @@ export async function startUnlockCheckout(): Promise<{ url?: string; error?: str
   return { url: session.url ?? undefined }
 }
 
+/** Restore a previously published website version into the current draft. */
+export async function restoreVersion(versionId: string) {
+  const site = await getPrimarySite()
+  if (!site) return { error: 'No site.' }
+  const supabase = await createClient()
+  const { data: v } = await supabase.from('published_versions')
+    .select('snapshot').eq('id', versionId).eq('site_id', site.siteId).maybeSingle()
+  if (!v) return { error: 'Version not found.' }
+  const snap = v.snapshot as { pages?: { is_home: boolean; puck_data: unknown }[]; theme?: unknown }
+  const home = snap.pages?.find((p) => p.is_home) ?? snap.pages?.[0]
+  if (home) {
+    await supabase.from('pages').update({ puck_data: home.puck_data })
+      .eq('site_id', site.siteId).eq('is_home', true)
+  }
+  if (snap.theme) await supabase.from('sites').update({ theme: snap.theme }).eq('id', site.siteId)
+  revalidatePath('/website')
+  revalidatePath('/settings')
+  return { ok: true }
+}
+
 /**
  * Invite a collaborator (partner, parent, planner) into the org. Creates the
  * auth user if new; they sign in with the magic-link tab on /login.
