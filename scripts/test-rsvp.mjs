@@ -38,6 +38,9 @@ function must(result, what) {
 }
 
 // ── Fixture ────────────────────────────────────────────────────────────────
+// Sweep orphans from any previously crashed run first (self-cleaning suite).
+await db.from('organisations').delete().like('name', 'rsvp-test %')
+
 const org = must(await db.from('organisations').insert({ name: `rsvp-test ${rnd}` }).select('id').single(), 'org')
 const site = must(await db.from('sites')
   .insert({ org_id: org.id, slug: `rsvp-test-${rnd}`, title: 'RSVP test' }).select('id').single(), 'site')

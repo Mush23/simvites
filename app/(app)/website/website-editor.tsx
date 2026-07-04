@@ -7,7 +7,7 @@ import { siteConfig, type SiteData } from '@/lib/puck/config'
 import type { SiteEvent } from '@/components/site/blocks'
 import { savePageDraft, saveAndPublish } from './actions'
 
-type Status = 'idle' | 'saving' | 'saved' | 'publishing' | 'published' | 'error'
+type Status = 'idle' | 'saving' | 'saved' | 'publishing' | 'published' | 'error' | 'locked'
 
 export function WebsiteEditor({
   siteId, pageId, slug, data, events, published,
@@ -32,7 +32,8 @@ export function WebsiteEditor({
   const publish = useCallback(async () => {
     setStatus('publishing')
     const res = await saveAndPublish(siteId, pageId, latest.current)
-    if ('error' in res && res.error) setStatus('error')
+    if ('locked' in res && res.locked) setStatus('locked')
+    else if ('error' in res && res.error) setStatus('error')
     else { setIsPublished(true); setStatus('published') }
   }, [siteId, pageId])
 
@@ -44,6 +45,12 @@ export function WebsiteEditor({
           <StatusPill status={status} />
         </div>
         <div className="flex items-center gap-4">
+          {status === 'locked' && (
+            <a href="/settings" id="unlock-cta"
+              className="rounded-md border border-accent-line bg-accent-soft px-3.5 py-2 text-sm text-accent-ink transition-colors hover:border-accent">
+              Publishing is part of the unlock — see billing →
+            </a>
+          )}
           {isPublished && (
             <a href={`/s/${slug}`} target="_blank" rel="noreferrer"
               className="font-mono text-[10px] uppercase tracking-[0.16em] text-accent-ink underline underline-offset-4">
@@ -65,7 +72,8 @@ export function WebsiteEditor({
 
 function StatusPill({ status }: { status: Status }) {
   const map: Record<Status, string> = {
-    idle: '', saving: 'Saving…', saved: 'Draft saved', publishing: 'Publishing…', published: 'Published ✓', error: 'Save failed',
+    idle: '', saving: 'Saving…', saved: 'Draft saved', publishing: 'Publishing…',
+    published: 'Published ✓', error: 'Save failed', locked: 'Draft saved — publish is locked',
   }
   if (!map[status]) return null
   return <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3">{map[status]}</span>

@@ -3,6 +3,7 @@ import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader, StatCard } from '@/components/app/ui'
 import { formatPence } from '@/lib/money'
 import { BudgetManager, type BudgetItemRow, type Option } from './budget-manager'
+import { BudgetImport } from './import-widget'
 
 export const metadata = { title: 'Budget · Occasio' }
 
@@ -45,6 +46,7 @@ export default async function BudgetPage() {
         <StatCard label="Left to pay" value={formatPence(Math.max(0, committed - paid)) || '£0.00'} />
       </div>
 
+      <BudgetImport />
       <div className="mt-8">
         <BudgetManager items={rows} events={eventOptions} vendors={vendorOptions} />
       </div>

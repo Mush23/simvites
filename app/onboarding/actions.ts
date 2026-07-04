@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { track } from '@/lib/analytics'
 
 export interface OnboardingState {
   error?: string
@@ -26,7 +27,7 @@ export async function createWorkspace(
   if (RESERVED.has(slug)) return { error: 'That address is reserved — pick another.' }
 
   const supabase = await createClient()
-  const { error } = await supabase.rpc('create_org_and_site', {
+  const { data: siteId, error } = await supabase.rpc('create_org_and_site', {
     p_org_name: orgName || `${siteTitle} team`,
     p_site_title: siteTitle,
     p_slug: slug,
@@ -35,6 +36,17 @@ export async function createWorkspace(
     if (/duplicate|unique/i.test(error.message)) return { error: 'That web address is taken — try another.' }
     return { error: error.message }
   }
+
+  // Starter events the host picked — the site opens already structured.
+  const picked = formData.getAll('events').map(String).filter(Boolean)
+  if (siteId && picked.length) {
+    await supabase.from('events').insert(
+      picked.map((name, i) => ({ site_id: siteId, name, sort_order: i })),
+    )
+  }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) track('site_created', user.id, { site_id: siteId, starter_events: picked.length })
 
   redirect('/dashboard')
 }

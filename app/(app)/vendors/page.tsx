@@ -4,6 +4,7 @@ import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { formatPence } from '@/lib/money'
 import { QuickAddVendor } from './quick-add'
+import { VendorImport } from './import-widget'
 
 export const metadata = { title: 'Vendors · Occasio' }
 
@@ -41,6 +42,7 @@ export default async function VendorsPage() {
       />
 
       <QuickAddVendor />
+      <VendorImport />
 
       <div className="mt-8 space-y-8">
         {PIPELINE.map((stage) => {

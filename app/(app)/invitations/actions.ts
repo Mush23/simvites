@@ -6,7 +6,7 @@ import { getPrimarySite } from '@/lib/workspace'
 import { generateGuestToken } from '@/lib/tokens'
 import { siteUrl } from '@/lib/tenant'
 import { sendEmail, invitationEmailHtml, emailConfigured } from '@/lib/email'
-import { BRAND_NAME } from '@/lib/brand'
+import { track } from '@/lib/analytics'
 
 /**
  * Create a personalised link for a household. The raw token is returned ONCE
@@ -51,6 +51,11 @@ export async function revokeLinks(householdId: string) {
 export async function sendInvitation(householdId: string) {
   const site = await getPrimarySite()
   if (!site) return { error: 'No site.' }
+  // Invite-send is part of the unlock (handoff §7). Links can still be
+  // generated and copied freely — the live site itself is gated by publish.
+  if (!site.isUnlocked) {
+    return { error: 'Email sending is part of the unlock — see Settings → Billing.' }
+  }
   const supabase = await createClient()
 
   const [{ data: household }, { data: guests }] = await Promise.all([
@@ -89,6 +94,7 @@ export async function sendInvitation(householdId: string) {
     entity_id: householdId,
     meta: { emails: emails.length, delivered: sent, configured: emailConfigured() },
   })
+  if (user) track('invites_sent', user.id, { site_id: site.siteId, emails: emails.length })
 
   revalidatePath('/invitations')
   return { ok: true, link, note: note || `Sent to ${sent} address${sent === 1 ? '' : 'es'}.` }

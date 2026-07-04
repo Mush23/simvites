@@ -6,6 +6,7 @@ export interface Workspace {
   slug: string
   orgId: string
   status: string
+  isUnlocked: boolean
 }
 
 /**
@@ -16,10 +17,13 @@ export async function getPrimarySite(): Promise<Workspace | null> {
   const supabase = await createClient()
   const { data } = await supabase
     .from('sites')
-    .select('id, title, slug, org_id, status')
+    .select('id, title, slug, org_id, status, is_unlocked')
     .order('created_at', { ascending: true })
     .limit(1)
     .maybeSingle()
   if (!data) return null
-  return { siteId: data.id, title: data.title, slug: data.slug, orgId: data.org_id, status: data.status }
+  return {
+    siteId: data.id, title: data.title, slug: data.slug, orgId: data.org_id,
+    status: data.status, isUnlocked: data.is_unlocked,
+  }
 }

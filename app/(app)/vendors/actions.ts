@@ -61,6 +61,32 @@ export async function archiveVendor(vendorId: string) {
   redirect('/vendors')
 }
 
+/** Paste-import vendors: "Name, Category" per line. Duplicates (by name) skipped. */
+export async function importVendors(rows: { name: string; category: string }[]) {
+  const site = await getPrimarySite()
+  if (!site) return { error: 'No site.' }
+  if (!rows.length) return { error: 'Nothing to import.' }
+  if (rows.length > 200) return { error: 'Import is limited to 200 rows.' }
+
+  const supabase = await createClient()
+  const { data: existing } = await supabase
+    .from('vendors').select('name').eq('site_id', site.siteId).is('archived_at', null)
+  const have = new Set((existing ?? []).map((v) => v.name.toLowerCase()))
+
+  const fresh = rows
+    .map((r) => ({ name: r.name.trim(), category: r.category.trim() || 'Other' }))
+    .filter((r) => r.name && !have.has(r.name.toLowerCase()))
+
+  if (fresh.length) {
+    const { error } = await supabase.from('vendors').insert(
+      fresh.map((r) => ({ site_id: site.siteId, ...r })),
+    )
+    if (error) return { error: error.message }
+  }
+  revalidatePath('/vendors')
+  return { ok: true, summary: `${fresh.length} added, ${rows.length - fresh.length} skipped.` }
+}
+
 /** Toggle which events this vendor covers (vendor_events). */
 export async function setVendorEvent(vendorId: string, eventId: string, covered: boolean) {
   const supabase = await createClient()

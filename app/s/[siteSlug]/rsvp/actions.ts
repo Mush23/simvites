@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/server'
 import { GUEST_COOKIE, verifyGuestSession } from '@/lib/guest-session'
+import { track } from '@/lib/analytics'
 
 export interface EventChoice {
   eventId: string
@@ -87,6 +88,11 @@ export async function submitGuestRsvp(submissions: GuestSubmission[]): Promise<S
       if (error) eventErrors[`${s.guestId}:${choice.eventId}`] = friendly(error.message)
       else anySuccess = true
     }
+  }
+
+  if (anySuccess) {
+    // Funnel event; distinct id = household (guests have no user identity).
+    track('rsvp_submitted', session.householdId, { site_id: session.siteId })
   }
 
   if (Object.keys(eventErrors).length) {

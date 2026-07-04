@@ -55,6 +55,30 @@ export default function Home() {
         </section>
       </main>
 
+      {/* Early access */}
+      <section className="border-t border-line bg-paper-2">
+        <div className="mx-auto max-w-[1060px] px-6 py-16 text-center">
+          <p className="eyebrow mb-3">Early access</p>
+          <h2 className="mx-auto max-w-lg font-display text-4xl">
+            We&apos;re opening to a handful of weddings first.
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-ink-2">
+            Planning a multi-event wedding in the next 18 months? Build free today, and tell us
+            what would make it perfect — early couples shape the product and keep founder pricing.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Link href="/login"
+              className="rounded-md bg-accent px-7 py-3 font-semibold text-white shadow-card transition-transform hover:-translate-y-px">
+              Start building — free
+            </Link>
+            <a href="mailto:maharshi.sim@hotmail.com?subject=Occasio%20early%20access"
+              className="font-mono text-[11px] uppercase tracking-[0.18em] text-accent-ink underline underline-offset-4">
+              Talk to the founder
+            </a>
+          </div>
+        </div>
+      </section>
+
       <footer className="mx-auto max-w-[1060px] px-6 py-12">
         <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">
           Made with {BRAND_NAME}

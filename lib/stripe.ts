@@ -1,7 +1,8 @@
 import Stripe from 'stripe'
+import { BRAND_NAME } from '@/lib/brand'
 
-// Guarded Stripe client: returns null until STRIPE_SECRET_KEY is set, so the
-// rest of the app (and the checkout button) degrade gracefully pre-connection.
+// Guarded Stripe client: null until STRIPE_SECRET_KEY is set, so billing
+// degrades gracefully pre-connection (checkout shows "not connected yet").
 let cached: Stripe | null = null
 
 export function getStripe(): Stripe | null {
@@ -15,6 +16,8 @@ export function stripeConfigured() {
   return !!process.env.STRIPE_SECRET_KEY
 }
 
-/** One-time price for the MVP "Wedding Package" (minor units, GBP). */
-export const WEDDING_PACKAGE_AMOUNT = 9900
-export const WEDDING_PACKAGE_CURRENCY = 'gbp'
+// One-time "Command Centre unlock" (handoff §7): free tier = draft + preview;
+// unlock gates publish + invite-send. Minor units (pence).
+export const UNLOCK_AMOUNT = 14900
+export const UNLOCK_CURRENCY = 'gbp'
+export const UNLOCK_PRODUCT_NAME = `${BRAND_NAME} — Command Centre unlock`

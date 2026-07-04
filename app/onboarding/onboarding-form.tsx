@@ -6,6 +6,14 @@ import { BASE_DOMAIN } from '@/lib/brand'
 
 const initial: OnboardingState = {}
 
+// Common celebrations across South Asian traditions — neutral-luxe stance:
+// the host picks; nothing is assumed. All renamable later.
+const STARTER_EVENTS = [
+  'Mehndi', 'Haldi', 'Sangeet', 'Wedding Ceremony', 'Nikah',
+  'Civil Ceremony', 'Reception', 'Walima', 'Next-day Brunch',
+]
+const PRESELECTED = new Set(['Wedding Ceremony', 'Reception'])
+
 export function OnboardingForm() {
   const [state, action, pending] = useActionState(createWorkspace, initial)
   const [slug, setSlug] = useState('')
@@ -31,6 +39,20 @@ export function OnboardingForm() {
           <span className="shrink-0 text-sm text-ink-3">.{BASE_DOMAIN}</span>
         </div>
       </label>
+
+      <fieldset>
+        <legend className="eyebrow mb-2">Which celebrations? (pick any — rename later)</legend>
+        <div className="flex flex-wrap gap-2">
+          {STARTER_EVENTS.map((name) => (
+            <label key={name}
+              className="flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-line bg-paper-2 px-3 text-sm text-ink transition-colors has-checked:border-accent has-checked:bg-accent-soft">
+              <input type="checkbox" name="events" value={name} defaultChecked={PRESELECTED.has(name)}
+                className="accent-[var(--accent)]" />
+              {name}
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       {state.error && <p className="text-sm text-bad">{state.error}</p>}
 

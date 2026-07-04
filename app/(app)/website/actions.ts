@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { getPrimarySite } from '@/lib/workspace'
+import { track } from '@/lib/analytics'
 import type { SiteData } from '@/lib/puck/config'
 
 /** Persist a page's Puck document as the draft (RLS: can_write_site). */
@@ -20,6 +22,12 @@ export async function savePageDraft(pageId: string, data: SiteData) {
 export async function saveAndPublish(siteId: string, pageId: string, data: SiteData) {
   const saved = await savePageDraft(pageId, data)
   if ('error' in saved && saved.error) return saved
+
+  // The business model (handoff §7): free tier = draft + preview only.
+  const workspace = await getPrimarySite()
+  if (!workspace?.isUnlocked) {
+    return { error: 'locked', locked: true as const }
+  }
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -60,6 +68,7 @@ export async function saveAndPublish(siteId: string, pageId: string, data: SiteD
   await supabase.from('activity_log').insert({
     site_id: siteId, actor_id: user?.id ?? null, verb: 'published', entity_type: 'site', entity_id: siteId,
   })
+  if (user) track('site_published', user.id, { site_id: siteId })
 
   revalidatePath('/website')
   return { ok: true }
