@@ -9,6 +9,12 @@ export default function Home() {
         <span className="font-display text-2xl">{BRAND_NAME}</span>
         <div className="flex items-center gap-5">
           <Link
+            href="/tour"
+            className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-3 transition-colors hover:text-accent-ink"
+          >
+            How it works
+          </Link>
+          <Link
             href="/login"
             className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-3 transition-colors hover:text-accent-ink"
           >
