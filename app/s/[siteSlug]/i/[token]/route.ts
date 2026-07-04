@@ -37,6 +37,14 @@ export async function GET(
   if (row.revoked) return redirect('revoked')
   if (row.expires_at && new Date(row.expires_at) < new Date()) return redirect('expired')
 
+  // Open tracking — powers the host's "opened but not responded" chase list.
+  await supabase.from('activity_log').insert({
+    site_id: row.site_id,
+    verb: 'invite_opened',
+    entity_type: 'household',
+    entity_id: row.household_id,
+  }).then(() => {}, () => {}) // best-effort; never block the guest
+
   const res = redirect()
   res.cookies.set(
     GUEST_COOKIE,

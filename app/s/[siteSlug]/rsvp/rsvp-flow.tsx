@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { GuestRsvpContext, GuestEventView, QuestionView } from '@/lib/guest-rsvp'
 import { formatEventDateTime } from '@/lib/utils'
 import { submitGuestRsvp, type GuestSubmission } from './actions'
@@ -90,6 +90,26 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
   }
 
   if (phase === 'done') {
+    const attendingEvents = ctx.guests
+      .flatMap((g) => g.events)
+      .filter((e, i, arr) => arr.findIndex((x) => x.eventId === e.eventId) === i)
+      .filter((e) => ctx.guests.some((g) => choices[`${g.guestId}:${e.eventId}`] === 'attending') && e.startsAt)
+
+    const onPdf = async () => {
+      const { downloadRsvpPdf } = await import('@/lib/rsvp-pdf')
+      await downloadRsvpPdf({
+        siteTitle: ctx.siteTitle,
+        householdName: ctx.householdName,
+        siteUrl: window.location.href,
+        lines: ctx.guests.map((g) => ({
+          guest: g.fullName,
+          events: g.events
+            .map((e) => ({ name: e.name, status: choices[`${g.guestId}:${e.eventId}`] }))
+            .filter((e): e is { name: string; status: 'attending' | 'declined' } => e.status !== 'pending'),
+        })).filter((l) => l.events.length > 0),
+      })
+    }
+
     return (
       <div className="flex min-h-screen items-center justify-center bg-paper px-6 text-center text-ink">
         <div className="max-w-md">
@@ -102,6 +122,20 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
             Your responses for {ctx.householdName} are saved. You can return through your
             invitation link any time before the deadline to change them.
           </p>
+
+          <button type="button" onClick={onPdf}
+            className="mt-8 rounded-md bg-accent px-7 py-3 font-semibold text-white transition-transform hover:-translate-y-px">
+            Download confirmation (PDF)
+          </button>
+
+          {attendingEvents.length > 0 && (
+            <div className="mt-8 border-t border-line pt-6 text-left">
+              <p className="eyebrow mb-3 text-center">Add to your calendar</p>
+              {attendingEvents.map((e) => (
+                <CalendarRow key={e.eventId} name={e.name} startsAt={e.startsAt!} venue={e.venueName} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     )
@@ -194,6 +228,26 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function CalendarRow({ name, startsAt, venue }: { name: string; startsAt: string; venue: string | null }) {
+  const [links, setLinks] = useState<{ g: string; ics: string } | null>(null)
+  useEffect(() => {
+    import('@/lib/calendar').then(({ googleCalendarUrl, icsDataUrl }) => {
+      const e = { title: name, startsAt, venue }
+      setLinks({ g: googleCalendarUrl(e), ics: icsDataUrl(e) })
+    })
+  }, [name, startsAt, venue])
+  if (!links) return null
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-line py-2.5 text-sm last:border-0">
+      <span className="min-w-0 truncate text-ink">{name}</span>
+      <span className="flex shrink-0 gap-3">
+        <a href={links.g} target="_blank" rel="noreferrer" className="text-accent-ink underline underline-offset-4">Google</a>
+        <a href={links.ics} download={`${name}.ics`} className="text-accent-ink underline underline-offset-4">Apple / .ics</a>
+      </span>
     </div>
   )
 }

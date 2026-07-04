@@ -1,14 +1,22 @@
 import type { Config, Data } from '@puckeditor/core'
 import {
   SiteHero, SiteSchedule, SiteEventDetail, SiteRsvpCta, SiteTravel, SiteFaq, SiteFooter,
+  SiteStory, SiteFamily, SiteHotelTravel, SiteGiftsNote,
   type SiteEvent,
 } from '@/components/site/blocks'
+import { Countdown } from '@/components/site/countdown'
+import { Gallery } from '@/components/site/gallery'
 
 export interface PuckSiteMeta {
   events: SiteEvent[]
+  /** Household name from the guest-session cookie, for the hero greeting. */
+  guestName?: string
+}
+function meta(puck: unknown): Partial<PuckSiteMeta> {
+  return (puck as { metadata?: Partial<PuckSiteMeta> } | undefined)?.metadata ?? {}
 }
 function metaEvents(puck: unknown): SiteEvent[] {
-  return (puck as { metadata?: Partial<PuckSiteMeta> } | undefined)?.metadata?.events ?? []
+  return meta(puck).events ?? []
 }
 
 interface HeroProps { kicker: string; title: string; subtitle: string; dateText: string; location: string; imageUrl: string }
@@ -18,14 +26,26 @@ interface RsvpProps { heading: string; body: string; buttonText: string }
 interface TravelProps { heading: string; body: string }
 interface FaqProps { heading: string; items: { q: string; a: string }[] }
 interface FooterProps { names: string; note: string }
+interface CountdownProps { heading: string; dateISO: string }
+interface StoryProps { kicker: string; title: string; paragraphs: { text: string }[] }
+interface FamilyProps { heading: string; sides: { side: string; name: string; parents: string }[] }
+interface GalleryProps { heading: string; images: { url: string; caption: string }[] }
+interface HotelProps { heading: string; hotelName: string; address: string; blockCode: string; phone: string; bookingUrl: string; notes: string }
+interface GiftsProps { heading: string; body: string }
 
 export interface SiteBlocks {
   Hero: HeroProps
+  CountdownBlock: CountdownProps
+  StoryBlock: StoryProps
+  FamilyBlock: FamilyProps
   Schedule: ScheduleProps
   EventDetail: EventDetailProps
+  GalleryBlock: GalleryProps
+  HotelTravel: HotelProps
   RsvpCta: RsvpProps
   Travel: TravelProps
   Faq: FaqProps
+  GiftsNote: GiftsProps
   SiteFooterBlock: FooterProps
 }
 
@@ -42,7 +62,75 @@ export const siteConfig: Config<SiteBlocks> = {
         dateText: text('Date'), location: text('Location'), imageUrl: text('Background image URL'),
       },
       defaultProps: { kicker: 'Together with our families', title: 'Aanya & Dev', subtitle: '', dateText: '19 September 2026', location: 'Manchester, UK', imageUrl: '' },
-      render: (p) => <SiteHero {...p} />,
+      render: ({ puck, ...p }) => <SiteHero {...p} guestName={meta(puck).guestName} />,
+    },
+    CountdownBlock: {
+      label: 'Countdown',
+      fields: { heading: text('Heading'), dateISO: text('Date/time (ISO, e.g. 2026-09-19T10:30)') },
+      defaultProps: { heading: 'The celebrations begin in', dateISO: '' },
+      // Client component: pass ONLY serialisable props (never Puck's `puck` object).
+      render: ({ heading, dateISO }) => <Countdown heading={heading} dateISO={dateISO} />,
+    },
+    StoryBlock: {
+      label: 'Story',
+      fields: {
+        kicker: text('Kicker'), title: text('Title'),
+        paragraphs: {
+          type: 'array', label: 'Paragraphs',
+          arrayFields: { text: area('Text') },
+          getItemSummary: (i) => i.text?.slice(0, 40) || 'Paragraph',
+        },
+      },
+      defaultProps: { kicker: 'Our Story', title: 'How we got here', paragraphs: [{ text: '' }] },
+      render: (p) => <SiteStory {...p} />,
+    },
+    FamilyBlock: {
+      label: 'Families',
+      fields: {
+        heading: text('Heading'),
+        sides: {
+          type: 'array', label: 'Sides',
+          arrayFields: { side: text('Side label'), name: text('Name'), parents: text('Parents line') },
+          getItemSummary: (i) => i.name || 'Side',
+        },
+      },
+      defaultProps: {
+        heading: 'With the blessings of',
+        sides: [
+          { side: 'The Groom', name: '', parents: '' },
+          { side: 'The Bride', name: '', parents: '' },
+        ],
+      },
+      render: (p) => <SiteFamily {...p} />,
+    },
+    GalleryBlock: {
+      label: 'Gallery',
+      fields: {
+        heading: text('Heading'),
+        images: {
+          type: 'array', label: 'Photos',
+          arrayFields: { url: text('Image URL'), caption: text('Caption') },
+          getItemSummary: (i) => i.caption || i.url?.slice(-24) || 'Photo',
+        },
+      },
+      defaultProps: { heading: 'Moments', images: [] },
+      render: ({ heading, images }) => <Gallery heading={heading} images={images ?? []} />,
+    },
+    HotelTravel: {
+      label: 'Hotel & travel',
+      fields: {
+        heading: text('Heading'), hotelName: text('Hotel name'), address: text('Address'),
+        blockCode: text('Room-block code'), phone: text('Phone'),
+        bookingUrl: text('Booking URL'), notes: area('Notes'),
+      },
+      defaultProps: { heading: 'Stay & Travel', hotelName: '', address: '', blockCode: '', phone: '', bookingUrl: '', notes: '' },
+      render: (p) => <SiteHotelTravel {...p} />,
+    },
+    GiftsNote: {
+      label: 'Gifts note',
+      fields: { heading: text('Heading'), body: area('Body') },
+      defaultProps: { heading: 'Your presence is the present', body: '' },
+      render: (p) => <SiteGiftsNote {...p} />,
     },
     Schedule: {
       label: 'Schedule',

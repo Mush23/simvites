@@ -37,7 +37,7 @@ export async function saveAndPublish(siteId: string, pageId: string, data: SiteD
     supabase.from('pages').select('slug, title, puck_data, is_home, nav_order, hidden').eq('site_id', siteId),
     supabase
       .from('events')
-      .select('id, name, starts_at, ends_at, venue_name, address, description, visibility, on_website, sort_order')
+      .select('id, name, starts_at, ends_at, venue_name, address, description, accent, visibility, on_website, sort_order')
       .eq('site_id', siteId)
       .is('archived_at', null)
       .neq('visibility', 'hidden')

@@ -10,9 +10,10 @@ import { savePageDraft, saveAndPublish } from './actions'
 type Status = 'idle' | 'saving' | 'saved' | 'publishing' | 'published' | 'error' | 'locked'
 
 export function WebsiteEditor({
-  siteId, pageId, slug, data, events, published,
+  siteId, pageId, slug, data, events, published, templateName, templateVars,
 }: {
   siteId: string; pageId: string; slug: string; data: SiteData; events: SiteEvent[]; published: boolean
+  templateName: string; templateVars: Record<string, string>
 }) {
   const [status, setStatus] = useState<Status>('idle')
   const [isPublished, setIsPublished] = useState(published)
@@ -42,6 +43,9 @@ export function WebsiteEditor({
       <div className="flex items-center justify-between border-b border-line bg-paper px-5 py-2.5">
         <div className="flex items-center gap-3">
           <span className="font-display text-lg text-ink">Website</span>
+          <span className="rounded-pill border border-line px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
+            {templateName}
+          </span>
           <StatusPill status={status} />
         </div>
         <div className="flex items-center gap-4">
@@ -63,8 +67,16 @@ export function WebsiteEditor({
           </button>
         </div>
       </div>
-      <div className="min-h-0 flex-1">
-        <Puck config={siteConfig} data={data} metadata={{ events }} onChange={onChange} onPublish={publish} />
+      {/* iframe disabled + template vars on the wrapper = true WYSIWYG canvas */}
+      <div className="min-h-0 flex-1" data-site-root style={templateVars as React.CSSProperties}>
+        <Puck
+          config={siteConfig}
+          data={data}
+          metadata={{ events }}
+          onChange={onChange}
+          onPublish={publish}
+          iframe={{ enabled: false }}
+        />
       </div>
     </div>
   )

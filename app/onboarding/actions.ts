@@ -45,6 +45,20 @@ export async function createWorkspace(
     )
   }
 
+  // Template choice: store on the site and seed the home page with the
+  // template's starter document (title personalised).
+  const { getTemplate, DEFAULT_TEMPLATE_KEY } = await import('@/lib/templates/registry')
+  const template = getTemplate(String(formData.get('template') ?? DEFAULT_TEMPLATE_KEY))
+  if (siteId) {
+    const doc = structuredClone(template.starterDoc)
+    for (const block of doc.content) {
+      if (block.type === 'Hero') (block.props as { title?: string }).title = siteTitle
+      if (block.type === 'SiteFooterBlock') (block.props as { names?: string }).names = siteTitle
+    }
+    await supabase.from('sites').update({ theme: { template: template.key } }).eq('id', siteId)
+    await supabase.from('pages').update({ puck_data: doc }).eq('site_id', siteId).eq('is_home', true)
+  }
+
   const { data: { user } } = await supabase.auth.getUser()
   if (user) track('site_created', user.id, { site_id: siteId, starter_events: picked.length })
 

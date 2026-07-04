@@ -15,11 +15,15 @@ export default async function WebsitePage() {
   const site = await getPrimarySite()
   const supabase = await createClient()
 
+  const { data: siteRow } = await supabase
+    .from('sites').select('theme').eq('id', site!.siteId).maybeSingle()
+  const templateKey = (siteRow?.theme as { template?: string } | null)?.template
+
   const [{ data: page }, { data: eventRows }] = await Promise.all([
     supabase.from('pages').select('id, puck_data').eq('site_id', site!.siteId).eq('is_home', true).maybeSingle(),
     supabase
       .from('events')
-      .select('id, name, starts_at, venue_name, address, description')
+      .select('id, name, starts_at, venue_name, address, description, accent')
       .eq('site_id', site!.siteId)
       .is('archived_at', null)
       .order('sort_order', { ascending: true })
@@ -32,17 +36,25 @@ export default async function WebsitePage() {
     return <div className="p-10 text-ink-2">No home page found for this site.</div>
   }
 
-  const data: SiteData = isEmpty(page?.puck_data) ? starterDoc : (page!.puck_data as SiteData)
+  const { getTemplate } = await import('@/lib/templates/registry')
+  const template = getTemplate(templateKey)
+  const data: SiteData = isEmpty(page?.puck_data) ? template.starterDoc : (page!.puck_data as SiteData)
   const events: SiteEvent[] = (eventRows ?? []) as SiteEvent[]
 
+  const { templateFontClasses } = await import('@/lib/template-fonts')
+
   return (
-    <WebsiteEditor
-      siteId={site!.siteId}
-      pageId={pageId}
-      slug={site!.slug}
-      data={data}
-      events={events}
-      published={site!.status === 'published'}
-    />
+    <div className={templateFontClasses}>
+      <WebsiteEditor
+        siteId={site!.siteId}
+        pageId={pageId}
+        slug={site!.slug}
+        data={data}
+        events={events}
+        published={site!.status === 'published'}
+        templateName={template.name}
+        templateVars={template.vars}
+      />
+    </div>
   )
 }

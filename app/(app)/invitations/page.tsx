@@ -19,6 +19,9 @@ export default async function InvitationsPage() {
       supabase.from('activity_log').select('entity_id, created_at').eq('site_id', site!.siteId)
         .eq('verb', 'sent_invites').order('created_at', { ascending: false }),
     ])
+  const { data: opens } = await supabase.from('activity_log')
+    .select('entity_id, created_at').eq('site_id', site!.siteId)
+    .eq('verb', 'invite_opened').order('created_at', { ascending: false })
 
   const rows: HouseholdInviteRow[] = (households ?? []).map((h) => {
     const hhGuests = (guests ?? []).filter((g) => g.household_id === h.id)
@@ -29,6 +32,7 @@ export default async function InvitationsPage() {
       emailCount: new Set(hhGuests.map((g) => g.email).filter(Boolean)).size,
       activeLinks: (tokens ?? []).filter((t) => t.household_id === h.id && !t.revoked).length,
       lastSentAt: (sends ?? []).find((s) => s.entity_id === h.id)?.created_at ?? null,
+      lastOpenedAt: (opens ?? []).find((o) => o.entity_id === h.id)?.created_at ?? null,
     }
   })
 

@@ -11,6 +11,7 @@ export interface HouseholdInviteRow {
   emailCount: number
   activeLinks: number
   lastSentAt: string | null
+  lastOpenedAt: string | null
 }
 
 export function InvitationsClient({ rows }: { rows: HouseholdInviteRow[] }) {
@@ -85,6 +86,9 @@ function HouseholdRow({ row, onChanged }: { row: HouseholdInviteRow; onChanged: 
           <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
             {row.guestCount} guests · {row.emailCount} emails · {row.activeLinks} active link{row.activeLinks === 1 ? '' : 's'}
             {row.lastSentAt && ` · sent ${new Date(row.lastSentAt).toLocaleDateString('en-GB')}`}
+            {row.lastOpenedAt && (
+              <span className="text-accent-ink"> · opened {new Date(row.lastOpenedAt).toLocaleDateString('en-GB')}</span>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2.5">
@@ -114,6 +118,13 @@ function HouseholdRow({ row, onChanged }: { row: HouseholdInviteRow; onChanged: 
             className="shrink-0 rounded-md border border-line bg-paper-2 px-3 py-2 text-sm hover:border-accent">
             {copied ? 'Copied ✓' : 'Copy'}
           </button>
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(`You're invited! Open your personal invitation: ${link}`)}`}
+            target="_blank" rel="noreferrer"
+            className="shrink-0 rounded-md border border-line bg-paper-2 px-3 py-2 text-sm hover:border-accent"
+            title="Share on WhatsApp — how South Asian families actually send invites">
+            WhatsApp
+          </a>
         </div>
       )}
       {note && <p className="mt-2 text-sm text-ink-2">{note}</p>}

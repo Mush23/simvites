@@ -41,6 +41,30 @@ export function OnboardingForm() {
       </label>
 
       <fieldset>
+        <legend className="eyebrow mb-2">Choose your look</legend>
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          {[
+            { key: 'editorial-gold', name: 'Editorial Gold', desc: 'Cream, gold & deep red — warm, ceremonial. The original.', swatches: ['#F5EFE3', '#C9A227', '#7A1F1F'] },
+            { key: 'editorial-luxury', name: 'Editorial Luxury', desc: 'Ivory & ink with brass hairlines — quiet, modern.', swatches: ['#F6F1E9', '#211D18', '#B08D57'] },
+          ].map((t, i) => (
+            <label key={t.key}
+              className="flex cursor-pointer flex-col gap-2 rounded-md border border-line bg-paper-2 p-3.5 transition-colors has-checked:border-accent has-checked:bg-accent-soft">
+              <span className="flex items-center gap-2">
+                <input type="radio" name="template" value={t.key} defaultChecked={i === 0} className="accent-[var(--accent)]" />
+                <span className="text-sm font-medium text-ink">{t.name}</span>
+                <span className="ml-auto flex gap-1">
+                  {t.swatches.map((c) => (
+                    <span key={c} className="h-3.5 w-3.5 rounded-pill border border-line" style={{ background: c }} />
+                  ))}
+                </span>
+              </span>
+              <span className="text-xs text-ink-3">{t.desc}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset>
         <legend className="eyebrow mb-2">Which celebrations? (pick any — rename later)</legend>
         <div className="flex flex-wrap gap-2">
           {STARTER_EVENTS.map((name) => (

@@ -11,12 +11,16 @@ export interface SiteEvent {
   venue_name: string | null
   address: string | null
   description: string | null
+  /** Optional per-event accent colour (any CSS colour) — the wedding-site signature. */
+  accent?: string | null
 }
 
 export function SiteHero({
-  kicker, title, subtitle, dateText, location, imageUrl,
+  kicker, title, subtitle, dateText, location, imageUrl, guestName,
 }: {
   kicker?: string; title?: string; subtitle?: string; dateText?: string; location?: string; imageUrl?: string
+  /** Set from the guest-session cookie — "Welcome, The Shah Family". */
+  guestName?: string
 }) {
   return (
     <section className="relative flex min-h-[72vh] items-center justify-center overflow-hidden bg-paper-2 px-6 py-24 text-center">
@@ -35,6 +39,13 @@ export function SiteHero({
           {dateText && location && <span className="opacity-50">·</span>}
           {location && <span>{location}</span>}
         </div>
+        {guestName && (
+          <p className={`mx-auto mt-8 inline-block rounded-pill border px-5 py-2 font-mono text-[10px] uppercase tracking-[0.16em] ${
+            imageUrl ? 'border-white/40 text-white/90' : 'text-ink-2'
+          }`} style={imageUrl ? undefined : { borderColor: 'var(--accent-line)' }}>
+            Welcome, {guestName}
+          </p>
+        )}
       </div>
     </section>
   )
@@ -48,7 +59,8 @@ export function SiteSchedule({ heading, events }: { heading?: string; events: Si
       <div className="space-y-4">
         {visible.length === 0 && <p className="text-center text-ink-3">Events will appear here.</p>}
         {visible.map((e) => (
-          <div key={e.id} className="rounded-card border border-line bg-surface p-6 shadow-card">
+          <div key={e.id} className="rounded-card border border-line bg-surface p-6 shadow-card"
+            style={{ borderTopColor: e.accent ?? 'var(--accent-line)', borderTopWidth: 3 }}>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h3 className="font-display text-2xl text-ink">{e.name}</h3>
               <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-ink">
@@ -109,6 +121,107 @@ export function SiteFaq({ heading, items }: { heading?: string; items?: { q: str
             <p className="mt-1 text-ink-2">{it.a}</p>
           </div>
         ))}
+      </div>
+    </section>
+  )
+}
+
+export function SiteStory({ kicker, title, paragraphs }: {
+  kicker?: string; title?: string; paragraphs: { text: string }[]
+}) {
+  return (
+    <section className="mx-auto max-w-2xl px-6 py-16 text-center">
+      {kicker && <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-accent-ink">{kicker}</p>}
+      {title && <h2 className="font-display text-4xl text-ink">{title}</h2>}
+      <div className="mt-6 space-y-5">
+        {(paragraphs ?? []).map((p, i) => (
+          <p key={i} className="text-lg leading-relaxed text-ink-2">{p.text}</p>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+export function SiteFamily({ heading, sides }: {
+  heading?: string; sides: { side: string; name: string; parents: string }[]
+}) {
+  return (
+    <section className="border-y border-line bg-paper-2 px-6 py-16">
+      {heading && <h2 className="mb-10 text-center font-display text-4xl text-ink">{heading}</h2>}
+      <div className="mx-auto grid max-w-2xl gap-8 sm:grid-cols-2">
+        {(sides ?? []).map((s, i) => (
+          <div key={i} className="text-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent-ink">{s.side}</p>
+            <p className="mt-2 font-display text-3xl text-ink">{s.name}</p>
+            <p className="mt-1.5 text-sm text-ink-2">{s.parents}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+export function SiteHotelTravel({ heading, hotelName, address, blockCode, phone, bookingUrl, notes }: {
+  heading?: string; hotelName?: string; address?: string; blockCode?: string
+  phone?: string; bookingUrl?: string; notes?: string
+}) {
+  const rows = [
+    blockCode && { label: 'Block code', value: blockCode },
+    phone && { label: 'Phone', value: phone },
+  ].filter(Boolean) as { label: string; value: string }[]
+  const mapsUrl = hotelName
+    ? `https://maps.google.com/?q=${encodeURIComponent(`${hotelName} ${address ?? ''}`)}` : null
+
+  return (
+    <section className="mx-auto max-w-2xl px-6 py-16">
+      <h2 className="mb-8 text-center font-display text-4xl text-ink">{heading ?? 'Stay & Travel'}</h2>
+      <div className="rounded-card border border-line bg-surface p-7 shadow-card">
+        {hotelName ? (
+          <>
+            <p className="font-display text-2xl text-ink">{hotelName}</p>
+            {address && <p className="mt-1 text-ink-2">{address}</p>}
+            {rows.length > 0 && (
+              <dl className="mt-4 space-y-1.5">
+                {rows.map((r) => (
+                  <div key={r.label} className="flex gap-3 text-sm">
+                    <dt className="w-24 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] leading-5 text-accent-ink">{r.label}</dt>
+                    <dd className="select-all text-ink">{r.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+            {notes && <p className="mt-4 whitespace-pre-line text-sm text-ink-2">{notes}</p>}
+            <div className="mt-6 flex flex-wrap gap-3">
+              {bookingUrl && (
+                <a href={bookingUrl} target="_blank" rel="noreferrer"
+                  className="rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:-translate-y-px">
+                  Book a room
+                </a>
+              )}
+              {mapsUrl && (
+                <a href={mapsUrl} target="_blank" rel="noreferrer"
+                  className="rounded-md border border-line px-5 py-2.5 text-sm text-ink transition-colors hover:border-accent-line">
+                  Open in Maps
+                </a>
+              )}
+            </div>
+          </>
+        ) : (
+          <p className="text-center text-sm text-ink-3">Hotel details will appear here.</p>
+        )}
+      </div>
+    </section>
+  )
+}
+
+export function SiteGiftsNote({ heading, body }: { heading?: string; body?: string }) {
+  return (
+    <section className="px-6 py-16 text-center">
+      <div className="mx-auto max-w-xl">
+        <div className="mx-auto mb-6 h-px w-16" style={{ background: 'var(--accent-line)' }} />
+        <h2 className="font-display text-3xl text-ink">{heading ?? 'Your presence is the present'}</h2>
+        {body && <p className="mt-4 leading-relaxed text-ink-2">{body}</p>}
+        <div className="mx-auto mt-6 h-px w-16" style={{ background: 'var(--accent-line)' }} />
       </div>
     </section>
   )
