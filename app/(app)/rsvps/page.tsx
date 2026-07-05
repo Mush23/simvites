@@ -72,7 +72,7 @@ export default async function RsvpsPage() {
   )
 
   return (
-    <div className="mx-auto max-w-[1060px] px-6 py-10">
+    <div className="mx-auto max-w-[1240px] px-6 py-7">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <PageHeader
           eyebrow="RSVPs"
@@ -100,27 +100,38 @@ export default async function RsvpsPage() {
         {perEvent.map((e) => (
           <section key={e.id} className="rounded-card border border-line bg-surface p-6 shadow-card">
             <div className="flex items-baseline justify-between">
-              <h2 className="font-display text-2xl text-ink">{e.name}</h2>
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
+              <h2 className="text-[15px] font-semibold tracking-tight text-ink">{e.name}</h2>
+              <span className="font-mono text-[10px] text-ink-3">
                 {formatEventDateTime(e.starts_at) ?? 'TBC'}
               </span>
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-              <Stat label="Attending" value={e.attending} tone="ok" />
-              <Stat label="Declined" value={e.declined} tone="bad" />
-              <Stat label="Pending" value={e.pending} tone="warn" />
-            </div>
-            {e.capacity != null && (
-              <div className="mt-4">
-                <div className="h-1.5 w-full overflow-hidden rounded-pill bg-paper-2">
-                  <div className="h-full rounded-pill bg-accent"
-                    style={{ width: `${Math.min(100, (e.attending / e.capacity) * 100)}%` }} />
+            {/* Segmented bar (overhaul): attending / declined / pending of invited */}
+            {(() => {
+              const total = Math.max(1, e.attending + e.declined + e.pending)
+              return (
+                <div className="mt-4">
+                  <div className="flex h-2 w-full overflow-hidden rounded-full bg-surface-2">
+                    <div className="h-full bg-ok" style={{ width: `${(e.attending / total) * 100}%` }} />
+                    <div className="h-full bg-bad" style={{ width: `${(e.declined / total) * 100}%` }} />
+                    <div className="h-full bg-warn" style={{ width: `${(e.pending / total) * 100}%` }} />
+                  </div>
+                  <div className="mt-2.5 flex flex-wrap items-center gap-4 text-[12px]">
+                    <span className="flex items-center gap-1.5 text-ink-2">
+                      <span className="h-2 w-2 rounded-full bg-ok" />Attending <span className="font-mono font-semibold text-ink">{e.attending}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5 text-ink-2">
+                      <span className="h-2 w-2 rounded-full bg-bad" />Declined <span className="font-mono font-semibold text-ink">{e.declined}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5 text-ink-2">
+                      <span className="h-2 w-2 rounded-full bg-warn" />Pending <span className="font-mono font-semibold text-ink">{e.pending}</span>
+                    </span>
+                    {e.capacity != null && (
+                      <span className="ml-auto font-mono text-[10.5px] text-ink-3">{e.attending}/{e.capacity} seats</span>
+                    )}
+                  </div>
                 </div>
-                <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
-                  {e.attending} / {e.capacity} seats
-                </p>
-              </div>
-            )}
+              )
+            })()}
             {e.nonResponders.length > 0 && (
               <p className="mt-4 text-xs text-ink-3">
                 <span className="eyebrow">Chase:</span> {e.nonResponders.slice(0, 6).join(', ')}
@@ -134,7 +145,7 @@ export default async function RsvpsPage() {
       {/* Answer roll-ups */}
       {(rollups.length > 0 || textAnswers.length > 0) && (
         <div className="mt-10">
-          <h2 className="mb-5 font-display text-3xl text-ink">Answers</h2>
+          <h2 className="mb-5 text-lg font-semibold tracking-tight text-ink">Answers</h2>
           <div className="grid gap-5 sm:grid-cols-2">
             {rollups.map((r) => (
               <section key={r.label} className="rounded-card border border-line bg-surface p-6 shadow-card">
@@ -142,7 +153,7 @@ export default async function RsvpsPage() {
                 {r.counts.map(([k, n]) => (
                   <div key={k} className="flex items-baseline justify-between border-b border-line py-1.5 text-sm last:border-0">
                     <span className="text-ink">{k}</span>
-                    <span className="font-display text-xl nums text-ink">{n}</span>
+                    <span className="font-mono text-base font-semibold nums text-ink">{n}</span>
                   </div>
                 ))}
               </section>
@@ -168,7 +179,7 @@ function Stat({ label, value, tone }: { label: string; value: number; tone: 'ok'
   const toneClass = { ok: 'text-ok', bad: 'text-bad', warn: 'text-warn' }[tone]
   return (
     <div className="rounded-md bg-paper-2 py-3">
-      <p className={`font-display text-3xl nums ${toneClass}`}>{value}</p>
+      <p className={`font-mono text-[22px] font-semibold tracking-tight nums ${toneClass}`}>{value}</p>
       <p className="eyebrow mt-1">{label}</p>
     </div>
   )

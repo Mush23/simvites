@@ -37,9 +37,9 @@ export default async function VendorDetailPage({
   const covered = new Set((coverage ?? []).map((c) => c.event_id))
 
   return (
-    <div className="mx-auto max-w-[1060px] px-6 py-10">
+    <div className="mx-auto max-w-[1240px] px-6 py-7">
       <Link href="/vendors" className="eyebrow mb-3 inline-block text-ink-3 hover:text-accent-ink">← Vendors</Link>
-      <h1 className="font-display text-4xl text-ink">{vendor.name}</h1>
+      <h1 className="text-[22px] font-semibold tracking-tight text-ink">{vendor.name}</h1>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <section className="rounded-card border border-line bg-surface p-7 shadow-card">

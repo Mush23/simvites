@@ -21,7 +21,7 @@ export default async function SeatingPage() {
   const hh = new Map((households ?? []).map((h) => [h.id, h.name]))
 
   return (
-    <div className="mx-auto max-w-[1060px] px-6 py-10">
+    <div className="mx-auto max-w-[1240px] px-6 py-7">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <PageHeader
           eyebrow="Seating"

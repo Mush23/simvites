@@ -17,7 +17,7 @@ export default async function DashboardPage() {
     : "Let's get you set up."
 
   return (
-    <div className="mx-auto max-w-[1060px] px-6 py-10">
+    <div className="mx-auto max-w-[1240px] px-6 py-7">
       <PageHeader
         eyebrow="Command Centre"
         title={headline}
@@ -29,22 +29,30 @@ export default async function DashboardPage() {
       />
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_2fr]">
-        {/* Readiness ring card */}
-        <section className="rounded-card border border-line bg-surface p-7 shadow-card">
-          <p className="eyebrow mb-4">Readiness</p>
-          <p className="font-display text-7xl nums text-ink">{r.score}%</p>
-          <p className="mt-2 text-sm text-ink-2">ready for the big weekend</p>
-          <div className="mt-5 h-2 w-full overflow-hidden rounded-pill bg-paper-2">
-            <div className="h-full rounded-pill bg-accent transition-all" style={{ width: `${r.score}%` }} />
+        {/* Readiness ring card (overhaul: 84px SVG ring, coral arc) */}
+        <section className="rounded-card border border-line bg-surface p-6 shadow-card">
+          <p className="text-[12px] font-medium text-ink-2">Readiness</p>
+          <div className="mt-4 flex items-center gap-5">
+            <svg width="84" height="84" viewBox="0 0 84 84" className="shrink-0 -rotate-90">
+              <circle cx="42" cy="42" r="34" fill="none" stroke="var(--surface-2)" strokeWidth="8" />
+              <circle cx="42" cy="42" r="34" fill="none" stroke="var(--accent)" strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={`${(r.score / 100) * 213.6} 213.6`} />
+            </svg>
+            <div>
+              <p className="font-mono text-[26px] font-semibold tracking-tight nums text-ink">{r.score}%</p>
+              <p className="text-[12.5px] text-ink-3">ready for the big weekend</p>
+            </div>
           </div>
 
           {r.attention.length > 0 && (
-            <div className="mt-6 space-y-2.5">
+            <div className="mt-5 space-y-1.5">
               {r.attention.slice(0, 5).map((c) => (
                 <Link key={c.key} href={c.href}
-                  className="flex items-center justify-between rounded-md border border-line bg-paper-2 px-3.5 py-2.5 text-sm text-ink transition-colors hover:border-accent">
-                  <span>{c.label}</span>
-                  <span aria-hidden className="text-accent-ink">→</span>
+                  className="flex items-center gap-2.5 rounded-lg border border-line bg-paper px-3 py-2 text-[13px] text-ink transition-colors hover:border-line-2 hover:bg-surface-2">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-warn" />
+                  <span className="flex-1">{c.label}</span>
+                  <span aria-hidden className="text-ink-3">→</span>
                 </Link>
               ))}
             </div>

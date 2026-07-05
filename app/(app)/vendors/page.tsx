@@ -34,7 +34,7 @@ export default async function VendorsPage() {
   const contractedTotal = booked.reduce((n, v) => n + (v.contracted_amount ?? v.quote_amount ?? 0), 0)
 
   return (
-    <div className="mx-auto max-w-[1060px] px-6 py-10">
+    <div className="mx-auto max-w-[1240px] px-6 py-7">
       <PageHeader
         eyebrow="Vendors"
         title="Supplier pipeline"
@@ -62,7 +62,7 @@ export default async function VendorsPage() {
                       </div>
                       <div className="flex items-center gap-3">
                         {(v.contracted_amount ?? v.quote_amount) != null && (
-                          <span className="font-display text-lg nums text-ink">
+                          <span className="font-mono text-[15px] font-semibold nums text-ink">
                             {formatPence(v.contracted_amount ?? v.quote_amount)}
                           </span>
                         )}

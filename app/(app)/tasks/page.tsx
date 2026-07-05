@@ -20,7 +20,7 @@ export default async function TasksPage() {
   const open = (tasks ?? []).filter((t) => t.status !== 'done').length
 
   return (
-    <div className="mx-auto max-w-[1060px] px-6 py-10">
+    <div className="mx-auto max-w-[1240px] px-6 py-7">
       <PageHeader
         eyebrow="Tasks"
         title="What needs doing"

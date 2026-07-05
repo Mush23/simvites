@@ -327,7 +327,7 @@ export function WebsiteEditor({
     <div className="flex h-[calc(100vh-57px)] flex-col">
       <div className="flex items-center justify-between border-b border-line bg-paper px-5 py-2.5">
         <div className="flex items-center gap-3">
-          <span className="font-display text-lg text-ink">Website</span>
+          <span className="text-[14.5px] font-semibold tracking-tight text-ink">Website</span>
           <span className="rounded-pill border border-line px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
             {templateName}
           </span>

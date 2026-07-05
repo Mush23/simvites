@@ -11,7 +11,7 @@ export default async function GuestsPage() {
 
   const [{ data: events }, { data: households }, { data: guests }, { data: invitations }] =
     await Promise.all([
-      supabase.from('events').select('id, name, sort_order').eq('site_id', site!.siteId)
+      supabase.from('events').select('id, name, accent, sort_order').eq('site_id', site!.siteId)
         .is('archived_at', null).order('sort_order').order('starts_at'),
       supabase.from('households').select('id, name, side').eq('site_id', site!.siteId)
         .is('archived_at', null).order('created_at'),
@@ -21,14 +21,14 @@ export default async function GuestsPage() {
     ])
 
   return (
-    <div className="mx-auto max-w-[1060px] px-6 py-10">
+    <div className="mx-auto max-w-[1240px] px-6 py-7">
       <PageHeader
         eyebrow="Guests"
         title="Guest list"
         description="Households, named guests, and the invite matrix — who is invited to what drives everything a guest can see and RSVP to."
       />
       <GuestManager
-        events={(events ?? []).map((e) => ({ id: e.id, name: e.name }))}
+        events={(events ?? []).map((e) => ({ id: e.id, name: e.name, accent: e.accent }))}
         households={(households ?? []).map((h) => ({
           id: h.id,
           name: h.name,

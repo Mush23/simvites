@@ -95,7 +95,7 @@ function HouseholdRow({ row, onChanged }: { row: HouseholdInviteRow; onChanged: 
     <section className="rounded-card border border-line bg-surface p-5 shadow-card">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="font-display text-xl text-ink">{row.name}</p>
+          <p className="text-[14.5px] font-semibold tracking-tight text-ink">{row.name}</p>
           <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
             {row.guestCount} guests · {row.emailCount} emails · {row.activeLinks} active link{row.activeLinks === 1 ? '' : 's'}
             {row.lastSentAt && ` · sent ${new Date(row.lastSentAt).toLocaleDateString('en-GB')}`}

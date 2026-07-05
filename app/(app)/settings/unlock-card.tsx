@@ -19,7 +19,7 @@ export function UnlockCard({ unlocked, priceDisplay }: { unlocked: boolean; pric
     return (
       <section className="rounded-card border border-line bg-surface p-7 shadow-card">
         <p className="eyebrow mb-4">Billing</p>
-        <p className="font-display text-3xl text-ink">Unlocked ✓</p>
+        <p className="text-lg font-semibold tracking-tight text-ink">Unlocked ✓</p>
         <p className="mt-3 text-ink-2">
           Publishing and invite sending are live for this site. One payment, the whole wedding — no subscription.
         </p>
@@ -30,7 +30,7 @@ export function UnlockCard({ unlocked, priceDisplay }: { unlocked: boolean; pric
   return (
     <section className="rounded-card border border-accent-line bg-accent-soft/40 p-7 shadow-card">
       <p className="eyebrow mb-4">Billing</p>
-      <p className="font-display text-3xl text-ink">Unlock your command centre</p>
+      <p className="text-lg font-semibold tracking-tight text-ink">Unlock your command centre</p>
       <p className="mt-3 leading-relaxed text-ink-2">
         Build everything free — events, guests, budget, the whole site. One payment of{' '}
         <span className="font-display nums text-ink">{priceDisplay}</span> unlocks publishing your

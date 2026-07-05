@@ -34,9 +34,9 @@ export default async function EventHubPage({
   if (!event) notFound()
 
   return (
-    <div className="mx-auto max-w-[1060px] px-6 py-10">
+    <div className="mx-auto max-w-[1240px] px-6 py-7">
       <Link href="/events" className="eyebrow mb-3 inline-block text-ink-3 hover:text-accent-ink">← Events</Link>
-      <h1 className="font-display text-4xl text-ink">{event.name}</h1>
+      <h1 className="text-[22px] font-semibold tracking-tight text-ink">{event.name}</h1>
 
       {/* Connected tab bar — real links, keyboard-reachable */}
       <nav className="mt-6 flex gap-1 overflow-x-auto border-b border-line" aria-label="Event sections">
@@ -101,7 +101,7 @@ async function ConnectedTab({ tab, eventId, siteId }: { tab: Tab; eventId: strin
         <div className="mb-6 grid max-w-md grid-cols-3 gap-3 text-center">
           {(['attending', 'declined', 'pending'] as const).map((k) => (
             <div key={k} className="rounded-md bg-paper-2 py-3">
-              <p className="font-display text-3xl nums text-ink">{counts[k]}</p>
+              <p className="font-mono text-[22px] font-semibold tracking-tight nums text-ink">{counts[k]}</p>
               <p className="eyebrow mt-1">{k}</p>
             </div>
           ))}
@@ -137,7 +137,7 @@ async function ConnectedTab({ tab, eventId, siteId }: { tab: Tab; eventId: strin
     const total = (items ?? []).reduce((n, i) => n + (i.actual_amount ?? i.estimated_amount ?? 0), 0)
     return (
       <div>
-        <p className="mb-4 font-display text-2xl nums text-ink">{formatPence(total) || '£0.00'} <span className="text-sm text-ink-3">committed to this event</span></p>
+        <p className="mb-4 font-mono text-lg font-semibold nums text-ink">{formatPence(total) || '£0.00'} <span className="text-sm text-ink-3">committed to this event</span></p>
         <Panel empty={!items?.length} emptyText="No budget lines linked to this event." manageHref="/budget" manageLabel="Open budget">
           {(items ?? []).map((i) => (
             <Row key={i.id} main={i.label} sub={i.category}

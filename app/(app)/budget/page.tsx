@@ -27,7 +27,7 @@ export default async function BudgetPage() {
   const vendorOptions: Option[] = (vendors ?? []).map((v) => ({ id: v.id, name: v.name }))
 
   return (
-    <div className="mx-auto max-w-[1060px] px-6 py-10">
+    <div className="mx-auto max-w-[1240px] px-6 py-7">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <PageHeader
           eyebrow="Budget"

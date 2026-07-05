@@ -58,7 +58,7 @@ export function SeatingManager({ tables, seats, guests, events }: {
           return (
             <section key={t.id} className="rounded-card border border-line bg-surface p-5 shadow-card">
               <div className="flex items-baseline justify-between">
-                <p className="font-display text-xl text-ink">{t.name}</p>
+                <p className="text-[14.5px] font-semibold tracking-tight text-ink">{t.name}</p>
                 <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
                   {seated.length}/{t.capacity}{t.eventName ? ` — ${t.eventName}` : ''}
                 </span>

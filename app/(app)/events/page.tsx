@@ -23,7 +23,7 @@ export default async function EventsPage() {
     .order('starts_at', { ascending: true })
 
   return (
-    <div className="mx-auto max-w-[1060px] px-6 py-10">
+    <div className="mx-auto max-w-[1240px] px-6 py-7">
       <PageHeader
         eyebrow="Events"
         title="Your celebrations"
@@ -45,7 +45,7 @@ export default async function EventsPage() {
               className="flex items-center justify-between rounded-card border border-line bg-surface p-5 shadow-card transition-transform hover:-translate-y-0.5"
             >
               <div>
-                <p className="font-display text-2xl text-ink">{e.name}</p>
+                <p className="text-[15px] font-semibold tracking-tight text-ink">{e.name}</p>
                 <p className="mt-1 text-sm text-ink-2">
                   {formatEventDateTime(e.starts_at) ?? 'Date TBC'}
                   {e.venue_name ? ` · ${e.venue_name}` : ''}

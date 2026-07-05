@@ -8,7 +8,7 @@ import {
 } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
 
-export interface MatrixEvent { id: string; name: string }
+export interface MatrixEvent { id: string; name: string; accent?: string | null }
 export interface MatrixGuest {
   id: string; fullName: string; email: string | null
   isChild: boolean; plusOneAllowed: boolean; invitedEventIds: string[]
@@ -88,10 +88,21 @@ function HouseholdCard({ household, events, onChanged }: {
     if (res?.error) setError(res.error); else onChanged()
   }
 
+  /** Column-header click (overhaul): toggle the whole household for an event. */
+  async function toggleColumn(eventId: string, invite: boolean) {
+    await Promise.all(
+      household.guests
+        .filter((g) => g.invitedEventIds.includes(eventId) !== invite)
+        .map((g) => setInvitation(g.id, eventId, invite)),
+    )
+    notify(invite ? `${household.name} invited` : `${household.name} uninvited`)
+    onChanged()
+  }
+
   return (
     <section className="rounded-card border border-line bg-surface p-6 shadow-card">
       <div className="flex items-baseline justify-between gap-3">
-        <h3 className="font-display text-2xl text-ink">{household.name}</h3>
+        <h3 className="text-[14.5px] font-semibold tracking-tight text-ink">{household.name}</h3>
         <div className="flex items-center gap-4">
           {household.side && (
             <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
@@ -114,10 +125,22 @@ function HouseholdCard({ household, events, onChanged }: {
         <table className="w-full min-w-[560px] border-collapse text-sm">
           <thead>
             <tr>
-              <th className="eyebrow pb-2 pr-4 text-left font-normal">Guest</th>
-              {events.map((e) => (
-                <th key={e.id} className="eyebrow pb-2 px-2 text-center font-normal">{e.name}</th>
-              ))}
+              <th className="pb-2 pr-4 text-left text-[12px] font-medium text-ink-3">Guest</th>
+              {events.map((e) => {
+                const allIn = household.guests.length > 0 &&
+                  household.guests.every((g) => g.invitedEventIds.includes(e.id))
+                return (
+                  <th key={e.id} className="pb-2 px-2 text-center font-normal">
+                    <button type="button"
+                      title={`Click to ${allIn ? 'uninvite' : 'invite'} the whole household ${allIn ? 'from' : 'to'} ${e.name}`}
+                      onClick={() => toggleColumn(e.id, !allIn)}
+                      className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[12px] font-medium text-ink-2 hover:bg-surface-2 hover:text-ink">
+                      <span className="h-2 w-2 rounded-full" style={{ background: e.accent ?? 'var(--accent)' }} />
+                      {e.name}
+                    </button>
+                  </th>
+                )
+              })}
               <th className="w-8" />
             </tr>
           </thead>
@@ -126,7 +149,7 @@ function HouseholdCard({ household, events, onChanged }: {
               <tr><td colSpan={events.length + 2} className="py-3 text-ink-3">No guests yet.</td></tr>
             )}
             {household.guests.map((g) => (
-              <GuestRow key={g.id} guest={g} events={events} onChanged={onChanged} />
+              <GuestRow key={`${g.id}:${g.invitedEventIds.join('.')}`} guest={g} events={events} onChanged={onChanged} />
             ))}
           </tbody>
         </table>
@@ -185,17 +208,25 @@ function GuestRow({ guest, events, onChanged }: {
         {guest.plusOneAllowed && <span className="ml-2 font-mono text-[9px] uppercase text-accent-ink">+1</span>}
         {guest.email && <span className="ml-2 text-xs text-ink-3">{guest.email}</span>}
       </td>
-      {events.map((e) => (
-        <td key={e.id} className="px-2 py-2.5 text-center">
-          <input
-            type="checkbox"
-            aria-label={`${guest.fullName} invited to ${e.name}`}
-            checked={invited.has(e.id)}
-            onChange={() => toggle(e.id)}
-            className="h-4.5 w-4.5 accent-[var(--accent)]"
-          />
-        </td>
-      ))}
+      {events.map((e) => {
+        const on = invited.has(e.id)
+        return (
+          <td key={e.id} className="px-2 py-2.5 text-center">
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked={on}
+              aria-label={`${guest.fullName} invited to ${e.name}`}
+              onClick={() => toggle(e.id)}
+              className={`inline-flex h-5 w-5 items-center justify-center !rounded-[6px] text-[11px] leading-none transition-colors ${
+                on ? 'bg-accent text-white' : 'border-[1.5px] border-line-2 bg-transparent hover:border-accent'
+              }`}
+            >
+              {on ? '✓' : ''}
+            </button>
+          </td>
+        )
+      })}
       <td className="text-right">
         <button type="button" aria-label={`Archive ${guest.fullName}`}
           onClick={async () => {

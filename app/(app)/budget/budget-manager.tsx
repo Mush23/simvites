@@ -112,7 +112,7 @@ function BudgetRow({ item, events, vendors, onChanged }: {
           <span className="text-sm text-ink-2">
             {formatPence(item.paid_amount)} paid · {formatPence(balance)} due
           </span>
-          <span className="font-display text-lg nums text-ink">{formatPence(item.actual_amount ?? item.estimated_amount)}</span>
+          <span className="font-mono text-[15px] font-semibold nums text-ink">{formatPence(item.actual_amount ?? item.estimated_amount)}</span>
           <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
             {STATUS_LABEL[item.status] ?? item.status}
           </span>
