@@ -29,6 +29,42 @@ export async function createVendor(formData: FormData) {
   redirect(`/vendors/${data.id}`)
 }
 
+/**
+ * Adopt a recommended vendor into this site's pipeline. Copies the curated
+ * contact details and records where it came from (source_directory_id).
+ * Idempotent per site: if already added, returns the existing vendor.
+ */
+export async function addFromDirectory(directoryId: string) {
+  const site = await getPrimarySite()
+  if (!site) return { error: 'No site.' }
+  const supabase = await createClient()
+
+  const { data: existing } = await supabase
+    .from('vendors').select('id').eq('site_id', site.siteId)
+    .eq('source_directory_id', directoryId).is('archived_at', null).maybeSingle()
+  if (existing) { revalidatePath('/vendors'); return { id: existing.id, already: true } }
+
+  const { data: rec } = await supabase
+    .from('vendor_directory')
+    .select('name, category, website, instagram, email, phone')
+    .eq('id', directoryId).maybeSingle()
+  if (!rec) return { error: 'That recommendation is no longer available.' }
+
+  const { data, error } = await supabase
+    .from('vendors')
+    .insert({
+      site_id: site.siteId, name: rec.name, category: rec.category,
+      website: rec.website, instagram: rec.instagram, email: rec.email, phone: rec.phone,
+      status: 'shortlisted', source_directory_id: directoryId,
+      notes: 'Added from Simvites recommendations.',
+    })
+    .select('id')
+    .single()
+  if (error) return { error: error.message }
+  revalidatePath('/vendors')
+  return { id: data.id }
+}
+
 export async function updateVendor(vendorId: string, formData: FormData) {
   const supabase = await createClient()
   const { error } = await supabase
