@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { updateSiteSettings } from './actions'
+import type { TemplateListing } from '@/lib/templates/registry'
 
 function toLocal(v: string | null) {
   if (!v) return ''
@@ -11,15 +12,11 @@ function toLocal(v: string | null) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-const TEMPLATE_OPTIONS = [
-  { key: 'editorial-gold', name: 'Editorial Gold — cream, gold & deep red' },
-  { key: 'editorial-luxury', name: 'Editorial Luxury — ivory, ink & brass' },
-]
-
-export function SiteSettingsForm({ title, deadlineDefault, templateKey }: {
+export function SiteSettingsForm({ title, deadlineDefault, templateKey, templates }: {
   title: string
   deadlineDefault: string | null
   templateKey: string
+  templates: TemplateListing[]
 }) {
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -37,16 +34,30 @@ export function SiteSettingsForm({ title, deadlineDefault, templateKey }: {
         <input name="title" defaultValue={title} required
           className="w-full rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-accent" />
       </label>
-      <label className="block">
-        <span className="eyebrow mb-1.5 block">Template</span>
-        <select name="template" defaultValue={templateKey}
-          className="w-full rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-accent">
-          {TEMPLATE_OPTIONS.map((t) => <option key={t.key} value={t.key}>{t.name}</option>)}
-        </select>
+      <fieldset>
+        <legend className="eyebrow mb-2">Template</legend>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {templates.map((t) => (
+            <label key={t.key}
+              className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-line bg-surface p-3 transition-colors has-checked:border-accent has-checked:shadow-[0_0_0_1px_var(--accent)]">
+              <input type="radio" name="template" value={t.key} defaultChecked={t.key === templateKey}
+                className="accent-[var(--accent)]" />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-display text-[14.5px] text-ink">{t.name}</span>
+                {t.mood && <span className="block text-[11px] text-ink-3">{t.mood}</span>}
+              </span>
+              <span className="flex shrink-0 gap-1">
+                {t.swatches.map((c) => (
+                  <span key={c} className="h-3 w-3 rounded-full border border-line" style={{ background: c }} />
+                ))}
+              </span>
+            </label>
+          ))}
+        </div>
         <span className="mt-1.5 block text-xs text-ink-3">
           Changes apply to the live site on your next publish.
         </span>
-      </label>
+      </fieldset>
       <label className="block">
         <span className="eyebrow mb-1.5 block">RSVP deadline (site-wide default)</span>
         <input name="rsvp_deadline_default" type="datetime-local" defaultValue={toLocal(deadlineDefault)}

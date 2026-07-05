@@ -1,8 +1,14 @@
 'use client'
 
+// Sign in (overhaul 3a/3b): split screen — the tool on the left, the
+// artifact on the right (near-black panel holding an ivory invitation
+// card: "The tool is software. What your guests get is a keepsake.").
+// Same Supabase OTP/password flows as before.
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Mail } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { BRAND_NAME } from '@/lib/brand'
@@ -19,9 +25,10 @@ export default function LoginPage() {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [linkSent, setLinkSent] = useState(false)
 
-  async function sendLink(e: React.FormEvent) {
-    e.preventDefault()
+  async function sendLink(e?: React.FormEvent) {
+    e?.preventDefault()
     setPending(true); setError(null); setNotice(null)
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -29,7 +36,7 @@ export default function LoginPage() {
     })
     setPending(false)
     if (error) setError(error.message)
-    else setNotice('Check your email for a sign-in link.')
+    else setLinkSent(true)
   }
 
   async function withPassword(e: React.FormEvent) {
@@ -50,60 +57,139 @@ export default function LoginPage() {
     }
   }
 
+  // 3b — link-sent state
+  if (linkSent) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-paper px-6 text-ink">
+        <div className="w-[420px] max-w-full rounded-[14px] border border-line bg-surface p-7 text-center shadow-card">
+          <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-accent-soft text-accent">
+            <Mail size={20} strokeWidth={1.7} />
+          </span>
+          <h1 className="mt-4 text-lg font-semibold tracking-tight">Check your email</h1>
+          <p className="mt-2 text-[13.5px] leading-relaxed text-ink-2">
+            We sent a sign-in link to <span className="font-medium text-ink">{email}</span>.
+            It works once and expires in about an hour.
+          </p>
+          <button type="button" onClick={() => sendLink()} disabled={pending}
+            className="mt-5 w-full border border-line px-4 py-2.5 text-[13px] font-medium text-ink hover:border-line-2 disabled:opacity-50">
+            {pending ? 'Sending…' : 'Resend the link'}
+          </button>
+          <button type="button" onClick={() => setLinkSent(false)}
+            className="mt-3 text-[12.5px] text-ink-3 underline underline-offset-4 hover:text-ink">
+            Go back
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex min-h-screen flex-col bg-paper text-ink">
-      <header className="mx-auto flex w-full max-w-[1060px] items-center justify-between px-6 py-6">
-        <Link href="/" className="font-display text-2xl">{BRAND_NAME}</Link>
-        <ThemeToggle />
-      </header>
+    <div className="grid min-h-screen bg-paper text-ink lg:grid-cols-2">
+      {/* Left — the tool */}
+      <div className="flex flex-col px-6 sm:px-12">
+        <header className="flex items-center justify-between py-6">
+          <Link href="/" className="text-[13px] font-semibold tracking-tight">{BRAND_NAME}</Link>
+          <ThemeToggle />
+        </header>
 
-      <main className="flex flex-1 items-center justify-center px-6 pb-24">
-        <div className="w-full max-w-sm">
-          <p className="eyebrow mb-3 text-center">Welcome</p>
-          <h1 className="text-center font-display text-4xl">Sign in to {BRAND_NAME}</h1>
+        <main className="flex flex-1 items-center">
+          <div className="mx-auto w-full max-w-sm pb-16">
+            <h1 className="text-[28px] font-semibold tracking-tight">Welcome back</h1>
+            <p className="mt-1.5 text-[13.5px] text-ink-2">Sign in to your wedding command centre.</p>
 
-          <div className="mt-8 flex rounded-md border border-line bg-paper-2 p-1 text-center">
-            {(['link', 'password'] as Tab[]).map((t) => (
+            <div className="mt-7 flex rounded-lg border border-line bg-surface-2 p-1 text-center">
+              {(['link', 'password'] as Tab[]).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => { setTab(t); setError(null); setNotice(null) }}
+                  className={`flex-1 !rounded-md px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
+                    tab === t ? 'bg-surface text-ink shadow-card' : 'text-ink-3'
+                  }`}
+                >
+                  {t === 'link' ? 'Email link' : 'Password'}
+                </button>
+              ))}
+            </div>
+
+            <form onSubmit={tab === 'link' ? sendLink : withPassword} className="mt-6 space-y-4">
+              <Field label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" />
+              {tab === 'password' && (
+                <Field
+                  label="Password" type="password" value={password} onChange={setPassword}
+                  autoComplete={signup ? 'new-password' : 'current-password'}
+                />
+              )}
+              {error && <p className="text-[13px] text-bad">{error}</p>}
+              {notice && <p className="text-[13px] text-ok">{notice}</p>}
               <button
-                key={t}
-                onClick={() => { setTab(t); setError(null); setNotice(null) }}
-                className={`flex-1 rounded-[6px] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] transition-colors ${
-                  tab === t ? 'bg-surface text-ink shadow-card' : 'text-ink-3'
-                }`}
+                type="submit" disabled={pending}
+                className="w-full bg-accent px-6 py-2.5 text-[13.5px] font-semibold text-white disabled:opacity-50"
               >
-                {t === 'link' ? 'Email link' : 'Password'}
+                {pending ? 'Please wait…' : tab === 'link' ? 'Send sign-in link' : signup ? 'Create account' : 'Sign in'}
               </button>
+              {tab === 'link' && <p className="text-center text-[12px] text-ink-3">No passwords needed — we email you a secure link.</p>}
+            </form>
+
+            {tab === 'password' && (
+              <p className="mt-5 text-center text-[13px] text-ink-3">
+                {signup ? 'Already have an account? ' : 'New here? '}
+                <button onClick={() => { setSignup(!signup); setError(null) }} className="text-accent-ink underline underline-offset-4">
+                  {signup ? 'Sign in' : 'Create one'}
+                </button>
+              </p>
+            )}
+
+            <div className="my-6 flex items-center gap-3 text-[11px] text-ink-3">
+              <span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" />
+            </div>
+            <button type="button"
+              onClick={() => { setTab('password'); setSignup(true); setError(null); setNotice(null) }}
+              className="block w-full rounded-lg border border-line px-6 py-2.5 text-center text-[13.5px] font-medium text-ink hover:border-line-2">
+              Create your wedding site free
+            </button>
+          </div>
+        </main>
+      </div>
+
+      {/* Right — the artifact */}
+      <div className="relative hidden items-center justify-center overflow-hidden lg:flex"
+        style={{ background: 'oklch(0.13 0.004 270)' }}>
+        <div aria-hidden className="absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px)',
+            backgroundSize: '56px 56px',
+          }} />
+        <div aria-hidden className="absolute inset-0"
+          style={{ background: 'radial-gradient(600px 420px at 65% 40%, oklch(0.62 0.21 29 / 0.16), transparent 70%)' }} />
+
+        <div className="relative w-[340px] rotate-[-1.5deg] rounded-[4px] px-9 py-10 text-center shadow-lift"
+          style={{ background: 'oklch(0.975 0.006 85)', color: '#211D18' }}>
+          <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-[#97753F]">Together with their families</p>
+          <p className="mt-3 font-display text-[34px] leading-tight">Aanya &amp; Dev</p>
+          <div className="mx-auto mt-4 h-px w-14 bg-[#C4BAAA]" />
+          <div className="mt-5 space-y-2.5 text-left text-[12px] text-[#5C544A]">
+            {[
+              { c: '#3E7C4F', n: 'Mehndi', d: 'Thu 17 Sep · At home' },
+              { c: '#6D3FA9', n: 'Sangeet', d: 'Fri 18 Sep · The Grand Hall' },
+              { c: '#C9A227', n: 'Ceremony', d: 'Sat 19 Sep · Merrydale Manor' },
+              { c: '#7A1F1F', n: 'Reception', d: 'Sat 19 Sep · Merrydale Manor' },
+            ].map((e) => (
+              <p key={e.n} className="flex items-center gap-2.5">
+                <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: e.c }} />
+                <span className="font-medium text-[#211D18]">{e.n}</span>
+                <span className="ml-auto">{e.d}</span>
+              </p>
             ))}
           </div>
-
-          <form onSubmit={tab === 'link' ? sendLink : withPassword} className="mt-7 space-y-5">
-            <Field label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" />
-            {tab === 'password' && (
-              <Field
-                label="Password" type="password" value={password} onChange={setPassword}
-                autoComplete={signup ? 'new-password' : 'current-password'}
-              />
-            )}
-            {error && <p className="text-sm text-bad">{error}</p>}
-            {notice && <p className="text-sm text-accent-ink">{notice}</p>}
-            <button
-              type="submit" disabled={pending}
-              className="w-full rounded-md bg-accent px-6 py-3 font-semibold text-white transition-transform hover:-translate-y-px disabled:opacity-50"
-            >
-              {pending ? 'Please wait…' : tab === 'link' ? 'Send sign-in link' : signup ? 'Create account' : 'Sign in'}
-            </button>
-          </form>
-
-          {tab === 'password' && (
-            <p className="mt-6 text-center text-sm text-ink-3">
-              {signup ? 'Already have an account? ' : 'New here? '}
-              <button onClick={() => { setSignup(!signup); setError(null) }} className="text-accent-ink underline underline-offset-4">
-                {signup ? 'Sign in' : 'Create one'}
-              </button>
-            </p>
-          )}
+          <span className="mt-7 inline-block bg-[#7A1F1F] px-6 py-2 text-[11px] font-semibold tracking-wide text-white">
+            KINDLY RSVP
+          </span>
         </div>
-      </main>
+
+        <p className="absolute bottom-10 left-0 right-0 text-center text-[13px] text-white/55">
+          The tool is software. What your guests get is <span className="font-display italic text-white/85">a keepsake</span>.
+        </p>
+      </div>
     </div>
   )
 }
@@ -113,11 +199,11 @@ function Field({ label, type, value, onChange, autoComplete }: {
 }) {
   return (
     <label className="block">
-      <span className="eyebrow mb-1.5 block">{label}</span>
+      <span className="mb-1.5 block text-[12px] font-medium text-ink-2">{label}</span>
       <input
         type={type} value={value} onChange={(e) => onChange(e.target.value)}
         autoComplete={autoComplete} required
-        className="w-full rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-accent"
+        className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent"
       />
     </label>
   )

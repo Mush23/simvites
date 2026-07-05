@@ -1,8 +1,13 @@
 'use client'
 
+// Onboarding (overhaul 3c): one page, three numbered moves. Same fields and
+// server action as before; the template picker is registry-driven and lists
+// every look on the platform.
+
 import { useActionState, useState } from 'react'
 import { createWorkspace, type OnboardingState } from './actions'
 import { BASE_DOMAIN } from '@/lib/brand'
+import type { TemplateListing } from '@/lib/templates/registry'
 
 const initial: OnboardingState = {}
 
@@ -14,83 +19,103 @@ const STARTER_EVENTS = [
 ]
 const PRESELECTED = new Set(['Wedding Ceremony', 'Reception'])
 
-export function OnboardingForm() {
+function MoveLabel({ n, title, hint }: { n: string; title: string; hint?: string }) {
+  return (
+    <div className="mb-3 flex items-baseline gap-2.5">
+      <span className="font-mono text-[10px] font-semibold text-accent">{n}</span>
+      <span className="text-[13.5px] font-semibold tracking-tight text-ink">{title}</span>
+      {hint && <span className="text-[12px] text-ink-3">{hint}</span>}
+    </div>
+  )
+}
+
+export function OnboardingForm({ templates }: { templates: TemplateListing[] }) {
   const [state, action, pending] = useActionState(createWorkspace, initial)
   const [slug, setSlug] = useState('')
+  const [showAll, setShowAll] = useState(false)
+  const shown = showAll ? templates : templates.slice(0, 4)
 
   return (
-    <form action={action} className="space-y-5">
-      <label className="block">
-        <span className="eyebrow mb-1.5 block">Couple / site name</span>
-        <input
-          name="site_title" required placeholder="Aanya & Dev"
-          className="w-full rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-accent"
-        />
-      </label>
-
-      <label className="block">
-        <span className="eyebrow mb-1.5 block">Web address</span>
-        <div className="flex items-baseline gap-1">
-          <input
-            name="slug" required value={slug} onChange={(e) => setSlug(e.target.value)}
-            placeholder="aanya-and-dev"
-            className="min-w-0 flex-1 rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-accent"
-          />
-          <span className="shrink-0 text-sm text-ink-3">.{BASE_DOMAIN}</span>
+    <form action={action} className="space-y-8">
+      {/* 01 — names */}
+      <section>
+        <MoveLabel n="01" title="Who's getting married?" />
+        <div className="space-y-3.5">
+          <label className="block">
+            <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Couple / site name</span>
+            <input
+              name="site_title" required placeholder="Aanya & Dev"
+              className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Web address</span>
+            <div className="flex items-center rounded-lg border border-line bg-surface focus-within:border-accent">
+              <input
+                name="slug" required value={slug} onChange={(e) => setSlug(e.target.value)}
+                placeholder="aanya-and-dev"
+                className="min-w-0 flex-1 bg-transparent px-3.5 py-2.5 text-[14px] text-ink outline-none"
+              />
+              <span className="shrink-0 pr-3.5 font-mono text-[11px] text-ink-3">.{BASE_DOMAIN}</span>
+            </div>
+          </label>
         </div>
-      </label>
+      </section>
 
-      <fieldset>
-        <legend className="eyebrow mb-2">Choose your look</legend>
+      {/* 02 — look */}
+      <section>
+        <MoveLabel n="02" title="Choose your look" hint="change it any time" />
         <div className="grid gap-2.5 sm:grid-cols-2">
-          {[
-            { key: 'editorial-gold', name: 'Editorial Gold', desc: 'Cream, gold and deep red. Warm, ceremonial. The original.', swatches: ['#F5EFE3', '#C9A227', '#7A1F1F'], preview: '/s/aanya-and-dev' },
-            { key: 'editorial-luxury', name: 'Editorial Luxury', desc: 'Ivory and ink with brass hairlines. Quiet, modern.', swatches: ['#F6F1E9', '#211D18', '#B08D57'], preview: '/s/riya-and-arjun' },
-          ].map((t, i) => (
+          {shown.map((t, i) => (
             <label key={t.key}
-              className="flex cursor-pointer flex-col gap-2 rounded-md border border-line bg-paper-2 p-3.5 transition-colors has-checked:border-accent has-checked:bg-accent-soft">
+              className="group flex cursor-pointer flex-col gap-2 rounded-xl border border-line bg-surface p-3.5 transition-colors has-checked:border-accent has-checked:shadow-[0_0_0_1px_var(--accent)]">
               <span className="flex items-center gap-2">
                 <input type="radio" name="template" value={t.key} defaultChecked={i === 0} className="accent-[var(--accent)]" />
-                <span className="text-sm font-medium text-ink">{t.name}</span>
+                <span className="font-display text-[15px] text-ink">{t.name}</span>
                 <span className="ml-auto flex gap-1">
                   {t.swatches.map((c) => (
-                    <span key={c} className="h-3.5 w-3.5 rounded-pill border border-line" style={{ background: c }} />
+                    <span key={c} className="h-3.5 w-3.5 rounded-full border border-line" style={{ background: c }} />
                   ))}
                 </span>
               </span>
-              <span className="text-xs text-ink-3">{t.desc}</span>
-              <a href={t.preview} target="_blank" rel="noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="text-xs text-accent-ink underline underline-offset-4">
-                Preview this template ↗
-              </a>
+              <span className="text-[11.5px] leading-relaxed text-ink-3">{t.description}</span>
             </label>
           ))}
+          {!showAll && templates.length > 4 && (
+            <button type="button" onClick={() => setShowAll(true)}
+              className="flex min-h-[74px] items-center justify-center rounded-xl border border-dashed border-line-2 text-[12.5px] font-medium text-ink-2 hover:border-accent hover:text-ink">
+              +{templates.length - 4} more looks
+            </button>
+          )}
         </div>
-      </fieldset>
+      </section>
 
-      <fieldset>
-        <legend className="eyebrow mb-2">Which celebrations? (pick any — rename later)</legend>
+      {/* 03 — celebrations */}
+      <section>
+        <MoveLabel n="03" title="Which celebrations?" hint="pick any — rename later" />
         <div className="flex flex-wrap gap-2">
           {STARTER_EVENTS.map((name) => (
             <label key={name}
-              className="flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-line bg-paper-2 px-3 text-sm text-ink transition-colors has-checked:border-accent has-checked:bg-accent-soft">
+              className="flex min-h-9 cursor-pointer items-center gap-2 rounded-full border border-line bg-surface px-3.5 text-[13px] text-ink transition-colors has-checked:border-accent has-checked:bg-accent-soft">
               <input type="checkbox" name="events" value={name} defaultChecked={PRESELECTED.has(name)}
                 className="accent-[var(--accent)]" />
               {name}
             </label>
           ))}
         </div>
-      </fieldset>
+      </section>
 
-      {state.error && <p className="text-sm text-bad">{state.error}</p>}
+      {state.error && <p className="text-[13px] text-bad">{state.error}</p>}
 
-      <button
-        type="submit" disabled={pending}
-        className="w-full rounded-md bg-accent px-6 py-3 font-semibold text-white transition-transform hover:-translate-y-px disabled:opacity-50"
-      >
-        {pending ? 'Creating…' : 'Create site'}
-      </button>
+      <div>
+        <button
+          type="submit" disabled={pending}
+          className="w-full bg-accent px-6 py-3 text-[14px] font-semibold text-white disabled:opacity-50"
+        >
+          {pending ? 'Creating…' : 'Create my site'}
+        </button>
+        <p className="mt-2.5 text-center text-[12px] text-ink-3">Free while you build. Pay once when you send.</p>
+      </div>
     </form>
   )
 }

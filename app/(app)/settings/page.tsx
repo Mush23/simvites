@@ -72,6 +72,7 @@ export default async function SettingsPage({
             title={row?.title ?? ''}
             deadlineDefault={row?.rsvp_deadline_default ?? null}
             templateKey={templateKey}
+            templates={(await import('@/lib/templates/registry')).listTemplates()}
           />
           <p className="mt-5 border-t border-line pt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3">
             Address: {row?.slug}.{BASE_DOMAIN} · Status: {row?.status}

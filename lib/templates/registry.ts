@@ -16,9 +16,25 @@ export interface SiteTemplate {
   key: string
   name: string
   description: string
+  /** Three swatches (bg / primary / accent) for pickers. */
+  swatches: [string, string, string]
+  /** One-word mood, shown under the name in pickers. */
+  mood?: string
   /** CSS custom-property overrides applied at the public site root. */
   vars: Record<string, string>
   starterDoc: SiteData
+}
+
+/** Picker-safe projection (no starter docs) for client components. */
+export interface TemplateListing {
+  key: string
+  name: string
+  description: string
+  swatches: [string, string, string]
+  mood?: string
+}
+export function listTemplates(): TemplateListing[] {
+  return TEMPLATES.map(({ key, name, description, swatches, mood }) => ({ key, name, description, swatches, mood }))
 }
 
 // Fonts are loaded once in app/s/[siteSlug]/layout.tsx via next/font and
@@ -101,6 +117,8 @@ export const TEMPLATES: SiteTemplate[] = [
     key: 'editorial-gold',
     name: 'Editorial Gold',
     description: 'Cream, gold and deep red with a classic serif — warm, ceremonial, celebratory. The original.',
+    swatches: ['#F5EFE3', '#C9A227', '#7A1F1F'],
+    mood: 'Ceremonial',
     vars: goldVars,
     starterDoc: goldStarter,
   },
@@ -108,6 +126,8 @@ export const TEMPLATES: SiteTemplate[] = [
     key: 'editorial-luxury',
     name: 'Editorial Luxury',
     description: 'Warm ivory and ink with brass hairlines — quiet, modern, gallery-calm.',
+    swatches: ['#F6F1E9', '#211D18', '#B08D57'],
+    mood: 'Gallery-calm',
     vars: luxuryVars,
     starterDoc: luxuryStarter,
   },
