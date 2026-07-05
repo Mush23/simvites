@@ -11,7 +11,7 @@ export async function publishSnapshot(siteId: string, summary = 'Published from 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: site }, { data: pages }, { data: events }] = await Promise.all([
+  const [{ data: site }, { data: pages }, { data: events }, { data: itinerary }] = await Promise.all([
     supabase.from('sites').select('title, slug, theme, labels').eq('id', siteId).maybeSingle(),
     supabase.from('pages').select('slug, title, puck_data, is_home, nav_order, hidden').eq('site_id', siteId),
     supabase
@@ -23,8 +23,20 @@ export async function publishSnapshot(siteId: string, summary = 'Published from 
       .eq('on_website', true)
       .order('sort_order', { ascending: true })
       .order('starts_at', { ascending: true }),
+    supabase.from('event_itinerary')
+      .select('event_id, time_label, title, note, sort_order')
+      .eq('site_id', siteId).order('sort_order'),
   ])
   if (!site) return { error: 'Site not found.' }
+
+  // Fold each event's itinerary into the event so it freezes into the snapshot.
+  const itinByEvent = new Map<string, { time_label: string | null; title: string; note: string | null }[]>()
+  for (const it of itinerary ?? []) {
+    const arr = itinByEvent.get(it.event_id) ?? []
+    arr.push({ time_label: it.time_label, title: it.title, note: it.note })
+    itinByEvent.set(it.event_id, arr)
+  }
+  const eventsWithItinerary = (events ?? []).map((e) => ({ ...e, itinerary: itinByEvent.get(e.id) ?? [] }))
 
   const snapshot = {
     schema_version: 1,
@@ -33,7 +45,7 @@ export async function publishSnapshot(siteId: string, summary = 'Published from 
     theme: site.theme,
     labels: site.labels,
     pages: pages ?? [],
-    events: events ?? [],
+    events: eventsWithItinerary,
   }
 
   const { error: insErr } = await supabase

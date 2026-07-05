@@ -13,6 +13,8 @@ export interface SiteEvent {
   description: string | null
   /** Optional per-event accent colour (any CSS colour) — the wedding-site signature. */
   accent?: string | null
+  /** The running order for the day (Save-the-Date/itinerary). */
+  itinerary?: { time_label: string | null; title: string; note: string | null }[]
 }
 
 /** Overlay depth → black alpha; keeps hero text readable over photos. */
@@ -78,6 +80,21 @@ export function SiteSchedule({ heading, events }: { heading?: string; events: Si
             </div>
             {e.venue_name && <p className="mt-2 text-ink-2">{e.venue_name}{e.address ? ` · ${e.address}` : ''}</p>}
             {e.description && <p className="mt-2 text-sm text-ink-3">{e.description}</p>}
+            {e.itinerary && e.itinerary.length > 0 && (
+              <dl className="mt-4 space-y-2 border-t border-line pt-4">
+                {e.itinerary.map((it, i) => (
+                  <div key={i} className="flex gap-3">
+                    <dt className="w-20 shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] leading-5 text-accent-ink">
+                      {it.time_label ?? '·'}
+                    </dt>
+                    <dd className="text-sm text-ink-2">
+                      <span className="text-ink">{it.title}</span>
+                      {it.note ? <span className="text-ink-3"> — {it.note}</span> : null}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
           </div>
         ))}
       </div>

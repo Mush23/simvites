@@ -3,13 +3,14 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { formatPence } from '@/lib/money'
 import { EventForm } from './event-form'
+import { ItineraryManager, type ItineraryItem } from './itinerary-manager'
 
 export const metadata = { title: 'Event · Occasio' }
 
-const TABS = ['overview', 'guests', 'rsvp', 'vendors', 'budget', 'tasks', 'files'] as const
+const TABS = ['overview', 'itinerary', 'guests', 'rsvp', 'vendors', 'budget', 'tasks', 'files'] as const
 type Tab = (typeof TABS)[number]
 const TAB_LABEL: Record<Tab, string> = {
-  overview: 'Overview', guests: 'Guests', rsvp: 'RSVP', vendors: 'Vendors',
+  overview: 'Overview', itinerary: 'Itinerary', guests: 'Guests', rsvp: 'RSVP', vendors: 'Vendors',
   budget: 'Budget', tasks: 'Tasks', files: 'Files',
 }
 
@@ -57,10 +58,22 @@ export default async function EventHubPage({
             <EventForm event={event} />
           </div>
         )}
-        {tab !== 'overview' && <ConnectedTab tab={tab} eventId={eventId} siteId={event.site_id} />}
+        {tab === 'itinerary' && <ItineraryTab eventId={eventId} />}
+        {tab !== 'overview' && tab !== 'itinerary' && <ConnectedTab tab={tab} eventId={eventId} siteId={event.site_id} />}
       </div>
     </div>
   )
+}
+
+/** Itinerary tab — the running order guests will see for this event. */
+async function ItineraryTab({ eventId }: { eventId: string }) {
+  const supabase = await createClient()
+  const { data: items } = await supabase
+    .from('event_itinerary')
+    .select('id, time_label, title, note, sort_order')
+    .eq('event_id', eventId)
+    .order('sort_order')
+  return <ItineraryManager eventId={eventId} items={(items ?? []) as ItineraryItem[]} />
 }
 
 /** Read-only connected views — the same rows the modules own, scoped to this event. */
