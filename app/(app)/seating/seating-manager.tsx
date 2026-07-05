@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { addTable, deleteTable, seatGuest } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
+import { X } from 'lucide-react'
 
 interface TableRow { id: string; name: string; capacity: number; eventName: string | null }
 interface GuestRow { id: string; name: string; household: string }
@@ -68,7 +69,7 @@ export function SeatingManager({ tables, seats, guests, events }: {
                   <li key={g.id} className="flex items-center justify-between text-sm">
                     <span className="text-ink">{g.name} <span className="text-ink-3">({g.household})</span></span>
                     <button type="button" onClick={() => onSeat(g.id, null)} title="Remove from table"
-                      className="font-mono text-[9px] uppercase text-ink-3 hover:text-bad">✕</button>
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-3 hover:bg-bad-soft hover:text-bad"><X size={14} strokeWidth={1.7} /></button>
                   </li>
                 ))}
                 {seated.length === 0 && <li className="text-sm text-ink-3">Empty table.</li>}

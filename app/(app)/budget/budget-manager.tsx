@@ -56,7 +56,7 @@ export function BudgetManager({ items, events, vendors }: {
         <Select name="event_id" label="Event" options={events} />
         <Select name="vendor_id" label="Vendor" options={vendors} />
         <Text name="estimated_amount" label="Estimated £" placeholder="2500.00" w="w-28" />
-        <button type="submit" className="rounded-md bg-accent px-5 py-2.5 font-semibold text-white transition-transform hover:-translate-y-px">
+        <button type="submit" className="rounded-md bg-accent px-5 py-2.5 font-semibold text-white">
           Add
         </button>
         {error && <p className="w-full text-sm text-bad">{error}</p>}
@@ -146,7 +146,7 @@ function BudgetRow({ item, events, vendors, onChanged }: {
               if (!(await askConfirm({ title: 'Archive this budget line?', body: 'It leaves your totals but is never deleted.' }))) return
               await archiveBudgetItem(item.id); notify('Budget line archived'); onChanged()
             }}
-            className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3 hover:text-bad">
+            className="text-[12.5px] font-medium text-ink-3 hover:text-bad">
             Archive
           </button>
           {error && <p className="w-full text-sm text-bad">{error}</p>}

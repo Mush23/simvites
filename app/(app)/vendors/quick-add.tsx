@@ -29,7 +29,7 @@ export function QuickAddVendor() {
         </select>
       </label>
       <button type="submit"
-        className="rounded-md bg-accent px-5 py-2.5 font-semibold text-white transition-transform hover:-translate-y-px">
+        className="rounded-md bg-accent px-5 py-2.5 font-semibold text-white">
         Add vendor
       </button>
       {error && <p className="w-full text-sm text-bad">{error}</p>}

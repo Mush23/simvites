@@ -7,6 +7,7 @@ import {
   type ImportRow,
 } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
+import { X } from 'lucide-react'
 
 export interface MatrixEvent { id: string; name: string; accent?: string | null }
 export interface MatrixGuest {
@@ -46,7 +47,7 @@ export function GuestManager({ events, households }: { events: MatrixEvent[]; ho
               className="w-28 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent" />
           </label>
           <button type="submit"
-            className="rounded-md bg-accent px-5 py-2.5 font-semibold text-white transition-transform hover:-translate-y-px">
+            className="rounded-md bg-accent px-5 py-2.5 font-semibold text-white">
             Add household
           </button>
         </form>

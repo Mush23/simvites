@@ -77,7 +77,7 @@ export function EventForm({ event }: { event: EventRow }) {
       </label>
 
       <div className="flex items-center gap-4 pt-2">
-        <button type="submit" className="rounded-md bg-accent px-6 py-3 font-semibold text-white transition-transform hover:-translate-y-px">
+        <button type="submit" className="rounded-md bg-accent px-6 py-3 font-semibold text-white">
           Save changes
         </button>
         {status === 'saved' && <span className="eyebrow text-accent-ink">Saved</span>}
@@ -89,7 +89,7 @@ export function EventForm({ event }: { event: EventRow }) {
             if (!(await askConfirm({ title: `Archive ${event.name}?`, body: 'It disappears from your site and guest invitations, but nothing is deleted.' }))) return
             notify('Event archived'); archiveEvent(event.id)
           }}
-          className="ml-auto font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3 hover:text-bad"
+          className="ml-auto text-[12.5px] font-medium text-ink-3 hover:text-bad"
         >
           Archive
         </button>

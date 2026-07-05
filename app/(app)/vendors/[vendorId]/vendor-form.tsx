@@ -62,7 +62,7 @@ export function VendorForm({ vendor }: { vendor: VendorRow }) {
       </label>
       <div className="flex items-center gap-4">
         <button type="submit"
-          className="rounded-md bg-accent px-6 py-3 font-semibold text-white transition-transform hover:-translate-y-px">
+          className="rounded-md bg-accent px-6 py-3 font-semibold text-white">
           Save vendor
         </button>
         {status === 'saved' && <span className="eyebrow text-accent-ink">Saved</span>}
@@ -73,7 +73,7 @@ export function VendorForm({ vendor }: { vendor: VendorRow }) {
             if (!(await askConfirm({ title: `Archive ${vendor.name}?`, body: 'Their budget lines stay; the vendor leaves your pipeline.' }))) return
             notify('Vendor archived'); archiveVendor(vendor.id)
           }}
-          className="ml-auto font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3 hover:text-bad">
+          className="ml-auto text-[12.5px] font-medium text-ink-3 hover:text-bad">
           Archive
         </button>
       </div>

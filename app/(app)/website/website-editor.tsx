@@ -12,7 +12,7 @@ import {
 } from './actions'
 import { SECTION_PRESETS } from '@/lib/puck/presets'
 import { askConfirm, askPrompt, notify } from '@/components/ui/overlays'
-import { Pencil, Trash2, Eye, EyeOff } from 'lucide-react'
+import { Pencil, Trash2, Eye, EyeOff, FileText, ChevronDown, Palette } from 'lucide-react'
 import { FONT_PAIRS, BACKGROUNDS, ACCENTS, GLOWS, HOVERS, type SiteStyle } from '@/lib/site-style'
 
 export interface EditorPage {
@@ -45,8 +45,8 @@ function PagesMenu({ pages, currentId }: { pages: EditorPage[]; currentId: strin
     <div className="relative">
       <button type="button" id="pages-menu" onClick={() => setOpen((o) => !o)}
         title="Add pages, rename them, or hide them from the menu"
-        className="rounded-pill border border-line bg-paper-2 px-3.5 py-2 text-sm text-ink hover:border-accent">
-        📄 {current?.title ?? 'Pages'} ▾
+        className="flex items-center gap-1.5 border border-line bg-paper-2 px-3 py-2 text-[13px] font-medium text-ink hover:border-line-2">
+        <FileText size={14} strokeWidth={1.7} className="text-ink-3" /> {current?.title ?? 'Pages'} <ChevronDown size={12} strokeWidth={1.7} className="text-ink-3" />
       </button>
       {open && (
         <div className="absolute left-0 top-12 z-50 w-72 space-y-1 rounded-card border border-line bg-surface p-3 shadow-lift">
@@ -124,8 +124,8 @@ function StylePanel({ current }: { current: SiteStyle }) {
     <div className="relative">
       <button type="button" onClick={() => setOpen((o) => !o)}
         title="Fonts, colours, glow and hover animation"
-        className="rounded-pill border border-line bg-paper-2 px-3.5 py-2 text-sm text-ink hover:border-accent">
-        ✨ Style
+        className="flex items-center gap-1.5 border border-line bg-paper-2 px-3 py-2 text-[13px] font-medium text-ink hover:border-line-2">
+        <Palette size={14} strokeWidth={1.7} className="text-ink-3" /> Style
       </button>
       {open && (
         <div className="absolute right-0 top-12 z-50 w-64 space-y-3 rounded-card border border-line bg-surface p-4 shadow-lift">
@@ -360,7 +360,7 @@ export function WebsiteEditor({
             </a>
           )}
           <button id="publish-site" type="button" onClick={publish} disabled={status === 'publishing'}
-            className="rounded-md bg-accent px-5 py-2 font-semibold text-white transition-transform hover:-translate-y-px disabled:opacity-50">
+            className="rounded-md bg-accent px-5 py-2 font-semibold text-white disabled:opacity-50">
             {status === 'publishing' ? 'Publishing…' : 'Publish'}
           </button>
         </div>

@@ -42,7 +42,7 @@ export function UnlockCard({ unlocked, priceDisplay }: { unlocked: boolean; pric
         <li>✓ Everything else stays free forever</li>
       </ul>
       <button id="unlock-button" type="button" onClick={onUnlock} disabled={busy}
-        className="mt-6 rounded-md bg-accent px-7 py-3 font-semibold text-white transition-transform hover:-translate-y-px disabled:opacity-50">
+        className="mt-6 rounded-md bg-accent px-7 py-3 font-semibold text-white disabled:opacity-50">
         {busy ? 'Starting checkout…' : `Unlock for ${priceDisplay}`}
       </button>
       {note && <p className="mt-3 text-sm text-ink-2">{note}</p>}

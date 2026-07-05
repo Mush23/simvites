@@ -114,7 +114,7 @@ export function ImageFieldInput({ value, onChange, focal = false }: {
         </label>
         <button type="button" onClick={() => setSearching((s) => !s)}
           className="rounded-pill border px-3 py-2 text-xs" style={{ borderColor: 'var(--line, #ddd)' }}>
-          {searching ? 'Close search' : '🔍 Find a photo'}
+          {searching ? 'Close search' : 'Find a photo'}
         </button>
         {url && (
           <button type="button" onClick={() => emit('')}

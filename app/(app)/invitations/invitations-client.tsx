@@ -111,7 +111,7 @@ function HouseholdRow({ row, onChanged }: { row: HouseholdInviteRow; onChanged: 
           </button>
           <button type="button" onClick={onSend} disabled={busy || row.emailCount === 0}
             title={row.emailCount === 0 ? 'No guest emails in this household' : undefined}
-            className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition-transform hover:-translate-y-px disabled:opacity-50">
+            className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
             Email invite
           </button>
           {row.activeLinks > 0 && (

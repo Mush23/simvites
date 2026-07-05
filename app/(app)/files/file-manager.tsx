@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { uploadFile, deleteFile } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
+import { X } from 'lucide-react'
 
 export interface Option { id: string; name: string }
 export interface FileRow {
@@ -54,7 +55,7 @@ export function FileManager({ files, events, vendors }: {
         <Select name="event_id" label="Event" options={events} />
         <Select name="vendor_id" label="Vendor" options={vendors} />
         <button type="submit" disabled={busy}
-          className="rounded-md bg-accent px-5 py-2.5 font-semibold text-white transition-transform hover:-translate-y-px disabled:opacity-50">
+          className="rounded-md bg-accent px-5 py-2.5 font-semibold text-white disabled:opacity-50">
           {busy ? 'Uploading…' : 'Upload'}
         </button>
         {error && <p className="w-full text-sm text-bad">{error}</p>}
@@ -91,7 +92,7 @@ export function FileManager({ files, events, vendors }: {
                   await deleteFile(f.id); notify('File deleted'); refresh()
                 }}
                 aria-label={`Delete ${f.name}`}
-                className="font-mono text-[9px] uppercase text-ink-3 hover:text-bad">✕</button>
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-3 hover:bg-bad-soft hover:text-bad"><X size={14} strokeWidth={1.7} /></button>
             </div>
           )
         })}

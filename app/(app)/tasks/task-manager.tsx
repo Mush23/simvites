@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createTask, setTaskStatus, archiveTask, addStarterPack } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
+import { X } from 'lucide-react'
 
 export interface Option { id: string; name: string }
 export interface TaskRow {
@@ -63,7 +64,7 @@ export function TaskManager({ tasks, events, vendors }: {
               <option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option>
             </select>
           </label>
-          <button type="submit" className="rounded-md bg-accent px-5 py-2.5 font-semibold text-white transition-transform hover:-translate-y-px">
+          <button type="submit" className="rounded-md bg-accent px-5 py-2.5 font-semibold text-white">
             Add
           </button>
         </form>
@@ -143,7 +144,7 @@ function TaskItem({ task, events, vendors, onChanged }: {
         await archiveTask(task.id); notify('Task archived'); onChanged()
       }}
         aria-label={`Archive ${task.title}`}
-        className="font-mono text-[9px] uppercase text-ink-3 hover:text-bad">✕</button>
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-3 hover:bg-bad-soft hover:text-bad"><X size={14} strokeWidth={1.7} /></button>
     </div>
   )
 }
