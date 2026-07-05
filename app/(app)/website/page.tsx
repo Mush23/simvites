@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
-import { starterDoc, type SiteData } from '@/lib/puck/config'
+import { type SiteData } from '@/lib/puck/config'
 import type { SiteEvent } from '@/components/site/blocks'
-import { WebsiteEditor } from './website-editor'
+import { WebsiteEditor, type EditorPage } from './website-editor'
 
 export const metadata = { title: 'Website · Occasio' }
 
@@ -11,16 +11,25 @@ function isEmpty(doc: unknown): boolean {
   return !d || !Array.isArray(d.content) || d.content.length === 0
 }
 
-export default async function WebsitePage() {
+export default async function WebsitePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>
+}) {
   const site = await getPrimarySite()
   const supabase = await createClient()
+  const { page: requestedPageId } = await searchParams
 
   const { data: siteRow } = await supabase
     .from('sites').select('theme').eq('id', site!.siteId).maybeSingle()
   const templateKey = (siteRow?.theme as { template?: string } | null)?.template
 
-  const [{ data: page }, { data: eventRows }] = await Promise.all([
-    supabase.from('pages').select('id, puck_data').eq('site_id', site!.siteId).eq('is_home', true).maybeSingle(),
+  const [{ data: pageRows }, { data: eventRows }] = await Promise.all([
+    supabase.from('pages')
+      .select('id, title, slug, puck_data, is_home, nav_order, hidden')
+      .eq('site_id', site!.siteId)
+      .order('is_home', { ascending: false })
+      .order('nav_order', { ascending: true }),
     supabase
       .from('events')
       .select('id, name, starts_at, venue_name, address, description, accent')
@@ -30,16 +39,20 @@ export default async function WebsitePage() {
       .order('starts_at', { ascending: true }),
   ])
 
-  // Fallback: create_org_and_site always makes a home page; guard anyway.
-  const pageId = page?.id
-  if (!pageId) {
+  // ?page=<id> opens that page; anything else falls back to home.
+  const pages = pageRows ?? []
+  const page = pages.find((p) => p.id === requestedPageId) ?? pages.find((p) => p.is_home) ?? pages[0]
+  if (!page) {
     return <div className="p-10 text-ink-2">No home page found for this site.</div>
   }
 
   const { getTemplate } = await import('@/lib/templates/registry')
   const { siteStyleProps } = await import('@/lib/site-style')
   const template = getTemplate(templateKey)
-  const data: SiteData = isEmpty(page?.puck_data) ? template.starterDoc : (page!.puck_data as SiteData)
+  // Only the HOME page inherits the template starter — new pages start blank.
+  const data: SiteData = isEmpty(page.puck_data)
+    ? (page.is_home ? template.starterDoc : { root: { props: {} }, content: [] })
+    : (page.puck_data as SiteData)
   const events: SiteEvent[] = (eventRows ?? []) as SiteEvent[]
 
   const { templateFontClasses } = await import('@/lib/template-fonts')
@@ -47,8 +60,10 @@ export default async function WebsitePage() {
   return (
     <div className={templateFontClasses}>
       <WebsiteEditor
+        key={page.id}
         siteId={site!.siteId}
-        pageId={pageId}
+        pageId={page.id}
+        pages={pages.map((p): EditorPage => ({ id: p.id, title: p.title, slug: p.slug, is_home: p.is_home, hidden: p.hidden }))}
         slug={site!.slug}
         data={data}
         events={events}

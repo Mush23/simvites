@@ -75,6 +75,65 @@ export async function updateSiteStyle(style: Record<string, string>) {
   return { ok: true }
 }
 
+// ── Multi-page management (Sprint D). RLS (can_write_site) scopes writes. ──
+
+/** Slugs that would shadow built-in routes under /s/[siteSlug]/. */
+const RESERVED_PAGE_SLUGS = new Set(['rsvp'])
+
+export async function createPage(title: string): Promise<{ id?: string; error?: string }> {
+  const workspace = await getPrimarySite()
+  if (!workspace) return { error: 'No site.' }
+  const clean = title.trim().slice(0, 60)
+  if (!clean) return { error: 'Give the page a name.' }
+  const base = clean.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'page'
+
+  const supabase = await createClient()
+  const { data: existing } = await supabase.from('pages').select('slug, nav_order').eq('site_id', workspace.siteId)
+  const taken = new Set((existing ?? []).map((p) => p.slug))
+  let slug = base
+  for (let n = 2; RESERVED_PAGE_SLUGS.has(slug) || taken.has(slug); n++) slug = `${base}-${n}`
+  const nav_order = Math.max(0, ...(existing ?? []).map((p) => p.nav_order ?? 0)) + 1
+
+  const { data: row, error } = await supabase
+    .from('pages')
+    .insert({
+      site_id: workspace.siteId, title: clean, slug, is_home: false, nav_order, hidden: false,
+      puck_data: { root: { props: {} }, content: [] },
+    })
+    .select('id')
+    .single()
+  if (error) return { error: error.message }
+  revalidatePath('/website')
+  return { id: row.id }
+}
+
+export async function renamePage(pageId: string, title: string) {
+  const clean = title.trim().slice(0, 60)
+  if (!clean) return { error: 'Give the page a name.' }
+  const supabase = await createClient()
+  const { error } = await supabase.from('pages').update({ title: clean }).eq('id', pageId)
+  if (error) return { error: error.message }
+  revalidatePath('/website')
+  return { ok: true }
+}
+
+export async function setPageHidden(pageId: string, hidden: boolean) {
+  const supabase = await createClient()
+  const { error } = await supabase.from('pages').update({ hidden }).eq('id', pageId).eq('is_home', false)
+  if (error) return { error: error.message }
+  revalidatePath('/website')
+  return { ok: true }
+}
+
+export async function deletePage(pageId: string) {
+  const supabase = await createClient()
+  // The home page is never deletable — it is the site.
+  const { error } = await supabase.from('pages').delete().eq('id', pageId).eq('is_home', false)
+  if (error) return { error: error.message }
+  revalidatePath('/website')
+  return { ok: true }
+}
+
 /** Persist a page's Puck document as the draft (RLS: can_write_site). */
 export async function savePageDraft(pageId: string, data: SiteData) {
   const supabase = await createClient()

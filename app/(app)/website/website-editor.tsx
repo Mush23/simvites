@@ -1,13 +1,101 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
-import { Puck, createUsePuck, type Overrides } from '@puckeditor/core'
+import { Puck, createUsePuck, useGetPuck, type Overrides } from '@puckeditor/core'
 import '@puckeditor/core/puck.css'
 import { siteConfig, type SiteData } from '@/lib/puck/config'
 import type { SiteEvent } from '@/components/site/blocks'
 import { useRouter } from 'next/navigation'
-import { savePageDraft, saveAndPublish, uploadSiteImage, updateSiteStyle } from './actions'
+import {
+  savePageDraft, saveAndPublish, uploadSiteImage, updateSiteStyle,
+  createPage, renamePage, setPageHidden, deletePage,
+} from './actions'
+import { SECTION_PRESETS } from '@/lib/puck/presets'
 import { FONT_PAIRS, BACKGROUNDS, ACCENTS, GLOWS, HOVERS, type SiteStyle } from '@/lib/site-style'
+
+export interface EditorPage {
+  id: string
+  title: string
+  slug: string
+  is_home: boolean
+  hidden: boolean
+}
+
+/** Multi-page management (Sprint D): switch, add, rename, hide, delete. */
+function PagesMenu({ pages, currentId }: { pages: EditorPage[]; currentId: string }) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [newTitle, setNewTitle] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  const current = pages.find((p) => p.id === currentId)
+
+  async function add() {
+    if (!newTitle.trim() || busy) return
+    setBusy(true); setErr(null)
+    const res = await createPage(newTitle)
+    setBusy(false)
+    if (res.error) setErr(res.error)
+    else { setNewTitle(''); router.push(`/website?page=${res.id}`); router.refresh() }
+  }
+
+  return (
+    <div className="relative">
+      <button type="button" id="pages-menu" onClick={() => setOpen((o) => !o)}
+        title="Add pages, rename them, or hide them from the menu"
+        className="rounded-pill border border-line bg-paper-2 px-3.5 py-2 text-sm text-ink hover:border-accent">
+        📄 {current?.title ?? 'Pages'} ▾
+      </button>
+      {open && (
+        <div className="absolute left-0 top-12 z-50 w-72 space-y-1 rounded-card border border-line bg-surface p-3 shadow-lift">
+          {pages.map((p) => (
+            <div key={p.id} className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm ${
+              p.id === currentId ? 'bg-accent-soft text-accent-ink' : 'text-ink hover:bg-paper-2'}`}>
+              <button type="button" className="min-w-0 flex-1 truncate text-left"
+                onClick={() => { setOpen(false); router.push(`/website?page=${p.id}`); router.refresh() }}>
+                {p.title}{p.is_home && <span className="ml-1.5 font-mono text-[9px] uppercase tracking-wider text-ink-3">home</span>}
+                {p.hidden && <span className="ml-1.5 font-mono text-[9px] uppercase tracking-wider text-warn">hidden</span>}
+              </button>
+              {!p.is_home && (
+                <>
+                  <button type="button" title="Rename this page" className="text-xs text-ink-3 hover:text-ink"
+                    onClick={async () => {
+                      const t = window.prompt('New page name', p.title)
+                      if (t) { await renamePage(p.id, t); router.refresh() }
+                    }}>✏️</button>
+                  <button type="button" title={p.hidden ? 'Show in the site menu' : 'Hide from the site menu'}
+                    className="text-xs text-ink-3 hover:text-ink"
+                    onClick={async () => { await setPageHidden(p.id, !p.hidden); router.refresh() }}>
+                    {p.hidden ? '🙈' : '👁'}
+                  </button>
+                  <button type="button" title="Delete this page" className="text-xs text-ink-3 hover:text-bad"
+                    onClick={async () => {
+                      if (!window.confirm(`Delete "${p.title}"? This cannot be undone.`)) return
+                      await deletePage(p.id)
+                      if (p.id === currentId) router.push('/website')
+                      router.refresh()
+                    }}>🗑</button>
+                </>
+              )}
+            </div>
+          ))}
+          <div className="flex gap-1.5 border-t border-line pt-2">
+            <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
+              placeholder="New page name, e.g. Travel"
+              className="min-w-0 flex-1 rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent" />
+            <button type="button" onClick={add} disabled={busy}
+              className="rounded-pill bg-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
+              {busy ? '…' : 'Add'}
+            </button>
+          </div>
+          {err && <p className="text-xs text-bad">{err}</p>}
+          <p className="text-[10px] text-ink-3">Pages appear in your site menu. Publish to make changes live.</p>
+        </div>
+      )}
+    </div>
+  )
+}
 
 /** The customisation panel stakeholders asked for: fonts, colours, glow, motion. */
 function StylePanel({ current }: { current: SiteStyle }) {
@@ -43,6 +131,47 @@ function StylePanel({ current }: { current: SiteStyle }) {
           <Sel k="accent" label="Accent colour" options={ACCENTS} />
           <Sel k="glow" label="Card glow" options={GLOWS} />
           <Sel k="hover" label="Hover animation" options={HOVERS} />
+
+          {/* Brand kit (Sprint D): monogram + initials shown in the site menu */}
+          <div className="border-t border-line pt-3">
+            <span className="eyebrow mb-1.5 block">Brand kit — monogram</span>
+            <div className="flex items-center gap-2">
+              {current.monogram ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={current.monogram} alt="Monogram" className="h-10 w-10 rounded-full border border-line object-cover" />
+              ) : (
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-accent-line font-display text-sm text-accent-ink">
+                  {current.initials || 'A·D'}
+                </span>
+              )}
+              <label className="cursor-pointer rounded-pill border border-line bg-paper-2 px-3 py-1.5 text-xs text-ink hover:border-accent">
+                {current.monogram ? 'Replace' : 'Upload'}
+                <input type="file" accept="image/*" className="hidden"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0]
+                    if (!f) return
+                    const fd = new FormData(); fd.set('file', f)
+                    const res = await uploadSiteImage(fd)
+                    if (res.url) await set('monogram', res.url)
+                    e.target.value = ''
+                  }} />
+              </label>
+              {current.monogram && (
+                <button type="button" onClick={() => set('monogram', '')}
+                  className="rounded-pill border border-line px-3 py-1.5 text-xs text-ink-3 hover:text-ink">
+                  Remove
+                </button>
+              )}
+            </div>
+            <label className="mt-2 block text-xs">
+              <span className="eyebrow mb-1 block">Initials (shown if no monogram)</span>
+              <input defaultValue={current.initials ?? ''} placeholder="A & D" maxLength={12}
+                onBlur={(e) => { if (e.target.value !== (current.initials ?? '')) set('initials', e.target.value) }}
+                className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent" />
+            </label>
+            <p className="mt-1 text-[10px] text-ink-3">Shown at the top of your site and in the page menu guests see.</p>
+          </div>
+
           <p className="text-[10px] text-ink-3">Changes preview instantly. Publish to make them live.</p>
         </div>
       )}
@@ -79,6 +208,51 @@ function ImageUploader() {
 
 const usePuckSel = createUsePuck()
 
+/** Section presets (Sprint D): one click inserts a pre-designed section. */
+function PresetsMenu() {
+  const getPuck = useGetPuck()
+  const [open, setOpen] = useState(false)
+
+  function insert(presetKey: string) {
+    const preset = SECTION_PRESETS.find((p) => p.key === presetKey)
+    if (!preset) return
+    const { appState, dispatch } = getPuck()
+    const content = [...appState.data.content]
+    const item = {
+      type: preset.type,
+      props: { ...preset.props, id: `${preset.type}-${crypto.randomUUID()}` },
+    } as (typeof content)[number]
+    // Keep the footer last — new sections slot in just above it.
+    const at = content.length > 0 && content[content.length - 1].type === 'SiteFooterBlock'
+      ? content.length - 1 : content.length
+    content.splice(at, 0, item)
+    dispatch({ type: 'setData', data: { ...appState.data, content } })
+    setOpen(false)
+  }
+
+  return (
+    <div className="relative">
+      <button type="button" id="presets-menu" onClick={() => setOpen((o) => !o)}
+        title="Insert a beautifully pre-styled section"
+        className="rounded-pill border border-line bg-paper-2 px-3 py-1.5 text-sm text-ink hover:border-accent">
+        ✚ Add section
+      </button>
+      {open && (
+        <div className="absolute right-0 top-11 z-50 w-72 space-y-1 rounded-card border border-line bg-surface p-2 shadow-lift">
+          {SECTION_PRESETS.map((p) => (
+            <button key={p.key} type="button" onClick={() => insert(p.key)}
+              className="block w-full rounded-md px-3 py-2 text-left hover:bg-paper-2">
+              <span className="block text-sm text-ink">{p.name}</span>
+              <span className="block text-[11px] text-ink-3">{p.desc}</span>
+            </button>
+          ))}
+          <p className="px-3 pb-1 text-[10px] text-ink-3">Sections land above your footer, ready to edit.</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /** Undo / redo, surfaced from Puck's built-in history (also on Ctrl+Z / Ctrl+Y). */
 function HistoryButtons() {
   const history = usePuckSel((s) => s.history)
@@ -97,7 +271,7 @@ function HistoryButtons() {
 // width is driven by a CSS variable set on the wrapper, so the device toggle
 // never touches this object.
 const puckOverrides: Partial<Overrides> = {
-  headerActions: ({ children }) => (<><HistoryButtons />{children}</>),
+  headerActions: ({ children }) => (<><PresetsMenu /><HistoryButtons />{children}</>),
   preview: ({ children }) => (
     <div className="editor-vp" style={{ maxWidth: 'var(--editor-vw, 100%)', margin: '0 auto' }}>
       {children}
@@ -115,9 +289,9 @@ type DeviceKey = (typeof DEVICES)[number]['key']
 type Status = 'idle' | 'saving' | 'saved' | 'publishing' | 'published' | 'error' | 'locked'
 
 export function WebsiteEditor({
-  siteId, pageId, slug, data, events, published, templateName, styleProps, currentStyle,
+  siteId, pageId, pages, slug, data, events, published, templateName, styleProps, currentStyle,
 }: {
-  siteId: string; pageId: string; slug: string; data: SiteData; events: SiteEvent[]; published: boolean
+  siteId: string; pageId: string; pages: EditorPage[]; slug: string; data: SiteData; events: SiteEvent[]; published: boolean
   templateName: string
   styleProps: { style: React.CSSProperties; 'data-glow': string; 'data-hover': string }
   currentStyle: SiteStyle
@@ -154,6 +328,7 @@ export function WebsiteEditor({
           <span className="rounded-pill border border-line px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
             {templateName}
           </span>
+          <PagesMenu pages={pages} currentId={pageId} />
           <StatusPill status={status} />
         </div>
         <div className="flex items-center gap-4">

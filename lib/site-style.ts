@@ -42,6 +42,9 @@ export interface SiteStyle {
   accent?: keyof typeof ACCENTS
   glow?: keyof typeof GLOWS
   hover?: keyof typeof HOVERS
+  /** Brand Kit (Sprint D): uploaded monogram image + fallback initials ("A & D"). */
+  monogram?: string
+  initials?: string
 }
 
 /** Merge template vars + couple's overrides → wrapper props for the site root. */

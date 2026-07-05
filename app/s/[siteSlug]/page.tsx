@@ -6,6 +6,7 @@ import { siteConfig, starterDoc } from '@/lib/puck/config'
 import { siteStyleProps } from '@/lib/site-style'
 import { GUEST_COOKIE, verifyGuestSession } from '@/lib/guest-session'
 import { createAdminClient } from '@/lib/supabase/server'
+import { SiteNav } from '@/components/site/site-nav'
 
 // Public published site (snapshot only), rendered under the site's TEMPLATE
 // theme — CSS-variable overrides at [data-site-root], so the same block
@@ -36,6 +37,7 @@ export default async function PublicSitePage({
 
   return (
     <div data-site-root className="min-h-screen bg-paper text-ink" {...styleProps}>
+      <SiteNav pages={snap.pages} theme={snap.theme} />
       <Render config={siteConfig} data={data} metadata={{ events: snap.events, guestName }} />
     </div>
   )

@@ -3,6 +3,7 @@ import { Render } from '@puckeditor/core/rsc'
 import { getPublishedSnapshot } from '@/lib/public-site'
 import { siteConfig } from '@/lib/puck/config'
 import { siteStyleProps } from '@/lib/site-style'
+import { SiteNav } from '@/components/site/site-nav'
 
 // A specific published page (snapshot only).
 export default async function PublicPage({
@@ -21,6 +22,7 @@ export default async function PublicPage({
 
   return (
     <div data-site-root className="min-h-screen bg-paper text-ink" {...styleProps}>
+      <SiteNav pages={snap.pages} theme={snap.theme} currentSlug={pageSlug} />
       <Render config={siteConfig} data={page.puck_data} metadata={{ events: snap.events }} />
     </div>
   )
