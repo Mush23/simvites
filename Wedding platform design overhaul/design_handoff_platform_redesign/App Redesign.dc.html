@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&amp;family=Instrument+Serif:ital@0;1&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+html,body{height:100%}
+body{margin:0;font-family:'Instrument Sans',sans-serif;-webkit-font-smoothing:antialiased;background:#FAFAF8}
+::selection{background:rgba(222,71,38,.15)}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<div ref="{{ refRoot }}" style="display:flex;height:100vh;overflow:hidden;background:var(--bg,#FAFAF8);color:var(--ink,#191918);font-size:14px;line-height:1.5">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <div style="width:230px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--ln,#E8E7E4);background:var(--sf,#fff)">
+    <div style="padding:16px 16px 10px;display:flex;align-items:center;gap:9px">
+      <span style="display:inline-flex;width:26px;height:26px;border-radius:7px;background:var(--ink,#191918);color:var(--sf,#fff);align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:-0.02em">S</span>
+      <span style="font-weight:650;font-size:14.5px;letter-spacing:-0.01em">Simvites</span>
+    </div>
+    <!-- site switcher -->
+    <div style="margin:6px 12px 10px;display:flex;align-items:center;gap:9px;border:1px solid var(--ln,#E8E7E4);border-radius:9px;padding:8px 10px;cursor:pointer;background:var(--sf2,#F5F4F2)" style-hover="border-color:var(--ln2,#DBDAD6)">
+      <span style="font-family:'Instrument Serif',serif;font-size:14px">Aanya &amp; Dev</span>
+      <span style="{{ statusDotStyle }}"></span>
+      <span style="margin-left:auto;font-family:'Geist Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3,#8F8D88)">{{ siteStatus }}</span>
+    </div>
+    <!-- nav -->
+    <div style="flex:1;overflow-y:auto;padding:2px 12px 10px">
+      <sc-for list="{{ navGroups }}" as="grp" hint-placeholder-count="5">
+        <div style="margin:12px 4px 5px;font-family:'Geist Mono',monospace;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3,#8F8D88)">{{ grp.label }}</div>
+        <sc-for list="{{ grp.items }}" as="it" hint-placeholder-count="4">
+          <div onClick="{{ it.go }}" style="{{ it.style }}" style-hover="background:var(--sf2,#F5F4F2)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;opacity:.85"><path d="{{ it.icon }}"></path></svg>
+            <span style="flex:1">{{ it.label }}</span>
+            <sc-if value="{{ it.badge }}" hint-placeholder-val="{{ false }}"><span style="{{ it.badgeStyle }}">{{ it.badge }}</span></sc-if>
+          </div>
+        </sc-for>
+      </sc-for>
+    </div>
+    <!-- bottom -->
+    <div style="border-top:1px solid var(--ln,#E8E7E4);padding:10px 12px;display:flex;flex-direction:column;gap:2px">
+      <div onClick="{{ goSettings }}" style="{{ settingsStyle }}" style-hover="background:var(--sf2,#F5F4F2)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h10M18 7h2M14 4.5v5M4 17h2M10 17h10M8 14.5v5"></path></svg>
+        <span style="flex:1">Settings</span>
+      </div>
+      <div onClick="{{ toggleDark }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--ink2,#6A6864)" style-hover="background:var(--sf2,#F5F4F2)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="{{ themeIcon }}"></path></svg>
+        <span style="flex:1">{{ themeLabel }}</span>
+        <span style="{{ themeTrack }}"><span style="{{ themeKnob }}"></span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 10px 4px">
+        <span style="display:inline-flex;width:26px;height:26px;border-radius:13px;background:linear-gradient(135deg,oklch(0.62 0.21 29),oklch(0.7 0.14 75));color:#fff;align-items:center;justify-content:center;font-size:10.5px;font-weight:700">A</span>
+        <div style="min-width:0;flex:1"><p style="margin:0;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Aanya</p><p style="margin:0;font-size:10.5px;color:var(--ink3,#8F8D88);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">aanya@example.com</p></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink3,#8F8D88)" stroke-width="1.7" stroke-linecap="round"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"></path></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <!-- header -->
+    <div style="flex-shrink:0;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--ln,#E8E7E4);padding:10px 20px;background:var(--sf,#fff)">
+      <span style="font-size:14.5px;font-weight:650;letter-spacing:-0.01em">{{ pageTitle }}</span>
+      <div onClick="{{ openCmd }}" style="display:flex;align-items:center;gap:8px;border:1px solid var(--ln,#E8E7E4);background:var(--sf2,#F5F4F2);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--ink3,#8F8D88);min-width:200px" style-hover="border-color:var(--ln2,#DBDAD6)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg>
+        <span style="font-size:12.5px">Search or jump to…</span>
+        <span style="margin-left:auto;font-family:'Geist Mono',monospace;font-size:9.5px;border:1px solid var(--ln,#E8E7E4);border-radius:5px;padding:1px 5px;background:var(--sf,#fff)">⌘K</span>
+      </div>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:5px;font-family:'Geist Mono',monospace;font-size:10px;color:var(--ink3,#8F8D88);white-space:nowrap"><span style="width:5px;height:5px;border-radius:3px;background:var(--ok,#1B9E5F)"></span>Saved · just now</span>
+      <span style="font-size:13px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:7px 13px;cursor:pointer;background:var(--sf,#fff)" style-hover="border-color:var(--ln2,#DBDAD6)">Preview</span>
+      <span onClick="{{ publish }}" style="{{ publishStyle }}">{{ publishLabel }}</span>
+    </div>
+
+    <!-- content -->
+    <div style="flex:1;overflow-y:auto">
+      <div style="max-width:1240px;margin:0 auto;padding:28px 28px 80px">
+
+        <!-- ═══ HOME ═══ -->
+        <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+            <div>
+              <h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em">Good morning, Aanya</h1>
+              <p style="margin:4px 0 0;font-size:13.5px;color:var(--ink2,#6A6864)">76 days to the big weekend. 3 things need a quick look.</p>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:8px;border:1px solid var(--ln,#E8E7E4);background:var(--sf,#fff);border-radius:999px;padding:6px 14px;font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink2,#6A6864)"><span style="font-family:'Instrument Serif',serif;font-size:13px;color:var(--ink,#191918)">Sat 19 Sep 2026</span>· Jaipur</span>
+          </div>
+          <div style="margin-top:20px;display:grid;grid-template-columns:340px 1fr;gap:14px">
+            <!-- readiness -->
+            <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:20px">
+              <div style="display:flex;align-items:center;gap:16px">
+                <div style="position:relative;width:84px;height:84px;flex:none">
+                  <svg width="84" height="84" viewBox="0 0 84 84">
+                    <circle cx="42" cy="42" r="34" fill="none" stroke="var(--sf2,#F5F4F2)" stroke-width="8"></circle>
+                    <circle cx="42" cy="42" r="34" fill="none" stroke="var(--ac,oklch(0.62 0.21 29))" stroke-width="8" stroke-linecap="round" stroke-dasharray="132.4 213.6" transform="rotate(-90 42 42)"></circle>
+                  </svg>
+                  <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:17px;font-weight:600">62%</span>
+                </div>
+                <div>
+                  <p style="margin:0;font-size:15px;font-weight:650;letter-spacing:-0.01em">On track</p>
+                  <p style="margin:3px 0 0;font-size:12.5px;line-height:1.5;color:var(--ink2,#6A6864)">Readiness across guests, site, vendors and tasks.</p>
+                </div>
+              </div>
+              <div style="margin-top:16px;display:flex;flex-direction:column;gap:6px">
+                <sc-for list="{{ attention }}" as="a" hint-placeholder-count="3">
+                  <div onClick="{{ a.go }}" style="display:flex;align-items:center;gap:9px;border:1px solid var(--ln,#E8E7E4);border-radius:9px;padding:9px 12px;cursor:pointer;font-size:13px;font-weight:500;background:var(--bg,#FAFAF8)" style-hover="border-color:var(--ac,oklch(0.62 0.21 29))">
+                    <span style="width:6px;height:6px;border-radius:3px;background:var(--wn,#B87A1E);flex:none"></span>
+                    <span style="flex:1">{{ a.label }}</span>
+                    <span style="color:var(--ink3,#8F8D88)">→</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <!-- stats + activity -->
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+                <sc-for list="{{ homeStats }}" as="s" hint-placeholder-count="4">
+                  <div onClick="{{ s.go }}" style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:16px;cursor:pointer" style-hover="border-color:var(--ln2,#DBDAD6)">
+                    <p style="margin:0;font-size:12px;font-weight:550;color:var(--ink2,#6A6864)">{{ s.label }}</p>
+                    <p style="margin:6px 0 0;font-family:'Geist Mono',monospace;font-size:22px;font-weight:600;letter-spacing:-0.02em">{{ s.value }}</p>
+                    <p style="margin:4px 0 0;font-size:11.5px;color:var(--ink3,#8F8D88)">{{ s.hint }}</p>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="flex:1;background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:16px 20px">
+                <div style="display:flex;align-items:center;justify-content:space-between"><p style="margin:0;font-size:13px;font-weight:650">Live activity</p><span style="display:inline-flex;align-items:center;gap:6px;font-family:'Geist Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ok,#1B9E5F)"><span style="width:5px;height:5px;border-radius:3px;background:var(--ok,#1B9E5F)"></span>live</span></div>
+                <div style="margin-top:10px;display:flex;flex-direction:column">
+                  <sc-for list="{{ activity }}" as="ev" hint-placeholder-count="4">
+                    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ln,#E8E7E4);font-size:13px">
+                      <span style="{{ ev.dotStyle }}"></span>
+                      <span style="flex:1;color:var(--ink,#191918)">{{ ev.text }}</span>
+                      <span style="font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--ink3,#8F8D88)">{{ ev.when }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ═══ WEBSITE ═══ -->
+        <sc-if value="{{ isWebsite }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em;margin-right:auto">Site editor</h1>
+            <span style="display:inline-flex;align-items:center;gap:7px;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:7px 12px;font-size:13px;font-weight:550;cursor:pointer;background:var(--sf,#fff)">Home ▾</span>
+            <span style="display:flex;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:2px;background:var(--sf,#fff)"><span style="font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;background:var(--sf2,#F5F4F2)">Desktop</span><span style="font-size:12px;padding:4px 10px;color:var(--ink3,#8F8D88);cursor:pointer">Tablet</span><span style="font-size:12px;padding:4px 10px;color:var(--ink3,#8F8D88);cursor:pointer">Phone</span></span>
+            <span style="display:inline-flex;align-items:center;gap:7px;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:7px 12px;font-size:13px;font-weight:550;cursor:pointer;background:var(--sf,#fff)">Style</span>
+          </div>
+          <div style="margin-top:16px;display:grid;grid-template-columns:170px 1fr 220px;gap:14px;height:560px">
+            <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;overflow-y:auto">
+              <span style="font-family:'Geist Mono',monospace;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3,#8F8D88);padding:0 2px">Blocks</span>
+              <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="7">
+                <div style="display:flex;align-items:center;gap:8px;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:550;cursor:grab;background:var(--bg,#FAFAF8)" style-hover="border-color:var(--ac,oklch(0.62 0.21 29))"><span style="color:var(--ink3,#8F8D88);font-family:'Geist Mono',monospace;font-size:10px">⠿</span>{{ b }}</div>
+              </sc-for>
+            </div>
+            <div style="background:var(--sf2,#F5F4F2);border:1px solid var(--ln,#E8E7E4);border-radius:12px;padding:20px;overflow-y:auto;display:flex;justify-content:center">
+              <div style="width:min(560px,100%);background:#FDFCF9;border:1px solid #EEE9DD;border-radius:10px;height:fit-content;overflow:hidden">
+                <div style="padding:34px 24px;text-align:center;border-bottom:1px dashed #EEE9DD;position:relative;cursor:pointer" style-hover="outline:2px solid oklch(0.62 0.21 29);outline-offset:-2px">
+                  <p style="margin:0;font-family:'Instrument Serif',serif;font-size:34px;color:#211D18">Aanya &amp; Dev</p>
+                  <p style="margin:6px 0 0;font-family:'Geist Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.16em;color:#8a6d2f">19 September 2026 · Jaipur</p>
+                </div>
+                <div style="padding:16px 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;border-bottom:1px dashed #EEE9DD;cursor:pointer" style-hover="outline:2px solid oklch(0.62 0.21 29);outline-offset:-2px">
+                  <div style="background:#fff;border:1px solid #EEE9DD;border-radius:8px;padding:9px 0;text-align:center"><span style="font-family:'Geist Mono',monospace;font-size:15px;font-weight:600;color:#211D18">76</span><span style="display:block;font-family:'Geist Mono',monospace;font-size:7.5px;color:#8a6d2f;text-transform:uppercase;letter-spacing:.12em">days</span></div>
+                  <div style="background:#fff;border:1px solid #EEE9DD;border-radius:8px;padding:9px 0;text-align:center"><span style="font-family:'Geist Mono',monospace;font-size:15px;font-weight:600;color:#211D18">08</span><span style="display:block;font-family:'Geist Mono',monospace;font-size:7.5px;color:#8a6d2f;text-transform:uppercase;letter-spacing:.12em">hrs</span></div>
+                  <div style="background:#fff;border:1px solid #EEE9DD;border-radius:8px;padding:9px 0;text-align:center"><span style="font-family:'Geist Mono',monospace;font-size:15px;font-weight:600;color:#211D18">21</span><span style="display:block;font-family:'Geist Mono',monospace;font-size:7.5px;color:#8a6d2f;text-transform:uppercase;letter-spacing:.12em">min</span></div>
+                  <div style="background:#fff;border:1px solid #EEE9DD;border-radius:8px;padding:9px 0;text-align:center"><span style="font-family:'Geist Mono',monospace;font-size:15px;font-weight:600;color:#211D18">54</span><span style="display:block;font-family:'Geist Mono',monospace;font-size:7.5px;color:#8a6d2f;text-transform:uppercase;letter-spacing:.12em">sec</span></div>
+                </div>
+                <div style="padding:16px 24px;cursor:pointer" style-hover="outline:2px solid oklch(0.62 0.21 29);outline-offset:-2px">
+                  <sc-for list="{{ siteSchedule }}" as="ev" hint-placeholder-count="4">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #F3EFE6">
+                      <span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#211D18"><span style="{{ ev.dot }}"></span>{{ ev.name }}</span>
+                      <span style="font-family:'Geist Mono',monospace;font-size:10px;color:#9b8a68">{{ ev.when }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:9px;overflow-y:auto">
+              <span style="font-family:'Geist Mono',monospace;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3,#8F8D88)">Hero · selected</span>
+              <span style="font-size:11.5px;font-weight:550;color:var(--ink2,#6A6864)">Names</span>
+              <span style="font-size:13px;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:8px 10px;background:var(--bg,#FAFAF8)">Aanya &amp; Dev</span>
+              <span style="font-size:11.5px;font-weight:550;color:var(--ink2,#6A6864)">Date &amp; place</span>
+              <span style="font-size:12.5px;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:8px 10px;background:var(--bg,#FAFAF8);font-family:'Geist Mono',monospace">19 Sep 2026 · Jaipur</span>
+              <span style="font-size:11.5px;font-weight:550;color:var(--ink2,#6A6864)">Accent</span>
+              <div style="display:flex;gap:6px"><span style="width:20px;height:20px;border-radius:10px;background:#C9A227;outline:2px solid rgba(201,162,39,.4);outline-offset:2px;cursor:pointer"></span><span style="width:20px;height:20px;border-radius:10px;background:#7A1F1F;cursor:pointer"></span><span style="width:20px;height:20px;border-radius:10px;background:#3E7C4F;cursor:pointer"></span><span style="width:20px;height:20px;border-radius:10px;background:#6D3FA9;cursor:pointer"></span></div>
+              <span style="font-size:11.5px;font-weight:550;color:var(--ink2,#6A6864)">Per event colours</span>
+              <sc-for list="{{ siteSchedule }}" as="ev" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:8px;font-size:12.5px"><span style="{{ ev.dot }}"></span><span style="flex:1">{{ ev.name }}</span><span style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--ink3,#8F8D88)">{{ ev.hex }}</span></div>
+              </sc-for>
+              <div style="margin-top:auto;border-top:1px solid var(--ln,#E8E7E4);padding-top:9px"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;color:var(--ink3,#8F8D88)">Draft · publish to go live</span></div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ═══ EVENTS ═══ -->
+        <sc-if value="{{ isEvents }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div><h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em">Events</h1><p style="margin:4px 0 0;font-size:13.5px;color:var(--ink2,#6A6864)">The spine of everything: the schedule, the matrix, vendors and budget all hang off these.</p></div>
+            <span style="font-size:13px;font-weight:600;background:var(--ac,oklch(0.62 0.21 29));color:#fff;border-radius:8px;padding:8px 15px;cursor:pointer" style-hover="filter:brightness(1.08)">+ Add event</span>
+          </div>
+          <div style="margin-top:20px;display:flex;gap:0;border:1px solid var(--ln,#E8E7E4);border-radius:12px;overflow:hidden;background:var(--sf,#fff)">
+            <sc-for list="{{ eventCards }}" as="e" hint-placeholder-count="4">
+              <div style="flex:1;padding:16px 18px;border-right:1px solid var(--ln,#E8E7E4)" style-hover="background:var(--sf2,#F5F4F2)">
+                <span style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:650"><span style="{{ e.dot }}"></span>{{ e.name }}</span>
+                <p style="margin:6px 0 0;font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--ink3,#8F8D88)">{{ e.when }}</p>
+                <p style="margin:2px 0 0;font-size:12.5px;color:var(--ink2,#6A6864)">{{ e.venue }}</p>
+                <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+                  <span style="{{ e.visStyle }}">{{ e.vis }}</span>
+                  <span style="font-family:'Geist Mono',monospace;font-size:9.5px;border:1px solid var(--ln,#E8E7E4);border-radius:6px;padding:2px 7px;color:var(--ink2,#6A6864)">cap {{ e.cap }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:14px;background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:12px;padding:14px 18px">
+            <span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3,#8F8D88)">The weekend</span>
+            <div style="margin-top:10px;position:relative;height:44px;background:var(--sf2,#F5F4F2);border-radius:8px">
+              <span style="position:absolute;left:4%;top:8px;bottom:8px;width:10%;border-radius:6px;background:#3E7C4F;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10.5px;font-weight:600">Mehndi</span>
+              <span style="position:absolute;left:26%;top:8px;bottom:8px;width:14%;border-radius:6px;background:#6D3FA9;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10.5px;font-weight:600">Sangeet</span>
+              <span style="position:absolute;left:54%;top:8px;bottom:8px;width:12%;border-radius:6px;background:#C9A227;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10.5px;font-weight:600">Ceremony</span>
+              <span style="position:absolute;left:78%;top:8px;bottom:8px;width:16%;border-radius:6px;background:#7A1F1F;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10.5px;font-weight:600">Reception</span>
+            </div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;font-family:'Geist Mono',monospace;font-size:9.5px;color:var(--ink3,#8F8D88)"><span>Thu 17</span><span>Fri 18</span><span>Sat 19</span></div>
+          </div>
+        </sc-if>
+
+        <!-- ═══ GUESTS ═══ -->
+        <sc-if value="{{ isGuests }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div><h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em">Guests</h1><p style="margin:4px 0 0;font-size:13.5px;color:var(--ink2,#6A6864)">{{ guestSummary }}</p></div>
+            <div style="display:flex;gap:8px">
+              <span style="font-size:13px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:8px 14px;cursor:pointer;background:var(--sf,#fff)" style-hover="border-color:var(--ln2,#DBDAD6)">Import list</span>
+              <span onClick="{{ addHouseholdToast }}" style="font-size:13px;font-weight:600;background:var(--ac,oklch(0.62 0.21 29));color:#fff;border-radius:8px;padding:8px 15px;cursor:pointer" style-hover="filter:brightness(1.08)">+ Add household</span>
+            </div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:8px;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:7px 11px;background:var(--sf,#fff);min-width:230px;color:var(--ink3,#8F8D88)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg>
+              <span style="font-size:12.5px">Search guests…</span>
+            </div>
+            <sc-for list="{{ guestFilters }}" as="f" hint-placeholder-count="3"><span style="{{ f.style }}">{{ f.label }}</span></sc-for>
+          </div>
+          <sc-for list="{{ households }}" as="h" hint-placeholder-count="2">
+            <div style="margin-top:14px;background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--ln,#E8E7E4)">
+                <span style="font-size:14.5px;font-weight:650;letter-spacing:-0.01em">{{ h.name }}</span>
+                <span style="{{ h.sideStyle }}">{{ h.side }}</span>
+                <span style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--ink3,#8F8D88)">{{ h.meta }}</span>
+                <span onClick="{{ h.archive }}" style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:550;color:var(--ink3,#8F8D88);border:1px solid transparent;border-radius:7px;padding:5px 9px;cursor:pointer" style-hover="color:var(--bd,#D2402A);border-color:var(--ln,#E8E7E4)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6.5 7l.8 12a1 1 0 0 0 1 .9h7.4a1 1 0 0 0 1-.9l.8-12"></path></svg>Archive
+                </span>
+              </div>
+              <div style="display:grid;grid-template-columns:minmax(220px,1.6fr) repeat(4,minmax(86px,1fr)) 44px;align-items:center">
+                <span style="padding:9px 18px;font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3,#8F8D88)">Guest</span>
+                <sc-for list="{{ h.cols }}" as="c" hint-placeholder-count="4">
+                  <span onClick="{{ c.toggleAll }}" title="Toggle everyone" style="padding:9px 6px;text-align:center;font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3,#8F8D88);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" style-hover="color:var(--ink,#191918)"><span style="{{ c.dot }}"></span>{{ c.name }}</span>
+                </sc-for>
+                <span></span>
+                <sc-for list="{{ h.guests }}" as="g">
+                  <span style="padding:10px 18px;border-top:1px solid var(--ln,#E8E7E4);font-size:13.5px;display:flex;align-items:center;gap:8px;min-width:0">
+                    <span style="font-weight:550;white-space:nowrap">{{ g.name }}</span>
+                    <sc-if value="{{ g.child }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Geist Mono',monospace;font-size:9px;border:1px solid var(--ln,#E8E7E4);border-radius:5px;padding:1px 5px;color:var(--ink3,#8F8D88)">child</span></sc-if>
+                    <sc-if value="{{ g.plusOne }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Geist Mono',monospace;font-size:9px;border-radius:5px;padding:1px 5px;background:var(--acs,rgba(222,71,38,.08));color:var(--ac,oklch(0.62 0.21 29))">+1</span></sc-if>
+                    <span style="font-size:11.5px;color:var(--ink3,#8F8D88);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ g.email }}</span>
+                  </span>
+                  <sc-for list="{{ g.cells }}" as="cell">
+                    <span style="border-top:1px solid var(--ln,#E8E7E4);padding:10px 6px;display:flex;justify-content:center">
+                      <span onClick="{{ cell.toggle }}" style="{{ cell.style }}">{{ cell.mark }}</span>
+                    </span>
+                  </sc-for>
+                  <span style="border-top:1px solid var(--ln,#E8E7E4);padding:10px 8px;display:flex;justify-content:center;color:var(--ink3,#8F8D88);cursor:pointer" style-hover="color:var(--bd,#D2402A)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+                  </span>
+                </sc-for>
+              </div>
+              <div style="border-top:1px solid var(--ln,#E8E7E4);padding:9px 18px">
+                <span style="font-size:12.5px;font-weight:550;color:var(--ink3,#8F8D88);cursor:pointer" style-hover="color:var(--ac,oklch(0.62 0.21 29))">+ Add guest</span>
+              </div>
+            </div>
+          </sc-for>
+        </sc-if>
+
+        <!-- ═══ INVITATIONS ═══ -->
+        <sc-if value="{{ isInvites }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div><h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em">Invitations</h1><p style="margin:4px 0 0;font-size:13.5px;color:var(--ink2,#6A6864)">One private link per household. Email, WhatsApp or a printed QR.</p></div>
+            <span onClick="{{ sendAllToast }}" style="font-size:13px;font-weight:600;background:var(--ac,oklch(0.62 0.21 29));color:#fff;border-radius:8px;padding:8px 15px;cursor:pointer" style-hover="filter:brightness(1.08)">Send 8 unsent</span>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px">
+            <div style="flex:1.7;background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;overflow:hidden">
+              <div style="display:grid;grid-template-columns:1.5fr .7fr .9fr 1fr auto;gap:8px;padding:10px 16px;border-bottom:1px solid var(--ln,#E8E7E4);font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3,#8F8D88)">
+                <span>Household</span><span>Guests</span><span>Status</span><span>Last activity</span><span></span>
+              </div>
+              <sc-for list="{{ inviteRows }}" as="r" hint-placeholder-count="5">
+                <div onClick="{{ r.select }}" style="{{ r.rowStyle }}" style-hover="background:var(--sf2,#F5F4F2)">
+                  <span style="font-size:13.5px;font-weight:600">{{ r.name }}</span>
+                  <span style="font-size:13px;color:var(--ink2,#6A6864)">{{ r.guests }}</span>
+                  <span><span style="{{ r.chipStyle }}"><span style="{{ r.chipDot }}"></span>{{ r.status }}</span></span>
+                  <span style="font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--ink3,#8F8D88)">{{ r.last }}</span>
+                  <span style="display:flex;gap:6px">
+                    <span onClick="{{ r.copy }}" style="font-size:11.5px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:7px;padding:4px 9px;cursor:pointer;background:var(--sf,#fff)" style-hover="border-color:var(--ln2,#DBDAD6)">Copy</span>
+                    <span style="font-size:11.5px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:7px;padding:4px 9px;cursor:pointer;background:var(--sf,#fff)" style-hover="border-color:var(--ln2,#DBDAD6)">WhatsApp</span>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="flex:1;background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:18px;height:fit-content">
+              <span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3,#8F8D88)">{{ selName }} · link</span>
+              <div style="margin-top:10px;display:flex;gap:6px">
+                <span style="flex:1;font-family:'Geist Mono',monospace;font-size:10.5px;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:8px 10px;background:var(--bg,#FAFAF8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ selLink }}</span>
+                <span onClick="{{ copySel }}" style="font-size:12px;font-weight:600;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:8px 11px;cursor:pointer" style-hover="border-color:var(--ln2,#DBDAD6)">Copy</span>
+              </div>
+              <div style="margin-top:14px;display:flex;gap:14px;align-items:center">
+                <div style="width:108px;height:108px;border-radius:10px;border:1px solid var(--ln,#E8E7E4);background:repeating-linear-gradient(45deg,#fff,#fff 5px,#E4E2DE 5px,#E4E2DE 10px);display:flex;align-items:center;justify-content:center"><span style="font-family:'Geist Mono',monospace;font-size:9px;color:#77756F;background:#fff;padding:2px 6px;border-radius:4px">QR CODE</span></div>
+                <div style="font-size:12.5px;line-height:1.55;color:var(--ink2,#6A6864)">Print on the paper card. Scanning opens their personal RSVP, only their events.<br><span style="color:var(--ac,oklch(0.62 0.21 29));font-weight:600;cursor:pointer">Download PNG</span></div>
+              </div>
+              <div style="margin-top:14px;display:flex;gap:8px">
+                <span style="flex:1;text-align:center;font-size:12.5px;font-weight:600;background:var(--ac,oklch(0.62 0.21 29));color:#fff;border-radius:8px;padding:8px 0;cursor:pointer" style-hover="filter:brightness(1.08)">Email invite</span>
+                <span style="flex:1;text-align:center;font-size:12.5px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:8px 0;cursor:pointer" style-hover="border-color:var(--ln2,#DBDAD6)">WhatsApp</span>
+                <span style="text-align:center;font-size:12.5px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:8px 11px;color:var(--bd,#D2402A);cursor:pointer" style-hover="background:var(--bds,#FBEAE6)">Revoke</span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ═══ RSVPS ═══ -->
+        <sc-if value="{{ isRsvps }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div><h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em">RSVPs</h1><p style="margin:4px 0 0;font-size:13.5px;color:var(--ink2,#6A6864)">18 of 32 households in. Answers land here live.</p></div>
+            <div style="display:flex;gap:8px">
+              <span style="font-size:13px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:8px 14px;cursor:pointer;background:var(--sf,#fff)" style-hover="border-color:var(--ln2,#DBDAD6)">Export caterer sheet</span>
+              <span onClick="{{ remind }}" style="font-size:13px;font-weight:600;background:var(--ac,oklch(0.62 0.21 29));color:#fff;border-radius:8px;padding:8px 15px;cursor:pointer" style-hover="filter:brightness(1.08)">Remind 14 pending</span>
+            </div>
+          </div>
+          <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <sc-for list="{{ rsvpEvents }}" as="e" hint-placeholder-count="4">
+              <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:18px">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span style="{{ e.dot }}"></span>
+                  <span style="font-size:15px;font-weight:650">{{ e.name }}</span>
+                  <span style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--ink3,#8F8D88)">{{ e.date }}</span>
+                  <span style="margin-left:auto;font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink2,#6A6864)">{{ e.capText }}</span>
+                </div>
+                <div style="margin-top:12px;display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--sf2,#F5F4F2)">
+                  <span style="{{ e.segA }}"></span><span style="{{ e.segD }}"></span><span style="{{ e.segP }}"></span>
+                </div>
+                <div style="margin-top:10px;display:flex;gap:14px;font-size:12.5px">
+                  <span style="display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:4px;background:var(--ok,#1B9E5F)"></span><b style="font-family:'Geist Mono',monospace">{{ e.att }}</b>&nbsp;attending</span>
+                  <span style="display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:4px;background:var(--bd,#D2402A)"></span><b style="font-family:'Geist Mono',monospace">{{ e.dec }}</b>&nbsp;declined</span>
+                  <span style="display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:4px;background:var(--wn,#B87A1E)"></span><b style="font-family:'Geist Mono',monospace">{{ e.pen }}</b>&nbsp;pending</span>
+                </div>
+                <div style="margin-top:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                  <span style="font-family:'Geist Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3,#8F8D88)">Chase</span>
+                  <sc-for list="{{ e.chase }}" as="c"><span style="font-size:11px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:999px;padding:2px 9px;color:var(--ink2,#6A6864);cursor:pointer" style-hover="border-color:var(--wn,#B87A1E);color:var(--wn,#B87A1E)">{{ c }}</span></sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+            <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:18px">
+              <p style="margin:0 0 10px;font-size:13px;font-weight:650">Meal choices</p>
+              <sc-for list="{{ meals }}" as="m" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:10px;padding:5px 0;font-size:13px">
+                  <span style="width:86px">{{ m.k }}</span>
+                  <span style="flex:1;height:6px;border-radius:3px;background:var(--sf2,#F5F4F2);overflow:hidden"><span style="{{ m.bar }}"></span></span>
+                  <span style="font-family:'Geist Mono',monospace;font-size:12px;font-weight:600;width:26px;text-align:right">{{ m.n }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:18px">
+              <p style="margin:0 0 10px;font-size:13px;font-weight:650">Dietary flags</p>
+              <sc-for list="{{ dietary }}" as="d" hint-placeholder-count="3">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--ln,#E8E7E4);font-size:13px">
+                  <span style="display:flex;align-items:center;gap:8px"><span style="width:6px;height:6px;border-radius:3px;background:var(--wn,#B87A1E)"></span>{{ d.k }}</span>
+                  <span style="font-family:'Geist Mono',monospace;font-size:12px;font-weight:600">{{ d.n }}</span>
+                </div>
+              </sc-for>
+              <p style="margin:10px 0 0;font-size:11.5px;color:var(--ink3,#8F8D88)">Included in the caterer export, per event.</p>
+            </div>
+            <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:18px">
+              <p style="margin:0 0 10px;font-size:13px;font-weight:650">Song requests</p>
+              <sc-for list="{{ songs }}" as="s" hint-placeholder-count="3">
+                <p style="margin:0;padding:6px 0;border-bottom:1px solid var(--ln,#E8E7E4);font-size:12.5px;color:var(--ink2,#6A6864)"><b style="color:var(--ink,#191918);font-weight:600">{{ s.guest }}</b> · {{ s.value }}</p>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ═══ SEATING ═══ -->
+        <sc-if value="{{ isSeating }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div><h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em">Seating</h1><p style="margin:4px 0 0;font-size:13.5px;color:var(--ink2,#6A6864)">Reception · 104 attending · 6 unseated</p></div>
+            <div style="display:flex;gap:8px">
+              <span style="font-size:13px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:8px 14px;cursor:pointer;background:var(--sf,#fff)" style-hover="border-color:var(--ln2,#DBDAD6)">+ Add table</span>
+              <span onClick="{{ notifySeated }}" style="font-size:13px;font-weight:600;background:var(--ac,oklch(0.62 0.21 29));color:#fff;border-radius:8px;padding:8px 15px;cursor:pointer" style-hover="filter:brightness(1.08)">Tell seated families</span>
+            </div>
+          </div>
+          <div style="margin-top:16px;display:grid;grid-template-columns:1fr 280px;gap:14px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-content:start">
+              <sc-for list="{{ tables }}" as="t" hint-placeholder-count="6">
+                <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:16px" style-hover="border-color:var(--ln2,#DBDAD6)">
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <span style="font-size:13.5px;font-weight:650">{{ t.name }}</span>
+                    <span style="{{ t.capStyle }}">{{ t.capText }}</span>
+                  </div>
+                  <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px">
+                    <sc-for list="{{ t.people }}" as="p"><span style="font-size:11px;font-weight:550;background:var(--sf2,#F5F4F2);border-radius:999px;padding:3px 9px;cursor:default" style-hover="background:var(--bds,#FBEAE6)">{{ p }}</span></sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:16px;height:fit-content">
+              <p style="margin:0;font-size:13px;font-weight:650">Unseated · 6</p>
+              <div style="margin-top:10px;display:flex;flex-direction:column;gap:7px">
+                <sc-for list="{{ unseated }}" as="u" hint-placeholder-count="6">
+                  <div style="display:flex;align-items:center;gap:8px;border:1px dashed var(--ln2,#DBDAD6);border-radius:9px;padding:7px 10px;font-size:12.5px;cursor:grab" style-hover="border-color:var(--ac,oklch(0.62 0.21 29))">
+                    <span style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--ink3,#8F8D88)">⠿</span>
+                    <span style="flex:1;font-weight:550">{{ u.name }}</span>
+                    <span style="font-size:10.5px;color:var(--ink3,#8F8D88)">{{ u.hh }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <p style="margin:12px 0 0;font-size:11.5px;line-height:1.5;color:var(--ink3,#8F8D88)">Drag onto a table, or use the seat picker. Families see their table after you notify.</p>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ═══ BUDGET ═══ -->
+        <sc-if value="{{ isBudget }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div><h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em">Budget</h1><p style="margin:4px 0 0;font-size:13.5px;color:var(--ink2,#6A6864)">A booked vendor lands here by itself.</p></div>
+            <span style="font-size:13px;font-weight:600;background:var(--ac,oklch(0.62 0.21 29));color:#fff;border-radius:8px;padding:8px 15px;cursor:pointer" style-hover="filter:brightness(1.08)">+ Add line</span>
+          </div>
+          <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+            <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:16px"><p style="margin:0;font-size:12px;font-weight:550;color:var(--ink2,#6A6864)">Total budget</p><p style="margin:6px 0 0;font-family:'Geist Mono',monospace;font-size:24px;font-weight:600;letter-spacing:-0.02em">£42,000</p></div>
+            <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:16px"><p style="margin:0;font-size:12px;font-weight:550;color:var(--ink2,#6A6864)">Committed</p><p style="margin:6px 0 0;font-family:'Geist Mono',monospace;font-size:24px;font-weight:600;letter-spacing:-0.02em">£31,400</p><div style="margin-top:8px;height:5px;border-radius:3px;background:var(--sf2,#F5F4F2)"><div style="width:75%;height:100%;border-radius:3px;background:var(--ac,oklch(0.62 0.21 29))"></div></div></div>
+            <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:16px"><p style="margin:0;font-size:12px;font-weight:550;color:var(--ink2,#6A6864)">Paid so far</p><p style="margin:6px 0 0;font-family:'Geist Mono',monospace;font-size:24px;font-weight:600;letter-spacing:-0.02em">£18,250</p><div style="margin-top:8px;height:5px;border-radius:3px;background:var(--sf2,#F5F4F2)"><div style="width:43%;height:100%;border-radius:3px;background:var(--ok,#1B9E5F)"></div></div></div>
+          </div>
+          <div style="margin-top:16px;background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;overflow:hidden">
+            <div style="display:grid;grid-template-columns:1.8fr 1fr .8fr .8fr .8fr .9fr;gap:8px;padding:10px 18px;border-bottom:1px solid var(--ln,#E8E7E4);font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3,#8F8D88)">
+              <span>Line</span><span>Linked to</span><span style="text-align:right">Estimate</span><span style="text-align:right">Actual</span><span style="text-align:right">Paid</span><span>Status</span>
+            </div>
+            <sc-for list="{{ budgetRows }}" as="b" hint-placeholder-count="7">
+              <div style="display:grid;grid-template-columns:1.8fr 1fr .8fr .8fr .8fr .9fr;gap:8px;align-items:center;padding:11px 18px;border-bottom:1px solid var(--ln,#E8E7E4)" style-hover="background:var(--sf2,#F5F4F2)">
+                <span style="font-size:13.5px;font-weight:600">{{ b.label }}<span style="display:block;font-size:11px;font-weight:400;color:var(--ink3,#8F8D88)">{{ b.cat }}</span></span>
+                <span style="font-size:12px;color:var(--ink2,#6A6864)">{{ b.link }}</span>
+                <span style="text-align:right;font-family:'Geist Mono',monospace;font-size:12.5px">{{ b.est }}</span>
+                <span style="text-align:right;font-family:'Geist Mono',monospace;font-size:12.5px">{{ b.act }}</span>
+                <span style="text-align:right;font-family:'Geist Mono',monospace;font-size:12.5px;color:var(--ok,#1B9E5F)">{{ b.paid }}</span>
+                <span><span style="{{ b.chip }}">{{ b.status }}</span></span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <!-- ═══ VENDORS ═══ -->
+        <sc-if value="{{ isVendors }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div><h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em">Vendors</h1><p style="margin:4px 0 0;font-size:13.5px;color:var(--ink2,#6A6864)">6 booked · £29,900 contracted</p></div>
+            <span style="font-size:13px;font-weight:600;background:var(--ac,oklch(0.62 0.21 29));color:#fff;border-radius:8px;padding:8px 15px;cursor:pointer" style-hover="filter:brightness(1.08)">+ Add vendor</span>
+          </div>
+          <div style="margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:start">
+            <sc-for list="{{ vendorCols }}" as="col" hint-placeholder-count="4">
+              <div style="background:var(--sf2,#F5F4F2);border:1px solid var(--ln,#E8E7E4);border-radius:12px;padding:10px">
+                <div style="display:flex;align-items:center;gap:7px;padding:2px 6px 8px"><span style="{{ col.dot }}"></span><span style="font-size:12px;font-weight:650">{{ col.label }}</span><span style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--ink3,#8F8D88)">{{ col.count }}</span></div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <sc-for list="{{ col.cards }}" as="v">
+                    <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:10px;padding:12px;cursor:grab" style-hover="border-color:var(--ln2,#DBDAD6)">
+                      <p style="margin:0;font-size:13px;font-weight:600">{{ v.name }}</p>
+                      <p style="margin:2px 0 0;font-size:11px;color:var(--ink3,#8F8D88)">{{ v.cat }}</p>
+                      <sc-if value="{{ v.amt }}" hint-placeholder-val="{{ false }}"><p style="margin:8px 0 0;font-family:'Geist Mono',monospace;font-size:13px;font-weight:600">{{ v.amt }}</p></sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <!-- ═══ TASKS ═══ -->
+        <sc-if value="{{ isTasks }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div><h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em">Tasks</h1><p style="margin:4px 0 0;font-size:13.5px;color:var(--ink2,#6A6864)">{{ tasksSummary }}</p></div>
+            <div style="display:flex;gap:8px">
+              <span style="font-size:13px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:8px 14px;cursor:pointer;background:var(--sf,#fff)" style-hover="border-color:var(--ln2,#DBDAD6)">Starter checklist</span>
+              <span style="font-size:13px;font-weight:600;background:var(--ac,oklch(0.62 0.21 29));color:#fff;border-radius:8px;padding:8px 15px;cursor:pointer" style-hover="filter:brightness(1.08)">+ Add task</span>
+            </div>
+          </div>
+          <sc-for list="{{ taskGroups }}" as="tg" hint-placeholder-count="3">
+            <div style="margin-top:18px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="{{ tg.dot }}"></span><span style="font-size:12.5px;font-weight:650">{{ tg.label }}</span><span style="font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--ink3,#8F8D88)">{{ tg.count }}</span></div>
+              <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:12px;overflow:hidden">
+                <sc-for list="{{ tg.items }}" as="t">
+                  <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--ln,#E8E7E4)" style-hover="background:var(--sf2,#F5F4F2)">
+                    <span onClick="{{ t.toggle }}" style="{{ t.checkStyle }}">{{ t.mark }}</span>
+                    <span style="{{ t.titleStyle }}">{{ t.title }}</span>
+                    <sc-if value="{{ t.chip }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:999px;padding:2px 9px;color:var(--ink2,#6A6864)">{{ t.chip }}</span></sc-if>
+                    <sc-if value="{{ t.pri }}" hint-placeholder-val="{{ false }}"><span style="{{ t.priStyle }}">{{ t.pri }}</span></sc-if>
+                    <span style="margin-left:auto;font-family:'Geist Mono',monospace;font-size:10.5px;color:{{ t.dueColor }}">{{ t.due }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </sc-if>
+
+        <!-- ═══ FILES ═══ -->
+        <sc-if value="{{ isFiles }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div><h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em">Files</h1><p style="margin:4px 0 0;font-size:13.5px;color:var(--ink2,#6A6864)">Contracts, quotes and inspiration, linked to vendors and events.</p></div>
+            <span style="font-size:13px;font-weight:600;background:var(--ac,oklch(0.62 0.21 29));color:#fff;border-radius:8px;padding:8px 15px;cursor:pointer" style-hover="filter:brightness(1.08)">Upload</span>
+          </div>
+          <div style="margin-top:16px;border:1.5px dashed var(--ln2,#DBDAD6);border-radius:14px;padding:26px;text-align:center;color:var(--ink3,#8F8D88);font-size:13px;background:var(--sf,#fff)" style-hover="border-color:var(--ac,oklch(0.62 0.21 29))">Drop files here, or click Upload · PDF, images, spreadsheets</div>
+          <div style="margin-top:14px;background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;overflow:hidden">
+            <sc-for list="{{ files }}" as="f" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--ln,#E8E7E4)" style-hover="background:var(--sf2,#F5F4F2)">
+                <span style="{{ f.iconStyle }}">{{ f.ext }}</span>
+                <span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ f.name }}</span><span style="font-size:11.5px;color:var(--ink3,#8F8D88)">{{ f.meta }}</span></span>
+                <span style="font-size:11px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:999px;padding:2px 9px;color:var(--ink2,#6A6864)">{{ f.link }}</span>
+                <span style="font-size:12px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:7px;padding:4px 10px;cursor:pointer;background:var(--sf,#fff)" style-hover="border-color:var(--ln2,#DBDAD6)">Download</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <!-- ═══ REPORTS ═══ -->
+        <sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}">
+          <div><h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em">Reports</h1><p style="margin:4px 0 0;font-size:13.5px;color:var(--ink2,#6A6864)">One-click CSVs. Open in Excel or hand straight to a supplier.</p></div>
+          <div style="margin-top:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+            <sc-for list="{{ reports }}" as="r" hint-placeholder-count="5">
+              <div style="display:flex;gap:14px;background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:18px;cursor:pointer" style-hover="border-color:var(--ln2,#DBDAD6)">
+                <span style="flex:none;display:inline-flex;width:38px;height:38px;border-radius:10px;background:var(--acs,rgba(222,71,38,.08));color:var(--ac,oklch(0.62 0.21 29));align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600">CSV</span>
+                <span style="flex:1"><span style="display:block;font-size:14px;font-weight:650">{{ r.title }}</span><span style="display:block;margin-top:3px;font-size:12.5px;line-height:1.5;color:var(--ink2,#6A6864)">{{ r.body }}</span></span>
+                <span style="align-self:center;color:var(--ac,oklch(0.62 0.21 29));font-weight:600">↓</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <!-- ═══ SETTINGS ═══ -->
+        <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+          <div><h1 style="margin:0;font-size:24px;font-weight:650;letter-spacing:-0.025em">Settings</h1></div>
+          <div style="margin-top:16px;display:grid;grid-template-columns:1.5fr 1fr;gap:14px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;padding:20px">
+                <p style="margin:0;font-size:14px;font-weight:650">Site</p>
+                <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                  <label style="display:block"><span style="display:block;margin-bottom:5px;font-size:12px;font-weight:550;color:var(--ink2,#6A6864)">Site name</span><input value="Aanya &amp; Dev" style="width:100%;box-sizing:border-box;font-size:13.5px;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:9px 11px;background:var(--bg,#FAFAF8);color:var(--ink,#191918);font-family:'Instrument Sans',sans-serif;outline:none"></label>
+                  <label style="display:block"><span style="display:block;margin-bottom:5px;font-size:12px;font-weight:550;color:var(--ink2,#6A6864)">Address</span><span style="display:flex;align-items:center;border:1px solid var(--ln,#E8E7E4);border-radius:8px;background:var(--bg,#FAFAF8);overflow:hidden"><input value="aanya-and-dev" style="flex:1;min-width:0;font-size:13px;border:none;padding:9px 11px;background:transparent;color:var(--ink,#191918);font-family:'Geist Mono',monospace;outline:none"><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink3,#8F8D88);padding:0 10px;border-left:1px solid var(--ln,#E8E7E4)">.simvites.co.uk</span></span></label>
+                </div>
+                <label style="display:block;margin-top:12px"><span style="display:block;margin-bottom:5px;font-size:12px;font-weight:550;color:var(--ink2,#6A6864)">Template</span><span style="display:flex;gap:10px">
+                  <span style="flex:1;border:2px solid var(--ac,oklch(0.62 0.21 29));border-radius:10px;padding:12px;cursor:pointer"><span style="display:block;font-family:'Instrument Serif',serif;font-size:15px">Editorial Gold</span><span style="font-size:11px;color:var(--ink3,#8F8D88)">cream · gold · deep red</span></span>
+                  <span style="flex:1;border:1px solid var(--ln,#E8E7E4);border-radius:10px;padding:12px;cursor:pointer" style-hover="border-color:var(--ln2,#DBDAD6)"><span style="display:block;font-family:'Instrument Serif',serif;font-size:15px">Editorial Luxury</span><span style="font-size:11px;color:var(--ink3,#8F8D88)">ivory · ink · brass</span></span>
+                </span></label>
+                <label style="display:block;margin-top:12px"><span style="display:block;margin-bottom:5px;font-size:12px;font-weight:550;color:var(--ink2,#6A6864)">RSVP deadline (site default)</span><input value="01 Sep 2026, 23:59" style="width:240px;font-size:13px;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:9px 11px;background:var(--bg,#FAFAF8);color:var(--ink,#191918);font-family:'Geist Mono',monospace;outline:none"><span style="display:block;margin-top:5px;font-size:11.5px;color:var(--ink3,#8F8D88)">Events can override this on their own page.</span></label>
+                <div style="margin-top:16px"><span style="font-size:13px;font-weight:600;background:var(--ink,#191918);color:var(--sf,#fff);border-radius:8px;padding:8px 16px;cursor:pointer">Save changes</span></div>
+              </div>
+              <div style="background:var(--sf,#fff);border:1px solid var(--bds,#FBEAE6);border-radius:14px;padding:20px">
+                <p style="margin:0;font-size:14px;font-weight:650;color:var(--bd,#D2402A)">Danger zone</p>
+                <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <span style="font-size:12.5px;color:var(--ink2,#6A6864)">Archive this site. Guests lose access; you can restore for 30 days.</span>
+                  <span style="font-size:12.5px;font-weight:600;border:1px solid var(--bd,#D2402A);color:var(--bd,#D2402A);border-radius:8px;padding:6px 13px;cursor:pointer;white-space:nowrap" style-hover="background:var(--bds,#FBEAE6)">Archive site</span>
+                </div>
+              </div>
+            </div>
+            <div style="background:linear-gradient(160deg,oklch(0.2 0.006 270),oklch(0.14 0.004 270));border-radius:14px;padding:22px;color:#fff">
+              <span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:oklch(0.72 0.17 32)">Unlock sending</span>
+              <p style="margin:10px 0 0;font-size:18px;font-weight:650;letter-spacing:-0.02em;line-height:1.25">Build free. One payment when you are ready to send.</p>
+              <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:oklch(0.8 0.005 90)">
+                <span style="display:flex;gap:8px"><span style="color:oklch(0.72 0.15 150)">✓</span>Publish your site to guests</span>
+                <span style="display:flex;gap:8px"><span style="color:oklch(0.72 0.15 150)">✓</span>Send email + WhatsApp invitations</span>
+                <span style="display:flex;gap:8px"><span style="color:oklch(0.72 0.15 150)">✓</span>Live for 18 months after the wedding</span>
+              </div>
+              <span style="display:block;margin-top:16px;text-align:center;font-size:13px;font-weight:600;background:var(--ac,oklch(0.62 0.21 29));color:#fff;border-radius:9px;padding:10px 0;cursor:pointer" style-hover="filter:brightness(1.1)">Unlock · one payment</span>
+              <p style="margin:10px 0 0;text-align:center;font-family:'Geist Mono',monospace;font-size:9.5px;color:oklch(0.6 0.005 90)">Stripe · no subscription</p>
+            </div>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ COMMAND PALETTE ═══════════ -->
+  <sc-if value="{{ cmdOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeCmd }}" style="position:fixed;inset:0;z-index:200;background:rgba(10,10,12,.4);backdrop-filter:blur(3px);animation:fadeIn .12s ease">
+      <div onClick="{{ stop }}" style="width:min(560px,92vw);margin:14vh auto 0;background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;box-shadow:0 40px 90px -20px rgba(0,0,0,.45);overflow:hidden;animation:popIn .16s cubic-bezier(.2,.9,.3,1.1)">
+        <div style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--ln,#E8E7E4)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink3,#8F8D88)" stroke-width="2" stroke-linecap="round"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg>
+          <input ref="{{ refCmdInput }}" value="{{ cmdQ }}" onChange="{{ onCmdQ }}" placeholder="Jump to a module or run an action…" style="flex:1;border:none;outline:none;background:transparent;font-size:14.5px;color:var(--ink,#191918);font-family:'Instrument Sans',sans-serif">
+          <span style="font-family:'Geist Mono',monospace;font-size:9.5px;border:1px solid var(--ln,#E8E7E4);border-radius:5px;padding:1px 6px;color:var(--ink3,#8F8D88)">esc</span>
+        </div>
+        <div style="max-height:320px;overflow-y:auto;padding:6px">
+          <sc-for list="{{ cmdItems }}" as="c" hint-placeholder-count="6">
+            <div onClick="{{ c.run }}" style="{{ c.style }}" style-hover="background:var(--sf2,#F5F4F2)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7"><path d="{{ c.icon }}"></path></svg>
+              <span style="flex:1">{{ c.label }}</span>
+              <span style="font-family:'Geist Mono',monospace;font-size:9.5px;color:var(--ink3,#8F8D88)">{{ c.kind }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ═══════════ DIALOG ═══════════ -->
+  <sc-if value="{{ dialogOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeDialog }}" style="position:fixed;inset:0;z-index:210;background:rgba(10,10,12,.4);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;animation:fadeIn .12s ease">
+      <div onClick="{{ stop }}" style="width:min(420px,92vw);background:var(--sf,#fff);border:1px solid var(--ln,#E8E7E4);border-radius:14px;box-shadow:0 40px 90px -20px rgba(0,0,0,.45);padding:22px;animation:popIn .16s cubic-bezier(.2,.9,.3,1.1)">
+        <p style="margin:0;font-size:16px;font-weight:650;letter-spacing:-0.015em">Archive {{ dialogName }}?</p>
+        <p style="margin:8px 0 0;font-size:13.5px;line-height:1.55;color:var(--ink2,#6A6864)">Their guests come off every list and their link stops working. You can undo this from the toast, or restore later from Settings.</p>
+        <div style="margin-top:18px;display:flex;justify-content:flex-end;gap:8px">
+          <span onClick="{{ closeDialog }}" style="font-size:13px;font-weight:550;border:1px solid var(--ln,#E8E7E4);border-radius:8px;padding:8px 14px;cursor:pointer" style-hover="background:var(--sf2,#F5F4F2)">Cancel</span>
+          <span onClick="{{ confirmArchive }}" style="font-size:13px;font-weight:600;background:var(--bd,#D2402A);color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer" style-hover="filter:brightness(1.08)">Archive household</span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ═══════════ TOASTS ═══════════ -->
+  <div style="position:fixed;right:18px;bottom:18px;z-index:300;display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+    <sc-for list="{{ toasts }}" as="t">
+      <div style="display:flex;align-items:center;gap:10px;background:var(--ink,#191918);color:var(--sf,#fff);border-radius:11px;padding:11px 14px;box-shadow:0 18px 45px -12px rgba(0,0,0,.4);animation:toastIn .22s cubic-bezier(.2,.9,.3,1.1);font-size:13px">
+        <span style="display:inline-flex;width:18px;height:18px;border-radius:9px;background:{{ t.color }};color:#fff;align-items:center;justify-content:center;font-size:10px;font-weight:700">{{ t.icon }}</span>
+        <span>{{ t.msg }}</span>
+        <sc-if value="{{ t.undo }}" hint-placeholder-val="{{ false }}"><span onClick="{{ t.undo }}" style="font-weight:650;color:oklch(0.75 0.15 32);cursor:pointer;margin-left:4px">Undo</span></sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#D6A035&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#DE4726&quot;,&quot;#5B5BD6&quot;,&quot;#12A594&quot;,&quot;#D6A035&quot;],&quot;section&quot;:&quot;Brand&quot;},&quot;startModule&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;home&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;website&quot;,&quot;events&quot;,&quot;guests&quot;,&quot;invites&quot;,&quot;rsvps&quot;,&quot;seating&quot;,&quot;budget&quot;,&quot;vendors&quot;,&quot;tasks&quot;,&quot;files&quot;,&quot;reports&quot;,&quot;settings&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;View&quot;},&quot;darkDefault&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;View&quot;}}">
+class Component extends DCLogic {
+  state = {
+    mod: (this.props && this.props.startModule) || 'home',
+    dark: !!(this.props && this.props.darkDefault),
+    cmd: false, q: '',
+    toasts: [], dialog: null,
+    publish: 'draft',
+    selInvite: 0,
+    archived: null,
+    households: [
+      { name: 'The Shah Family', side: 'Bride', guests: [
+        { name: 'Priya Shah', email: 'priya@example.com', child: false, plusOne: true, cells: [true, true, true, true] },
+        { name: 'Raj Shah', email: '', child: false, plusOne: false, cells: [true, true, true, true] },
+        { name: 'Aarav Shah', email: '', child: true, plusOne: false, cells: [false, true, true, false] },
+      ]},
+      { name: 'The Patel Family', side: 'Groom', guests: [
+        { name: 'Meera Patel', email: 'meera@example.com', child: false, plusOne: false, cells: [true, false, true, true] },
+        { name: 'Arjun Patel', email: '', child: false, plusOne: true, cells: [false, false, true, true] },
+      ]},
+      { name: 'The Mehta Family', side: 'Bride', guests: [
+        { name: 'Nikhil Mehta', email: 'nikhil@example.com', child: false, plusOne: false, cells: [true, true, true, true] },
+        { name: 'Sara Mehta', email: '', child: false, plusOne: false, cells: [true, true, true, true] },
+        { name: 'Zara Mehta', email: '', child: true, plusOne: false, cells: [false, true, false, false] },
+      ]},
+    ],
+    tasks: [
+      { id: 1, title: 'Chase caterer for tasting date', done: false, grp: 'overdue', chip: 'Sangeet', pri: 'high', due: '2 days ago' },
+      { id: 2, title: 'Pay florist deposit', done: false, grp: 'overdue', chip: 'Vendors', pri: '', due: 'yesterday' },
+      { id: 3, title: 'Confirm mehndi artist headcount', done: false, grp: 'week', chip: 'Mehndi', pri: '', due: 'Wed' },
+      { id: 4, title: 'Send hotel block link to out-of-town guests', done: false, grp: 'week', chip: '', pri: '', due: 'Fri' },
+      { id: 5, title: 'Approve sangeet playlist', done: false, grp: 'week', chip: 'Sangeet', pri: 'low', due: 'Sat' },
+      { id: 6, title: 'Book airport pickups', done: true, grp: 'done', chip: '', pri: '', due: 'done' },
+      { id: 7, title: 'Shortlist photographers', done: true, grp: 'done', chip: '', pri: '', due: 'done' },
+    ],
+  }
+
+  // ── theme plumbing ──
+  componentDidMount() {
+    this._applyTheme()
+    this._applyAccent()
+    this._onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); this.setState(s => ({ cmd: !s.cmd, q: '' })) }
+      else if (e.key === 'Escape') this.setState({ cmd: false, dialog: null })
+    }
+    window.addEventListener('keydown', this._onKey)
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._onKey); clearTimeout(this._pubT) }
+  componentDidUpdate() {
+    this._applyTheme()
+    this._applyAccent()
+    if (this.state.cmd && !this._cmdWas && this.refs.cmdInput) setTimeout(() => this.refs.cmdInput && this.refs.cmdInput.focus(), 30)
+    this._cmdWas = this.state.cmd
+  }
+  refs = {}
+  mkRef(n) { if (!this._rf) this._rf = {}; if (!this._rf[n]) this._rf[n] = (el) => { this.refs[n] = el }; return this._rf[n] }
+
+  _applyAccent() { const a = this.props.accent; if (a && this.refs.root) this.refs.root.style.setProperty('--ac', a) }
+  _applyTheme() {
+    const el = this.refs.root
+    if (!el) return
+    const L = { bg: '#FAFAF8', sf: '#FFFFFF', sf2: '#F5F4F2', ink: '#191918', ink2: '#6A6864', ink3: '#8F8D88', ln: '#E8E7E4', ln2: '#DBDAD6', ok: '#1B9E5F', oks: '#E5F5EC', wn: '#B87A1E', wns: '#FAF0DD', bd: '#D2402A', bds: '#FBEAE6', acs: 'rgba(222,71,38,.08)' }
+    const D = { bg: '#101012', sf: '#17171A', sf2: '#1F1F23', ink: '#F2F2F0', ink2: '#B0AEA9', ink3: '#7C7A76', ln: '#26262B', ln2: '#303036', ok: '#3DD68C', oks: 'rgba(61,214,140,.14)', wn: '#F0B25A', wns: 'rgba(240,178,90,.14)', bd: '#F26D56', bds: 'rgba(242,109,86,.14)', acs: 'rgba(230,90,55,.16)' }
+    const T = this.state.dark ? D : L
+    for (const k in T) el.style.setProperty('--' + k, T[k])
+    el.style.setProperty('--ac', this.props.accent || (this.state.dark ? 'oklch(0.68 0.19 30)' : 'oklch(0.62 0.21 29)'))
+  }
+
+  toast(msg, opts) {
+    const id = Math.random()
+    const t = { id, msg, icon: (opts && opts.icon) || '✓', color: (opts && opts.color) || 'var(--ok,#1B9E5F)', undoFn: opts && opts.undoFn }
+    this.setState(s => ({ toasts: [...s.toasts, t] }))
+    setTimeout(() => this.setState(s => ({ toasts: s.toasts.filter(x => x.id !== id) })), 4200)
+  }
+
+  renderVals() {
+    const s = this.state
+    const nav = (mod) => () => this.setState({ mod, cmd: false })
+
+    // ── icons ──
+    const IC = {
+      home: 'M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
+      website: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9',
+      events: 'M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z',
+      guests: 'M16 19v-1a4 4 0 0 0-8 0v1M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M20 19v-.6a4 4 0 0 0-2.5-3.7M15.6 4.5a3.5 3.5 0 0 1 0 6',
+      invites: 'M21 3 10.5 13.5M21 3l-6.8 18-3.7-7.5L3 9.8z',
+      rsvps: 'M8.5 12.5l2.5 2.5 5-6M4 5h16v14H4z',
+      seating: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+      budget: 'M3 7h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7V6a2 2 0 0 1 2-2h11M15.5 13h2.5',
+      vendors: 'M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M4 7h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zM3 12.5h18',
+      tasks: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M8.5 12.5l2.5 2.5 5-6',
+      files: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+      reports: 'M4 19.5h16M7 16v-5M12 16V6.5M17 16v-7.5',
+      settings: 'M4 7h10M18 7h2M14 4.5v5M4 17h2M10 17h10M8 14.5v5',
+    }
+
+    const item = (mod, label, icon, badge, badgeTone) => ({
+      label, icon: IC[icon], go: nav(mod), badge: badge || false,
+      badgeStyle: 'font-family:Geist Mono,monospace;font-size:9.5px;font-weight:600;border-radius:6px;padding:1px 6px;' + (badgeTone === 'warn' ? 'background:var(--wns,#FAF0DD);color:var(--wn,#B87A1E)' : 'background:var(--sf2,#F5F4F2);color:var(--ink3,#8F8D88)'),
+      style: 'display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13.5px;margin-bottom:1px;' +
+        (s.mod === mod ? 'background:var(--sf2,#F5F4F2);font-weight:600;color:var(--ink,#191918);box-shadow:inset 2px 0 0 var(--ac,oklch(0.62 0.21 29))' : 'font-weight:500;color:var(--ink2,#6A6864)'),
+    })
+
+    const navGroups = [
+      { label: 'Overview', items: [item('home', 'Home', 'home')] },
+      { label: 'Website', items: [item('website', 'Site editor', 'website', 'draft'), item('events', 'Events', 'events', '4')] },
+      { label: 'Guests', items: [item('guests', 'Guest list', 'guests', '86'), item('invites', 'Invitations', 'invites', '8', 'warn'), item('rsvps', 'RSVPs', 'rsvps', 'live'), item('seating', 'Seating', 'seating')] },
+      { label: 'Planning', items: [item('budget', 'Budget', 'budget'), item('vendors', 'Vendors', 'vendors'), item('tasks', 'Tasks', 'tasks', '2', 'warn'), item('files', 'Files', 'files')] },
+      { label: 'Insights', items: [item('reports', 'Reports', 'reports')] },
+    ]
+
+    const TITLES = { home: 'Home', website: 'Site editor', events: 'Events', guests: 'Guest list', invites: 'Invitations', rsvps: 'RSVPs', seating: 'Seating', budget: 'Budget', vendors: 'Vendors', tasks: 'Tasks', files: 'Files', reports: 'Reports', settings: 'Settings' }
+
+    // ── event identity dots ──
+    const EV = [ { n: 'Mehndi', c: '#3E7C4F' }, { n: 'Sangeet', c: '#6D3FA9' }, { n: 'Ceremony', c: '#C9A227' }, { n: 'Reception', c: '#7A1F1F' } ]
+    const dot = (c) => 'display:inline-block;width:8px;height:8px;border-radius:4px;background:' + c + ';flex:none'
+
+    // ── guests matrix ──
+    const totalGuests = s.households.reduce((n, h) => n + h.guests.length, 0)
+    const invitedCount = s.households.reduce((n, h) => n + h.guests.filter(g => g.cells.some(Boolean)).length, 0)
+    const households = s.households.map((h, hi) => ({
+      name: h.name, side: h.side,
+      sideStyle: 'font-family:Geist Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.06em;border-radius:6px;padding:2px 7px;' + (h.side === 'Bride' ? 'background:var(--acs,rgba(222,71,38,.08));color:var(--ac,oklch(0.62 0.21 29))' : 'background:var(--sf2,#F5F4F2);color:var(--ink2,#6A6864)'),
+      meta: h.guests.length + ' guests · ' + h.guests.filter(g => g.cells.some(Boolean)).length + ' invited',
+      archive: () => this.setState({ dialog: hi }),
+      cols: EV.map((e, ci) => ({
+        name: e.n, dot: dot(e.c),
+        toggleAll: () => this.setState(st => {
+          const hh = st.households.map((x, i) => {
+            if (i !== hi) return x
+            const allOn = x.guests.every(g => g.cells[ci])
+            return { ...x, guests: x.guests.map(g => ({ ...g, cells: g.cells.map((c, j) => j === ci ? !allOn : c) })) }
+          })
+          return { households: hh }
+        }),
+      })),
+      guests: h.guests.map((g, gi) => ({
+        name: g.name, email: g.email, child: g.child, plusOne: g.plusOne,
+        cells: g.cells.map((on, ci) => ({
+          mark: on ? '✓' : '',
+          style: 'display:inline-flex;width:20px;height:20px;border-radius:6px;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;transition:all .12s;' +
+            (on ? 'background:var(--ac,oklch(0.62 0.21 29));color:#fff' : 'border:1.5px solid var(--ln2,#DBDAD6);color:transparent;background:var(--sf,#fff)'),
+          toggle: () => this.setState(st => ({
+            households: st.households.map((x, i) => i !== hi ? x : { ...x, guests: x.guests.map((gg, j) => j !== gi ? gg : { ...gg, cells: gg.cells.map((c, k) => k === ci ? !c : c) }) }),
+          })),
+        })),
+      })),
+    }))
+
+    // ── invitations ──
+    const INV = [
+      { name: 'The Shah Family', guests: '3 · 2 emails', status: 'Opened', last: 'opened 2h ago' },
+      { name: 'The Patel Family', guests: '2 · 1 email', status: 'Sent', last: 'sent Tue' },
+      { name: 'The Mehta Family', guests: '3 · 1 email', status: 'Not sent', last: '—' },
+      { name: 'The Khan Family', guests: '4 · 2 emails', status: 'Opened', last: 'opened yesterday' },
+      { name: 'The Desai Family', guests: '2 · 1 email', status: 'Not sent', last: '—' },
+    ]
+    const chipFor = (st) => {
+      const base = 'display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;border-radius:999px;padding:3px 10px;'
+      if (st === 'Opened') return { c: base + 'background:var(--oks,#E5F5EC);color:var(--ok,#1B9E5F)', d: 'width:5px;height:5px;border-radius:3px;background:var(--ok,#1B9E5F)' }
+      if (st === 'Sent') return { c: base + 'background:var(--sf2,#F5F4F2);color:var(--ink2,#6A6864)', d: 'width:5px;height:5px;border-radius:3px;background:var(--ink3,#8F8D88)' }
+      return { c: base + 'background:var(--wns,#FAF0DD);color:var(--wn,#B87A1E)', d: 'width:5px;height:5px;border-radius:3px;background:var(--wn,#B87A1E)' }
+    }
+    const inviteRows = INV.map((r, i) => {
+      const ch = chipFor(r.status)
+      return {
+        ...r, chipStyle: ch.c, chipDot: ch.d,
+        rowStyle: 'display:grid;grid-template-columns:1.5fr .7fr .9fr 1fr auto;gap:8px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--ln,#E8E7E4);cursor:pointer;' + (s.selInvite === i ? 'background:var(--acs,rgba(222,71,38,.08))' : ''),
+        select: () => this.setState({ selInvite: i }),
+        copy: () => this.toast('Link copied for ' + r.name),
+      }
+    })
+    const selName = INV[s.selInvite].name
+
+    // ── rsvps ──
+    const seg = (color, pct) => 'display:block;width:' + pct + '%;background:' + color
+    const rsvpEvents = [
+      { name: 'Mehndi', date: 'Thu 17 · 4pm', att: 38, dec: 6, pen: 12, cap: 60, chase: ['Nikhil M', 'Sara K', '+4'] },
+      { name: 'Sangeet', date: 'Fri 18 · 7pm', att: 74, dec: 9, pen: 21, cap: 120, chase: ['Anita R', 'Kabir S', '+6'] },
+      { name: 'Ceremony', date: 'Sat 19 · 11am', att: 92, dec: 11, pen: 17, cap: 120, chase: ['Ishan D', '+3'] },
+      { name: 'Reception', date: 'Sat 19 · 7pm', att: 104, dec: 8, pen: 14, cap: 150, chase: ['Leela N', 'Rohan J', '+5'] },
+    ].map((e, i) => {
+      const tot = e.att + e.dec + e.pen
+      return { ...e, dot: dot(EV[i].c), capText: e.att + '/' + e.cap + ' seats',
+        segA: seg('var(--ok,#1B9E5F)', e.att / tot * 100), segD: seg('var(--bd,#D2402A)', e.dec / tot * 100), segP: seg('var(--wn,#B87A1E)', e.pen / tot * 100) }
+    })
+    const meals = [ { k: 'Vegetarian', n: 46 }, { k: 'Chicken', n: 31 }, { k: 'Lamb', n: 19 }, { k: 'Kids meal', n: 8 } ].map(m => ({ ...m, bar: 'display:block;height:100%;border-radius:3px;background:var(--ac,oklch(0.62 0.21 29));width:' + (m.n / 46 * 100) + '%' }))
+
+    // ── tasks ──
+    const tasksByGroup = (grp) => s.tasks.filter(t => (grp === 'done' ? t.done : !t.done && t.grp === grp))
+    const mkTask = (t) => ({
+      title: t.title, chip: t.chip || false, due: t.due,
+      dueColor: t.grp === 'overdue' && !t.done ? 'var(--bd,#D2402A)' : 'var(--ink3,#8F8D88)',
+      pri: t.pri ? t.pri : false,
+      priStyle: 'font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;border-radius:5px;padding:1px 6px;' + (t.pri === 'high' ? 'background:var(--bds,#FBEAE6);color:var(--bd,#D2402A)' : 'background:var(--sf2,#F5F4F2);color:var(--ink3,#8F8D88)'),
+      mark: t.done ? '✓' : '',
+      checkStyle: 'display:inline-flex;width:19px;height:19px;border-radius:10px;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;flex:none;transition:all .12s;' + (t.done ? 'background:var(--ok,#1B9E5F);color:#fff' : 'border:1.5px solid var(--ln2,#DBDAD6);color:transparent'),
+      titleStyle: 'font-size:13.5px;font-weight:550;' + (t.done ? 'text-decoration:line-through;color:var(--ink3,#8F8D88)' : ''),
+      toggle: () => {
+        const wasDone = t.done
+        this.setState(st => ({ tasks: st.tasks.map(x => x.id === t.id ? { ...x, done: !x.done } : x) }))
+        if (!wasDone) this.toast('Task done · nice')
+      },
+    })
+    const openCount = s.tasks.filter(t => !t.done).length
+    const overdueCount = s.tasks.filter(t => !t.done && t.grp === 'overdue').length
+    const taskGroups = [
+      { label: 'Overdue', dot: dot('var(--bd,#D2402A)'), items: tasksByGroup('overdue').map(mkTask) },
+      { label: 'This week', dot: dot('var(--wn,#B87A1E)'), items: tasksByGroup('week').map(mkTask) },
+      { label: 'Done', dot: dot('var(--ok,#1B9E5F)'), items: tasksByGroup('done').map(mkTask) },
+    ].filter(g => g.items.length).map(g => ({ ...g, count: g.items.length }))
+
+    // ── budget ──
+    const bchip = (st) => {
+      const base = 'font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;'
+      if (st === 'Paid') return base + 'background:var(--oks,#E5F5EC);color:var(--ok,#1B9E5F)'
+      if (st === 'Deposit paid' || st === 'Part paid') return base + 'background:var(--wns,#FAF0DD);color:var(--wn,#B87A1E)'
+      return base + 'background:var(--sf2,#F5F4F2);color:var(--ink2,#6A6864)'
+    }
+    const budgetRows = [
+      { label: 'Rambagh Palace hire', cat: 'Venue', link: 'Reception · Rambagh', est: '£14,000', act: '£14,500', paid: '£7,250', status: 'Deposit paid' },
+      { label: 'Wedding feast', cat: 'Catering', link: 'Reception · Saffron & Co', est: '£9,000', act: '£8,600', paid: '£4,300', status: 'Deposit paid' },
+      { label: 'Mandap & florals', cat: 'Decor', link: 'Ceremony · Petal Studio', est: '£3,500', act: '£3,900', paid: '£3,900', status: 'Paid' },
+      { label: 'Photography, 3 days', cat: 'Photography', link: 'All events · Anaya Films', est: '£4,200', act: '—', paid: '£1,000', status: 'Deposit paid' },
+      { label: 'Sangeet DJ + dhol', cat: 'Music & entertainment', link: 'Sangeet', est: '£1,400', act: '—', paid: '£0', status: 'Estimated' },
+      { label: 'Bridal lehenga', cat: 'Attire', link: 'unlinked', est: '£2,800', act: '£2,650', paid: '£2,650', status: 'Paid' },
+      { label: 'Guest transport', cat: 'Transport', link: 'Ceremony · Reception', est: '£900', act: '—', paid: '£0', status: 'Estimated' },
+    ].map(b => ({ ...b, chip: bchip(b.status) }))
+
+    // ── vendors ──
+    const vendorCols = [
+      { label: 'Shortlisted', dotc: 'var(--ink3,#8F8D88)', cards: [ { name: 'Mehndi by Meera', cat: 'Beauty' }, { name: 'Jaipur Vintage Cars', cat: 'Transport' } ] },
+      { label: 'Contacted', dotc: '#3E63DD', cards: [ { name: 'The Baraat Band', cat: 'Music', amt: '' } ] },
+      { label: 'Quote in', dotc: 'var(--wn,#B87A1E)', cards: [ { name: 'Lotus Lighting', cat: 'Decor', amt: '£1,800' }, { name: 'Sweet Tooth Mithai', cat: 'Catering', amt: '£950' } ] },
+      { label: 'Booked', dotc: 'var(--ok,#1B9E5F)', cards: [ { name: 'Saffron & Co', cat: 'Catering', amt: '£8,600' }, { name: 'Petal Studio', cat: 'Decor', amt: '£3,900' }, { name: 'Anaya Films', cat: 'Photography', amt: '£4,200' } ] },
+    ].map(c => ({ ...c, dot: dot(c.dotc), count: c.cards.length, cards: c.cards.map(v => ({ ...v, amt: v.amt || false })) }))
+
+    // ── seating ──
+    const capStyle = (n, cap) => 'font-family:Geist Mono,monospace;font-size:10.5px;font-weight:600;border-radius:6px;padding:2px 7px;' + (n >= cap ? 'background:var(--oks,#E5F5EC);color:var(--ok,#1B9E5F)' : 'background:var(--sf2,#F5F4F2);color:var(--ink2,#6A6864)')
+    const tables = [
+      { name: 'Family · bride', n: 10, cap: 10, people: ['Priya', 'Raj', 'Aarav', 'Nani', '+6'] },
+      { name: 'Family · groom', n: 9, cap: 10, people: ['Meera', 'Arjun', 'Dadi', '+6'] },
+      { name: 'College friends', n: 8, cap: 10, people: ['Sara', 'Kabir', 'Anita', '+5'] },
+      { name: 'Work · Aanya', n: 6, cap: 8, people: ['Ishan', 'Leela', '+4'] },
+      { name: 'Work · Dev', n: 7, cap: 8, people: ['Rohan', 'Nikhil', '+5'] },
+      { name: 'Neighbours', n: 4, cap: 8, people: ['The Raos', 'The Guptas'] },
+    ].map(t => ({ ...t, capText: t.n + '/' + t.cap, capStyle: capStyle(t.n, t.cap) }))
+    const unseated = [ { name: 'Zara Mehta', hh: 'Mehta' }, { name: 'Vikram Khan', hh: 'Khan' }, { name: 'Ayesha Khan', hh: 'Khan' }, { name: 'Karan Desai', hh: 'Desai' }, { name: 'Tara Desai', hh: 'Desai' }, { name: 'Uncle Bharat', hh: 'Shah' } ]
+
+    // ── files / reports ──
+    const fIcon = (bg) => 'flex:none;display:inline-flex;width:34px;height:34px;border-radius:9px;align-items:center;justify-content:center;font-family:Geist Mono,monospace;font-size:8.5px;font-weight:700;color:#fff;background:' + bg
+    const files = [
+      { name: 'Rambagh Palace — signed contract.pdf', meta: '1.2 MB · uploaded Tue', ext: 'PDF', link: 'Rambagh', iconStyle: fIcon('#D2402A') },
+      { name: 'Saffron & Co menu v3.pdf', meta: '640 KB · uploaded Mon', ext: 'PDF', link: 'Saffron & Co', iconStyle: fIcon('#D2402A') },
+      { name: 'Mandap sketch — final.png', meta: '2.8 MB · last week', ext: 'PNG', link: 'Ceremony', iconStyle: fIcon('#3E63DD') },
+      { name: 'Guest list master.xlsx', meta: '88 KB · last week', ext: 'XLS', link: 'Guests', iconStyle: fIcon('#1B9E5F') },
+      { name: 'Sangeet run of show.docx', meta: '54 KB · 2 weeks ago', ext: 'DOC', link: 'Sangeet', iconStyle: fIcon('#6D3FA9') },
+    ]
+    const reports = [
+      { title: 'Guest list', body: 'Every household and guest, with emails, children and plus-ones.' },
+      { title: 'RSVPs by event', body: 'Guest × event × status, with a column for every question. The caterer sheet.' },
+      { title: 'Budget', body: 'Every line with estimate, actual, paid and balance, linked to events and vendors.' },
+      { title: 'Vendors', body: 'The full pipeline with quotes, contracts and event coverage.' },
+      { title: 'Tasks', body: 'The whole checklist with status, priority, due dates and links.' },
+    ]
+
+    // ── command palette ──
+    const allCmds = [
+      ...Object.entries(TITLES).map(([mod, label]) => ({ label: 'Go to ' + label, icon: IC[mod === 'settings' ? 'settings' : mod] || IC.home, kind: 'module', fn: nav(mod) })),
+      { label: 'Add household', icon: IC.guests, kind: 'action', fn: () => { this.setState({ mod: 'guests', cmd: false }); this.toast('Household dialog would open here', { icon: 'i', color: '#3E63DD' }) } },
+      { label: 'Remind pending households', icon: IC.invites, kind: 'action', fn: () => { this.setState({ cmd: false }); this.toast('Reminders queued for 14 households') } },
+      { label: 'Export caterer sheet', icon: IC.reports, kind: 'action', fn: () => { this.setState({ cmd: false }); this.toast('RSVPs by event.csv downloading') } },
+      { label: 'Toggle dark mode', icon: 'M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z', kind: 'action', fn: () => this.setState(st => ({ dark: !st.dark, cmd: false })) },
+    ]
+    const q = s.q.toLowerCase()
+    const cmdItems = allCmds.filter(c => !q || c.label.toLowerCase().includes(q)).slice(0, 9).map((c, i) => ({
+      ...c, run: c.fn,
+      style: 'display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:550;' + (i === 0 ? 'background:var(--sf2,#F5F4F2)' : ''),
+    }))
+
+    // ── header publish ──
+    const pub = s.publish
+    const publishStyle = 'font-size:13px;font-weight:600;border-radius:8px;padding:7px 15px;cursor:pointer;color:#fff;white-space:nowrap;background:' + (pub === 'live' ? 'var(--ok,#1B9E5F)' : 'var(--ac,oklch(0.62 0.21 29))') + (pub === 'publishing' ? ';opacity:.7' : '')
+
+    // ── home ──
+    const homeStats = [
+      { label: 'Events', value: '4', hint: 'across 3 days', go: nav('events') },
+      { label: 'Guests invited', value: '73/86', hint: 'to at least one event', go: nav('guests') },
+      { label: 'Households in', value: '18/32', hint: '14 to chase', go: nav('rsvps') },
+      { label: 'Open tasks', value: String(openCount), hint: overdueCount + ' overdue', go: nav('tasks') },
+    ]
+    const activity = [
+      { text: 'Priya Shah said yes to all four events', when: '2m', dotStyle: dot('var(--ok,#1B9E5F)') },
+      { text: 'The Khan Family opened their invitation', when: '1h', dotStyle: dot('#3E63DD') },
+      { text: 'Petal Studio marked Paid · £3,900', when: '3h', dotStyle: dot('var(--ok,#1B9E5F)') },
+      { text: 'Meera Patel declined Sangeet, note attached', when: '5h', dotStyle: dot('var(--bd,#D2402A)') },
+      { text: 'Aarav Shah requested a kids meal', when: '1d', dotStyle: dot('var(--wn,#B87A1E)') },
+    ]
+
+    const dlg = s.dialog
+    return {
+      refRoot: this.mkRef('root'), refCmdInput: this.mkRef('cmdInput'),
+      navGroups, pageTitle: TITLES[s.mod],
+      siteStatus: pub === 'live' ? 'live' : 'draft',
+      statusDotStyle: 'width:6px;height:6px;border-radius:3px;flex:none;background:' + (pub === 'live' ? 'var(--ok,#1B9E5F)' : 'var(--wn,#B87A1E)'),
+      isHome: s.mod === 'home', isWebsite: s.mod === 'website', isEvents: s.mod === 'events', isGuests: s.mod === 'guests',
+      isInvites: s.mod === 'invites', isRsvps: s.mod === 'rsvps', isSeating: s.mod === 'seating', isBudget: s.mod === 'budget',
+      isVendors: s.mod === 'vendors', isTasks: s.mod === 'tasks', isFiles: s.mod === 'files', isReports: s.mod === 'reports', isSettings: s.mod === 'settings',
+      goSettings: nav('settings'),
+      settingsStyle: 'display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13.5px;' + (s.mod === 'settings' ? 'background:var(--sf2,#F5F4F2);font-weight:600' : 'font-weight:500;color:var(--ink2,#6A6864)'),
+
+      // theme
+      toggleDark: () => this.setState(st => ({ dark: !st.dark })),
+      themeLabel: s.dark ? 'Dark' : 'Light',
+      themeIcon: s.dark ? 'M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z' : 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4',
+      themeTrack: 'display:inline-flex;width:30px;height:17px;border-radius:9px;padding:2px;box-sizing:border-box;transition:background .15s;background:' + (s.dark ? 'var(--ac,oklch(0.62 0.21 29))' : 'var(--ln2,#DBDAD6)'),
+      themeKnob: 'display:block;width:13px;height:13px;border-radius:7px;background:#fff;transition:transform .15s;transform:translateX(' + (s.dark ? 13 : 0) + 'px)',
+
+      // header
+      openCmd: () => this.setState({ cmd: true, q: '' }),
+      publish: () => {
+        if (pub !== 'draft') return
+        this.setState({ publish: 'publishing' })
+        this._pubT = setTimeout(() => { this.setState({ publish: 'live' }); this.toast('Site published · aanya-and-dev.simvites.co.uk') }, 1200)
+      },
+      publishLabel: pub === 'draft' ? 'Publish' : pub === 'publishing' ? 'Publishing…' : 'Live ✓',
+      publishStyle,
+
+      // home
+      attention: [
+        { label: 'Invite the Desai family to events', go: nav('guests') },
+        { label: '14 households have not answered', go: nav('rsvps') },
+        { label: 'Florist deposit is overdue', go: nav('budget') },
+      ],
+      homeStats, activity,
+
+      // website
+      blocks: ['Hero', 'Countdown', 'Schedule', 'Gallery', 'Our story', 'Hotels', 'RSVP'],
+      siteSchedule: EV.map(e => ({ name: e.n, dot: dot(e.c), hex: e.c, when: { Mehndi: 'Thu 17 · 4pm', Sangeet: 'Fri 18 · 7pm', Ceremony: 'Sat 19 · 11am', Reception: 'Sat 19 · 7pm' }[e.n] })),
+
+      // events
+      eventCards: [
+        { name: 'Mehndi', when: 'Thu 17 Sep · 4:00 pm', venue: 'Haveli courtyard', vis: 'Invite only', cap: '60' },
+        { name: 'Sangeet', when: 'Fri 18 Sep · 7:00 pm', venue: 'The Glasshouse', vis: 'Invite only', cap: '120' },
+        { name: 'Ceremony', when: 'Sat 19 Sep · 11:00 am', venue: 'Rambagh Palace', vis: 'Public', cap: '120' },
+        { name: 'Reception', when: 'Sat 19 Sep · 7:00 pm', venue: 'Rambagh Palace', vis: 'Invite only', cap: '150' },
+      ].map((e, i) => ({ ...e, dot: dot(EV[i].c), visStyle: 'font-size:10.5px;font-weight:600;border-radius:6px;padding:2px 8px;' + (e.vis === 'Public' ? 'background:var(--oks,#E5F5EC);color:var(--ok,#1B9E5F)' : 'background:var(--sf2,#F5F4F2);color:var(--ink2,#6A6864)') })),
+
+      // guests
+      guestSummary: 'Showing ' + s.households.length + ' of 32 households · 86 guests · 73 invited to at least one event',
+      guestFilters: ['All', 'Bride side', 'Groom side', 'Children', 'Uninvited'].map((f, i) => ({
+        label: f,
+        style: 'font-size:12px;font-weight:550;border-radius:999px;padding:6px 13px;cursor:pointer;' + (i === 0 ? 'background:var(--ink,#191918);color:var(--sf,#fff)' : 'border:1px solid var(--ln,#E8E7E4);color:var(--ink2,#6A6864);background:var(--sf,#fff)'),
+      })),
+      households,
+      addHouseholdToast: () => this.toast('Add-household dialog would open here', { icon: 'i', color: '#3E63DD' }),
+
+      // invitations
+      inviteRows, selName,
+      selLink: 'simvites.co.uk/i/9f2c…d41a',
+      copySel: () => this.toast('Link copied for ' + selName),
+      sendAllToast: () => this.toast('8 invitations queued · you approve before send', { icon: '→', color: '#3E63DD' }),
+
+      // rsvps
+      rsvpEvents, meals,
+      dietary: [ { k: 'Nut allergy', n: 3 }, { k: 'Gluten free', n: 5 }, { k: 'Jain, no root veg', n: 4 } ],
+      songs: [ { guest: 'Priya', value: 'Kala Chashma, obviously' }, { guest: 'Meera', value: 'Anything AR Rahman' }, { guest: 'Sara', value: 'Levitating' } ],
+      remind: () => this.toast('Reminders queued for 14 households'),
+
+      // seating
+      tables, unseated,
+      notifySeated: () => this.toast('44 seated families will see their table'),
+
+      // budget / vendors / tasks / files / reports
+      budgetRows, vendorCols,
+      tasksSummary: openCount + ' open · ' + overdueCount + ' overdue',
+      taskGroups, files, reports,
+
+      // overlays
+      cmdOpen: s.cmd, cmdQ: s.q,
+      onCmdQ: (e) => this.setState({ q: e.target.value }),
+      closeCmd: () => this.setState({ cmd: false }),
+      cmdItems,
+      stop: (e) => e.stopPropagation(),
+      dialogOpen: dlg !== null,
+      dialogName: dlg !== null && s.households[dlg] ? s.households[dlg].name : '',
+      closeDialog: () => this.setState({ dialog: null }),
+      confirmArchive: () => {
+        const idx = s.dialog
+        const hh = s.households[idx]
+        const stash = { idx, hh }
+        this.setState(st => ({ dialog: null, households: st.households.filter((_, i) => i !== idx) }))
+        this.toast(hh.name + ' archived', {
+          icon: '↺', color: 'var(--ink3,#8F8D88)',
+          undoFn: () => this.setState(st => {
+            const arr = [...st.households]; arr.splice(stash.idx, 0, stash.hh); return { households: arr }
+          }),
+        })
+      },
+      toasts: s.toasts.map(t => ({ msg: t.msg, icon: t.icon, color: t.color, undo: t.undoFn ? () => { t.undoFn(); this.setState(st => ({ toasts: st.toasts.filter(x => x.id !== t.id) })) } : false })),
+    }
+  }
+}
+</script>
+</body>
+</html>

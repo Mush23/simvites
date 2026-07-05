@@ -32,66 +32,68 @@
   --color-info-soft: var(--info-soft);
 
   --radius-sm: 6px;
-  --radius-md: 9px;
-  --radius-card: 13px;
-  --radius-lg: 16px;
+  --radius-md: 8px;
+  --radius-card: 12px;
+  --radius-lg: 18px;
 
   --shadow-card: var(--shadow);
   --shadow-lift: var(--shadow-lg);
 }
 
-/* ── LIGHT (warm ivory paper, one terracotta accent) — from prototype :root ── */
+/* ── LIGHT — 2026 overhaul: neutral, fast, precise. One electric coral.
+   (The couple-facing artifact keeps its ivory identity via template vars
+   overriding these at [data-site-root].) ── */
 :root {
-  --paper: oklch(0.992 0.004 85);
-  --paper-2: oklch(0.972 0.005 80);
-  --surface: oklch(1 0 0);
-  --surface-2: oklch(0.976 0.004 80);
-  --ink: oklch(0.23 0.014 55);
-  --ink-2: oklch(0.44 0.013 55);
-  --ink-3: oklch(0.60 0.010 55);
-  --line: oklch(0.915 0.006 70);
-  --line-2: oklch(0.86 0.008 65);
-  --accent: oklch(0.56 0.155 33);
-  --accent-ink: oklch(0.47 0.15 33);
-  --accent-soft: oklch(0.955 0.026 45);
-  --accent-line: oklch(0.86 0.06 40);
-  --ok: oklch(0.56 0.11 155);
-  --warn: oklch(0.66 0.13 65);
-  --bad: oklch(0.57 0.17 27);
-  --info: oklch(0.55 0.10 250);
-  --ok-soft: oklch(0.95 0.04 155);
-  --warn-soft: oklch(0.95 0.06 75);
-  --bad-soft: oklch(0.95 0.04 30);
-  --info-soft: oklch(0.95 0.03 250);
-  --shadow: 0 1px 2px rgba(40, 22, 10, 0.05), 0 10px 34px -12px rgba(40, 22, 10, 0.1);
-  --shadow-lg: 0 40px 80px -28px rgba(40, 22, 10, 0.22);
+  --paper: #FAFAF8;
+  --paper-2: #F5F4F2;
+  --surface: #FFFFFF;
+  --surface-2: #F5F4F2;
+  --ink: #191918;
+  --ink-2: #6A6864;
+  --ink-3: #8F8D88;
+  --line: #E8E7E4;
+  --line-2: #DBDAD6;
+  --accent: oklch(0.62 0.21 29);
+  --accent-ink: oklch(0.55 0.19 29);
+  --accent-soft: rgba(222, 71, 38, 0.08);
+  --accent-line: rgba(222, 71, 38, 0.35);
+  --ok: #1B9E5F;
+  --warn: #B87A1E;
+  --bad: #D2402A;
+  --info: #3E63DD;
+  --ok-soft: #E5F5EC;
+  --warn-soft: #FAF0DD;
+  --bad-soft: #FBEAE6;
+  --info-soft: #E8EDFB;
+  --shadow: 0 1px 2px rgba(15, 15, 20, 0.04);
+  --shadow-lg: 0 40px 90px -20px rgba(0, 0, 0, 0.45);
 }
 
-/* ── DARK (warm charcoal, accent lifts) — from prototype [data-theme=dark] ── */
+/* ── DARK — near-black, same hue logic at 14–16% alpha softs ── */
 .dark {
-  --paper: oklch(0.175 0.009 60);
-  --paper-2: oklch(0.205 0.010 60);
-  --surface: oklch(0.215 0.011 60);
-  --surface-2: oklch(0.245 0.012 60);
-  --ink: oklch(0.95 0.006 85);
-  --ink-2: oklch(0.77 0.010 78);
-  --ink-3: oklch(0.60 0.010 70);
-  --line: oklch(0.30 0.012 62);
-  --line-2: oklch(0.37 0.014 62);
-  --accent: oklch(0.74 0.145 42);
-  --accent-ink: oklch(0.82 0.13 44);
-  --accent-soft: oklch(0.30 0.055 38);
-  --accent-line: oklch(0.42 0.08 40);
-  --ok: oklch(0.74 0.13 158);
-  --warn: oklch(0.80 0.12 80);
-  --bad: oklch(0.70 0.16 30);
-  --info: oklch(0.72 0.10 250);
-  --ok-soft: oklch(0.30 0.05 158);
-  --warn-soft: oklch(0.32 0.05 80);
-  --bad-soft: oklch(0.32 0.06 30);
-  --info-soft: oklch(0.30 0.04 250);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 34px -12px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 40px 80px -28px rgba(0, 0, 0, 0.66);
+  --paper: #101012;
+  --paper-2: #1F1F23;
+  --surface: #17171A;
+  --surface-2: #1F1F23;
+  --ink: #F2F2F0;
+  --ink-2: #B0AEA9;
+  --ink-3: #7C7A76;
+  --line: #26262B;
+  --line-2: #303036;
+  --accent: oklch(0.68 0.19 30);
+  --accent-ink: oklch(0.74 0.17 30);
+  --accent-soft: rgba(242, 109, 86, 0.14);
+  --accent-line: rgba(242, 109, 86, 0.4);
+  --ok: #3DD68C;
+  --warn: #F0B25A;
+  --bad: #F26D56;
+  --info: #7E97E8;
+  --ok-soft: rgba(61, 214, 140, 0.15);
+  --warn-soft: rgba(240, 178, 90, 0.15);
+  --bad-soft: rgba(242, 109, 86, 0.15);
+  --info-soft: rgba(62, 99, 221, 0.18);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 40px 90px -20px rgba(0, 0, 0, 0.65);
 }
 
 @layer base {
@@ -106,20 +108,27 @@
     background-color: var(--paper);
     color: var(--ink);
     font-family: var(--font-sans);
-    font-size: 15px;
-    line-height: 1.65;
+    font-size: 14px;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
+  /* Tool headings are SANS (600–650, tight tracking). The artifact's serif
+     headings all carry an explicit .font-display class in the block library,
+     so the couple-facing sites keep their identity. */
   h1, h2, h3, h4 {
-    font-family: var(--font-display);
+    font-family: var(--font-sans);
+    font-weight: 650;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  [data-site-root] h1, [data-site-root] h2, [data-site-root] h3, [data-site-root] h4 {
     font-weight: 400;
     line-height: 1.05;
     letter-spacing: -0.01em;
   }
-  /* Lining/old-style numerals look right in the serif for big stats. */
-  .nums { font-variant-numeric: oldstyle-nums; }
-  ::selection { background: oklch(0.56 0.155 33 / 0.18); }
+  .nums { font-variant-numeric: tabular-nums; }
+  ::selection { background: oklch(0.62 0.21 29 / 0.16); }
   :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
@@ -130,25 +139,22 @@
   }
 }
 
-/* ── Buttons: rounded, never square, with a consistent hover animation ──
-   Un-layered on purpose: cascade-layer rules (incl. Tailwind utilities)
-   cannot override these, so every button in the product complies without
-   touching each file. Checkboxes/radios are inputs and stay untouched. */
+/* ── Controls: 8px radius, quiet color transitions, NO hover jiggle ──
+   (Overhaul: pills survive only as chips/badges — spans, not buttons.)
+   Un-layered on purpose so it beats pill-era utility classes everywhere
+   in the tool without touching each file. The couple-facing artifact keeps
+   its own button geometry via [data-site-root] scoping below. */
 button:not([aria-label='Open menu']):not([aria-label='Close menu']),
 a[class*='bg-accent'],
 a[class*='bg-primary'] {
-  border-radius: 999px;
-  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 150ms cubic-bezier(0.16, 1, 0.3, 1),
-              background-color 150ms ease, border-color 150ms ease;
+  border-radius: 8px;
+  transition: background-color 150ms ease, border-color 150ms ease,
+              color 150ms ease, opacity 150ms ease;
 }
-button:hover:not(:disabled),
-a[class*='bg-accent']:hover,
-a[class*='bg-primary']:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
+[data-site-root] button,
+[data-site-root] a[class*='bg-accent'] {
+  border-radius: var(--radius-md, 8px);
 }
-button:active:not(:disabled) { transform: translateY(0); }
 
 /* ── Sprint A: per-BLOCK variants, shading and appear animations ─────────
    The Styled wrapper sets data-variant / data-banim / data-shadow (plus the
@@ -214,12 +220,10 @@ button:active:not(:disabled) { transform: translateY(0); }
 [data-hover='tilt'] .shadow-card { transition: transform 300ms cubic-bezier(0.16,1,0.3,1); }
 [data-hover='tilt'] .shadow-card:hover { transform: rotate(0.6deg) translateY(-3px); }
 
-/* ── App chrome polish (feedback: "stiff and stocky") ────────────────────
-   Softer surfaces, glassy header, breathing sidebar. */
-.app-header { backdrop-filter: blur(10px); background: color-mix(in oklab, var(--paper) 82%, transparent); }
-aside a { transition: transform 200ms cubic-bezier(0.16,1,0.3,1), background-color 200ms, color 200ms; }
-aside a:hover { transform: translateX(3px); }
-.shadow-card { transition: box-shadow 300ms cubic-bezier(0.16,1,0.3,1), transform 300ms cubic-bezier(0.16,1,0.3,1); }
+/* ── App chrome (overhaul): elevation = hairline + subtle shadow; motion
+   only inside the artifact. Glassy header kept, jiggles removed. */
+.app-header { backdrop-filter: blur(10px); background: color-mix(in oklab, var(--surface) 86%, transparent); }
+[data-site-root] .shadow-card { transition: box-shadow 300ms cubic-bezier(0.16,1,0.3,1), transform 300ms cubic-bezier(0.16,1,0.3,1); }
 
 /* ── Public-site motion (animations review) ─────────────────────────────
    Scroll-driven reveals on template sections + a slow Ken Burns on hero
@@ -242,10 +246,30 @@ aside a:hover { transform: translateX(3px); }
   }
 }
 
-/* Eyebrow: mono, uppercase, tracked — the canonical micro-label. */
+/* Eyebrow (overhaul): functional labels are 12px sentence-case, weight 550.
+   The old 10px uppercase-mono pattern is dead for actions/labels. */
 @utility eyebrow {
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--ink-2);
+}
+
+/* Micro-label: mono uppercase survives ONLY as a group label (sidebar
+   sections, column headers) at 9.5px+, never as an action. */
+@utility microlabel {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+/* Artifact surfaces keep the classic tracked eyebrow. */
+[data-site-root] .eyebrow {
   font-family: var(--font-mono);
   font-size: 10px;
+  font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: var(--ink-3);

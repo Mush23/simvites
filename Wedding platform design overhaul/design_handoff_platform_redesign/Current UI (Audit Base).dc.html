@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&amp;family=Instrument+Serif&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#eceae5;font-family:system-ui,sans-serif}
+.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.55)}
+.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}
+.dv-next{margin:22px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}
+@keyframes orbfloat{from{transform:translateY(0) scale(1)}to{transform:translateY(-28px) scale(1.12)}}
+@keyframes marqueeAnim{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes pingAnim{0%{transform:scale(.6);opacity:.6}80%,100%{transform:scale(1.6);opacity:0}}
+@keyframes caretPulse{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes flowbar{from{width:0}to{width:100%}}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t1" data-screen-label="Turn 1 — Current UI recreation">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Current state — faithful recreation from the simvites codebase (audit base)</span></div>
+
+<div style="max-width:880px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:22px 26px;margin:0 0 26px;font:13px/1.6 system-ui,sans-serif;color:#333">
+  <p style="margin:0 0 8px;font-weight:700;font-size:13px">What this is</p>
+  <p style="margin:0 0 10px">Pixel-faithful recreations of today's key screens, rebuilt from source — <span style="font-family:ui-monospace,monospace;font-size:11px;background:rgba(0,0,0,.05);padding:1px 5px;border-radius:4px">app/page.tsx</span> <span style="font-family:ui-monospace,monospace;font-size:11px;background:rgba(0,0,0,.05);padding:1px 5px;border-radius:4px">tour/flow-player.tsx</span> <span style="font-family:ui-monospace,monospace;font-size:11px;background:rgba(0,0,0,.05);padding:1px 5px;border-radius:4px">globals.css</span> <span style="font-family:ui-monospace,monospace;font-size:11px;background:rgba(0,0,0,.05);padding:1px 5px;border-radius:4px">components/app/sidebar.tsx</span> <span style="font-family:ui-monospace,monospace;font-size:11px;background:rgba(0,0,0,.05);padding:1px 5px;border-radius:4px">guest-manager.tsx</span> <span style="font-family:ui-monospace,monospace;font-size:11px;background:rgba(0,0,0,.05);padding:1px 5px;border-radius:4px">invitations-client.tsx</span> <span style="font-family:ui-monospace,monospace;font-size:11px;background:rgba(0,0,0,.05);padding:1px 5px;border-radius:4px">rsvps/page.tsx</span> <span style="font-family:ui-monospace,monospace;font-size:11px;background:rgba(0,0,0,.05);padding:1px 5px;border-radius:4px">login/page.tsx</span>. Exact OKLCH tokens, Instrument Serif / Hanken Grotesk / JetBrains Mono, real copy. The demo player in <a class="dv-oid" href="#1a">1a</a> runs live — it's the 6-step loop you called out.</p>
+  <p style="margin:0"><span style="font-weight:700">Why it exists:</span> the audit doc and the redesigns reference these screens by id. Sample data (Aanya &amp; Dev, Shah/Patel households) stands in for DB rows.</p>
+</div>
+
+<div class="dv-opts">
+
+<!-- ═══════════════ 1a LANDING ═══════════════ -->
+<div class="dv-opt" id="1a" data-screen-label="Current landing page">
+<div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Landing page — app/page.tsx (hero orbs, marquee, FlowPlayer demo, features, templates, offer)</div>
+<div class="dv-card" style="width:1280px">
+<div style="background:oklch(0.992 0.004 85);color:oklch(0.23 0.014 55);font-family:'Hanken Grotesk',sans-serif;font-size:15px;line-height:1.65;overflow:hidden;position:relative">
+
+  <!-- header -->
+  <div style="max-width:1060px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:24px">
+    <span style="font-family:'Instrument Serif',serif;font-size:24px">Simvites</span>
+    <div style="display:flex;align-items:center;gap:20px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">How it works</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Sign in</span>
+      <span style="display:inline-flex;height:36px;width:36px;align-items:center;justify-content:center;border-radius:999px;border:1px solid oklch(0.915 0.006 70);color:oklch(0.44 0.013 55)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </span>
+    </div>
+  </div>
+
+  <!-- hero -->
+  <div style="position:relative;padding:96px 24px 80px;text-align:center">
+    <span style="position:absolute;left:12%;top:18%;height:224px;width:224px;border-radius:999px;background:oklch(0.68 0.13 80 / 0.16);filter:blur(46px);animation:orbfloat 9s ease-in-out infinite alternate"></span>
+    <span style="position:absolute;right:10%;top:38%;height:288px;width:288px;border-radius:999px;background:oklch(0.955 0.026 45);filter:blur(46px);animation:orbfloat 13s ease-in-out infinite alternate;animation-delay:-4s"></span>
+    <p style="position:relative;margin:0 0 20px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">The wedding platform for multi event celebrations</p>
+    <h1 style="position:relative;margin:0 auto;max-width:768px;font-family:'Instrument Serif',serif;font-weight:400;font-size:72px;line-height:1.03;letter-spacing:-0.01em">One <span style="color:oklch(0.68 0.13 80)">beautiful</span> place for the whole celebration, from <span style="color:oklch(0.68 0.13 80)">first invite</span> to<span style="color:oklch(0.68 0.13 80)"> final headcount</span>.</h1>
+    <p style="position:relative;margin:28px auto 0;max-width:576px;font-size:18px;color:oklch(0.44 0.013 55)">Build a stunning website, invite every guest to exactly the right events, watch RSVPs land live and run the whole plan from one calm dashboard. All of it <span style="font-weight:600;color:oklch(0.68 0.13 80)">zero code</span>.</p>
+    <div style="position:relative;margin-top:40px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px">
+      <span style="background:oklch(0.56 0.155 33);padding:14px 32px;font-weight:600;color:#fff;border-radius:999px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">Start building free</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.68 0.13 80);text-decoration:underline;text-underline-offset:4px">See a live wedding site</span>
+    </div>
+    <!-- marquee -->
+    <div style="position:relative;margin-top:64px;overflow:hidden;border-top:1px solid oklch(0.915 0.006 70);border-bottom:1px solid oklch(0.915 0.006 70);padding:12px 0">
+      <div style="display:inline-block;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:oklch(0.6 0.01 55);animation:marqueeAnim 28s linear infinite">
+        <sc-for list="{{ marquee }}" as="m" hint-placeholder-count="8"><span style="margin:0 24px">{{ m }} <span style="color:oklch(0.68 0.13 80)">✦</span></span></sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- dive: FlowPlayer -->
+  <div style="max-width:672px;margin:0 auto;padding:64px 24px">
+    <p style="margin:0 0 12px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Watch it happen</p>
+    <h2 style="margin:0 0 32px;text-align:center;font-family:'Instrument Serif',serif;font-weight:400;font-size:36px;line-height:1.05">Sixty seconds inside the <span style="color:oklch(0.68 0.13 80)">editor</span></h2>
+
+    <!-- FlowPlayer card (live simulation) -->
+    <div style="overflow:hidden;border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">
+      <div style="display:flex;align-items:center;gap:8px;border-bottom:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:10px 16px">
+        <span style="display:flex;gap:6px"><span style="height:10px;width:10px;border-radius:999px;background:oklch(0.86 0.008 65)"></span><span style="height:10px;width:10px;border-radius:999px;background:oklch(0.86 0.008 65)"></span><span style="height:10px;width:10px;border-radius:999px;background:oklch(0.86 0.008 65)"></span></span>
+        <span style="margin:0 auto;border-radius:999px;background:#fff;padding:4px 16px;font-family:'JetBrains Mono',monospace;font-size:10px;color:oklch(0.6 0.01 55)">yoursite.simvites.co.uk, editing</span>
+      </div>
+      <div style="position:relative;user-select:none;background:oklch(0.972 0.005 80);height:320px">
+        <!-- block library -->
+        <div style="position:absolute;left:8px;top:12px;bottom:12px;width:18%;border-radius:9px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:8px">
+          <sc-for list="{{ fpLib }}" as="b" hint-placeholder-count="5">
+            <div style="{{ b.style }}">{{ b.label }}</div>
+          </sc-for>
+        </div>
+        <!-- canvas -->
+        <div style="position:absolute;left:21%;right:26%;top:12px;bottom:12px;overflow:hidden;border-radius:9px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:12px">
+          <div style="{{ fpHeroStyle }}">
+            <p style="margin:0;font-family:'Instrument Serif',serif;font-size:20px;color:oklch(0.23 0.014 55)">{{ fpTyped }}<sc-if value="{{ fpCaret }}" hint-placeholder-val="{{ false }}"><span style="color:oklch(0.47 0.15 33);animation:caretPulse 1.2s ease infinite">|</span></sc-if></p>
+            <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">19 September 2026</p>
+          </div>
+          <div style="{{ fpDragStyle }}">
+            <div style="height:8px;width:96px;border-radius:4px;background:oklch(0.86 0.008 65)"></div><div style="margin-top:6px;height:8px;width:128px;border-radius:4px;background:oklch(0.915 0.006 70)"></div>
+          </div>
+          <div style="{{ fpGalleryStyle }}">
+            <div style="height:36px;border-radius:4px;background:oklch(0.915 0.006 70)"></div><div style="height:36px;border-radius:4px;background:oklch(0.915 0.006 70)"></div><div style="height:36px;border-radius:4px;background:oklch(0.915 0.006 70)"></div>
+          </div>
+          <sc-if value="{{ fpPublished }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;left:32px;right:32px;top:33%;border-radius:9px;background:oklch(0.23 0.014 55);padding:8px 12px;text-align:center;font-size:12px;color:oklch(0.992 0.004 85);box-shadow:0 40px 80px -28px rgba(40,22,10,0.22)">Published, your site is live ✓</div>
+          </sc-if>
+        </div>
+        <!-- side panel -->
+        <div style="position:absolute;right:8px;top:12px;bottom:12px;width:23%;border-radius:9px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:8px">
+          <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:oklch(0.6 0.01 55)">Hero</p>
+          <p style="margin:8px 0 0;font-size:10px;color:oklch(0.44 0.013 55)">Title</p>
+          <div style="{{ fpPanelStyle }}">{{ fpTyped }}</div>
+          <div style="margin-top:12px;border-radius:999px;background:oklch(0.56 0.155 33);padding:6px 12px;text-align:center;font-size:10px;font-weight:600;color:#fff">Publish</div>
+        </div>
+        <!-- cursor -->
+        <div style="{{ fpCursorStyle }}">
+          <svg width="20" height="20" viewBox="0 0 24 24" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))"><path d="M5 3l14 8-6 1.5L10.5 19 5 3z" fill="oklch(0.23 0.014 55)" stroke="oklch(0.992 0.004 85)" stroke-width="1.5"></path></svg>
+          <span style="position:absolute;left:-8px;top:-8px;height:36px;width:36px;border-radius:999px;border:2px solid oklch(0.56 0.155 33);animation:pingAnim 1s cubic-bezier(0,0,0.2,1) infinite"></span>
+        </div>
+      </div>
+      <!-- caption + controls -->
+      <div style="padding:20px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+          <div>
+            <p style="margin:0;font-family:'Instrument Serif',serif;font-size:20px;color:oklch(0.23 0.014 55)">{{ fpTitle }}</p>
+            <p style="margin:4px 0 0;font-size:14px;color:oklch(0.44 0.013 55)">{{ fpHelp }}</p>
+          </div>
+          <span style="display:flex;flex-shrink:0;gap:8px">
+            <button onClick="{{ fpTogglePlay }}" style="display:flex;height:44px;width:44px;align-items:center;justify-content:center;border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:transparent;color:oklch(0.23 0.014 55);font-size:11px;cursor:pointer">{{ fpPlayIcon }}</button>
+            <span style="display:flex;height:44px;width:44px;align-items:center;justify-content:center;border-radius:999px;border:1px solid oklch(0.915 0.006 70);color:oklch(0.23 0.014 55)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg>
+            </span>
+          </span>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px">
+          <sc-for list="{{ fpBars }}" as="bar" hint-placeholder-count="6">
+            <span style="height:6px;flex:1;overflow:hidden;border-radius:999px;background:oklch(0.915 0.006 70);display:block"><span style="{{ bar.fill }}"></span></span>
+          </sc-for>
+        </div>
+        <p style="margin:12px 0 0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">Everything you just watched is zero code</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- features -->
+  <div style="max-width:1060px;margin:0 auto;padding:64px 24px">
+    <h2 style="margin:0 0 40px;text-align:center;font-family:'Instrument Serif',serif;font-weight:400;font-size:36px;line-height:1.05">Built for weddings that span <span style="color:oklch(0.68 0.13 80)">days</span>, not hours</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+      <sc-for list="{{ features }}" as="f" hint-placeholder-count="6">
+        <div style="border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:24px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">
+          <p style="margin:0;font-family:'Instrument Serif',serif;font-size:20px;color:oklch(0.23 0.014 55)">{{ f.t }}</p>
+          <p style="margin:8px 0 0;font-size:14px;line-height:1.62;color:oklch(0.44 0.013 55)">{{ f.d }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- templates -->
+  <div style="border-top:1px solid oklch(0.915 0.006 70);border-bottom:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:64px 24px;text-align:center">
+    <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:36px">Two looks, both <span style="color:oklch(0.68 0.13 80)">yours</span></h2>
+    <p style="margin:12px auto 0;max-width:448px;color:oklch(0.44 0.013 55)">Pick a template, swap any time. Your live site never changes until you publish.</p>
+    <div style="margin:32px auto 0;display:flex;max-width:512px;flex-wrap:wrap;justify-content:center;gap:20px">
+      <div style="width:208px;border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:20px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">
+        <div style="display:flex;justify-content:center;gap:8px"><span style="height:24px;width:24px;border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:#F5EFE3"></span><span style="height:24px;width:24px;border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:#C9A227"></span><span style="height:24px;width:24px;border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:#7A1F1F"></span></div>
+        <p style="margin:12px 0 0;font-family:'Instrument Serif',serif;font-size:18px;color:oklch(0.23 0.014 55)">Editorial Gold</p>
+      </div>
+      <div style="width:208px;border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:20px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">
+        <div style="display:flex;justify-content:center;gap:8px"><span style="height:24px;width:24px;border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:#F6F1E9"></span><span style="height:24px;width:24px;border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:#211D18"></span><span style="height:24px;width:24px;border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:#B08D57"></span></div>
+        <p style="margin:12px 0 0;font-family:'Instrument Serif',serif;font-size:18px;color:oklch(0.23 0.014 55)">Editorial Luxury</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- offer -->
+  <div style="padding:80px 24px;text-align:center">
+    <p style="margin:0 0 12px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Early access</p>
+    <h2 style="margin:0 auto;max-width:512px;font-family:'Instrument Serif',serif;font-weight:400;font-size:36px;line-height:1.05">Build everything <span style="color:oklch(0.68 0.13 80)">free</span>. Pay once when you are ready to send.</h2>
+    <p style="margin:16px auto 0;max-width:448px;color:oklch(0.44 0.013 55)">No subscription. One payment unlocks publishing and sending, and your site stays live for 18 months after the wedding. Early couples shape the product and keep founder pricing.</p>
+    <div style="margin-top:36px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px">
+      <span style="background:oklch(0.56 0.155 33);padding:14px 32px;font-weight:600;color:#fff;border-radius:999px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">Start your site</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.68 0.13 80);text-decoration:underline;text-underline-offset:4px">Talk to the founder</span>
+    </div>
+  </div>
+
+  <div style="max-width:1060px;margin:0 auto;padding:48px 24px;text-align:center">
+    <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Made with Simvites</p>
+  </div>
+
+</div>
+</div>
+</div>
+
+<!-- ═══════════════ 1b DASHBOARD ═══════════════ -->
+<div class="dv-opt" id="1b" data-screen-label="Current dashboard">
+<div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Dashboard "Command Centre" — (app)/dashboard/page.tsx + sidebar.tsx + (app)/layout.tsx</div>
+<div class="dv-card" style="width:1280px">
+<div style="display:flex;min-height:760px;background:oklch(0.992 0.004 85);color:oklch(0.23 0.014 55);font-family:'Hanken Grotesk',sans-serif;font-size:15px;line-height:1.65">
+  <!-- sidebar -->
+  <div style="width:240px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80)">
+    <div style="padding:24px"><span style="font-family:'Instrument Serif',serif;font-size:24px;color:oklch(0.23 0.014 55)">Simvites</span></div>
+    <div style="flex:1;padding:0 12px">
+      <sc-for list="{{ sidebarDash }}" as="it" hint-placeholder-count="13">
+        <div style="{{ it.style }}">{{ it.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  <!-- main -->
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid oklch(0.915 0.006 70);padding:14px 24px;background:color-mix(in oklab, oklch(0.992 0.004 85) 82%, transparent);backdrop-filter:blur(10px)">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-family:'Instrument Serif',serif;font-size:18px">Aanya &amp; Dev</span>
+        <span style="border-radius:999px;border:1px solid oklch(0.915 0.006 70);padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">draft</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">aanya@example.com</span>
+        <span style="display:inline-flex;height:36px;width:36px;align-items:center;justify-content:center;border-radius:999px;border:1px solid oklch(0.915 0.006 70);color:oklch(0.44 0.013 55)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">Sign out</span>
+      </div>
+    </div>
+    <div style="flex:1;max-width:1060px;width:100%;margin:0 auto;padding:40px 24px;box-sizing:border-box">
+      <div style="margin-bottom:32px">
+        <p style="margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Command Centre</p>
+        <h1 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:36px;line-height:1.05">You're on track.</h1>
+        <p style="margin:8px 0 0;max-width:672px;color:oklch(0.44 0.013 55)">3 things need a quick look.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1.2fr 2fr;gap:20px">
+        <div style="border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:28px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">
+          <p style="margin:0 0 16px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Readiness</p>
+          <p style="margin:0;font-family:'Instrument Serif',serif;font-size:72px;line-height:1.05;font-variant-numeric:oldstyle-nums">62%</p>
+          <p style="margin:8px 0 0;font-size:14px;color:oklch(0.44 0.013 55)">ready for the big weekend</p>
+          <div style="margin-top:20px;height:8px;width:100%;overflow:hidden;border-radius:999px;background:oklch(0.972 0.005 80)"><div style="height:100%;border-radius:999px;background:oklch(0.56 0.155 33);width:62%"></div></div>
+          <div style="margin-top:24px;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ attention }}" as="a" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;justify-content:space-between;border-radius:9px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:10px 14px;font-size:14px">
+                <span>{{ a }}</span><span style="color:oklch(0.47 0.15 33)">→</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-content:start">
+          <sc-for list="{{ dashStats }}" as="s" hint-placeholder-count="6">
+            <div style="border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:24px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">
+              <p style="margin:0 0 12px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">{{ s.label }}</p>
+              <p style="margin:0;font-family:'Instrument Serif',serif;font-size:48px;line-height:1.05;font-variant-numeric:oldstyle-nums">{{ s.value }}</p>
+              <sc-if value="{{ s.hint }}" hint-placeholder-val="{{ false }}"><p style="margin:8px 0 0;font-size:14px;color:oklch(0.44 0.013 55)">{{ s.hint }}</p></sc-if>
+              <sc-if value="{{ s.bar }}" hint-placeholder-val="{{ false }}"><div style="margin-top:16px;height:6px;width:100%;overflow:hidden;border-radius:999px;background:oklch(0.972 0.005 80)"><div style="{{ s.barFill }}"></div></div></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════ 1c GUESTS ═══════════════ -->
+<div class="dv-opt" id="1c" data-screen-label="Current guests page">
+<div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Guests + invite matrix — guests/guest-manager.tsx (toolbar form, household cards, checkbox matrix)</div>
+<div class="dv-card" style="width:1280px">
+<div style="display:flex;min-height:860px;background:oklch(0.992 0.004 85);color:oklch(0.23 0.014 55);font-family:'Hanken Grotesk',sans-serif;font-size:15px;line-height:1.65">
+  <div style="width:240px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80)">
+    <div style="padding:24px"><span style="font-family:'Instrument Serif',serif;font-size:24px;color:oklch(0.23 0.014 55)">Simvites</span></div>
+    <div style="flex:1;padding:0 12px">
+      <sc-for list="{{ sidebarGuests }}" as="it" hint-placeholder-count="13">
+        <div style="{{ it.style }}">{{ it.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid oklch(0.915 0.006 70);padding:14px 24px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-family:'Instrument Serif',serif;font-size:18px">Aanya &amp; Dev</span>
+        <span style="border-radius:999px;border:1px solid oklch(0.915 0.006 70);padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">draft</span>
+      </div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">aanya@example.com · Sign out</span>
+    </div>
+    <div style="flex:1;max-width:1060px;width:100%;margin:0 auto;padding:40px 24px;box-sizing:border-box">
+      <div style="margin-bottom:32px">
+        <p style="margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Guests</p>
+        <h1 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:36px;line-height:1.05">Households &amp; the invite matrix</h1>
+        <p style="margin:8px 0 0;max-width:672px;color:oklch(0.44 0.013 55)">One checkbox per guest per event decides who sees and answers for what.</p>
+      </div>
+
+      <!-- toolbar -->
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:20px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">
+        <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px">
+          <label style="display:block">
+            <span style="display:block;margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">New household</span>
+            <input placeholder="The Shah Family" style="width:208px;border-radius:9px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:10px 12px;color:oklch(0.23 0.014 55);outline:none;font-family:'Hanken Grotesk',sans-serif;font-size:15px;box-sizing:content-box">
+          </label>
+          <label style="display:block">
+            <span style="display:block;margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Side (optional)</span>
+            <input placeholder="Bride" style="width:112px;border-radius:9px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:10px 12px;color:oklch(0.23 0.014 55);outline:none;font-family:'Hanken Grotesk',sans-serif;font-size:15px;box-sizing:content-box">
+          </label>
+          <button style="border-radius:999px;background:oklch(0.56 0.155 33);padding:10px 20px;font-weight:600;color:#fff;border:none;font-family:'Hanken Grotesk',sans-serif;font-size:15px;cursor:pointer">Add household</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">2 households · 5 guests</span>
+          <button style="border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:10px 16px;font-size:14px;color:oklch(0.23 0.014 55);font-family:'Hanken Grotesk',sans-serif;cursor:pointer">Paste import</button>
+        </div>
+      </div>
+
+      <!-- household cards -->
+      <sc-for list="{{ households }}" as="h" hint-placeholder-count="2">
+        <div style="margin-top:32px;border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:24px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+            <h3 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:24px;line-height:1.05">{{ h.name }}</h3>
+            <div style="display:flex;align-items:center;gap:16px">
+              <span style="border-radius:999px;background:oklch(0.972 0.005 80);padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:oklch(0.6 0.01 55)">{{ h.side }}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:oklch(0.6 0.01 55)">Archive</span>
+            </div>
+          </div>
+          <table style="margin-top:20px;width:100%;border-collapse:collapse;font-size:14px">
+            <thead><tr>
+              <th style="padding:0 16px 8px 0;text-align:left;font-weight:400;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Guest</th>
+              <th style="padding:0 8px 8px;text-align:center;font-weight:400;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Mehndi</th>
+              <th style="padding:0 8px 8px;text-align:center;font-weight:400;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Sangeet</th>
+              <th style="padding:0 8px 8px;text-align:center;font-weight:400;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Ceremony</th>
+              <th style="padding:0 8px 8px;text-align:center;font-weight:400;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Reception</th>
+              <th style="width:32px"></th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{ h.guests }}" as="g" hint-placeholder-count="3">
+                <tr style="border-top:1px solid oklch(0.915 0.006 70)">
+                  <td style="padding:10px 16px 10px 0">
+                    <span style="color:oklch(0.23 0.014 55)">{{ g.name }}</span>
+                    <sc-if value="{{ g.child }}" hint-placeholder-val="{{ false }}"><span style="margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:oklch(0.6 0.01 55)">child</span></sc-if>
+                    <sc-if value="{{ g.plusOne }}" hint-placeholder-val="{{ false }}"><span style="margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:oklch(0.47 0.15 33)">+1</span></sc-if>
+                    <sc-if value="{{ g.email }}" hint-placeholder-val="{{ false }}"><span style="margin-left:8px;font-size:12px;color:oklch(0.6 0.01 55)">{{ g.email }}</span></sc-if>
+                  </td>
+                  <td style="padding:10px 8px;text-align:center"><input type="checkbox" defaultChecked="{{ g.c1 }}" style="height:18px;width:18px;accent-color:oklch(0.56 0.155 33)"></td>
+                  <td style="padding:10px 8px;text-align:center"><input type="checkbox" defaultChecked="{{ g.c2 }}" style="height:18px;width:18px;accent-color:oklch(0.56 0.155 33)"></td>
+                  <td style="padding:10px 8px;text-align:center"><input type="checkbox" defaultChecked="{{ g.c3 }}" style="height:18px;width:18px;accent-color:oklch(0.56 0.155 33)"></td>
+                  <td style="padding:10px 8px;text-align:center"><input type="checkbox" defaultChecked="{{ g.c4 }}" style="height:18px;width:18px;accent-color:oklch(0.56 0.155 33)"></td>
+                  <td style="text-align:right"><span style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:oklch(0.6 0.01 55)">✕</span></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          <div style="margin-top:16px;display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;border-top:1px solid oklch(0.915 0.006 70);padding-top:16px">
+            <label style="display:block">
+              <span style="display:block;margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Add guest</span>
+              <input placeholder="Priya Shah" style="width:176px;border-radius:9px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:8px 12px;outline:none;font-family:'Hanken Grotesk',sans-serif;font-size:15px;box-sizing:content-box">
+            </label>
+            <label style="display:block">
+              <span style="display:block;margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Email (optional)</span>
+              <input placeholder="priya@example.com" style="width:208px;border-radius:9px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:8px 12px;outline:none;font-family:'Hanken Grotesk',sans-serif;font-size:15px;box-sizing:content-box">
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;padding-bottom:8px;font-size:12px;color:oklch(0.44 0.013 55)"><input type="checkbox"> Child</label>
+            <label style="display:flex;align-items:center;gap:6px;padding-bottom:8px;font-size:12px;color:oklch(0.44 0.013 55)"><input type="checkbox"> +1 allowed</label>
+            <button style="border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:8px 16px;font-size:14px;font-family:'Hanken Grotesk',sans-serif;color:oklch(0.23 0.014 55);cursor:pointer">Add</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════ 1d INVITATIONS ═══════════════ -->
+<div class="dv-opt" id="1d" data-screen-label="Current invitations page">
+<div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Invitations — invitations-client.tsx (per-household links, copy / WhatsApp / QR)</div>
+<div class="dv-card" style="width:1280px">
+<div style="display:flex;min-height:640px;background:oklch(0.992 0.004 85);color:oklch(0.23 0.014 55);font-family:'Hanken Grotesk',sans-serif;font-size:15px;line-height:1.65">
+  <div style="width:240px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80)">
+    <div style="padding:24px"><span style="font-family:'Instrument Serif',serif;font-size:24px;color:oklch(0.23 0.014 55)">Simvites</span></div>
+    <div style="flex:1;padding:0 12px">
+      <sc-for list="{{ sidebarInv }}" as="it" hint-placeholder-count="13">
+        <div style="{{ it.style }}">{{ it.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid oklch(0.915 0.006 70);padding:14px 24px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-family:'Instrument Serif',serif;font-size:18px">Aanya &amp; Dev</span>
+        <span style="border-radius:999px;border:1px solid oklch(0.915 0.006 70);padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">draft</span>
+      </div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">aanya@example.com · Sign out</span>
+    </div>
+    <div style="flex:1;max-width:1060px;width:100%;margin:0 auto;padding:40px 24px;box-sizing:border-box">
+      <div style="margin-bottom:32px">
+        <p style="margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Invitations</p>
+        <h1 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:36px;line-height:1.05">Personal links, one per household</h1>
+        <p style="margin:8px 0 0;max-width:672px;color:oklch(0.44 0.013 55)">Generate a private link, send it by email or WhatsApp, print the QR on the card.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <!-- expanded row -->
+        <div style="border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:20px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
+            <div>
+              <p style="margin:0;font-family:'Instrument Serif',serif;font-size:20px">The Shah Family</p>
+              <p style="margin:2px 0 0;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:oklch(0.6 0.01 55)">3 guests · 2 emails · 1 active link · sent 12/06/2026 · <span style="color:oklch(0.47 0.15 33)">opened 14/06/2026</span></p>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button style="border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:8px 16px;font-size:14px;font-family:'Hanken Grotesk',sans-serif;color:oklch(0.23 0.014 55);cursor:pointer">Generate link</button>
+              <button style="border-radius:999px;background:oklch(0.56 0.155 33);border:none;padding:8px 16px;font-size:14px;font-weight:600;color:#fff;font-family:'Hanken Grotesk',sans-serif;cursor:pointer">Email invite</button>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:oklch(0.6 0.01 55)">Revoke</span>
+            </div>
+          </div>
+          <div style="margin-top:12px;display:flex;align-items:center;gap:8px">
+            <input readOnly value="https://aanya-and-dev.simvites.co.uk/i/9f2c…d41a" style="width:100%;border-radius:9px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:oklch(0.23 0.014 55);outline:none;box-sizing:border-box">
+            <button style="flex-shrink:0;border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:8px 12px;font-size:14px;font-family:'Hanken Grotesk',sans-serif;color:oklch(0.23 0.014 55);cursor:pointer">Copy</button>
+            <button style="flex-shrink:0;border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:8px 12px;font-size:14px;font-family:'Hanken Grotesk',sans-serif;color:oklch(0.23 0.014 55);cursor:pointer">WhatsApp</button>
+            <button style="flex-shrink:0;border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:8px 12px;font-size:14px;font-family:'Hanken Grotesk',sans-serif;color:oklch(0.23 0.014 55);cursor:pointer">QR</button>
+          </div>
+          <div style="margin-top:12px;display:flex;align-items:center;gap:16px">
+            <div style="height:112px;width:112px;border-radius:9px;border:1px solid oklch(0.915 0.006 70);background:repeating-linear-gradient(45deg,#fff,#fff 6px,oklch(0.96 0.004 80) 6px,oklch(0.96 0.004 80) 12px);display:flex;align-items:center;justify-content:center"><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:oklch(0.6 0.01 55)">QR CODE</span></div>
+            <div style="font-size:14px;color:oklch(0.44 0.013 55)">
+              <p style="margin:0">Print this on the paper invitation — scanning opens their personal RSVP.</p>
+              <span style="display:inline-block;margin-top:4px;color:oklch(0.47 0.15 33);text-decoration:underline;text-underline-offset:4px">Download PNG</span>
+            </div>
+          </div>
+        </div>
+        <!-- collapsed rows -->
+        <sc-for list="{{ inviteRows }}" as="r" hint-placeholder-count="2">
+          <div style="border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:20px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
+            <div>
+              <p style="margin:0;font-family:'Instrument Serif',serif;font-size:20px">{{ r.name }}</p>
+              <p style="margin:2px 0 0;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:oklch(0.6 0.01 55)">{{ r.meta }}</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button style="border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:8px 16px;font-size:14px;font-family:'Hanken Grotesk',sans-serif;color:oklch(0.23 0.014 55);cursor:pointer">Generate link</button>
+              <button style="border-radius:999px;background:oklch(0.56 0.155 33);border:none;padding:8px 16px;font-size:14px;font-weight:600;color:#fff;font-family:'Hanken Grotesk',sans-serif;cursor:pointer">Email invite</button>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════ 1e RSVPS ═══════════════ -->
+<div class="dv-opt" id="1e" data-screen-label="Current RSVPs page">
+<div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>RSVPs — rsvps/page.tsx (per-event roll-ups, chase list, answer roll-ups)</div>
+<div class="dv-card" style="width:1280px">
+<div style="display:flex;min-height:900px;background:oklch(0.992 0.004 85);color:oklch(0.23 0.014 55);font-family:'Hanken Grotesk',sans-serif;font-size:15px;line-height:1.65">
+  <div style="width:240px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80)">
+    <div style="padding:24px"><span style="font-family:'Instrument Serif',serif;font-size:24px;color:oklch(0.23 0.014 55)">Simvites</span></div>
+    <div style="flex:1;padding:0 12px">
+      <sc-for list="{{ sidebarRsvp }}" as="it" hint-placeholder-count="13">
+        <div style="{{ it.style }}">{{ it.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid oklch(0.915 0.006 70);padding:14px 24px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-family:'Instrument Serif',serif;font-size:18px">Aanya &amp; Dev</span>
+        <span style="border-radius:999px;border:1px solid oklch(0.915 0.006 70);padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">draft</span>
+      </div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">aanya@example.com · Sign out</span>
+    </div>
+    <div style="flex:1;max-width:1060px;width:100%;margin:0 auto;padding:40px 24px;box-sizing:border-box">
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px">
+        <div style="margin-bottom:32px">
+          <p style="margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">RSVPs</p>
+          <h1 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:36px;line-height:1.05">Who's coming</h1>
+          <p style="margin:8px 0 0;max-width:672px;color:oklch(0.44 0.013 55)">18 of 32 households have responded.</p>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px">
+          <button style="border-radius:999px;background:oklch(0.56 0.155 33);border:none;padding:8px 16px;font-size:14px;font-weight:600;color:#fff;font-family:'Hanken Grotesk',sans-serif;cursor:pointer">Remind pending households</button>
+          <button style="border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:8px 16px;font-size:14px;font-family:'Hanken Grotesk',sans-serif;color:oklch(0.23 0.014 55);cursor:pointer">Export RSVPs (CSV)</button>
+          <button style="border-radius:999px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:8px 16px;font-size:14px;font-family:'Hanken Grotesk',sans-serif;color:oklch(0.23 0.014 55);cursor:pointer">Export guests (CSV)</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <sc-for list="{{ rsvpEvents }}" as="e" hint-placeholder-count="4">
+          <div style="border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:24px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">
+            <div style="display:flex;align-items:baseline;justify-content:space-between">
+              <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:24px;line-height:1.05">{{ e.name }}</h2>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:oklch(0.6 0.01 55)">{{ e.date }}</span>
+            </div>
+            <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center">
+              <div style="border-radius:9px;background:oklch(0.972 0.005 80);padding:12px 0">
+                <p style="margin:0;font-family:'Instrument Serif',serif;font-size:30px;line-height:1.05;font-variant-numeric:oldstyle-nums;color:oklch(0.56 0.11 155)">{{ e.att }}</p>
+                <p style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Attending</p>
+              </div>
+              <div style="border-radius:9px;background:oklch(0.972 0.005 80);padding:12px 0">
+                <p style="margin:0;font-family:'Instrument Serif',serif;font-size:30px;line-height:1.05;font-variant-numeric:oldstyle-nums;color:oklch(0.57 0.17 27)">{{ e.dec }}</p>
+                <p style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Declined</p>
+              </div>
+              <div style="border-radius:9px;background:oklch(0.972 0.005 80);padding:12px 0">
+                <p style="margin:0;font-family:'Instrument Serif',serif;font-size:30px;line-height:1.05;font-variant-numeric:oldstyle-nums;color:oklch(0.66 0.13 65)">{{ e.pen }}</p>
+                <p style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Pending</p>
+              </div>
+            </div>
+            <div style="margin-top:16px">
+              <div style="height:6px;width:100%;overflow:hidden;border-radius:999px;background:oklch(0.972 0.005 80)"><div style="{{ e.capFill }}"></div></div>
+              <p style="margin:6px 0 0;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:oklch(0.6 0.01 55)">{{ e.capText }}</p>
+            </div>
+            <p style="margin:16px 0 0;font-size:12px;color:oklch(0.6 0.01 55)"><span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em">Chase:</span> {{ e.chase }}</p>
+          </div>
+        </sc-for>
+      </div>
+      <h2 style="margin:40px 0 20px;font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;line-height:1.05">Answers</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div style="border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:24px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">
+          <p style="margin:0 0 12px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Meal choice</p>
+          <sc-for list="{{ mealCounts }}" as="m" hint-placeholder-count="3">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid oklch(0.915 0.006 70);padding:6px 0;font-size:14px">
+              <span style="color:oklch(0.23 0.014 55)">{{ m.k }}</span>
+              <span style="font-family:'Instrument Serif',serif;font-size:20px;font-variant-numeric:oldstyle-nums;color:oklch(0.23 0.014 55)">{{ m.n }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="border-radius:13px;border:1px solid oklch(0.915 0.006 70);background:#fff;padding:24px;box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">
+          <p style="margin:0 0 12px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Song requests</p>
+          <sc-for list="{{ songRequests }}" as="s" hint-placeholder-count="3">
+            <p style="margin:0;border-bottom:1px solid oklch(0.915 0.006 70);padding:6px 0;font-size:14px;color:oklch(0.44 0.013 55)"><span style="color:oklch(0.23 0.014 55)">{{ s.guest }}:</span> {{ s.value }}</p>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════ 1f LOGIN ═══════════════ -->
+<div class="dv-opt" id="1f" data-screen-label="Current login page">
+<div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Login — app/login/page.tsx (email link / password tabs)</div>
+<div class="dv-card" style="width:1280px">
+<div style="display:flex;flex-direction:column;min-height:720px;background:oklch(0.992 0.004 85);color:oklch(0.23 0.014 55);font-family:'Hanken Grotesk',sans-serif;font-size:15px;line-height:1.65">
+  <div style="max-width:1060px;width:100%;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:24px;box-sizing:border-box">
+    <span style="font-family:'Instrument Serif',serif;font-size:24px">Simvites</span>
+    <span style="display:inline-flex;height:36px;width:36px;align-items:center;justify-content:center;border-radius:999px;border:1px solid oklch(0.915 0.006 70);color:oklch(0.44 0.013 55)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 24px 96px">
+    <div style="width:100%;max-width:384px">
+      <p style="margin:0 0 12px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Welcome</p>
+      <h1 style="margin:0;text-align:center;font-family:'Instrument Serif',serif;font-weight:400;font-size:36px;line-height:1.05">Sign in to Simvites</h1>
+      <div style="margin-top:32px;display:flex;border-radius:9px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:4px;text-align:center">
+        <span style="flex:1;border-radius:6px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.16em;background:#fff;color:oklch(0.23 0.014 55);box-shadow:0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)">Email link</span>
+        <span style="flex:1;border-radius:6px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.16em;color:oklch(0.6 0.01 55)">Password</span>
+      </div>
+      <div style="margin-top:28px">
+        <label style="display:block">
+          <span style="display:block;margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:oklch(0.6 0.01 55)">Email</span>
+          <input type="email" style="width:100%;border-radius:9px;border:1px solid oklch(0.915 0.006 70);background:oklch(0.972 0.005 80);padding:12px 14px;color:oklch(0.23 0.014 55);outline:none;font-family:'Hanken Grotesk',sans-serif;font-size:15px;box-sizing:border-box">
+        </label>
+        <button style="margin-top:20px;width:100%;border-radius:999px;background:oklch(0.56 0.155 33);border:none;padding:12px 24px;font-weight:600;font-size:15px;color:#fff;font-family:'Hanken Grotesk',sans-serif;cursor:pointer">Send sign-in link</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">This is the baseline. Next up: the audit doc, then 4 landing directions, then the app redesign. Reference any screen by its badge — e.g. "the matrix in <a class="dv-oid" href="#1c">1c</a>".</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { step: 0, playing: true }
+
+  componentDidMount() {
+    this._t = setInterval(() => {
+      if (this.state.playing) this.setState(s => ({ step: (s.step + 1) % 6 }))
+    }, 4200)
+  }
+  componentWillUnmount() { clearInterval(this._t) }
+
+  renderVals() {
+    const { step, playing } = this.state
+    const INK = 'oklch(0.23 0.014 55)', INK3 = 'oklch(0.6 0.01 55)', LINE = 'oklch(0.915 0.006 70)'
+    const ACCENT = 'oklch(0.56 0.155 33)', ASOFT = 'oklch(0.955 0.026 45)', ALINE = 'oklch(0.86 0.06 40)'
+    const SHADOW = '0 1px 2px rgba(40,22,10,0.05),0 10px 34px -12px rgba(40,22,10,0.1)'
+    const LIFT = '0 40px 80px -28px rgba(40,22,10,0.22)'
+
+    // ── FlowPlayer simulation (exact port of tour/flow-player.tsx) ──
+    const STEPS = [
+      { title: 'Step 1: Meet your editor', help: 'This is your website in edit mode. No code, ever, if you can click and type, you can build this.' },
+      { title: 'Step 2: Click any text to edit', help: 'Click straight on a heading or paragraph. It opens in the side panel, ready to change.' },
+      { title: 'Step 3: Type, and watch it update', help: 'Type in the panel and the page updates instantly. What you see is exactly what guests get.' },
+      { title: 'Step 4: Drag to reorder and resize', help: 'Grab a block to move it up or down. Sections size themselves for phones automatically.' },
+      { title: 'Step 5: Add blocks from the library', help: 'Countdown, gallery, hotel card, RSVP, click one and it drops onto your page.' },
+      { title: 'Step 6: Press Publish', help: 'Nothing goes live until you say so. One click and your site is out in the world.' },
+    ]
+    const CURSOR = [[50, 55], [46, 34], [82, 30], [46, 62], [12, 40], [88, 9]]
+    const [cx, cy] = CURSOR[step]
+
+    const fpLib = ['Hero', 'Countdown', 'Gallery', 'Hotel', 'RSVP'].map((label, i) => ({
+      label,
+      style: 'margin-bottom:6px;border-radius:9px;padding:6px 8px;font-size:10px;transition:all .5s;border:1px solid ' +
+        (step === 4 && i === 1 ? ALINE + ';background:' + ASOFT + ';color:' + INK + ';box-shadow:' + SHADOW : LINE + ';color:' + INK3),
+    }))
+
+    const heroHl = step === 1 || step === 2
+    const fpHeroStyle = 'border-radius:9px;padding:8px;text-align:center;transition:all .5s;' +
+      (heroHl ? 'background:' + ASOFT + ';outline:2px solid ' + ALINE : '')
+    const fpDragStyle = 'margin-top:8px;border-radius:9px;border:1px solid ' + LINE + ';padding:8px;transition:all .5s;' +
+      (step === 3 ? 'transform:translateY(-4px) rotate(0.6deg);box-shadow:' + LIFT + ';outline:2px solid ' + ALINE : '')
+    const fpGalleryStyle = 'margin-top:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;transition:opacity .7s;opacity:' + (step >= 4 ? '1' : '0.3')
+    const fpPanelStyle = 'margin-top:4px;border-radius:9px;padding:6px 8px;font-size:10px;color:' + INK + ';transition:all .5s;border:1px solid ' +
+      (step === 2 ? ACCENT + ';background:' + ASOFT : LINE)
+    const fpCursorStyle = 'pointer-events:none;position:absolute;z-index:10;transition:all 900ms ease-out;left:' + cx + '%;top:' + cy + '%'
+
+    const fpBars = STEPS.map((_, i) => ({
+      fill: 'display:block;height:100%;border-radius:999px;background:' + ACCENT + ';' +
+        (i < step ? 'width:100%' : i === step && playing ? 'width:0%;animation:flowbar 4200ms linear forwards' : 'width:0%'),
+    }))
+
+    // ── App shell sidebar ──
+    const NAV = ['Command Centre', 'Website', 'Events', 'Guests', 'Invitations', 'RSVPs', 'Seating', 'Budget', 'Vendors', 'Tasks', 'Files', 'Reports', 'Settings']
+    const mkSidebar = (activeIdx) => NAV.map((label, i) => ({
+      label,
+      style: 'margin-bottom:2px;display:block;border-radius:9px;padding:8px 12px;font-size:14px;cursor:pointer;' +
+        (i === activeIdx ? 'background:#fff;color:' + INK + ';box-shadow:' + SHADOW : 'color:oklch(0.44 0.013 55)'),
+    }))
+
+    const pct = (n) => 'height:100%;border-radius:999px;background:' + ACCENT + ';width:' + n + '%'
+
+    return {
+      // flowplayer
+      fpTitle: STEPS[step].title, fpHelp: STEPS[step].help,
+      fpTyped: step >= 2 ? 'Aanya & Dev' : 'Your names',
+      fpCaret: step === 2, fpPublished: step === 5,
+      fpLib, fpHeroStyle, fpDragStyle, fpGalleryStyle, fpPanelStyle, fpCursorStyle, fpBars,
+      fpPlayIcon: playing ? '❚❚' : '▶',
+      fpTogglePlay: () => this.setState(s => ({ playing: !s.playing })),
+
+      // landing content
+      marquee: ['Website builder', 'Guest list', 'Invitations', 'RSVPs', 'Seating', 'Budget', 'Vendors', 'Tasks', 'Files', 'Reports',
+                'Website builder', 'Guest list', 'Invitations', 'RSVPs', 'Seating', 'Budget', 'Vendors', 'Tasks', 'Files', 'Reports'],
+      features: [
+        { t: 'Every guest sees only their events', d: 'One checkbox per guest per event decides everything. Uninvited events simply do not exist for that household. This is the heart of a multi event wedding, done properly.' },
+        { t: 'Personal links, zero accounts', d: 'Each family gets one private link by WhatsApp, email or a printed QR code. They tap, they answer, they get a keepsake PDF. No passwords, no forms, no friction.' },
+        { t: 'A website they will screenshot', d: 'Two editorial templates, real typography, per event colour identities. Click any text and type. Publish when you are ready and never before.' },
+        { t: 'The command centre', d: 'Budget, vendors, tasks, files and seating all talk to each other. Book a caterer once and watch it appear in your budget, your checklist and your dashboard.' },
+        { t: 'Answers you can hand to a caterer', d: 'Live counts per event, meal totals, dietary notes, a chase list of who has not replied, and one clean spreadsheet export for every supplier.' },
+        { t: 'Live updates after the big send', d: 'Seating plan ready? One button tells every seated family. They open their link and see their table. Your site keeps working long after the invites go out.' },
+      ],
+
+      // app screens
+      sidebarDash: mkSidebar(0),
+      sidebarGuests: mkSidebar(3),
+      sidebarInv: mkSidebar(4),
+      sidebarRsvp: mkSidebar(5),
+      attention: ['Invite guests to events', 'Set a date for Sangeet', 'Add your first vendor'],
+      dashStats: [
+        { label: 'Events', value: '4', hint: 'celebrations planned', bar: false, barFill: '' },
+        { label: 'Guests', value: '86', hint: '73 invited to at least one event', bar: false, barFill: '' },
+        { label: 'Households responded', value: '18/32', hint: '', bar: true, barFill: pct(56) },
+        { label: 'Attending', value: '54', hint: 'guest-event confirmations', bar: false, barFill: '' },
+        { label: 'Vendors booked', value: '6', hint: '', bar: false, barFill: '' },
+        { label: 'Open tasks', value: '12', hint: '3 overdue', bar: false, barFill: '' },
+      ],
+      households: [
+        { name: 'The Shah Family', side: 'Bride', guests: [
+          { name: 'Priya Shah', email: 'priya@example.com', child: false, plusOne: true, c1: true, c2: true, c3: true, c4: true },
+          { name: 'Raj Shah', email: '', child: false, plusOne: false, c1: true, c2: true, c3: true, c4: true },
+          { name: 'Aarav Shah', email: '', child: true, plusOne: false, c1: false, c2: true, c3: true, c4: false },
+        ]},
+        { name: 'The Patel Family', side: 'Groom', guests: [
+          { name: 'Meera Patel', email: 'meera@example.com', child: false, plusOne: false, c1: true, c2: false, c3: true, c4: true },
+          { name: 'Arjun Patel', email: '', child: false, plusOne: true, c1: false, c2: false, c3: true, c4: true },
+        ]},
+      ],
+      inviteRows: [
+        { name: 'The Patel Family', meta: '2 guests · 1 email · 1 active link · sent 12/06/2026' },
+        { name: 'The Mehta Family', meta: '4 guests · 2 emails · 0 active links' },
+      ],
+      rsvpEvents: [
+        { name: 'Mehndi', date: 'Thu 17 Sep, 4:00 pm', att: '38', dec: '6', pen: '12', capFill: pct(63), capText: '38 / 60 seats', chase: 'Nikhil Mehta, Sara Khan, Dev Kapoor +4 more' },
+        { name: 'Sangeet', date: 'Fri 18 Sep, 7:00 pm', att: '74', dec: '9', pen: '21', capFill: pct(62), capText: '74 / 120 seats', chase: 'Anita Rao, Kabir Singh +6 more' },
+        { name: 'Ceremony', date: 'Sat 19 Sep, 11:00 am', att: '92', dec: '11', pen: '17', capFill: pct(77), capText: '92 / 120 seats', chase: 'Ishan Desai +3 more' },
+        { name: 'Reception', date: 'Sat 19 Sep, 7:00 pm', att: '104', dec: '8', pen: '14', capFill: pct(69), capText: '104 / 150 seats', chase: 'Leela Nair, Rohan Joshi +5 more' },
+      ],
+      mealCounts: [ { k: 'Vegetarian', n: '46' }, { k: 'Chicken', n: '31' }, { k: 'Lamb', n: '19' }, { k: 'Kids meal', n: '8' } ],
+      songRequests: [
+        { guest: 'Priya Shah', value: 'Kala Chashma, obviously' },
+        { guest: 'Meera Patel', value: 'Anything by AR Rahman' },
+        { guest: 'Sara Khan', value: 'Levitating — Dua Lipa' },
+      ],
+    }
+  }
+}
+</script>
+</body>
+</html>

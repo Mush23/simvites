@@ -1,21 +1,26 @@
 import type { Metadata } from 'next'
-import { Instrument_Serif, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
+import { Instrument_Serif, Instrument_Sans, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider, ThemeScript } from '@/components/theme/theme-provider'
 import { BRAND_NAME } from '@/lib/brand'
 
+// Design overhaul ("one family, two voices"): the TOOL speaks Instrument Sans
+// + Geist Mono; Instrument Serif is reserved for the artifact — template
+// previews, site names in chrome, guest-facing surfaces. The variable names
+// are historical (--font-hanken / --font-jetbrains) and kept stable because
+// the template registry aliases them; only the faces behind them changed.
 const display = Instrument_Serif({
   variable: '--font-instrument',
   subsets: ['latin'],
   weight: ['400'],
   display: 'swap',
 })
-const sans = Hanken_Grotesk({
+const sans = Instrument_Sans({
   variable: '--font-hanken',
   subsets: ['latin'],
   display: 'swap',
 })
-const mono = JetBrains_Mono({
+const mono = Geist_Mono({
   variable: '--font-jetbrains',
   subsets: ['latin'],
   display: 'swap',

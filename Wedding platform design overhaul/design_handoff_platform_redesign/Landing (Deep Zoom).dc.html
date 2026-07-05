@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&amp;family=Instrument+Serif:ital@0;1&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+html{scroll-behavior:smooth}
+body{margin:0;background:oklch(0.985 0.002 90);color:oklch(0.17 0.005 90);font-family:'Instrument Sans',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
+::selection{background:oklch(0.62 0.21 29 / 0.16)}
+@keyframes demoPing{0%{transform:scale(.4);opacity:.7}100%{transform:scale(1.9);opacity:0}}
+@keyframes caretBlink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes idleBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes kenb{0%{transform:scale(1) translateY(0)}100%{transform:scale(1.09) translateY(-8px)}}
+@keyframes chipIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<!-- ══════════════ NAV ══════════════ -->
+<div style="position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:90;display:flex;flex-wrap:nowrap;white-space:nowrap;align-items:center;gap:4px;background:rgba(255,255,255,.72);backdrop-filter:blur(14px);border:1px solid oklch(0.9 0.003 90 / 0.8);border-radius:13px;padding:7px 8px;box-shadow:0 8px 30px -12px rgba(15,15,20,.18)">
+  <a href="#top" style="display:flex;align-items:center;gap:8px;font-weight:650;font-size:14px;letter-spacing:-0.01em;color:inherit;text-decoration:none;padding:6px 10px"><span style="display:inline-flex;width:22px;height:22px;border-radius:6px;background:oklch(0.17 0.005 90);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:700">S</span>Simvites</a>
+  <a href="#dive" style="font-size:13px;font-weight:550;color:oklch(0.4 0.008 90);text-decoration:none;padding:6px 10px;border-radius:8px" style-hover="background:oklch(0.95 0.002 90);color:oklch(0.17 0.005 90)">Product</a>
+  <a href="#wedding" style="font-size:13px;font-weight:550;color:oklch(0.4 0.008 90);text-decoration:none;padding:6px 10px;border-radius:8px" style-hover="background:oklch(0.95 0.002 90);color:oklch(0.17 0.005 90)">Templates</a>
+  <a href="#usp" style="font-size:13px;font-weight:550;color:oklch(0.4 0.008 90);text-decoration:none;padding:6px 10px;border-radius:8px" style-hover="background:oklch(0.95 0.002 90);color:oklch(0.17 0.005 90)">RSVP</a>
+  <a href="#pricing" style="font-size:13px;font-weight:550;color:oklch(0.4 0.008 90);text-decoration:none;padding:6px 10px;border-radius:8px" style-hover="background:oklch(0.95 0.002 90);color:oklch(0.17 0.005 90)">Pricing</a>
+  <span style="width:1px;height:18px;background:oklch(0.9 0.003 90);margin:0 4px"></span>
+  <a href="#" style="font-size:13px;font-weight:550;color:oklch(0.3 0.008 90);text-decoration:none;padding:6px 10px">Sign in</a>
+  <a href="#pricing" style="font-size:13px;font-weight:600;background:var(--sv-accent, oklch(0.62 0.21 29));color:#fff;border-radius:9px;padding:8px 15px;text-decoration:none" style-hover="filter:brightness(1.08)">Start free</a>
+</div>
+
+<!-- ══════════════ HERO ══════════════ -->
+<div id="top" data-screen-label="Hero" style="position:relative;min-height:100vh;overflow:clip;display:flex;flex-direction:column;align-items:center;padding-top:118px">
+  <div style="position:absolute;inset:0;background-image:linear-gradient(oklch(0.17 0.005 90 / 0.035) 1px,transparent 1px),linear-gradient(90deg,oklch(0.17 0.005 90 / 0.035) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 40%,transparent 100%)"></div>
+  <div style="position:relative;text-align:center;padding:0 24px">
+    <div style="display:inline-flex;align-items:center;gap:8px;font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:oklch(0.42 0.008 90);border:1px solid oklch(0.9 0.003 90);background:#fff;border-radius:999px;padding:6px 13px;white-space:nowrap"><span style="width:6px;height:6px;border-radius:3px;background:var(--sv-accent, oklch(0.62 0.21 29))"></span>Per event invitations · live RSVP · zero code</div>
+    <h1 style="margin:22px auto 0;max-width:840px;font-size:clamp(48px,6.4vw,80px);line-height:0.98;letter-spacing:-0.045em;font-weight:650">Every event. Every guest.<br>One platform.</h1>
+    <p style="margin:20px auto 0;max-width:540px;font-size:17.5px;line-height:1.55;color:oklch(0.42 0.008 90);text-wrap:pretty">Build the wedding website, invite each guest to exactly the right events, and watch RSVPs land live. Planning, guests and the site itself, finally in one place.</p>
+    <div style="margin-top:28px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+      <a href="#pricing" style="font-size:15px;font-weight:600;background:oklch(0.17 0.005 90);color:#fff;border-radius:11px;padding:13px 24px;text-decoration:none" style-hover="background:oklch(0.28 0.005 90)">Start building free</a>
+      <a href="#dive" style="display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:550;color:oklch(0.28 0.008 90);border:1px solid oklch(0.9 0.003 90);background:#fff;border-radius:11px;padding:13px 22px;text-decoration:none" style-hover="border-color:oklch(0.8 0.003 90)"><span style="display:inline-flex;width:18px;height:18px;border-radius:9px;background:var(--sv-accent, oklch(0.62 0.21 29));color:#fff;align-items:center;justify-content:center;font-size:9px">▶</span>Watch the live demo</a>
+    </div>
+  </div>
+  <!-- hero editor frame, tilted -->
+  <div style="position:relative;margin-top:64px;width:min(980px,92vw);perspective:1600px">
+    <div style="transform:rotateX(11deg);transform-origin:50% 0%;background:#fff;border:1px solid oklch(0.9 0.003 90);border-radius:16px;box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 50px 110px -35px rgba(15,15,20,.32);overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;border-bottom:1px solid oklch(0.94 0.002 90);padding:11px 16px">
+        <span style="display:flex;gap:5px"><span style="width:10px;height:10px;border-radius:5px;background:oklch(0.92 0.003 90)"></span><span style="width:10px;height:10px;border-radius:5px;background:oklch(0.92 0.003 90)"></span><span style="width:10px;height:10px;border-radius:5px;background:oklch(0.92 0.003 90)"></span></span>
+        <span style="margin:0 auto;font-family:'Geist Mono',monospace;font-size:10.5px;color:oklch(0.48 0.008 90);background:oklch(0.97 0.002 90);border-radius:7px;padding:4px 14px">aanya-and-dev.simvites.co.uk</span>
+        <span style="font-size:12px;font-weight:600;background:var(--sv-accent, oklch(0.62 0.21 29));color:#fff;border-radius:8px;padding:6px 13px">Publish</span>
+      </div>
+      <div style="display:flex;height:340px">
+        <div style="width:170px;border-right:1px solid oklch(0.94 0.002 90);padding:12px;display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:'Geist Mono',monospace;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:oklch(0.6 0.006 90)">Blocks</span>
+          <span style="font-size:12.5px;font-weight:550;border:1px solid oklch(0.92 0.003 90);border-radius:8px;padding:8px 10px">Hero</span>
+          <span style="font-size:12.5px;font-weight:550;border:1px solid oklch(0.92 0.003 90);border-radius:8px;padding:8px 10px">Countdown</span>
+          <span style="font-size:12.5px;font-weight:550;border:1px solid oklch(0.92 0.003 90);border-radius:8px;padding:8px 10px">Schedule</span>
+          <span style="font-size:12.5px;font-weight:550;border:1px solid oklch(0.92 0.003 90);border-radius:8px;padding:8px 10px">Gallery</span>
+          <span style="font-size:12.5px;font-weight:550;border:1px solid oklch(0.92 0.003 90);border-radius:8px;padding:8px 10px">RSVP</span>
+        </div>
+        <div style="flex:1;background:oklch(0.97 0.002 90);padding:18px;display:flex;flex-direction:column;gap:10px;align-items:center">
+          <div style="width:84%;background:oklch(0.975 0.006 85);border:1px solid oklch(0.93 0.01 80);border-radius:10px;padding:24px;text-align:center">
+            <p style="margin:0;font-family:'Instrument Serif',serif;font-size:32px;color:oklch(0.25 0.02 60)">Aanya &amp; Dev</p>
+            <p style="margin:5px 0 0;font-family:'Geist Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.14em;color:oklch(0.5 0.02 60)">19 September 2026 · Jaipur</p>
+          </div>
+          <div style="width:84%;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            <div style="background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:8px;padding:10px 0;text-align:center"><span style="font-family:'Geist Mono',monospace;font-size:16px;font-weight:600">76</span><span style="display:block;font-family:'Geist Mono',monospace;font-size:8px;color:oklch(0.55 0.008 90);text-transform:uppercase;letter-spacing:.1em">days</span></div>
+            <div style="background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:8px;padding:10px 0;text-align:center"><span style="font-family:'Geist Mono',monospace;font-size:16px;font-weight:600">08</span><span style="display:block;font-family:'Geist Mono',monospace;font-size:8px;color:oklch(0.55 0.008 90);text-transform:uppercase;letter-spacing:.1em">hrs</span></div>
+            <div style="background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:8px;padding:10px 0;text-align:center"><span style="font-family:'Geist Mono',monospace;font-size:16px;font-weight:600">21</span><span style="display:block;font-family:'Geist Mono',monospace;font-size:8px;color:oklch(0.55 0.008 90);text-transform:uppercase;letter-spacing:.1em">min</span></div>
+            <div style="background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:8px;padding:10px 0;text-align:center"><span style="font-family:'Geist Mono',monospace;font-size:16px;font-weight:600">54</span><span style="display:block;font-family:'Geist Mono',monospace;font-size:8px;color:oklch(0.55 0.008 90);text-transform:uppercase;letter-spacing:.1em">sec</span></div>
+          </div>
+          <div style="width:84%;flex:1;background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:8px;display:flex;align-items:center;justify-content:center;gap:8px;color:oklch(0.6 0.006 90);font-size:12px">Schedule · 4 events · per guest visibility</div>
+        </div>
+        <div style="width:190px;border-left:1px solid oklch(0.94 0.002 90);padding:12px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:'Geist Mono',monospace;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:oklch(0.6 0.006 90)">Hero</span>
+          <span style="font-size:11px;font-weight:550;color:oklch(0.45 0.008 90)">Names</span>
+          <span style="font-size:12px;border:1px solid oklch(0.9 0.003 90);border-radius:8px;padding:7px 10px">Aanya &amp; Dev</span>
+          <span style="font-size:11px;font-weight:550;color:oklch(0.45 0.008 90)">Accent</span>
+          <div style="display:flex;gap:6px"><span style="width:20px;height:20px;border-radius:10px;background:oklch(0.62 0.21 29);outline:2px solid oklch(0.62 0.21 29 / .3);outline-offset:2px"></span><span style="width:20px;height:20px;border-radius:10px;background:oklch(0.7 0.14 75)"></span><span style="width:20px;height:20px;border-radius:10px;background:oklch(0.45 0.14 300)"></span><span style="width:20px;height:20px;border-radius:10px;background:oklch(0.55 0.12 160)"></span></div>
+        </div>
+      </div>
+    </div>
+    <div style="position:absolute;left:50%;bottom:-52px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;color:oklch(0.5 0.008 90)">
+      <span style="font-family:'Geist Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.14em">Scroll to dive in</span>
+      <span style="display:block;width:1px;height:26px;background:linear-gradient(oklch(0.5 0.008 90),transparent)"></span>
+    </div>
+  </div>
+  <div style="height:120px"></div>
+</div>
+
+<!-- ══════════════ THE DIVE (sticky scroll journey) ══════════════ -->
+<div id="dive" ref="{{ refDive }}" data-screen-label="Deep-zoom dive" style="position:relative;height:560vh">
+  <div style="position:sticky;top:0;height:100vh;overflow:clip;display:flex;align-items:center;justify-content:center">
+
+    <!-- dark space overlay -->
+    <div ref="{{ refDark }}" style="position:absolute;inset:0;background:oklch(0.13 0.004 270);opacity:0;pointer-events:none">
+      <div style="position:absolute;inset:0;background-image:linear-gradient(oklch(1 0 0/0.05) 1px,transparent 1px),linear-gradient(90deg,oklch(1 0 0/0.05) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000,transparent)"></div>
+      <div style="position:absolute;left:14%;top:22%;width:5px;height:5px;border-radius:3px;background:var(--sv-accent, oklch(0.62 0.21 29));filter:blur(1px)"></div>
+      <div style="position:absolute;left:82%;top:30%;width:4px;height:4px;border-radius:2px;background:#fff;opacity:.5;filter:blur(1px)"></div>
+      <div style="position:absolute;left:70%;top:78%;width:5px;height:5px;border-radius:3px;background:#fff;opacity:.35;filter:blur(1px)"></div>
+      <div style="position:absolute;left:24%;top:70%;width:4px;height:4px;border-radius:2px;background:var(--sv-accent, oklch(0.62 0.21 29));opacity:.6;filter:blur(1px)"></div>
+      <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:1100px;height:1100px;border-radius:50%;background:radial-gradient(closest-side,oklch(0.62 0.21 29/0.1),transparent 70%)"></div>
+    </div>
+
+    <!-- DEMO FRAME (the seamless recording) -->
+    <div ref="{{ refFrameWrap }}" style="position:absolute;width:min(1060px,90vw);will-change:transform,opacity">
+      <div style="background:#fff;border:1px solid oklch(0.88 0.003 90);border-radius:16px;box-shadow:0 60px 140px -40px rgba(0,0,0,.5),0 0 90px -30px oklch(0.62 0.21 29/0.35);overflow:hidden">
+        <!-- browser bar -->
+        <div style="display:flex;align-items:center;gap:8px;border-bottom:1px solid oklch(0.94 0.002 90);padding:11px 16px;background:#fff">
+          <span style="display:flex;gap:5px"><span style="width:10px;height:10px;border-radius:5px;background:#FF5F57"></span><span style="width:10px;height:10px;border-radius:5px;background:#FEBC2E"></span><span style="width:10px;height:10px;border-radius:5px;background:#28C840"></span></span>
+          <span ref="{{ refUrlPill }}" style="margin:0 auto;font-family:'Geist Mono',monospace;font-size:10.5px;color:oklch(0.48 0.008 90);background:oklch(0.97 0.002 90);border-radius:7px;padding:4px 14px">aanya-and-dev.simvites.co.uk · editing</span>
+          <span ref="{{ refDeviceToggle }}" style="display:flex;gap:2px;border:1px solid oklch(0.92 0.003 90);border-radius:8px;padding:2px">
+            <span ref="{{ refDeskBtn }}" style="font-size:10px;padding:3px 8px;border-radius:6px;background:oklch(0.94 0.002 90);font-weight:600">Desktop</span>
+            <span ref="{{ refMobBtn }}" style="font-size:10px;padding:3px 8px;border-radius:6px;color:oklch(0.5 0.008 90)">Phone</span>
+          </span>
+          <span ref="{{ refPublishBtn }}" style="font-size:12px;font-weight:600;background:var(--sv-accent, oklch(0.62 0.21 29));color:#fff;border-radius:8px;padding:6px 13px;transition:transform .15s">Publish</span>
+        </div>
+        <!-- stage -->
+        <div style="position:relative;height:min(56vh,520px);background:oklch(0.965 0.002 90);overflow:hidden">
+          <!-- left library -->
+          <div style="position:absolute;left:10px;top:12px;bottom:12px;width:15%;background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px">
+            <span style="font-family:'Geist Mono',monospace;font-size:8.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:oklch(0.6 0.006 90)">Blocks</span>
+            <span style="font-size:11.5px;font-weight:550;border:1px solid oklch(0.93 0.003 90);border-radius:7px;padding:6px 9px">Hero</span>
+            <span style="font-size:11.5px;font-weight:550;border:1px solid oklch(0.93 0.003 90);border-radius:7px;padding:6px 9px">Countdown</span>
+            <span style="font-size:11.5px;font-weight:550;border:1px solid oklch(0.93 0.003 90);border-radius:7px;padding:6px 9px">Schedule</span>
+            <span ref="{{ refLibGallery }}" style="font-size:11.5px;font-weight:550;border:1px solid oklch(0.93 0.003 90);border-radius:7px;padding:6px 9px;transition:all .25s">Gallery</span>
+            <span style="font-size:11.5px;font-weight:550;border:1px solid oklch(0.93 0.003 90);border-radius:7px;padding:6px 9px">RSVP</span>
+            <span style="font-size:11.5px;font-weight:550;border:1px solid oklch(0.93 0.003 90);border-radius:7px;padding:6px 9px">Hotels</span>
+          </div>
+          <!-- canvas -->
+          <div ref="{{ refCanvasWrap }}" style="position:absolute;left:17.5%;right:19.5%;top:12px;bottom:12px;display:flex;justify-content:center;transition:left .5s cubic-bezier(.4,0,.2,1),right .5s cubic-bezier(.4,0,.2,1)">
+            <div ref="{{ refPage }}" style="width:100%;background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:10px;overflow:hidden;transition:width .55s cubic-bezier(.4,0,.2,1)">
+              <div ref="{{ refPageScroll }}" style="padding:16px;display:flex;flex-direction:column;gap:10px;align-items:center;will-change:transform">
+                <!-- hero block -->
+                <div ref="{{ refHeroBlock }}" style="width:92%;background:oklch(0.975 0.006 85);border:1px solid oklch(0.93 0.01 80);border-radius:10px;padding:20px;text-align:center;transition:outline .2s;outline:2px solid transparent">
+                  <p style="margin:0;font-family:'Instrument Serif',serif;font-size:28px;color:oklch(0.25 0.02 60);min-height:36px"><span ref="{{ refHeroName }}">Your names</span><span ref="{{ refCaret }}" style="display:none;color:var(--sv-accent, oklch(0.62 0.21 29));animation:caretBlink 0.9s step-end infinite">|</span></p>
+                  <p ref="{{ refHeroDate }}" style="margin:4px 0 0;font-family:'Geist Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:oklch(0.5 0.02 60)">19 September 2026 · Jaipur</p>
+                </div>
+                <!-- countdown block (draggable) -->
+                <div ref="{{ refCountBlock }}" style="width:92%;order:2;background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:10px;padding:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;will-change:transform;position:relative;z-index:1">
+                  <div style="background:oklch(0.97 0.002 90);border-radius:7px;padding:8px 0;text-align:center"><span style="font-family:'Geist Mono',monospace;font-size:14px;font-weight:600">76</span><span style="display:block;font-family:'Geist Mono',monospace;font-size:7.5px;color:oklch(0.55 0.008 90);text-transform:uppercase;letter-spacing:.1em">days</span></div>
+                  <div style="background:oklch(0.97 0.002 90);border-radius:7px;padding:8px 0;text-align:center"><span style="font-family:'Geist Mono',monospace;font-size:14px;font-weight:600">08</span><span style="display:block;font-family:'Geist Mono',monospace;font-size:7.5px;color:oklch(0.55 0.008 90);text-transform:uppercase;letter-spacing:.1em">hrs</span></div>
+                  <div style="background:oklch(0.97 0.002 90);border-radius:7px;padding:8px 0;text-align:center"><span style="font-family:'Geist Mono',monospace;font-size:14px;font-weight:600">21</span><span style="display:block;font-family:'Geist Mono',monospace;font-size:7.5px;color:oklch(0.55 0.008 90);text-transform:uppercase;letter-spacing:.1em">min</span></div>
+                  <div style="background:oklch(0.97 0.002 90);border-radius:7px;padding:8px 0;text-align:center"><span style="font-family:'Geist Mono',monospace;font-size:14px;font-weight:600">54</span><span style="display:block;font-family:'Geist Mono',monospace;font-size:7.5px;color:oklch(0.55 0.008 90);text-transform:uppercase;letter-spacing:.1em">sec</span></div>
+                </div>
+                <!-- gallery block (appears) -->
+                <div ref="{{ refGalleryBlock }}" style="width:92%;order:3;background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:10px;padding:12px;display:none;grid-template-columns:repeat(3,1fr);gap:8px;will-change:transform">
+                  <div style="height:52px;border-radius:7px;background:repeating-linear-gradient(45deg,oklch(0.96 0.004 85),oklch(0.96 0.004 85) 6px,oklch(0.93 0.006 85) 6px,oklch(0.93 0.006 85) 12px)"></div>
+                  <div style="height:52px;border-radius:7px;background:repeating-linear-gradient(45deg,oklch(0.96 0.004 85),oklch(0.96 0.004 85) 6px,oklch(0.93 0.006 85) 6px,oklch(0.93 0.006 85) 12px)"></div>
+                  <div style="height:52px;border-radius:7px;background:repeating-linear-gradient(45deg,oklch(0.96 0.004 85),oklch(0.96 0.004 85) 6px,oklch(0.93 0.006 85) 6px,oklch(0.93 0.006 85) 12px)"></div>
+                </div>
+                <!-- schedule block -->
+                <div style="width:92%;order:4;background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:7px">
+                  <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600">Mehndi</span><span style="font-family:'Geist Mono',monospace;font-size:9.5px;color:oklch(0.55 0.008 90)">Thu 17 · 4pm</span></div>
+                  <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600">Sangeet</span><span style="font-family:'Geist Mono',monospace;font-size:9.5px;color:oklch(0.55 0.008 90)">Fri 18 · 7pm</span></div>
+                  <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600">Ceremony</span><span style="font-family:'Geist Mono',monospace;font-size:9.5px;color:oklch(0.55 0.008 90)">Sat 19 · 11am</span></div>
+                </div>
+                <!-- rsvp block -->
+                <div style="width:92%;order:5;background:oklch(0.975 0.006 85);border:1px solid oklch(0.93 0.01 80);border-radius:10px;padding:14px;text-align:center">
+                  <p style="margin:0;font-family:'Instrument Serif',serif;font-size:16px;color:oklch(0.25 0.02 60)">Will you join us?</p>
+                  <span style="display:inline-block;margin-top:8px;font-size:11px;font-weight:600;background:var(--sv-accent, oklch(0.62 0.21 29));color:#fff;border-radius:7px;padding:6px 14px">RSVP now</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- right inspector -->
+          <div style="position:absolute;right:10px;top:12px;bottom:12px;width:17%;background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:7px">
+            <span style="font-family:'Geist Mono',monospace;font-size:8.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:oklch(0.6 0.006 90)">Hero</span>
+            <span style="font-size:10.5px;font-weight:550;color:oklch(0.45 0.008 90)">Names</span>
+            <span ref="{{ refPanelInput }}" style="font-size:11px;border:1px solid oklch(0.9 0.003 90);border-radius:7px;padding:6px 8px;min-height:14px;transition:all .2s;overflow:hidden;white-space:nowrap">Your names</span>
+            <span style="font-size:10.5px;font-weight:550;color:oklch(0.45 0.008 90)">Date</span>
+            <span style="font-size:11px;border:1px solid oklch(0.9 0.003 90);border-radius:7px;padding:6px 8px;font-family:'Geist Mono',monospace">19 Sep 2026</span>
+            <span style="font-size:10.5px;font-weight:550;color:oklch(0.45 0.008 90)">Accent</span>
+            <div style="display:flex;gap:5px">
+              <span ref="{{ refSwatch1 }}" style="width:18px;height:18px;border-radius:9px;background:oklch(0.62 0.21 29);outline:2px solid oklch(0.62 0.21 29/.35);outline-offset:2px;transition:outline .2s"></span>
+              <span ref="{{ refSwatch2 }}" style="width:18px;height:18px;border-radius:9px;background:oklch(0.7 0.14 75);outline:2px solid transparent;outline-offset:2px;transition:outline .2s"></span>
+              <span style="width:18px;height:18px;border-radius:9px;background:oklch(0.45 0.14 300)"></span>
+              <span style="width:18px;height:18px;border-radius:9px;background:oklch(0.55 0.12 160)"></span>
+            </div>
+            <div style="margin-top:auto;border-top:1px solid oklch(0.94 0.002 90);padding-top:8px">
+              <span style="font-family:'Geist Mono',monospace;font-size:8.5px;color:oklch(0.6 0.006 90)">Autosaved · just now</span>
+            </div>
+          </div>
+          <!-- cursor -->
+          <div ref="{{ refCursor }}" style="position:absolute;left:78%;top:64%;z-index:30;pointer-events:none;will-change:left,top,transform">
+            <svg width="22" height="22" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))"><path d="M5 3l14 8-6 1.5L10.5 19 5 3z" fill="#111" stroke="#fff" stroke-width="1.6"></path></svg>
+            <span ref="{{ refRipple }}" style="position:absolute;left:-9px;top:-9px;width:40px;height:40px;border-radius:20px;border:2px solid var(--sv-accent, oklch(0.62 0.21 29));opacity:0"></span>
+          </div>
+          <!-- toast -->
+          <div ref="{{ refToast }}" style="position:absolute;left:50%;bottom:18px;transform:translate(-50%,70px);z-index:25;display:flex;align-items:center;gap:10px;background:oklch(0.17 0.005 90);color:#fff;border-radius:11px;padding:11px 16px;box-shadow:0 20px 50px -15px rgba(0,0,0,.5);transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .3s;opacity:0">
+            <span style="display:inline-flex;width:20px;height:20px;border-radius:10px;background:oklch(0.72 0.15 150);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:700">✓</span>
+            <span style="font-size:13px;font-weight:550">Your site is live</span>
+            <span style="font-family:'Geist Mono',monospace;font-size:10.5px;color:oklch(0.7 0.005 90)">aanya-and-dev.simvites.co.uk</span>
+          </div>
+          <!-- reset veil -->
+          <div ref="{{ refVeil }}" style="position:absolute;inset:0;background:oklch(0.965 0.002 90);opacity:0;pointer-events:none;z-index:40"></div>
+        </div>
+        <!-- scrubber -->
+        <div style="display:flex;align-items:center;gap:14px;padding:10px 16px;border-top:1px solid oklch(0.94 0.002 90);background:#fff">
+          <span style="display:flex;align-items:center;gap:6px;font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;color:var(--sv-accent, oklch(0.62 0.21 29))"><span style="width:6px;height:6px;border-radius:3px;background:var(--sv-accent, oklch(0.62 0.21 29))"></span>Live demo</span>
+          <div style="position:relative;flex:1;height:4px;border-radius:2px;background:oklch(0.93 0.003 90)">
+            <div ref="{{ refBar }}" style="position:absolute;left:0;top:0;bottom:0;width:0%;border-radius:2px;background:var(--sv-accent, oklch(0.62 0.21 29))"></div>
+            <span style="position:absolute;left:24%;top:-2px;width:1.5px;height:8px;background:oklch(0.8 0.003 90)"></span>
+            <span style="position:absolute;left:48%;top:-2px;width:1.5px;height:8px;background:oklch(0.8 0.003 90)"></span>
+            <span style="position:absolute;left:70%;top:-2px;width:1.5px;height:8px;background:oklch(0.8 0.003 90)"></span>
+          </div>
+          <span ref="{{ refChapter }}" style="font-family:'Geist Mono',monospace;font-size:9.5px;color:oklch(0.5 0.008 90);min-width:86px;text-align:right">Edit anything</span>
+          <span ref="{{ refClock }}" style="font-family:'Geist Mono',monospace;font-size:9.5px;color:oklch(0.5 0.008 90)">0:00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE WINDOWS (z-tunnel) -->
+    <div ref="{{ refWin0 }}" style="position:absolute;width:min(660px,80vw);opacity:0;will-change:transform,opacity">
+      <div style="background:oklch(0.22 0.006 270);border:1px solid oklch(1 0 0/0.13);border-radius:14px;box-shadow:0 0 80px -20px oklch(0.62 0.21 29/0.4),0 60px 120px -40px rgba(0,0,0,.8);padding:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.65 0.005 90)">Guests · invite matrix</span><span style="font-size:11px;font-weight:600;background:var(--sv-accent, oklch(0.62 0.21 29));color:#fff;border-radius:7px;padding:4px 11px">Send invites</span></div>
+        <div style="margin-top:16px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:9px;font-size:12.5px;color:#fff">
+          <span style="color:oklch(0.6 0.005 90);font-size:10px;font-family:'Geist Mono',monospace">HOUSEHOLD</span><span style="color:oklch(0.6 0.005 90);font-size:10px;font-family:'Geist Mono',monospace;text-align:center">MEHNDI</span><span style="color:oklch(0.6 0.005 90);font-size:10px;font-family:'Geist Mono',monospace;text-align:center">SANGEET</span><span style="color:oklch(0.6 0.005 90);font-size:10px;font-family:'Geist Mono',monospace;text-align:center">CEREMONY</span><span style="color:oklch(0.6 0.005 90);font-size:10px;font-family:'Geist Mono',monospace;text-align:center">RECEPTION</span>
+          <span>Priya Shah</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span>
+          <span>Raj Shah</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:oklch(0.42 0.01 270)">○</span>
+          <span>Aarav Shah <span style="font-size:9px;color:oklch(0.6 0.005 90)">child</span></span><span style="text-align:center;color:oklch(0.42 0.01 270)">○</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:oklch(0.42 0.01 270)">○</span>
+          <span>Meera Patel</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:oklch(0.42 0.01 270)">○</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span>
+        </div>
+        <p style="margin:14px 0 0;font-size:12px;color:oklch(0.7 0.005 90)">One dot per guest per event. Uninvited events do not exist for that family.</p>
+      </div>
+    </div>
+    <div ref="{{ refWin1 }}" style="position:absolute;width:min(620px,78vw);opacity:0;will-change:transform,opacity">
+      <div style="background:oklch(0.22 0.006 270);border:1px solid oklch(1 0 0/0.13);border-radius:14px;box-shadow:0 0 80px -20px oklch(0.62 0.21 29/0.4),0 60px 120px -40px rgba(0,0,0,.8);padding:20px;color:#fff">
+        <span style="font-family:'Geist Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.65 0.005 90)">RSVPs · landing live</span>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+          <div><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px">Sangeet</span><span style="font-family:'Geist Mono',monospace;font-size:12px;color:oklch(0.72 0.15 150)">74 / 120</span></div><div style="margin-top:5px;height:5px;border-radius:3px;background:oklch(0.32 0.008 270)"><div style="width:62%;height:100%;border-radius:3px;background:oklch(0.72 0.15 150)"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px">Ceremony</span><span style="font-family:'Geist Mono',monospace;font-size:12px;color:oklch(0.72 0.15 150)">92 / 120</span></div><div style="margin-top:5px;height:5px;border-radius:3px;background:oklch(0.32 0.008 270)"><div style="width:77%;height:100%;border-radius:3px;background:oklch(0.72 0.15 150)"></div></div></div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <span style="font-size:11px;background:oklch(1 0 0/0.1);border-radius:999px;padding:4px 11px">Priya said yes · just now</span>
+            <span style="font-size:11px;background:oklch(1 0 0/0.1);border-radius:999px;padding:4px 11px">46 veg · 8 kids meals</span>
+            <span style="font-size:11px;background:oklch(1 0 0/0.1);border-radius:999px;padding:4px 11px">3 nut allergies flagged</span>
+          </div>
+        </div>
+        <p style="margin:14px 0 0;font-size:12px;color:oklch(0.7 0.005 90)">Counts, meals and dietary notes ready to hand to the caterer.</p>
+      </div>
+    </div>
+    <div ref="{{ refWin2 }}" style="position:absolute;width:min(600px,76vw);opacity:0;will-change:transform,opacity">
+      <div style="background:oklch(0.22 0.006 270);border:1px solid oklch(1 0 0/0.13);border-radius:14px;box-shadow:0 0 80px -20px oklch(0.62 0.21 29/0.4),0 60px 120px -40px rgba(0,0,0,.8);padding:20px;color:#fff">
+        <span style="font-family:'Geist Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.65 0.005 90)">Invitations · personal links</span>
+        <div style="margin-top:14px;display:flex;align-items:center;gap:12px;background:oklch(0.27 0.007 270);border:1px solid oklch(1 0 0/0.1);border-radius:10px;padding:12px 14px">
+          <div style="min-width:0;flex:1">
+            <p style="margin:0;font-size:13px;font-weight:600">The Shah Family</p>
+            <p style="margin:3px 0 0;font-family:'Geist Mono',monospace;font-size:10px;color:oklch(0.65 0.005 90);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">simvites.co.uk/i/9f2c…d41a · opened twice</p>
+          </div>
+          <span style="font-size:11px;font-weight:600;background:oklch(0.65 0.14 150);color:#fff;border-radius:7px;padding:5px 11px">WhatsApp</span>
+          <span style="width:34px;height:34px;border-radius:7px;background:repeating-linear-gradient(45deg,#fff,#fff 3px,#bbb 3px,#bbb 6px)"></span>
+        </div>
+        <p style="margin:14px 0 0;font-size:12px;color:oklch(0.7 0.005 90)">No guest accounts. One tap from WhatsApp, email or a printed QR.</p>
+      </div>
+    </div>
+    <div ref="{{ refWin3 }}" style="position:absolute;width:min(640px,79vw);opacity:0;will-change:transform,opacity">
+      <div style="background:oklch(0.22 0.006 270);border:1px solid oklch(1 0 0/0.13);border-radius:14px;box-shadow:0 0 80px -20px oklch(0.62 0.21 29/0.4),0 60px 120px -40px rgba(0,0,0,.8);padding:20px;color:#fff">
+        <span style="font-family:'Geist Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.65 0.005 90)">Planning · budget, vendors, seating</span>
+        <div style="margin-top:14px;display:grid;grid-template-columns:1.2fr 1fr;gap:12px">
+          <div style="background:oklch(0.27 0.007 270);border:1px solid oklch(1 0 0/0.1);border-radius:10px;padding:12px">
+            <span style="font-size:10.5px;color:oklch(0.65 0.005 90)">Budget used</span>
+            <p style="margin:4px 0 0;font-family:'Geist Mono',monospace;font-size:22px;font-weight:600">£31,400<span style="font-size:11px;color:oklch(0.65 0.005 90)"> / 42k</span></p>
+            <div style="margin-top:8px;display:flex;gap:4px;align-items:flex-end;height:44px"><span style="flex:1;background:oklch(0.4 0.01 270);border-radius:3px;height:35%"></span><span style="flex:1;background:oklch(0.4 0.01 270);border-radius:3px;height:60%"></span><span style="flex:1;background:var(--sv-accent, oklch(0.62 0.21 29));border-radius:3px;height:100%"></span><span style="flex:1;background:oklch(0.4 0.01 270);border-radius:3px;height:45%"></span><span style="flex:1;background:oklch(0.4 0.01 270);border-radius:3px;height:25%"></span><span style="flex:1;background:oklch(0.4 0.01 270);border-radius:3px;height:52%"></span></div>
+          </div>
+          <div style="background:oklch(0.27 0.007 270);border:1px solid oklch(1 0 0/0.1);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:7px">
+            <span style="font-size:10.5px;color:oklch(0.65 0.005 90)">This week</span>
+            <span style="font-size:12px">✓ Caterer booked → budget updated</span>
+            <span style="font-size:12px">✓ Table 4 seated → families told</span>
+            <span style="font-size:12px;color:oklch(0.8 0.1 65)">○ Florist deposit due Friday</span>
+          </div>
+        </div>
+        <p style="margin:14px 0 0;font-size:12px;color:oklch(0.7 0.005 90)">Book a vendor once. Budget, checklist and dashboard all hear about it.</p>
+      </div>
+    </div>
+
+    <!-- tunnel captions -->
+    <div ref="{{ refCap0 }}" style="position:absolute;left:6vw;top:14vh;opacity:0;color:#fff;max-width:340px;will-change:opacity,transform">
+      <span style="font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--sv-accent, oklch(0.62 0.21 29))">DIMENSION 01</span>
+      <p style="margin:8px 0 0;font-size:34px;font-weight:650;letter-spacing:-0.03em;line-height:1.05">The matrix that runs the whole wedding</p>
+    </div>
+    <div ref="{{ refCap1 }}" style="position:absolute;right:6vw;top:16vh;opacity:0;color:#fff;max-width:320px;text-align:right;will-change:opacity,transform">
+      <span style="font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--sv-accent, oklch(0.62 0.21 29))">DIMENSION 02</span>
+      <p style="margin:8px 0 0;font-size:34px;font-weight:650;letter-spacing:-0.03em;line-height:1.05">Answers land while you watch</p>
+    </div>
+    <div ref="{{ refCap2 }}" style="position:absolute;left:6vw;top:16vh;opacity:0;color:#fff;max-width:320px;will-change:opacity,transform">
+      <span style="font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--sv-accent, oklch(0.62 0.21 29))">DIMENSION 03</span>
+      <p style="margin:8px 0 0;font-size:34px;font-weight:650;letter-spacing:-0.03em;line-height:1.05">Invites with no accounts, ever</p>
+    </div>
+    <div ref="{{ refCap3 }}" style="position:absolute;right:6vw;top:14vh;opacity:0;color:#fff;max-width:340px;text-align:right;will-change:opacity,transform">
+      <span style="font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--sv-accent, oklch(0.62 0.21 29))">DIMENSION 04</span>
+      <p style="margin:8px 0 0;font-size:34px;font-weight:650;letter-spacing:-0.03em;line-height:1.05">Planning that talks to itself</p>
+    </div>
+
+    <!-- ivory portal -->
+    <div ref="{{ refPortal }}" style="position:absolute;left:50%;top:50%;width:130vmax;height:130vmax;margin-left:-65vmax;margin-top:-65vmax;border-radius:50%;background:oklch(0.975 0.006 85);transform:scale(0);will-change:transform"></div>
+    <div ref="{{ refPortalLabel }}" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);opacity:0;text-align:center;will-change:opacity">
+      <span style="font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:0.14em;color:oklch(0.5 0.02 60)">FINAL DIMENSION</span>
+      <p style="margin:10px 0 0;font-family:'Instrument Serif',serif;font-size:52px;color:oklch(0.25 0.02 60)">the part your guests see</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ WEDDING DIMENSION (ivory) ══════════════ -->
+<div id="wedding" data-screen-label="Wedding templates" style="background:oklch(0.975 0.006 85);padding:110px 24px 90px">
+  <div style="max-width:1120px;margin:0 auto">
+    <div style="text-align:center">
+      <span style="font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.5 0.02 60)">Templates · the artifact</span>
+      <h2 style="margin:16px auto 0;max-width:720px;font-size:clamp(36px,4.6vw,56px);line-height:1.02;letter-spacing:-0.035em;font-weight:650;color:oklch(0.22 0.015 60)">The tool is software.<br>What your guests get is <em style="font-family:'Instrument Serif',serif;font-weight:400;font-style:italic;letter-spacing:-0.01em">a keepsake</em>.</h2>
+      <p style="margin:18px auto 0;max-width:560px;font-size:16px;line-height:1.6;color:oklch(0.42 0.015 60)">Editorial templates with real typography and per event colour identities. Click any text and type. Nothing goes live until you publish.</p>
+    </div>
+    <div style="margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:28px">
+      <!-- template 1 -->
+      <div style="background:#fff;border:1px solid oklch(0.9 0.01 75);border-radius:16px;overflow:hidden;box-shadow:0 30px 80px -30px rgba(60,40,20,.25)">
+        <div style="position:relative;height:300px;overflow:hidden;background:#F5EFE3">
+          <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#F5EFE3,#F5EFE3 14px,#EFE7D6 14px,#EFE7D6 28px);animation:kenb 26s ease-in-out infinite alternate"></div>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+            <span style="font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:0.2em;color:#8a6d2f">COUPLE PHOTO</span>
+            <p style="margin:14px 0 0;font-family:'Instrument Serif',serif;font-size:44px;color:#211D18">Aanya <span style="color:#C9A227">&amp;</span> Dev</p>
+            <p style="margin:6px 0 0;font-family:'Geist Mono',monospace;font-size:9.5px;letter-spacing:0.22em;color:#7A1F1F">19 · 09 · 2026 — JAIPUR</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px">
+          <div><p style="margin:0;font-size:15px;font-weight:600;color:oklch(0.2 0.01 60)">Editorial Gold</p><p style="margin:2px 0 0;font-size:12.5px;color:oklch(0.5 0.015 60)">Ivory · gold · deep maroon</p></div>
+          <div style="display:flex;gap:6px"><span style="width:22px;height:22px;border-radius:11px;background:#F5EFE3;border:1px solid rgba(0,0,0,.08)"></span><span style="width:22px;height:22px;border-radius:11px;background:#C9A227"></span><span style="width:22px;height:22px;border-radius:11px;background:#7A1F1F"></span></div>
+        </div>
+      </div>
+      <!-- template 2 -->
+      <div style="background:#fff;border:1px solid oklch(0.9 0.01 75);border-radius:16px;overflow:hidden;box-shadow:0 30px 80px -30px rgba(60,40,20,.25)">
+        <div style="position:relative;height:300px;overflow:hidden;background:#211D18">
+          <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#211D18,#211D18 14px,#2A2620 14px,#2A2620 28px);animation:kenb 30s ease-in-out infinite alternate"></div>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+            <span style="font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:0.2em;color:#B08D57">VENUE PHOTO</span>
+            <p style="margin:14px 0 0;font-family:'Instrument Serif',serif;font-size:44px;color:#F6F1E9">Aanya <em style="color:#B08D57">&amp;</em> Dev</p>
+            <p style="margin:6px 0 0;font-family:'Geist Mono',monospace;font-size:9.5px;letter-spacing:0.22em;color:#B08D57">FOUR EVENTS · ONE WEEKEND</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px">
+          <div><p style="margin:0;font-size:15px;font-weight:600;color:oklch(0.2 0.01 60)">Editorial Luxury</p><p style="margin:2px 0 0;font-size:12.5px;color:oklch(0.5 0.015 60)">Cream · ink · antique brass</p></div>
+          <div style="display:flex;gap:6px"><span style="width:22px;height:22px;border-radius:11px;background:#F6F1E9;border:1px solid rgba(0,0,0,.08)"></span><span style="width:22px;height:22px;border-radius:11px;background:#211D18"></span><span style="width:22px;height:22px;border-radius:11px;background:#B08D57"></span></div>
+        </div>
+      </div>
+    </div>
+    <!-- per-event identities -->
+    <div style="margin-top:28px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+      <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid oklch(0.9 0.01 75);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:550;color:oklch(0.3 0.02 60)"><span style="width:8px;height:8px;border-radius:4px;background:#3E7C4F"></span>Mehndi <em style="font-family:'Instrument Serif',serif;font-style:italic;color:oklch(0.5 0.02 60)">·green</em></span>
+      <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid oklch(0.9 0.01 75);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:550;color:oklch(0.3 0.02 60)"><span style="width:8px;height:8px;border-radius:4px;background:#6D3FA9"></span>Sangeet <em style="font-family:'Instrument Serif',serif;font-style:italic;color:oklch(0.5 0.02 60)">·violet</em></span>
+      <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid oklch(0.9 0.01 75);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:550;color:oklch(0.3 0.02 60)"><span style="width:8px;height:8px;border-radius:4px;background:#C9A227"></span>Ceremony <em style="font-family:'Instrument Serif',serif;font-style:italic;color:oklch(0.5 0.02 60)">·gold</em></span>
+      <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid oklch(0.9 0.01 75);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:550;color:oklch(0.3 0.02 60)"><span style="width:8px;height:8px;border-radius:4px;background:#7A1F1F"></span>Reception <em style="font-family:'Instrument Serif',serif;font-style:italic;color:oklch(0.5 0.02 60)">·maroon</em></span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ USP DUO ══════════════ -->
+<div id="usp" data-screen-label="USP section" style="background:oklch(0.985 0.002 90);padding:100px 24px">
+  <div style="max-width:1120px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:52px">
+      <span style="font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.45 0.008 90)">Why couples switch</span>
+      <h2 style="margin:14px auto 0;max-width:680px;font-size:clamp(34px,4.2vw,50px);line-height:1.02;letter-spacing:-0.035em;font-weight:650">Two things nobody else does properly</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <!-- per-event invitations -->
+      <div style="background:#fff;border:1px solid oklch(0.92 0.003 90);border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:20px">
+        <div>
+          <span style="font-family:'Geist Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;color:var(--sv-accent, oklch(0.62 0.21 29))">USP 01 · Per event invitations</span>
+          <h3 style="margin:10px 0 0;font-size:24px;font-weight:650;letter-spacing:-0.025em">Every guest sees only their events</h3>
+          <p style="margin:8px 0 0;font-size:14.5px;line-height:1.6;color:oklch(0.42 0.008 90)">Grandma gets the ceremony. College friends get the sangeet and the afterparty. Same website, different wedding for each family.</p>
+        </div>
+        <div style="display:flex;gap:16px;align-items:stretch">
+          <div style="flex:1.4;background:oklch(0.97 0.002 90);border:1px solid oklch(0.93 0.003 90);border-radius:12px;padding:14px">
+            <span style="font-family:'Geist Mono',monospace;font-size:9px;color:oklch(0.55 0.008 90)">THE SHAH FAMILY · LINK</span>
+            <div style="margin-top:8px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:7px;font-size:12px">
+              <span style="color:oklch(0.55 0.008 90);font-size:9.5px"></span><span style="color:oklch(0.55 0.008 90);font-size:9.5px;text-align:center">Mehndi</span><span style="color:oklch(0.55 0.008 90);font-size:9.5px;text-align:center">Sangeet</span><span style="color:oklch(0.55 0.008 90);font-size:9.5px;text-align:center">Ceremony</span>
+              <span>Priya</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span>
+              <span>Aarav</span><span style="text-align:center;color:oklch(0.85 0.003 90)">○</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span><span style="text-align:center;color:var(--sv-accent, oklch(0.62 0.21 29))">●</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;color:oklch(0.6 0.006 90);font-size:18px">→</div>
+          <div style="flex:1;background:oklch(0.17 0.005 90);border-radius:16px;padding:12px;color:#fff">
+            <div style="width:36px;height:4px;border-radius:2px;background:oklch(1 0 0/0.25);margin:0 auto 10px"></div>
+            <p style="margin:0;font-family:'Instrument Serif',serif;font-size:15px;text-align:center">Aanya &amp; Dev</p>
+            <div style="margin-top:8px;display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:10.5px;background:oklch(1 0 0/0.1);border-radius:6px;padding:5px 8px">Sangeet · Fri 7pm</span>
+              <span style="font-size:10.5px;background:oklch(1 0 0/0.1);border-radius:6px;padding:5px 8px">Ceremony · Sat 11am</span>
+              <span style="font-size:9.5px;color:oklch(0.6 0.005 90);text-align:center;padding:2px">Mehndi? Not on Aarav's list.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- custom rsvp -->
+      <div style="background:#fff;border:1px solid oklch(0.92 0.003 90);border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:20px">
+        <div>
+          <span style="font-family:'Geist Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;color:var(--sv-accent, oklch(0.62 0.21 29))">USP 02 · The RSVP engine</span>
+          <h3 style="margin:10px 0 0;font-size:24px;font-weight:650;letter-spacing:-0.025em">One tap for the family, answers for the caterer</h3>
+          <p style="margin:8px 0 0;font-size:14.5px;line-height:1.6;color:oklch(0.42 0.008 90)">A household answers once, per person, per event, with your custom questions. You get live totals and one clean export.</p>
+        </div>
+        <div style="display:flex;gap:16px;align-items:stretch">
+          <div style="flex:1;background:oklch(0.975 0.006 85);border:1px solid oklch(0.93 0.01 80);border-radius:12px;padding:14px">
+            <p style="margin:0;font-family:'Instrument Serif',serif;font-size:15px;color:oklch(0.25 0.02 60)">Sangeet · are you in?</p>
+            <div style="margin-top:8px;display:flex;gap:6px"><span style="flex:1;text-align:center;font-size:11.5px;font-weight:600;background:oklch(0.3 0.02 60);color:#fff;border-radius:7px;padding:6px 0">Joyfully yes</span><span style="flex:1;text-align:center;font-size:11.5px;color:oklch(0.45 0.02 60);border:1px solid oklch(0.88 0.01 70);border-radius:7px;padding:6px 0">Sadly no</span></div>
+            <p style="margin:10px 0 4px;font-size:10.5px;color:oklch(0.5 0.02 60)">Meal</p>
+            <div style="display:flex;gap:5px;flex-wrap:wrap"><span style="font-size:10.5px;border:1.5px solid oklch(0.3 0.02 60);border-radius:999px;padding:3px 10px;font-weight:600;color:oklch(0.3 0.02 60)">Veg</span><span style="font-size:10.5px;border:1px solid oklch(0.88 0.01 70);border-radius:999px;padding:3px 10px;color:oklch(0.5 0.02 60)">Chicken</span><span style="font-size:10.5px;border:1px solid oklch(0.88 0.01 70);border-radius:999px;padding:3px 10px;color:oklch(0.5 0.02 60)">Kids</span></div>
+          </div>
+          <div style="display:flex;align-items:center;color:oklch(0.6 0.006 90);font-size:18px">→</div>
+          <div style="flex:1;background:oklch(0.97 0.002 90);border:1px solid oklch(0.93 0.003 90);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:'Geist Mono',monospace;font-size:9px;color:oklch(0.55 0.008 90)">LIVE TOTALS</span>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px"><span>Attending</span><span style="font-family:'Geist Mono',monospace;font-weight:600;color:oklch(0.55 0.13 150)">74</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px"><span>Vegetarian</span><span style="font-family:'Geist Mono',monospace;font-weight:600">46</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px"><span>Nut allergies</span><span style="font-family:'Geist Mono',monospace;font-weight:600;color:var(--sv-accent, oklch(0.62 0.21 29))">3</span></div>
+            <span style="margin-top:auto;font-size:11.5px;font-weight:600;text-align:center;border:1px solid oklch(0.9 0.003 90);border-radius:7px;padding:6px 0;background:#fff">Export for the caterer ↓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PRICING ══════════════ -->
+<div id="pricing" data-screen-label="Pricing" style="padding:40px 24px 110px;background:oklch(0.985 0.002 90)">
+  <div style="max-width:1120px;margin:0 auto;background:oklch(0.15 0.004 270);border-radius:22px;padding:64px 56px;color:#fff;position:relative;overflow:hidden">
+    <div style="position:absolute;right:-140px;top:-140px;width:480px;height:480px;border-radius:50%;background:radial-gradient(closest-side,oklch(0.62 0.21 29/0.25),transparent 70%)"></div>
+    <div style="position:relative;display:grid;grid-template-columns:1.3fr 1fr;gap:48px;align-items:center">
+      <div>
+        <span style="font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;color:var(--sv-accent, oklch(0.72 0.17 32))">Early access</span>
+        <h2 style="margin:14px 0 0;font-size:clamp(34px,4vw,48px);line-height:1.03;letter-spacing:-0.035em;font-weight:650">Build everything free.<br>Pay once when you send.</h2>
+        <p style="margin:16px 0 0;max-width:460px;font-size:15.5px;line-height:1.6;color:oklch(0.75 0.005 90)">No subscription. One payment unlocks publishing and sending, and your site stays live for 18 months after the wedding. Early couples shape the product and keep founder pricing.</p>
+        <div style="margin-top:26px;display:flex;gap:10px;flex-wrap:wrap">
+          <a href="#" style="font-size:15px;font-weight:600;background:var(--sv-accent, oklch(0.62 0.21 29));color:#fff;border-radius:11px;padding:13px 24px;text-decoration:none" style-hover="filter:brightness(1.1)">Start your site</a>
+          <a href="#" style="font-size:15px;font-weight:550;color:#fff;border:1px solid oklch(1 0 0/0.2);border-radius:11px;padding:13px 22px;text-decoration:none" style-hover="background:oklch(1 0 0/0.08)">Talk to the founder</a>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;gap:12px;align-items:flex-start;background:oklch(1 0 0/0.06);border:1px solid oklch(1 0 0/0.1);border-radius:12px;padding:15px 17px"><span style="color:oklch(0.72 0.15 150);font-weight:700">✓</span><div><p style="margin:0;font-size:14px;font-weight:600">Everything unlocked while you build</p><p style="margin:3px 0 0;font-size:12.5px;color:oklch(0.7 0.005 90)">Website, guests, matrix, planning. Free until send day.</p></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;background:oklch(1 0 0/0.06);border:1px solid oklch(1 0 0/0.1);border-radius:12px;padding:15px 17px"><span style="color:oklch(0.72 0.15 150);font-weight:700">✓</span><div><p style="margin:0;font-size:14px;font-weight:600">One payment, no subscription</p><p style="margin:3px 0 0;font-size:12.5px;color:oklch(0.7 0.005 90)">Pay when you publish and send invites. That is it.</p></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;background:oklch(1 0 0/0.06);border:1px solid oklch(1 0 0/0.1);border-radius:12px;padding:15px 17px"><span style="color:oklch(0.72 0.15 150);font-weight:700">✓</span><div><p style="margin:0;font-size:14px;font-weight:600">Live 18 months after the wedding</p><p style="margin:3px 0 0;font-size:12.5px;color:oklch(0.7 0.005 90)">Photos, thank yous and the memory stay up.</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<div data-screen-label="Footer" style="border-top:1px solid oklch(0.92 0.003 90);background:#fff;padding:56px 24px 40px">
+  <div style="max-width:1120px;margin:0 auto">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px">
+      <div>
+        <span style="display:flex;align-items:center;gap:8px;font-weight:650;font-size:15px"><span style="display:inline-flex;width:24px;height:24px;border-radius:7px;background:oklch(0.17 0.005 90);color:#fff;align-items:center;justify-content:center;font-size:12px;font-weight:700">S</span>Simvites</span>
+        <p style="margin:12px 0 0;max-width:280px;font-size:13px;line-height:1.6;color:oklch(0.48 0.008 90)">The platform for multi event weddings. Website, invitations, RSVPs and planning, connected.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.55 0.008 90)">Product</span><a href="#dive" style="font-size:13.5px;color:oklch(0.35 0.008 90);text-decoration:none">The editor</a><a href="#usp" style="font-size:13.5px;color:oklch(0.35 0.008 90);text-decoration:none">Invitations &amp; RSVP</a><a href="#wedding" style="font-size:13.5px;color:oklch(0.35 0.008 90);text-decoration:none">Templates</a><a href="#pricing" style="font-size:13.5px;color:oklch(0.35 0.008 90);text-decoration:none">Pricing</a></div>
+      <div style="display:flex;flex-direction:column;gap:9px"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.55 0.008 90)">Company</span><a href="#" style="font-size:13.5px;color:oklch(0.35 0.008 90);text-decoration:none">Early access</a><a href="#" style="font-size:13.5px;color:oklch(0.35 0.008 90);text-decoration:none">Talk to the founder</a><a href="#" style="font-size:13.5px;color:oklch(0.35 0.008 90);text-decoration:none">Changelog</a></div>
+      <div style="display:flex;flex-direction:column;gap:9px"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.55 0.008 90)">Legal</span><a href="#" style="font-size:13.5px;color:oklch(0.35 0.008 90);text-decoration:none">Privacy</a><a href="#" style="font-size:13.5px;color:oklch(0.35 0.008 90);text-decoration:none">Terms</a><a href="#" style="font-size:13.5px;color:oklch(0.35 0.008 90);text-decoration:none">Contact</a></div>
+    </div>
+    <div style="margin-top:44px;padding-top:20px;border-top:1px solid oklch(0.94 0.002 90);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <span style="font-size:12px;color:oklch(0.55 0.008 90)">© 2026 Simvites. Made for the big weekend.</span>
+      <span style="font-family:'Geist Mono',monospace;font-size:10px;color:oklch(0.62 0.006 90)">simvites.co.uk</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#D6A035&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#DE4726&quot;,&quot;#5B5BD6&quot;,&quot;#12A594&quot;,&quot;#D6A035&quot;],&quot;section&quot;:&quot;Brand&quot;},&quot;demoSpeed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.6,&quot;max&quot;:1.8,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;darkDive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Dive&quot;}}">
+class Component extends DCLogic {
+  refs = {}
+
+  mkRef(name) {
+    if (!this._refFns) this._refFns = {}
+    if (!this._refFns[name]) this._refFns[name] = (el) => { this.refs[name] = el }
+    return this._refFns[name]
+  }
+
+  componentDidMount() {
+    this._applyAccent()
+    this._reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    this._start = performance.now()
+    this._lastT = 0
+    this._running = true
+    this._onResize = () => { this._lastSy = -1 }
+    window.addEventListener('resize', this._onResize)
+    const loop = () => {
+      if (!this._running) return
+      this._tick()
+      this._raf = requestAnimationFrame(loop)
+    }
+    if (this._reduced) { this._applyDemo(17.9); this._applyScroll(); window.addEventListener('scroll', () => this._applyScroll(), { passive: true }) }
+    else this._raf = requestAnimationFrame(loop)
+  }
+  componentWillUnmount() { this._running = false; cancelAnimationFrame(this._raf); window.removeEventListener('resize', this._onResize) }
+  componentDidUpdate() { this._applyAccent() }
+
+  _applyAccent() {
+    const a = this.props.accent
+    if (a) document.body.style.setProperty('--sv-accent', a)
+  }
+
+  // ═══════════ per-frame ═══════════
+  _tick() {
+    const speed = Number(this.props.demoSpeed ?? 1) || 1
+    const now = performance.now()
+    const t = ((now - this._start) / 1000) * speed % 22
+    // Perf: only write demo DOM while the frame can actually be seen
+    let demoVisible = true
+    const dive = this.refs.dive
+    if (dive) {
+      const r = dive.getBoundingClientRect()
+      const vh = window.innerHeight
+      const p = Math.min(1, Math.max(0, -r.top / (r.height - vh)))
+      demoVisible = r.top < vh * 1.25 && p < 0.62
+    }
+    if (demoVisible) { this._applyDemo(t); this._lastT = t }
+    // Perf: skip scroll choreography when scroll position is unchanged
+    const sy = window.scrollY
+    if (sy !== this._lastSy) { this._applyScroll(); this._lastSy = sy }
+  }
+
+  // ═══════════ THE SEAMLESS TAKE (22s loop) ═══════════
+  _applyDemo(t) {
+    const R = this.refs
+    if (!R.cursor) return
+    const prev = this._lastT ?? 0
+    const E = (x) => x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2
+    const seg = (a, b) => t <= a ? 0 : t >= b ? 1 : E((t - a) / (b - a))
+    const lin = (a, b) => t <= a ? 0 : t >= b ? 1 : (t - a) / (b - a)
+
+    // cursor waypoints [t, x%, y%] — positions inside the stage
+    const W = [
+      [0.0, 76, 70], [1.5, 43, 26],            // → hero title
+      [5.6, 43, 26], [6.4, 7, 44],             // → library Gallery
+      [7.0, 7, 44], [8.0, 46, 42],             // → countdown block
+      [8.3, 46, 42], [10.2, 46, 62],           // drag down past gallery
+      [10.6, 46, 62], [11.8, 89.5, 47],        // → accent swatch 2
+      [12.2, 89.5, 47], [13.3, 79, 5],         // → phone toggle
+      [14.9, 79, 5], [15.3, 75.5, 5],          // → desktop toggle
+      [15.9, 75.5, 5], [16.8, 94, 5],          // → publish
+      [18.6, 94, 5], [20.5, 70, 78],           // drift away
+    ]
+    let cx = W[W.length - 1][1], cy = W[W.length - 1][2]
+    for (let i = 0; i < W.length - 1; i++) {
+      const [t0, x0, y0] = W[i], [t1, x1, y1] = W[i + 1]
+      if (t <= t0) { cx = x0; cy = y0; break }
+      if (t < t1) {
+        const p = E((t - t0) / (t1 - t0))
+        const mx = (x0 + x1) / 2 + (y1 - y0) * 0.12, my = (y0 + y1) / 2 - (x1 - x0) * 0.12
+        const u = 1 - p
+        cx = u * u * x0 + 2 * u * p * mx + p * p * x1
+        cy = u * u * y0 + 2 * u * p * my + p * p * y1
+        break
+      }
+      cx = x1; cy = y1
+    }
+    R.cursor.style.left = cx + '%'
+    R.cursor.style.top = cy + '%'
+
+    // clicks → ripple + cursor dip
+    const clicks = [1.55, 6.45, 11.95, 13.35, 15.35, 16.9]
+    for (const ct of clicks) {
+      if (prev < ct && t >= ct && t - ct < 0.5 && R.ripple) {
+        R.ripple.style.animation = 'none'
+        void R.ripple.offsetWidth
+        R.ripple.style.animation = 'demoPing 0.55s ease-out'
+      }
+    }
+    const nearClick = clicks.some(ct => t >= ct && t < ct + 0.18)
+    R.cursor.style.transform = nearClick ? 'scale(0.82)' : 'scale(1)'
+
+    // 1 · select hero + type name (1.55 → 5.4)
+    const selected = t >= 1.55 && t < 21
+    R.heroBlock.style.outline = selected && t < 6.2 ? '2px solid var(--sv-accent, oklch(0.62 0.21 29))' : '2px solid transparent'
+    R.panelInput.style.borderColor = selected && t < 6.2 ? 'var(--sv-accent, oklch(0.62 0.21 29))' : 'oklch(0.9 0.003 90)'
+    const NAME = 'Aanya & Dev'
+    const nChars = Math.round(lin(2.1, 5.2) * NAME.length)
+    const typed = t < 1.9 ? 'Your names' : NAME.slice(0, Math.max(0, nChars))
+    R.heroName.textContent = typed === '' ? '\u00A0' : typed
+    R.panelInput.textContent = typed === '' ? '\u00A0' : typed
+    R.caret.style.display = t >= 1.9 && t < 5.5 ? 'inline' : 'none'
+
+    // 2 · add gallery (6.45)
+    const gIn = seg(6.45, 7.05)
+    R.libGallery.style.borderColor = t >= 6.2 && t < 7.2 ? 'var(--sv-accent, oklch(0.62 0.21 29))' : 'oklch(0.93 0.003 90)'
+    R.libGallery.style.background = t >= 6.2 && t < 7.2 ? 'oklch(0.62 0.21 29 / 0.07)' : ''
+    R.galleryBlock.style.display = gIn > 0 ? 'grid' : 'none'
+    if (gIn > 0) {
+      R.galleryBlock.style.opacity = gIn
+      R.galleryBlock.style.transform = 'translateY(' + (14 * (1 - gIn)) + 'px) scale(' + (0.96 + 0.04 * gIn) + ')'
+    }
+
+    // 3 · drag: swap countdown below gallery (8.3 → 10.6)
+    const drag = seg(8.4, 10.2), settle = seg(10.2, 10.55)
+    const lift = t >= 8.3 && t < 10.2 ? 1 : t < 8.3 ? 0 : 1 - settle
+    const dy = 88 * drag
+    R.countBlock.style.transform = 'translateY(' + dy + 'px) rotate(' + (1.6 * lift) + 'deg) scale(' + (1 + 0.02 * lift) + ')'
+    R.countBlock.style.boxShadow = lift > 0 ? '0 ' + (18 * lift) + 'px ' + (40 * lift) + 'px -12px rgba(15,15,20,' + 0.3 * lift + ')' : 'none'
+    R.countBlock.style.zIndex = lift > 0.02 ? 5 : 1
+    if (t >= 8.3) R.galleryBlock.style.transform = 'translateY(' + (-82 * drag) + 'px)'
+
+    // 4 · accent swap (11.95) — canvas hero accents to gold
+    const gold = t >= 11.95 && t < 21
+    R.swatch1.style.outlineColor = gold ? 'transparent' : 'oklch(0.62 0.21 29 / .35)'
+    R.swatch2.style.outlineColor = gold ? 'oklch(0.7 0.14 75 / .45)' : 'transparent'
+    R.heroDate.style.color = gold ? 'oklch(0.55 0.1 75)' : 'oklch(0.5 0.02 60)'
+    R.heroBlock.style.background = gold ? 'oklch(0.975 0.012 85)' : 'oklch(0.975 0.006 85)'
+    R.heroBlock.style.borderColor = gold ? 'oklch(0.86 0.06 75)' : 'oklch(0.93 0.01 80)'
+
+    // 5 · phone preview (13.35 → 15.35)
+    const mob = t >= 13.35 && t < 15.35
+    R.page.style.width = mob ? '46%' : '100%'
+    R.mobBtn.style.background = mob ? 'oklch(0.94 0.002 90)' : 'transparent'
+    R.mobBtn.style.fontWeight = mob ? '600' : '400'
+    R.mobBtn.style.color = mob ? 'inherit' : 'oklch(0.5 0.008 90)'
+    R.deskBtn.style.background = mob ? 'transparent' : 'oklch(0.94 0.002 90)'
+    R.deskBtn.style.fontWeight = mob ? '400' : '600'
+
+    // 6 · publish (16.9)
+    const pressed = t >= 16.9 && t < 17.15
+    R.publishBtn.style.transform = pressed ? 'scale(0.93)' : 'scale(1)'
+    const busy = t >= 17.0 && t < 17.8
+    R.publishBtn.textContent = busy ? 'Publishing…' : (t >= 17.8 && t < 21 ? 'Published ✓' : 'Publish')
+    R.publishBtn.style.background = t >= 17.8 && t < 21 ? 'oklch(0.55 0.13 150)' : 'var(--sv-accent, oklch(0.62 0.21 29))'
+    const toastIn = t >= 17.8 && t < 20.6
+    R.toast.style.opacity = toastIn ? 1 : 0
+    R.toast.style.transform = toastIn ? 'translate(-50%,0)' : 'translate(-50%,70px)'
+    R.urlPill.textContent = t >= 17.8 && t < 21 ? 'aanya-and-dev.simvites.co.uk · live ●' : 'aanya-and-dev.simvites.co.uk · editing'
+    R.urlPill.style.color = t >= 17.8 && t < 21 ? 'oklch(0.5 0.13 150)' : 'oklch(0.48 0.008 90)'
+
+    // 7 · reset veil (21 → 22)
+    const veil = t < 21 ? 0 : t < 21.5 ? lin(21, 21.5) : 1 - lin(21.5, 22)
+    R.veil.style.opacity = veil
+
+    // scrubber
+    R.bar.style.width = (t / 22 * 100) + '%'
+    const secs = Math.floor(t)
+    R.clock.textContent = '0:' + (secs < 10 ? '0' : '') + secs
+    R.chapter.textContent = t < 5.4 ? 'Edit anything' : t < 10.6 ? 'Add & arrange' : t < 15.4 ? 'Style & preview' : 'Publish'
+  }
+
+  // ═══════════ SCROLL CHOREOGRAPHY ═══════════
+  _applyScroll() {
+    const R = this.refs
+    const dive = R.dive
+    if (!dive || !R.frameWrap) return
+    const vh = window.innerHeight
+    const rect = dive.getBoundingClientRect()
+    const p = Math.min(1, Math.max(0, -rect.top / (rect.height - vh)))
+    const E = (x) => x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2
+    const span = (a, b) => p <= a ? 0 : p >= b ? 1 : E((p - a) / (b - a))
+
+    // darkness
+    const darkTarget = (this.props.darkDive ?? true) ? 1 : 0.18
+    const dk = span(0.03, 0.17) * darkTarget * (1 - span(0.93, 1))
+    R.dark.style.opacity = dk
+
+    // demo frame: approach → hold → recede
+    const inP = span(0, 0.14)
+    const outP = span(0.44, 0.56)
+    const scale = 0.6 + 0.4 * inP - 0.34 * outP
+    const y = (18 - 18 * inP) - 10 * outP
+    const rx = 10 - 10 * inP
+    R.frameWrap.style.transform = 'perspective(1600px) translateY(' + y + 'vh) rotateX(' + rx + 'deg) scale(' + scale + ')'
+    R.frameWrap.style.opacity = 1 - span(0.47, 0.56) * 0.95
+    R.frameWrap.style.filter = outP > 0 ? 'blur(' + (3 * outP) + 'px)' : 'none'
+    R.frameWrap.style.pointerEvents = outP > 0.5 ? 'none' : 'auto'
+
+    // module tunnel
+    const wins = [R.win0, R.win1, R.win2, R.win3]
+    const caps = [R.cap0, R.cap1, R.cap2, R.cap3]
+    const centers = [0.585, 0.675, 0.765, 0.855]
+    const halfSpan = 0.085
+    for (let i = 0; i < 4; i++) {
+      const q = (p - centers[i]) / halfSpan // -1 far … 0 center … +1 past
+      const el = wins[i]
+      if (!el) continue
+      if (q < -1.15 || q > 1.05) { el.style.opacity = 0; caps[i].style.opacity = 0; continue }
+      let s, op, ty
+      if (q <= 0) { s = 1 + q * 0.62; op = Math.max(0, 1 + q * 1.15); ty = -q * 6 }
+      else { s = 1 + q * 1.9; op = Math.max(0, 1 - q * 1.35); ty = -q * 4 }
+      el.style.opacity = op
+      el.style.transform = 'translateY(' + ty + 'vh) scale(' + Math.max(0.05, s) + ')'
+      el.style.zIndex = q > 0 ? 20 : 10
+      const capOp = Math.max(0, 1 - Math.abs(q) * 1.8)
+      caps[i].style.opacity = capOp
+      caps[i].style.transform = 'translateY(' + (-q * 18) + 'px)'
+    }
+
+    // ivory portal
+    const pt = span(0.9, 0.995)
+    R.portal.style.transform = 'scale(' + pt + ')'
+    const lbl = Math.max(0, span(0.94, 0.985) - span(0.995, 1) * 1)
+    R.portalLabel.style.opacity = lbl
+  }
+
+  renderVals() {
+    return {
+      refDive: this.mkRef('dive'), refDark: this.mkRef('dark'), refFrameWrap: this.mkRef('frameWrap'),
+      refUrlPill: this.mkRef('urlPill'), refDeviceToggle: this.mkRef('deviceToggle'), refDeskBtn: this.mkRef('deskBtn'), refMobBtn: this.mkRef('mobBtn'),
+      refPublishBtn: this.mkRef('publishBtn'), refLibGallery: this.mkRef('libGallery'), refCanvasWrap: this.mkRef('canvasWrap'),
+      refPage: this.mkRef('page'), refPageScroll: this.mkRef('pageScroll'), refHeroBlock: this.mkRef('heroBlock'),
+      refHeroName: this.mkRef('heroName'), refHeroDate: this.mkRef('heroDate'), refCaret: this.mkRef('caret'),
+      refCountBlock: this.mkRef('countBlock'), refGalleryBlock: this.mkRef('galleryBlock'), refPanelInput: this.mkRef('panelInput'),
+      refSwatch1: this.mkRef('swatch1'), refSwatch2: this.mkRef('swatch2'), refCursor: this.mkRef('cursor'), refRipple: this.mkRef('ripple'),
+      refToast: this.mkRef('toast'), refVeil: this.mkRef('veil'), refBar: this.mkRef('bar'), refClock: this.mkRef('clock'), refChapter: this.mkRef('chapter'),
+      refWin0: this.mkRef('win0'), refWin1: this.mkRef('win1'), refWin2: this.mkRef('win2'), refWin3: this.mkRef('win3'),
+      refCap0: this.mkRef('cap0'), refCap1: this.mkRef('cap1'), refCap2: this.mkRef('cap2'), refCap3: this.mkRef('cap3'),
+      refPortal: this.mkRef('portal'), refPortalLabel: this.mkRef('portalLabel'),
+    }
+  }
+}
+</script>
+</body>
+</html>

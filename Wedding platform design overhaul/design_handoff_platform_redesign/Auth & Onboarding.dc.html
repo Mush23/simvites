@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&amp;family=Instrument+Serif:ital@0;1&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#eceae5;font-family:system-ui,sans-serif}
+.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.55)}
+.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}
+.dv-next{margin:22px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t3" data-screen-label="Turn 3 — Auth &amp; onboarding redesign">
+<div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">Remaining pages — sign in and onboarding in the new language. Replaces app/login/page.tsx and app/onboarding/. Fields, template picker and starter celebrations match the shipped code.</span></div>
+<div class="dv-opts">
+
+<!-- ══════════ 3a SIGN IN ══════════ -->
+<div class="dv-opt" id="3a" data-screen-label="Sign in">
+<div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>Sign in — split: form left, the artifact right. Email link is the default path; password behind the segment.</div>
+<div class="dv-card" style="width:1280px">
+<div style="display:grid;grid-template-columns:1fr 1fr;min-height:720px;background:#FAFAF8;color:#191918;font-family:'Instrument Sans',sans-serif">
+  <!-- form side -->
+  <div style="display:flex;flex-direction:column;padding:28px 56px">
+    <div style="display:flex;align-items:center;gap:9px">
+      <span style="display:inline-flex;width:26px;height:26px;border-radius:7px;background:#191918;color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:700">S</span>
+      <span style="font-weight:650;font-size:14.5px">Simvites</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;max-width:360px;width:100%;margin:0 auto">
+      <h1 style="margin:0;font-size:28px;font-weight:650;letter-spacing:-0.03em">Welcome back</h1>
+      <p style="margin:8px 0 0;font-size:14px;color:#6A6864">Sign in to your wedding workspace.</p>
+      <div style="margin-top:26px;display:flex;border:1px solid #E8E7E4;background:#F5F4F2;border-radius:9px;padding:3px">
+        <span style="flex:1;text-align:center;font-size:12.5px;font-weight:600;background:#fff;border-radius:7px;padding:7px 0;box-shadow:0 1px 2px rgba(15,15,20,.06)">Email link</span>
+        <span style="flex:1;text-align:center;font-size:12.5px;font-weight:550;color:#8F8D88;padding:7px 0;cursor:pointer">Password</span>
+      </div>
+      <label style="display:block;margin-top:20px">
+        <span style="display:block;margin-bottom:6px;font-size:12.5px;font-weight:550;color:#6A6864">Email</span>
+        <input placeholder="you@example.com" style="width:100%;box-sizing:border-box;font-size:14px;border:1px solid #E8E7E4;border-radius:9px;padding:11px 13px;background:#fff;color:#191918;font-family:'Instrument Sans',sans-serif;outline:none">
+      </label>
+      <span style="display:block;margin-top:16px;text-align:center;font-size:14px;font-weight:600;background:oklch(0.62 0.21 29);color:#fff;border-radius:10px;padding:12px 0;cursor:pointer">Send sign-in link</span>
+      <p style="margin:14px 0 0;text-align:center;font-size:12.5px;color:#8F8D88">No passwords needed. We email you a one-tap link.</p>
+      <div style="margin:24px 0;display:flex;align-items:center;gap:12px;color:#8F8D88"><span style="flex:1;height:1px;background:#E8E7E4"></span><span style="font-family:'Geist Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em">New here</span><span style="flex:1;height:1px;background:#E8E7E4"></span></div>
+      <span style="display:block;text-align:center;font-size:13.5px;font-weight:550;border:1px solid #E8E7E4;border-radius:10px;padding:11px 0;cursor:pointer;background:#fff">Create your wedding site free</span>
+    </div>
+    <p style="margin:0;font-family:'Geist Mono',monospace;font-size:10px;color:#8F8D88">© 2026 Simvites</p>
+  </div>
+  <!-- artifact side -->
+  <div style="position:relative;background:oklch(0.15 0.004 270);overflow:hidden;display:flex;align-items:center;justify-content:center">
+    <div style="position:absolute;inset:0;background-image:linear-gradient(oklch(1 0 0/0.04) 1px,transparent 1px),linear-gradient(90deg,oklch(1 0 0/0.04) 1px,transparent 1px);background-size:64px 64px"></div>
+    <div style="position:absolute;left:-120px;bottom:-120px;width:460px;height:460px;border-radius:50%;background:radial-gradient(closest-side,oklch(0.62 0.21 29/0.22),transparent 70%)"></div>
+    <div style="position:relative;width:360px">
+      <div style="background:#F5EFE3;border-radius:14px;box-shadow:0 50px 110px -30px rgba(0,0,0,.6);padding:34px 28px;text-align:center">
+        <p style="margin:0;font-family:'Geist Mono',monospace;font-size:8.5px;letter-spacing:.24em;color:#8a6d2f">TOGETHER WITH THEIR FAMILIES</p>
+        <p style="margin:14px 0 0;font-family:'Instrument Serif',serif;font-size:38px;color:#211D18;line-height:1.1">Aanya <span style="color:#C9A227">&amp;</span> Dev</p>
+        <p style="margin:10px 0 0;font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:.2em;color:#7A1F1F">19 · 09 · 2026 — JAIPUR</p>
+        <div style="margin:18px auto 0;width:44px;height:1px;background:#C9A227"></div>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:7px;text-align:left">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#3d372e"><span style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#3E7C4F"></span>Mehndi</span><span style="font-family:'Geist Mono',monospace;font-size:9.5px;color:#8a6d2f">THU · 4PM</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#3d372e"><span style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#6D3FA9"></span>Sangeet</span><span style="font-family:'Geist Mono',monospace;font-size:9.5px;color:#8a6d2f">FRI · 7PM</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#3d372e"><span style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#C9A227"></span>Ceremony</span><span style="font-family:'Geist Mono',monospace;font-size:9.5px;color:#8a6d2f">SAT · 11AM</span></div>
+        </div>
+        <span style="display:inline-block;margin-top:18px;font-size:11.5px;font-weight:600;background:#7A1F1F;color:#F5EFE3;border-radius:8px;padding:8px 22px">RSVP</span>
+      </div>
+      <p style="margin:22px 0 0;text-align:center;font-size:13.5px;line-height:1.6;color:oklch(0.75 0.005 90)">The tool is software.<br><em style="font-family:'Instrument Serif',serif;font-size:15px">What your guests get is a keepsake.</em></p>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ══════════ 3b CHECK EMAIL ══════════ -->
+<div class="dv-opt" id="3b" data-screen-label="Magic link sent">
+<div class="dv-olabel"><a class="dv-oid" href="#3b">3b</a>Link sent state — replaces the inline notice string.</div>
+<div class="dv-card" style="width:420px">
+<div style="background:#FAFAF8;padding:44px 36px;text-align:center;font-family:'Instrument Sans',sans-serif;color:#191918">
+  <span style="display:inline-flex;width:52px;height:52px;border-radius:16px;background:oklch(0.62 0.21 29/0.1);color:oklch(0.62 0.21 29);align-items:center;justify-content:center">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4zM4 7l8 6 8-6"></path></svg>
+  </span>
+  <h2 style="margin:18px 0 0;font-size:20px;font-weight:650;letter-spacing:-0.02em">Check your email</h2>
+  <p style="margin:8px 0 0;font-size:13.5px;line-height:1.6;color:#6A6864">We sent a sign-in link to<br><b style="color:#191918">aanya@example.com</b>. It works once and expires in 15 minutes.</p>
+  <span style="display:block;margin-top:20px;font-size:13px;font-weight:550;border:1px solid #E8E7E4;border-radius:9px;padding:10px 0;cursor:pointer;background:#fff">Resend link</span>
+  <p style="margin:12px 0 0;font-size:12px;color:#8F8D88">Wrong address? <span style="color:oklch(0.62 0.21 29);font-weight:550;cursor:pointer">Go back</span></p>
+</div>
+</div>
+</div>
+
+<!-- ══════════ 3c ONBOARDING ══════════ -->
+<div class="dv-opt" id="3c" data-screen-label="Onboarding">
+<div class="dv-olabel"><a class="dv-oid" href="#3c">3c</a>Onboarding — one calm page, three numbered moves. Fields, templates and the 9 starter celebrations match onboarding-form.tsx.</div>
+<div class="dv-card" style="width:860px">
+<div style="background:#FAFAF8;padding:40px 72px 48px;font-family:'Instrument Sans',sans-serif;color:#191918">
+  <div style="display:flex;align-items:center;gap:9px">
+    <span style="display:inline-flex;width:26px;height:26px;border-radius:7px;background:#191918;color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:700">S</span>
+    <span style="font-weight:650;font-size:14.5px">Simvites</span>
+    <span style="margin-left:auto;font-family:'Geist Mono',monospace;font-size:10px;color:#8F8D88">Step 1 of 1 · two minutes</span>
+  </div>
+  <h1 style="margin:32px 0 0;font-size:30px;font-weight:650;letter-spacing:-0.03em">Let's set up your wedding</h1>
+  <p style="margin:8px 0 0;font-size:14px;color:#6A6864">Everything here can change later. Nothing goes live until you publish.</p>
+
+  <!-- 01 name + address -->
+  <div style="margin-top:30px;display:flex;gap:18px">
+    <span style="flex:none;font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;color:oklch(0.62 0.21 29);padding-top:3px">01</span>
+    <div style="flex:1">
+      <p style="margin:0;font-size:15px;font-weight:650">Who's getting married?</p>
+      <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <label style="display:block"><span style="display:block;margin-bottom:6px;font-size:12.5px;font-weight:550;color:#6A6864">Couple / site name</span><input placeholder="Aanya &amp; Dev" style="width:100%;box-sizing:border-box;font-size:14px;border:1px solid #E8E7E4;border-radius:9px;padding:11px 13px;background:#fff;font-family:'Instrument Sans',sans-serif;outline:none"></label>
+        <label style="display:block"><span style="display:block;margin-bottom:6px;font-size:12.5px;font-weight:550;color:#6A6864">Web address</span>
+          <span style="display:flex;align-items:center;border:1px solid #E8E7E4;border-radius:9px;background:#fff;overflow:hidden"><input placeholder="aanya-and-dev" style="flex:1;min-width:0;font-size:13px;border:none;padding:11px 13px;background:transparent;font-family:'Geist Mono',monospace;outline:none"><span style="font-family:'Geist Mono',monospace;font-size:11px;color:#8F8D88;padding:0 11px;border-left:1px solid #E8E7E4;white-space:nowrap">.simvites.co.uk</span></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 template -->
+  <div style="margin-top:28px;display:flex;gap:18px">
+    <span style="flex:none;font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;color:oklch(0.62 0.21 29);padding-top:3px">02</span>
+    <div style="flex:1">
+      <div style="display:flex;align-items:baseline;gap:10px"><p style="margin:0;font-size:15px;font-weight:650">Choose your look</p><span style="font-size:12px;color:#8F8D88">swap any time · <span style="color:oklch(0.62 0.21 29);font-weight:550;cursor:pointer">see all 12 templates</span></span></div>
+      <div style="margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+        <div style="border:2px solid oklch(0.62 0.21 29);border-radius:11px;overflow:hidden;cursor:pointer;background:#fff">
+          <div style="height:74px;background:#F5EFE3;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Instrument Serif',serif;font-size:15px;color:#211D18">Aanya &amp; Dev</span><span style="font-family:'Geist Mono',monospace;font-size:7px;letter-spacing:.18em;color:#7A1F1F;margin-top:3px">19 · 09 · 2026</span></div>
+          <div style="padding:8px 10px;display:flex;align-items:center;gap:6px"><span style="font-size:11.5px;font-weight:600">Editorial Gold</span><span style="margin-left:auto;display:flex;gap:3px"><span style="width:10px;height:10px;border-radius:5px;background:#F5EFE3;border:1px solid rgba(0,0,0,.1)"></span><span style="width:10px;height:10px;border-radius:5px;background:#C9A227"></span><span style="width:10px;height:10px;border-radius:5px;background:#7A1F1F"></span></span></div>
+        </div>
+        <div style="border:1px solid #E8E7E4;border-radius:11px;overflow:hidden;cursor:pointer;background:#fff">
+          <div style="height:74px;background:#211D18;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Instrument Serif',serif;font-size:15px;color:#F6F1E9">Aanya <em style="color:#B08D57">&amp;</em> Dev</span><span style="font-family:'Geist Mono',monospace;font-size:7px;letter-spacing:.18em;color:#B08D57;margin-top:3px">FOUR EVENTS</span></div>
+          <div style="padding:8px 10px;display:flex;align-items:center;gap:6px"><span style="font-size:11.5px;font-weight:600">Editorial Luxury</span><span style="margin-left:auto;display:flex;gap:3px"><span style="width:10px;height:10px;border-radius:5px;background:#F6F1E9;border:1px solid rgba(0,0,0,.1)"></span><span style="width:10px;height:10px;border-radius:5px;background:#211D18"></span><span style="width:10px;height:10px;border-radius:5px;background:#B08D57"></span></span></div>
+        </div>
+        <div style="border:1px solid #E8E7E4;border-radius:11px;overflow:hidden;cursor:pointer;background:#fff">
+          <div style="height:74px;background:#101C33;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Instrument Serif',serif;font-size:15px;color:#EFE6D2">Aanya <em style="color:#D4AF6A">&amp;</em> Dev</span><span style="font-family:'Geist Mono',monospace;font-size:7px;letter-spacing:.18em;color:#D4AF6A;margin-top:3px">UNDER THE STARS</span></div>
+          <div style="padding:8px 10px;display:flex;align-items:center;gap:6px"><span style="font-size:11.5px;font-weight:600">Midnight Baraat</span><span style="margin-left:auto;display:flex;gap:3px"><span style="width:10px;height:10px;border-radius:5px;background:#101C33"></span><span style="width:10px;height:10px;border-radius:5px;background:#D4AF6A"></span><span style="width:10px;height:10px;border-radius:5px;background:#EFE6D2;border:1px solid rgba(0,0,0,.1)"></span></span></div>
+        </div>
+        <div style="border:1px dashed #DBDAD6;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;min-height:112px;background:#fff">
+          <span style="font-size:18px;color:#8F8D88">+9</span><span style="font-size:11px;font-weight:550;color:#6A6864">more looks</span><span style="font-size:10px;color:#8F8D88">browse the gallery</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 celebrations -->
+  <div style="margin-top:28px;display:flex;gap:18px">
+    <span style="flex:none;font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;color:oklch(0.62 0.21 29);padding-top:3px">03</span>
+    <div style="flex:1">
+      <div style="display:flex;align-items:baseline;gap:10px"><p style="margin:0;font-size:15px;font-weight:650">Which celebrations?</p><span style="font-size:12px;color:#8F8D88">pick any, rename later</span></div>
+      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
+        <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:550;border:1px solid #E8E7E4;border-radius:999px;padding:8px 15px;cursor:pointer;background:#fff;color:#6A6864">Mehndi</span>
+        <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:550;border:1px solid #E8E7E4;border-radius:999px;padding:8px 15px;cursor:pointer;background:#fff;color:#6A6864">Haldi</span>
+        <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:550;border:1px solid #E8E7E4;border-radius:999px;padding:8px 15px;cursor:pointer;background:#fff;color:#6A6864">Sangeet</span>
+        <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;border:1px solid oklch(0.62 0.21 29);border-radius:999px;padding:8px 15px;cursor:pointer;background:oklch(0.62 0.21 29/0.08);color:oklch(0.52 0.19 29)">✓ Wedding Ceremony</span>
+        <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:550;border:1px solid #E8E7E4;border-radius:999px;padding:8px 15px;cursor:pointer;background:#fff;color:#6A6864">Nikah</span>
+        <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:550;border:1px solid #E8E7E4;border-radius:999px;padding:8px 15px;cursor:pointer;background:#fff;color:#6A6864">Civil Ceremony</span>
+        <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;border:1px solid oklch(0.62 0.21 29);border-radius:999px;padding:8px 15px;cursor:pointer;background:oklch(0.62 0.21 29/0.08);color:oklch(0.52 0.19 29)">✓ Reception</span>
+        <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:550;border:1px solid #E8E7E4;border-radius:999px;padding:8px 15px;cursor:pointer;background:#fff;color:#6A6864">Walima</span>
+        <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:550;border:1px solid #E8E7E4;border-radius:999px;padding:8px 15px;cursor:pointer;background:#fff;color:#6A6864">Next-day Brunch</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:34px;display:flex;align-items:center;gap:14px;padding-left:36px">
+    <span style="font-size:14.5px;font-weight:600;background:oklch(0.62 0.21 29);color:#fff;border-radius:10px;padding:12px 26px;cursor:pointer">Create my site</span>
+    <span style="font-size:12.5px;color:#8F8D88">Free while you build. Pay once when you send.</span>
+  </div>
+</div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">Try: "make sign in dark", "onboarding as 3 separate steps", "add passkey sign-in to <a class="dv-oid" href="#3a">3a</a>".</p>
+</section>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&amp;family=Instrument+Serif:ital@0;1&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:oklch(0.985 0.002 90);color:oklch(0.17 0.005 90);font-family:'Instrument Sans',sans-serif;-webkit-font-smoothing:antialiased}
+::selection{background:oklch(0.62 0.21 29 / 0.15)}
+</style>
+</helmet>
+
+<div style="max-width:920px;margin:0 auto;padding:56px 32px 120px">
+
+  <!-- masthead -->
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:28px;border-bottom:1px solid oklch(0.9 0.003 90)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="display:inline-flex;width:26px;height:26px;border-radius:7px;background:oklch(0.17 0.005 90);color:#fff;align-items:center;justify-content:center;font-weight:700;font-size:13px;letter-spacing:-0.02em">S</span>
+      <span style="font-weight:650;font-size:15px;letter-spacing:-0.01em">Simvites</span>
+      <span style="font-family:'Geist Mono',monospace;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:oklch(0.45 0.008 90);border:1px solid oklch(0.9 0.003 90);border-radius:6px;padding:3px 8px">Design audit · Jul 2026</span>
+    </div>
+    <span style="font-family:'Geist Mono',monospace;font-size:10px;color:oklch(0.62 0.006 90)">v1 · principal review</span>
+  </div>
+
+  <h1 style="margin:44px 0 0;font-size:44px;line-height:1.05;letter-spacing:-0.035em;font-weight:650;max-width:760px">The product works. The design says <em style="font-family:'Instrument Serif',serif;font-weight:400;font-style:italic">wedding blog</em>, not <span style="color:oklch(0.62 0.21 29)">zero-code platform</span>.</h1>
+
+  <p style="margin:20px 0 0;font-size:17px;line-height:1.6;color:oklch(0.38 0.008 90);max-width:720px">Full audit of the marketing site, the demo player, and the 13-module app, based on the shipped code. Every finding cites its source file. Faithful recreations of today's screens are in <a href="Current UI (Audit Base).dc.html" style="color:oklch(0.62 0.21 29);text-decoration:none;font-weight:550;border-bottom:1px solid oklch(0.62 0.21 29 / 0.3)">Current UI (Audit Base)</a> — findings reference screens <a href="Current UI (Audit Base).dc.html#1a" style="color:oklch(0.62 0.21 29);text-decoration:none;font-weight:550">1a</a>–<a href="Current UI (Audit Base).dc.html#1f" style="color:oklch(0.62 0.21 29);text-decoration:none;font-weight:550">1f</a>.</p>
+
+  <!-- verdict strip -->
+  <div style="margin-top:36px;display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+    <sc-for list="{{ scores }}" as="s" hint-placeholder-count="10">
+      <div style="background:#fff;border:1px solid oklch(0.92 0.003 90);border-radius:10px;padding:14px 14px 12px">
+        <div style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:oklch(0.5 0.008 90)">{{ s.area }}</div>
+        <div style="margin-top:6px;display:flex;align-items:baseline;gap:2px"><span style="font-size:24px;font-weight:650;letter-spacing:-0.03em;color:{{ s.color }}">{{ s.score }}</span><span style="font-size:12px;color:oklch(0.62 0.006 90)">/10</span></div>
+        <div style="margin-top:8px;height:3px;border-radius:2px;background:oklch(0.94 0.002 90);overflow:hidden"><div style="{{ s.fill }}"></div></div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- root causes -->
+  <h2 style="margin:64px 0 0;font-size:13px;font-weight:650;text-transform:uppercase;letter-spacing:0.08em;font-family:'Geist Mono',monospace;color:oklch(0.45 0.008 90)">Executive summary — why it feels clunky</h2>
+  <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <sc-for list="{{ causes }}" as="c" hint-placeholder-count="8">
+      <div style="display:flex;gap:12px;background:#fff;border:1px solid oklch(0.92 0.003 90);border-radius:10px;padding:16px">
+        <span style="flex:none;font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;color:oklch(0.62 0.21 29);padding-top:2px">{{ c.n }}</span>
+        <div>
+          <p style="margin:0;font-size:14px;font-weight:600;letter-spacing:-0.01em">{{ c.t }}</p>
+          <p style="margin:4px 0 0;font-size:13px;line-height:1.55;color:oklch(0.42 0.008 90)">{{ c.d }}</p>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- ══ findings ══ -->
+  <sc-for list="{{ sections }}" as="sec">
+    <h2 style="margin:64px 0 0;display:flex;align-items:baseline;gap:12px;font-size:22px;font-weight:650;letter-spacing:-0.025em">{{ sec.title }}<span style="font-family:'Geist Mono',monospace;font-size:10px;font-weight:500;color:oklch(0.62 0.006 90);letter-spacing:0.05em">{{ sec.ref }}</span></h2>
+    <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ sec.items }}" as="f" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid oklch(0.92 0.003 90);border-radius:10px;padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span style="{{ f.sevStyle }}">{{ f.sev }}</span>
+            <span style="font-size:14.5px;font-weight:600;letter-spacing:-0.01em">{{ f.t }}</span>
+            <span style="font-family:'Geist Mono',monospace;font-size:10px;color:oklch(0.62 0.006 90);margin-left:auto">{{ f.src }}</span>
+          </div>
+          <p style="margin:8px 0 0;font-size:13.5px;line-height:1.6;color:oklch(0.42 0.008 90)">{{ f.ev }}</p>
+          <p style="margin:8px 0 0;font-size:13.5px;line-height:1.6;color:oklch(0.17 0.005 90)"><span style="font-family:'Geist Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:oklch(0.55 0.15 150);margin-right:8px">Fix</span>{{ f.fix }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </sc-for>
+
+  <!-- keep -->
+  <h2 style="margin:64px 0 0;font-size:22px;font-weight:650;letter-spacing:-0.025em">What's genuinely good — keep it</h2>
+  <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <sc-for list="{{ keeps }}" as="k" hint-placeholder-count="8">
+      <div style="display:flex;gap:10px;align-items:flex-start;background:oklch(0.97 0.008 150 / 0.5);border:1px solid oklch(0.9 0.03 150);border-radius:10px;padding:13px 15px">
+        <span style="flex:none;color:oklch(0.55 0.15 150);font-weight:700;font-size:13px;padding-top:1px">✓</span>
+        <p style="margin:0;font-size:13.5px;line-height:1.55;color:oklch(0.25 0.01 120)">{{ k }}</p>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- prescription -->
+  <div style="margin-top:72px;background:oklch(0.17 0.005 90);border-radius:16px;padding:36px 36px 32px;color:#fff">
+    <span style="font-family:'Geist Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.72 0.17 32)">The prescription</span>
+    <h2 style="margin:12px 0 0;font-size:30px;font-weight:650;letter-spacing:-0.03em;line-height:1.1">One family, two voices.</h2>
+    <p style="margin:14px 0 0;font-size:15px;line-height:1.65;color:oklch(0.75 0.005 90);max-width:640px">The <strong style="color:#fff;font-weight:600">tool</strong> becomes a neutral, fast, 2026 tech product — Instrument Sans, near-black on near-white, one electric coral accent, 8px geometry, real icons, dialogs and toasts. The <strong style="color:#fff;font-weight:600">artifact</strong> — the couple's website, invitations, RSVP cards — keeps the romance: Instrument Serif, ivory, gold. The serif appears in the app <em style="font-family:'Instrument Serif',serif">only</em> where the couple's content shows through: template previews, site names, invitation cards. That contrast is the brand.</p>
+    <div style="margin-top:24px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+      <sc-for list="{{ tokens }}" as="tk" hint-placeholder-count="8">
+        <div style="background:oklch(1 0 0 / 0.06);border:1px solid oklch(1 0 0 / 0.1);border-radius:10px;padding:13px 14px">
+          <div style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:oklch(0.65 0.005 90)">{{ tk.k }}</div>
+          <div style="margin-top:5px;font-size:13px;font-weight:550;color:#fff;display:flex;align-items:center;gap:7px"><sc-if value="{{ tk.swatch }}" hint-placeholder-val="{{ false }}"><span style="{{ tk.swatch }}"></span></sc-if>{{ tk.v }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- deliverables -->
+  <h2 style="margin:64px 0 0;font-size:22px;font-weight:650;letter-spacing:-0.025em">Deliverables in this project</h2>
+  <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+    <a href="Current UI (Audit Base).dc.html" style="display:flex;align-items:center;gap:14px;background:#fff;border:1px solid oklch(0.92 0.003 90);border-radius:10px;padding:16px 18px;text-decoration:none;color:inherit">
+      <span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;color:oklch(0.45 0.008 90);background:oklch(0.95 0.002 90);border-radius:6px;padding:4px 8px">01</span>
+      <span style="font-size:14.5px;font-weight:600">Current UI — faithful recreation</span>
+      <span style="font-size:13px;color:oklch(0.55 0.008 90)">screens 1a–1f · shipped</span>
+      <span style="margin-left:auto;color:oklch(0.62 0.21 29);font-weight:600">→</span>
+    </a>
+    <div style="display:flex;align-items:center;gap:14px;background:#fff;border:1px dashed oklch(0.88 0.003 90);border-radius:10px;padding:16px 18px">
+      <span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;color:oklch(0.45 0.008 90);background:oklch(0.95 0.002 90);border-radius:6px;padding:4px 8px">02</span>
+      <span style="font-size:14.5px;font-weight:600">Landing — 4 directions</span>
+      <span style="font-size:13px;color:oklch(0.55 0.008 90)">deep-zoom scroll + seamless recording demo · next</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;background:#fff;border:1px dashed oklch(0.88 0.003 90);border-radius:10px;padding:16px 18px">
+      <span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;color:oklch(0.45 0.008 90);background:oklch(0.95 0.002 90);border-radius:6px;padding:4px 8px">03</span>
+      <span style="font-size:14.5px;font-weight:600">App redesign — all 13 modules</span>
+      <span style="font-size:13px;color:oklch(0.55 0.008 90)">new shell, nav, components, light + dark · after</span>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const CORAL = 'oklch(0.62 0.21 29)', AMBER = 'oklch(0.66 0.13 65)', GRAY = 'oklch(0.5 0.008 90)', GREEN = 'oklch(0.55 0.15 150)'
+    const sev = (label) => {
+      const base = 'font-family:Geist Mono,monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;border-radius:6px;padding:3px 8px;'
+      if (label === 'Critical') return base + 'background:' + CORAL + ';color:#fff'
+      if (label === 'High') return base + 'background:oklch(0.62 0.21 29 / 0.1);color:' + CORAL
+      if (label === 'Medium') return base + 'background:oklch(0.66 0.13 65 / 0.12);color:oklch(0.5 0.12 65)'
+      return base + 'background:oklch(0.94 0.002 90);color:' + GRAY
+    }
+    const F = (sevL, t, src, ev, fix) => ({ sev: sevL, sevStyle: sev(sevL), t, src, ev, fix })
+    const score = (area, n) => ({
+      area, score: n,
+      color: n <= 3 ? CORAL : n <= 5 ? 'oklch(0.5 0.12 65)' : 'oklch(0.35 0.008 90)',
+      fill: 'height:100%;width:' + (n * 10) + '%;border-radius:2px;background:' + (n <= 3 ? CORAL : n <= 5 ? AMBER : GREEN),
+    })
+
+    return {
+      scores: [
+        score('First impression', 4), score('Typography', 3), score('Color', 5), score('Layout · density', 4), score('Components', 4),
+        score('Motion', 5), score('Demo player', 3), score('Flows', 6), score('Accessibility', 5), score('Trust', 4),
+      ],
+      causes: [
+        { n: '01', t: 'The tool wears the wedding costume', d: 'Serif display type, gold key words, ivory paper on every SaaS surface. The romance belongs to the couple\u2019s site, not the platform chrome.' },
+        { n: '02', t: 'Micro-mono everywhere', d: '9\u201310px uppercase JetBrains Mono with 0.14\u20130.22em tracking is the label system for forms, tables, buttons \u2014 decorative, below the legibility floor.' },
+        { n: '03', t: 'No icon system', d: 'Emoji (\ud83d\udcc4 \u270f\ufe0f \ud83d\ude48 \ud83d\uddd1 \u2728) and unicode glyphs (\u25b6 \u275a\u275a \u2715 \u2726) serve as product iconography. Renders differently on every OS.' },
+        { n: '04', t: 'Native browser dialogs', d: 'confirm() and prompt() handle archiving guests, deleting pages, renaming \u2014 the single fastest way to feel un-modern.' },
+        { n: '05', t: 'Forms are always open', d: 'Add-household and add-guest forms sit permanently expanded on every card. The page reads as a form, not a workspace.' },
+        { n: '06', t: 'One flat dimension', d: 'Landing = orbs + marquee + text cards. No product shown at hero, no depth, no scroll story. The demo is a captioned slide loop, not a recording.' },
+        { n: '07', t: 'Soft everything', d: 'Pill buttons (forced globally), 13px card radii, warm blurred shadows, hover jiggles. Nothing feels precise or fast.' },
+        { n: '08', t: 'Wasted canvas', d: '1060px content cap in a 13-module data app; a 1440px screen leaves ~30% dead margin around a dense invite matrix.' },
+      ],
+      sections: [
+        { title: 'Landing page', ref: 'screens 1a', items: [
+          F('Critical', 'The demo is a slide carousel, not a recording', 'tour/flow-player.tsx', 'Six captioned steps on a 4.2s interval; the cursor teleports between hardcoded [x,y] points with a 900ms ease; \u201ctyping\u201d is a string swap. Step titles (\u201cStep 2: Click any text to edit\u201d) make it a tutorial, not a demo.', 'One continuous 45\u201360s take: bezier cursor paths, per-character typing, real drag with physics, panel scrolling, publish moment \u2014 no captions, chapter markers on a scrubber instead.'),
+          F('High', 'Hero leads with decoration, not product', 'app/page.tsx', 'Blurred gold orbs, 72px serif headline with three gold-tinted phrases, zero product pixels above the fold.', 'Lead with the product: editor UI live behind/below the headline, headline in a tight grotesque, one accent.'),
+          F('High', 'Marquee of module names', 'app/page.tsx', 'A 28s linear marquee of \u201cWebsite builder \u2726 Guest list \u2726\u2026\u201d \u2014 2019 template trope, conveys nothing.', 'Replace with the deep-zoom module journey: each module shown as an actual screen you travel through.'),
+          F('Medium', 'Competing CTAs', 'app/page.tsx', '\u201cStart building free\u201d (solid) and \u201cSee a live wedding site\u201d (gold mono underline) fight at equal weight; the live-site link leaves the funnel with no return path.', 'Primary CTA + quiet secondary; live template preview embedded in the page itself.'),
+          F('Medium', 'Six identical text cards as \u201cfeatures\u201d', 'app/page.tsx', 'Claims without proof \u2014 no screenshots, no UI, same card six times.', 'Each feature paired with its real UI (the redesigned module screens become the imagery).'),
+          F('Low', 'Footer is one mono line', 'app/page.tsx', '\u201cMade with Simvites\u201d \u2014 no nav, legal, contact, socials. Undermines trust for a product taking payments.', 'Proper footer: product, templates, pricing, legal, contact.'),
+        ]},
+        { title: 'Typography', ref: 'all screens', items: [
+          F('Critical', 'Display serif carries the data', 'globals.css \u00b7 ui.tsx', 'Instrument Serif 400 set on every heading AND every stat (48\u201372px oldstyle numerals). Dashboard numbers read as wedding stationery; scanning suffers.', 'Grotesque (Instrument Sans 550\u2013700, \u22120.02em) for all UI + data. Serif survives only where the couple\u2019s artifact shows: template previews, site name, invitation surfaces.'),
+          F('High', 'Micro-mono as the label system', 'globals.css @utility eyebrow', '10px uppercase 0.18em-tracked mono for form labels, table headers, metadata \u2014 and destructive actions (Archive, Revoke, Sign out) at 9px.', '12\u201313px sentence-case labels, 500\u2013550 weight; mono reserved for genuinely technical strings (URLs, tokens, counts).'),
+          F('Medium', 'Blog rhythm in an app', 'globals.css', 'Body 15px/1.65 everywhere \u2014 comfortable for prose, too airy for tables, toolbars, dense modules.', 'App base 13.5\u201314px/1.5 with a tighter component scale; marketing keeps generous rhythm.'),
+        ]},
+        { title: 'Color', ref: 'all screens', items: [
+          F('High', 'One parchment wash over everything', 'globals.css', 'paper / paper-2 / surface are all warm ivory neighbours; app, marketing and auth share the same beige atmosphere \u2014 surfaces barely separate.', 'Neutral near-white base (oklch 0.985), pure white surfaces, hairline cool borders; warmth exits the chrome and lives in the wedding artifact.'),
+          F('Medium', 'Accent too muted to signal', 'globals.css', 'Terracotta at 0.155 chroma; gold hero keywords oklch(0.68 0.13 80) on white \u2248 2.4:1 contrast.', 'One electric coral \u2014 oklch(0.62 0.21 29) \u2014 used sparingly at full strength; passes on white at weights used.'),
+          F('Medium', 'No status chip system', 'rsvps/page.tsx', 'ok/warn/bad exist as text tints on serif numerals only; statuses (draft, attending, overdue) appear as assorted pills and colored text.', 'Single Badge component: dot + label, soft bg, consistent everywhere (RSVP states, site status, task status).'),
+        ]},
+        { title: 'App shell & navigation', ref: 'screens 1b\u20131e', items: [
+          F('High', '13 flat text links, no wayfinding', 'components/app/sidebar.tsx', 'No icons, no grouping, no collapse, no keyboard access. \u201cCommand Centre\u201d is charming but unscannable at a glance.', 'Grouped sidebar (Plan / Guests / Website / Insights) with a real icon set, collapsed mode, \u2318K command palette.'),
+          F('High', 'Header does nothing', '(app)/layout.tsx', 'Site title + \u201cdraft\u201d pill + raw email + mono \u201cSign out\u201d. No search, no publish CTA, no account menu, no notifications.', 'Search / \u2318K, primary Publish button with status, avatar menu, breadcrumb context.'),
+          F('Medium', 'Hover jiggle as personality', 'globals.css', 'Global button translateY(\u22121px), sidebar links translateX(3px), cards lift+tilt options \u2014 movement without meaning.', 'Motion budget: 150ms color/opacity on hover; transforms reserved for spatial changes (drag, dialogs, page transitions).'),
+          F('Medium', 'Content capped at 1060px', 'every module page', 'Dense modules (matrix, budget, seating) squeezed into a blog column on wide screens.', 'Fluid container to 1440px with per-module density; tables breathe.'),
+        ]},
+        { title: 'Components, forms & feedback', ref: 'screens 1c\u20131f', items: [
+          F('Critical', 'window.confirm() / prompt() for destructive + rename actions', 'guest-manager.tsx \u00b7 website-editor.tsx', 'Archiving households/guests, deleting pages, renaming pages all go through native OS dialogs.', 'Proper dialog system + toast-with-undo for archive; inline rename.'),
+          F('High', 'Emoji-as-icons in product chrome', 'website-editor.tsx \u00b7 flow-player.tsx', 'PagesMenu: \ud83d\udcc4 \u270f\ufe0f \ud83d\ude48 \ud83d\uddd1; Style panel: \u2728; player: \u25b6 \u275a\u275a; guest rows: \u2715.', 'One icon set (Lucide-style, 1.5px stroke, 16/20px grid) used consistently.'),
+          F('High', 'Permanent inline forms', 'guest-manager.tsx', 'Add-household toolbar and add-guest rows always expanded \u2014 every card is 40% form.', '\u201c+ Add\u201d actions open popover/dialog; empty states own the first-run moment; bulk import is a real flow (upload \u2192 map \u2192 preview).'),
+          F('Medium', 'Mixed geometry in one toolbar', 'globals.css', 'Global CSS forces buttons to 999px pills while inputs are 9px rects \u2014 side by side in every form.', 'One geometry: 8px controls, 10px cards, 12px dialogs. No global overrides.'),
+          F('Medium', 'No skeletons, no optimistic polish', '(app)/loading.tsx', 'router.refresh() blanks lists; a single global loading file.', 'Per-module skeletons; optimistic rows; saved-state affordances (\u201cSaved \u00b7 just now\u201d).'),
+          F('Low', 'Matrix ergonomics', 'guest-manager.tsx', 'No row/col hover highlight, no \u201cinvite household to event\u201d bulk toggle, headers scroll away.', 'Hover cross-highlight, column header toggles-all, sticky headers, keyboard navigation.'),
+        ]},
+        { title: 'Where the wedding DNA should live', ref: 'strategy', items: [
+          F('High', 'Tool vs artifact inversion', 'brand-wide', 'The SaaS chrome wears the serif/gold/ivory; the couple\u2019s actual website templates are reduced to three color dots on the landing page.', 'Invert it: chrome goes tech-neutral; templates get full-bleed live previews \u2014 they are the single best marketing asset the product owns.'),
+          F('Medium', 'Template cards show swatches, not sites', 'app/page.tsx', '\u201cEditorial Gold\u201d / \u201cEditorial Luxury\u201d cards contain three 24px dots each.', 'Live, scrolling mini-previews of real template pages inside device frames.'),
+        ]},
+        { title: 'Accessibility', ref: 'checks', items: [
+          F('High', 'Type below the floor', 'globals.css', '9\u201310px functional text (labels, actions, metadata) with heavy tracking and uppercase.', 'Functional minimum 12px; uppercase only at \u226511px with moderate tracking.'),
+          F('Medium', 'Contrast failures on brand moments', 'app/page.tsx', 'Gold keywords on white \u2248 2.4:1; ink-3 mono at 10px borders on failing.', 'Accent usage checked at weight+size; muted text \u2265 4.5:1 at functional sizes.'),
+          F('Medium', 'Demo not machine-readable', 'flow-player.tsx', 'aria-live div soup; 6px-tall progress \u201cbuttons\u201d as only nav.', 'Scrubber with 44px targets, chapter list, full transcript toggle.'),
+        ]},
+      ],
+      keeps: [
+        'The per-guest \u00d7 per-event invite matrix \u2014 the core USP; the model is right, the surface just needs ergonomics.',
+        'Household links with zero guest accounts, QR for printed cards, WhatsApp share \u2014 exactly how this audience behaves.',
+        'Readiness score as the dashboard\u2019s emotional anchor \u2014 keep, promote it.',
+        'Connected modules story (book a caterer \u2192 budget + checklist + dashboard).',
+        'OKLCH token system and class-based dark mode \u2014 solid foundation to rebuild on.',
+        'reduced-motion handling and :focus-visible styles already in place.',
+        'The \u201cbuild free, pay once to send\u201d offer \u2014 clear, generous, differentiating.',
+        'Copy voice: warm, concrete, no dashes \u2014 keep the voice, tighten the surfaces it sits on.',
+      ],
+      tokens: [
+        { k: 'UI type', v: 'Instrument Sans', swatch: '' },
+        { k: 'Artifact type', v: 'Instrument Serif', swatch: '' },
+        { k: 'Data / code', v: 'Geist Mono', swatch: '' },
+        { k: 'Base · light', v: 'oklch 0.985', swatch: 'display:inline-block;width:14px;height:14px;border-radius:4px;background:oklch(0.985 0.002 90);border:1px solid oklch(1 0 0/0.25)' },
+        { k: 'Ink', v: 'oklch 0.17', swatch: 'display:inline-block;width:14px;height:14px;border-radius:4px;background:oklch(0.17 0.005 90);border:1px solid oklch(1 0 0/0.25)' },
+        { k: 'Accent', v: 'Coral 0.62/0.21/29', swatch: 'display:inline-block;width:14px;height:14px;border-radius:4px;background:oklch(0.62 0.21 29)' },
+        { k: 'Geometry', v: '8 / 10 / 12px', swatch: '' },
+        { k: 'Motion', v: '150ms · no jiggle', swatch: '' },
+      ],
+    }
+  }
+}
+</script>
+</body>
+</html>

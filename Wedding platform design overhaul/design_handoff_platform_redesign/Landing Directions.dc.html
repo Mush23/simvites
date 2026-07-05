@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&amp;family=Instrument+Serif:ital@0;1&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#eceae5;font-family:system-ui,sans-serif}
+.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.55)}
+.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}
+.dv-next{margin:22px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t2" data-screen-label="Turn 2 — Landing directions">
+<div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Landing page — 4 directions. All share the deep-zoom concept (you scroll INTO the product and travel through the modules); they differ in the world you travel through. Each board: hero frame + the scroll storyline.</span></div>
+<div class="dv-opts">
+
+<!-- ══════════ 2a SIGNAL — light, product-first ══════════ -->
+<div class="dv-opt" id="2a" data-screen-label="Direction 2a Signal">
+<div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>SIGNAL — light &amp; precise. Linear/Squarespace energy. Hero leads with the live editor; dive tunnel stays white with hairlines.</div>
+<div class="dv-card" style="width:1180px">
+  <!-- hero frame -->
+  <div style="position:relative;background:oklch(0.985 0.002 90);height:700px;overflow:hidden;font-family:'Instrument Sans',sans-serif;color:oklch(0.17 0.005 90)">
+    <!-- nav -->
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:22px;background:rgba(255,255,255,.75);backdrop-filter:blur(12px);border:1px solid oklch(0.92 0.003 90);border-radius:12px;padding:10px 14px;z-index:5">
+      <span style="display:flex;align-items:center;gap:8px;font-weight:650;font-size:14px;letter-spacing:-0.01em"><span style="display:inline-flex;width:22px;height:22px;border-radius:6px;background:oklch(0.17 0.005 90);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:700">S</span>Simvites</span>
+      <span style="font-size:13px;font-weight:500;color:oklch(0.42 0.008 90)">Product</span>
+      <span style="font-size:13px;font-weight:500;color:oklch(0.42 0.008 90)">Templates</span>
+      <span style="font-size:13px;font-weight:500;color:oklch(0.42 0.008 90)">Pricing</span>
+      <span style="font-size:13px;font-weight:600;background:oklch(0.62 0.21 29);color:#fff;border-radius:8px;padding:7px 14px">Start free</span>
+    </div>
+    <!-- headline -->
+    <div style="position:absolute;top:110px;left:0;right:0;text-align:center;z-index:4">
+      <div style="display:inline-flex;align-items:center;gap:8px;font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:oklch(0.45 0.008 90);border:1px solid oklch(0.9 0.003 90);background:#fff;border-radius:999px;padding:5px 12px"><span style="width:6px;height:6px;border-radius:3px;background:oklch(0.62 0.21 29)"></span>Per-event invitations · live RSVP engine</div>
+      <h1 style="margin:18px auto 0;max-width:820px;font-size:72px;line-height:0.98;letter-spacing:-0.045em;font-weight:650">Every event. Every guest.<br>One platform.</h1>
+      <p style="margin:18px auto 0;max-width:520px;font-size:17px;line-height:1.55;color:oklch(0.42 0.008 90)">Build the website, invite each guest to exactly the right events, and watch RSVPs land live. Zero code.</p>
+      <div style="margin-top:24px;display:flex;justify-content:center;gap:10px">
+        <span style="font-size:14.5px;font-weight:600;background:oklch(0.17 0.005 90);color:#fff;border-radius:10px;padding:12px 22px">Start building free</span>
+        <span style="font-size:14.5px;font-weight:550;color:oklch(0.3 0.008 90);border:1px solid oklch(0.9 0.003 90);background:#fff;border-radius:10px;padding:12px 22px">Watch the 60s demo</span>
+      </div>
+    </div>
+    <!-- editor frame rising from bottom, slight 3D -->
+    <div style="position:absolute;left:50%;bottom:-150px;transform:translateX(-50%) perspective(1400px) rotateX(14deg);width:920px;height:520px;background:#fff;border:1px solid oklch(0.9 0.003 90);border-radius:14px;box-shadow:0 -8px 24px rgba(15,15,20,0.04),0 40px 90px -30px rgba(15,15,20,0.25);overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;border-bottom:1px solid oklch(0.94 0.002 90);padding:10px 14px">
+        <span style="display:flex;gap:5px"><span style="width:9px;height:9px;border-radius:5px;background:oklch(0.92 0.003 90)"></span><span style="width:9px;height:9px;border-radius:5px;background:oklch(0.92 0.003 90)"></span><span style="width:9px;height:9px;border-radius:5px;background:oklch(0.92 0.003 90)"></span></span>
+        <span style="margin:0 auto;font-family:'Geist Mono',monospace;font-size:10px;color:oklch(0.5 0.008 90);background:oklch(0.97 0.002 90);border-radius:6px;padding:3px 12px">aanya-and-dev.simvites.co.uk · editing</span>
+        <span style="font-size:11.5px;font-weight:600;background:oklch(0.62 0.21 29);color:#fff;border-radius:7px;padding:5px 12px">Publish</span>
+      </div>
+      <div style="display:flex;height:100%">
+        <div style="width:180px;border-right:1px solid oklch(0.94 0.002 90);padding:12px;display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:'Geist Mono',monospace;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:oklch(0.6 0.006 90)">Blocks</span>
+          <span style="font-size:12px;font-weight:550;border:1px solid oklch(0.92 0.003 90);border-radius:8px;padding:8px 10px">Hero</span>
+          <span style="font-size:12px;font-weight:550;border:1px solid oklch(0.62 0.21 29);background:oklch(0.62 0.21 29/0.06);border-radius:8px;padding:8px 10px;color:oklch(0.52 0.19 29)">Countdown</span>
+          <span style="font-size:12px;font-weight:550;border:1px solid oklch(0.92 0.003 90);border-radius:8px;padding:8px 10px">Schedule</span>
+          <span style="font-size:12px;font-weight:550;border:1px solid oklch(0.92 0.003 90);border-radius:8px;padding:8px 10px">RSVP</span>
+        </div>
+        <div style="flex:1;background:oklch(0.97 0.002 90);padding:18px;display:flex;flex-direction:column;gap:10px;align-items:center">
+          <div style="width:82%;background:oklch(0.975 0.006 85);border:1px solid oklch(0.93 0.01 80);border-radius:10px;padding:22px;text-align:center">
+            <p style="margin:0;font-family:'Instrument Serif',serif;font-size:30px;color:oklch(0.25 0.02 60)">Aanya &amp; Dev</p>
+            <p style="margin:4px 0 0;font-family:'Geist Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:oklch(0.5 0.02 60)">19 September 2026 · Jaipur</p>
+          </div>
+          <div style="width:82%;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            <div style="background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:8px;height:52px"></div>
+            <div style="background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:8px;height:52px"></div>
+            <div style="background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:8px;height:52px"></div>
+            <div style="background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:8px;height:52px"></div>
+          </div>
+          <div style="width:82%;background:#fff;border:1px solid oklch(0.93 0.003 90);border-radius:8px;height:64px"></div>
+        </div>
+        <div style="width:200px;border-left:1px solid oklch(0.94 0.002 90);padding:12px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:'Geist Mono',monospace;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:oklch(0.6 0.006 90)">Countdown</span>
+          <span style="font-size:11px;font-weight:550;color:oklch(0.45 0.008 90)">Target date</span>
+          <span style="font-size:12px;border:1px solid oklch(0.9 0.003 90);border-radius:8px;padding:7px 10px;font-family:'Geist Mono',monospace">19 Sep 2026</span>
+          <span style="font-size:11px;font-weight:550;color:oklch(0.45 0.008 90)">Style</span>
+          <div style="display:flex;gap:6px"><span style="flex:1;border:1px solid oklch(0.62 0.21 29);border-radius:7px;padding:6px 0;text-align:center;font-size:11px;font-weight:600;color:oklch(0.52 0.19 29)">Flip</span><span style="flex:1;border:1px solid oklch(0.92 0.003 90);border-radius:7px;padding:6px 0;text-align:center;font-size:11px;color:oklch(0.45 0.008 90)">Ring</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- storyline strip -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(0,0,0,.08);font-family:'Instrument Sans',sans-serif">
+    <div style="padding:16px 18px;border-right:1px solid rgba(0,0,0,.06)"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;color:oklch(0.62 0.21 29)">SCENE 1</span><p style="margin:6px 0 0;font-size:12.5px;line-height:1.5;color:#333"><b>Surface.</b> White hero, editor rises tilted from below. Scroll pushes you toward its screen.</p></div>
+    <div style="padding:16px 18px;border-right:1px solid rgba(0,0,0,.06)"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;color:oklch(0.62 0.21 29)">SCENE 2</span><p style="margin:6px 0 0;font-size:12.5px;line-height:1.5;color:#333"><b>The dive.</b> Frame scales past the viewport; you are inside. The 60s recording plays, one take.</p></div>
+    <div style="padding:16px 18px;border-right:1px solid rgba(0,0,0,.06)"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;color:oklch(0.62 0.21 29)">SCENE 3</span><p style="margin:6px 0 0;font-size:12.5px;line-height:1.5;color:#333"><b>Module tunnel.</b> Guests, RSVPs, invitations, budget fly past in z-space on white with hairline grid.</p></div>
+    <div style="padding:16px 18px"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;color:oklch(0.62 0.21 29)">SCENE 4</span><p style="margin:6px 0 0;font-size:12.5px;line-height:1.5;color:#333"><b>Ivory dimension.</b> World turns warm; serif returns; live template previews. Then pricing, footer.</p></div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════ 2b OBSIDIAN — dark cinematic dive ══════════ -->
+<div class="dv-opt" id="2b" data-screen-label="Direction 2b Obsidian">
+<div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>OBSIDIAN — light hero, but the dive plunges into near-black space: modules are lit windows floating in the void. Framer energy, strongest "dimension" feel.</div>
+<div class="dv-card" style="width:1180px">
+  <div style="position:relative;background:oklch(0.145 0.004 270);height:700px;overflow:hidden;font-family:'Instrument Sans',sans-serif;color:#fff">
+    <!-- starfield-ish hairline grid -->
+    <div style="position:absolute;inset:0;background-image:linear-gradient(oklch(1 0 0/0.04) 1px,transparent 1px),linear-gradient(90deg,oklch(1 0 0/0.04) 1px,transparent 1px);background-size:72px 72px"></div>
+    <div style="position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:900px;height:900px;border-radius:50%;background:radial-gradient(closest-side,oklch(0.62 0.21 29/0.14),transparent 70%)"></div>
+    <!-- nav -->
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:22px;background:oklch(1 0 0/0.06);backdrop-filter:blur(12px);border:1px solid oklch(1 0 0/0.1);border-radius:12px;padding:10px 14px;z-index:5">
+      <span style="display:flex;align-items:center;gap:8px;font-weight:650;font-size:14px"><span style="display:inline-flex;width:22px;height:22px;border-radius:6px;background:#fff;color:#000;align-items:center;justify-content:center;font-size:11px;font-weight:700">S</span>Simvites</span>
+      <span style="font-size:13px;font-weight:500;color:oklch(0.75 0.005 90)">Product</span>
+      <span style="font-size:13px;font-weight:500;color:oklch(0.75 0.005 90)">Templates</span>
+      <span style="font-size:13px;font-weight:500;color:oklch(0.75 0.005 90)">Pricing</span>
+      <span style="font-size:13px;font-weight:600;background:oklch(0.62 0.21 29);color:#fff;border-radius:8px;padding:7px 14px">Start free</span>
+    </div>
+    <!-- mid-dive composition: module windows in z-space -->
+    <div style="position:absolute;left:50%;top:54%;transform:translate(-50%,-50%) perspective(1200px)">
+      <!-- far -->
+      <div style="position:absolute;left:-560px;top:-240px;width:360px;height:220px;background:oklch(0.2 0.006 270);border:1px solid oklch(1 0 0/0.1);border-radius:12px;transform:translateZ(-300px) rotateY(18deg);opacity:.55;padding:14px">
+        <span style="font-family:'Geist Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.65 0.005 90)">Budget</span>
+        <div style="margin-top:10px;display:flex;gap:6px;align-items:flex-end;height:110px"><span style="flex:1;background:oklch(0.35 0.01 270);border-radius:4px;height:40%"></span><span style="flex:1;background:oklch(0.35 0.01 270);border-radius:4px;height:70%"></span><span style="flex:1;background:oklch(0.62 0.21 29);border-radius:4px;height:100%"></span><span style="flex:1;background:oklch(0.35 0.01 270);border-radius:4px;height:55%"></span><span style="flex:1;background:oklch(0.35 0.01 270);border-radius:4px;height:30%"></span></div>
+      </div>
+      <div style="position:absolute;left:220px;top:-260px;width:380px;height:230px;background:oklch(0.2 0.006 270);border:1px solid oklch(1 0 0/0.1);border-radius:12px;transform:translateZ(-180px) rotateY(-14deg);opacity:.7;padding:14px">
+        <span style="font-family:'Geist Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.65 0.005 90)">RSVPs · live</span>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:oklch(0.85 0.005 90)">Sangeet</span><span style="font-family:'Geist Mono',monospace;font-size:11px;color:oklch(0.72 0.15 150)">74 in</span></div>
+          <div style="height:4px;border-radius:2px;background:oklch(0.3 0.008 270)"><div style="width:62%;height:100%;border-radius:2px;background:oklch(0.72 0.15 150)"></div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:oklch(0.85 0.005 90)">Ceremony</span><span style="font-family:'Geist Mono',monospace;font-size:11px;color:oklch(0.72 0.15 150)">92 in</span></div>
+          <div style="height:4px;border-radius:2px;background:oklch(0.3 0.008 270)"><div style="width:77%;height:100%;border-radius:2px;background:oklch(0.72 0.15 150)"></div></div>
+        </div>
+      </div>
+      <!-- near: guests matrix window -->
+      <div style="position:relative;width:640px;height:360px;background:oklch(0.23 0.006 270);border:1px solid oklch(1 0 0/0.14);border-radius:14px;box-shadow:0 0 80px -20px oklch(0.62 0.21 29/0.45),0 60px 120px -40px rgba(0,0,0,.8);padding:18px">
+        <span style="font-family:'Geist Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.65 0.005 90)">Guests · invite matrix</span>
+        <div style="margin-top:14px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:8px;font-size:12px">
+          <span style="color:oklch(0.6 0.005 90);font-size:10.5px">HOUSEHOLD</span><span style="color:oklch(0.6 0.005 90);font-size:10.5px;text-align:center">Mehndi</span><span style="color:oklch(0.6 0.005 90);font-size:10.5px;text-align:center">Sangeet</span><span style="color:oklch(0.6 0.005 90);font-size:10.5px;text-align:center">Ceremony</span><span style="color:oklch(0.6 0.005 90);font-size:10.5px;text-align:center">Reception</span>
+          <span style="color:#fff">Priya Shah</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span>
+          <span style="color:#fff">Raj Shah</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.4 0.01 270)">○</span>
+          <span style="color:#fff">Aarav Shah</span><span style="text-align:center;color:oklch(0.4 0.01 270)">○</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.4 0.01 270)">○</span>
+          <span style="color:#fff">Meera Patel</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.4 0.01 270)">○</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span>
+        </div>
+        <div style="position:absolute;bottom:16px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:oklch(0.7 0.005 90)">One checkbox decides what each guest sees.</span>
+          <span style="font-size:11.5px;font-weight:600;background:oklch(0.62 0.21 29);border-radius:7px;padding:5px 12px">Send invites</span>
+        </div>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:26px;left:0;right:0;text-align:center;z-index:5">
+      <p style="margin:0;font-size:28px;font-weight:650;letter-spacing:-0.03em">You are now <span style="color:oklch(0.72 0.17 32)">inside</span> the platform.</p>
+      <p style="margin:6px 0 0;font-size:13px;color:oklch(0.65 0.005 90)">Scene 3 of the scroll — modules pass like stations. Hero and pricing stay light; the journey is dark.</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(0,0,0,.08);font-family:'Instrument Sans',sans-serif">
+    <div style="padding:16px 18px;border-right:1px solid rgba(0,0,0,.06)"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;color:oklch(0.62 0.21 29)">SCENE 1</span><p style="margin:6px 0 0;font-size:12.5px;line-height:1.5;color:#333"><b>Light surface.</b> Same product-first hero as <b>2a</b> — continuity with the light-default brand.</p></div>
+    <div style="padding:16px 18px;border-right:1px solid rgba(0,0,0,.06)"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;color:oklch(0.62 0.21 29)">SCENE 2</span><p style="margin:6px 0 0;font-size:12.5px;line-height:1.5;color:#333"><b>The plunge.</b> Zooming into the editor screen dims the room to black. Recording plays inside the void.</p></div>
+    <div style="padding:16px 18px;border-right:1px solid rgba(0,0,0,.06)"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;color:oklch(0.62 0.21 29)">SCENE 3</span><p style="margin:6px 0 0;font-size:12.5px;line-height:1.5;color:#333"><b>Deep space.</b> Module windows glow past in 3D (above). Coral light is the only color.</p></div>
+    <div style="padding:16px 18px"><span style="font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;color:oklch(0.62 0.21 29)">SCENE 4</span><p style="margin:6px 0 0;font-size:12.5px;line-height:1.5;color:#333"><b>Break the surface.</b> Black cuts to ivory — the wedding dimension hits harder from the dark. Light pricing + footer.</p></div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════ 2c MONO — editorial-tech, type-led ══════════ -->
+<div class="dv-opt" id="2c" data-screen-label="Direction 2c Mono">
+<div class="dv-olabel"><a class="dv-oid" href="#2c">2c</a>MONO — black on white, type does the work. Serif italic marks every wedding word. Zoom expressed through typographic scale, not 3D. Squarespace-calm.</div>
+<div class="dv-card" style="width:1180px">
+  <div style="position:relative;background:#fff;height:700px;overflow:hidden;font-family:'Instrument Sans',sans-serif;color:#0e0e0e">
+    <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:20px 36px;border-bottom:1px solid #ececec">
+      <span style="font-weight:700;font-size:15px;letter-spacing:-0.01em">Simvites</span>
+      <div style="display:flex;gap:26px;font-size:13px;font-weight:500;color:#555"><span>Product</span><span>Templates</span><span>Pricing</span></div>
+      <span style="font-size:13px;font-weight:600;background:#0e0e0e;color:#fff;border-radius:8px;padding:8px 16px">Start free</span>
+    </div>
+    <div style="position:absolute;top:120px;left:36px;right:36px">
+      <p style="margin:0;font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;color:#888">The platform for multi event weddings</p>
+      <h1 style="margin:14px 0 0;font-size:92px;line-height:0.96;letter-spacing:-0.05em;font-weight:650">Software this good,<br>for a day this <em style="font-family:'Instrument Serif',serif;font-weight:400;letter-spacing:-0.02em">beautiful</em>.</h1>
+      <div style="margin-top:28px;display:flex;align-items:center;gap:24px">
+        <span style="font-size:14.5px;font-weight:600;background:oklch(0.62 0.21 29);color:#fff;border-radius:10px;padding:13px 24px">Start building free</span>
+        <span style="font-size:14px;font-weight:550;color:#0e0e0e;border-bottom:1.5px solid #0e0e0e;padding-bottom:2px">Watch it work, 60 seconds</span>
+      </div>
+    </div>
+    <!-- typographic module ticker -->
+    <div style="position:absolute;bottom:0;left:0;right:0;border-top:1px solid #ececec">
+      <div style="display:flex;align-items:baseline;gap:0;padding:26px 36px;justify-content:space-between">
+        <span style="font-size:44px;font-weight:650;letter-spacing:-0.04em;color:#0e0e0e">Guests</span>
+        <span style="font-size:44px;font-weight:650;letter-spacing:-0.04em;color:#d9d9d9">Invites</span>
+        <span style="font-size:44px;font-weight:650;letter-spacing:-0.04em;color:#d9d9d9">RSVPs</span>
+        <span style="font-size:44px;font-weight:650;letter-spacing:-0.04em;color:#d9d9d9">Seating</span>
+        <span style="font-size:44px;font-weight:650;letter-spacing:-0.04em;color:#d9d9d9">Budget</span>
+        <span style="font-family:'Instrument Serif',serif;font-style:italic;font-size:44px;color:oklch(0.62 0.21 29)">the site</span>
+      </div>
+      <div style="padding:0 36px 26px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <div style="border:1px solid #ececec;border-radius:12px;padding:16px"><span style="font-family:'Geist Mono',monospace;font-size:10px;color:#999">01</span><p style="margin:6px 0 0;font-size:13.5px;line-height:1.5;color:#333">Scroll a word into focus and its module fills the screen — zoom lives in the type scale.</p></div>
+        <div style="border:1px solid #ececec;border-radius:12px;padding:16px"><span style="font-family:'Geist Mono',monospace;font-size:10px;color:#999">02</span><p style="margin:6px 0 0;font-size:13.5px;line-height:1.5;color:#333">Demo plays inside a bare hairline frame. No chrome, no captions, just the take.</p></div>
+        <div style="border:1px solid #ececec;border-radius:12px;padding:16px"><span style="font-family:'Geist Mono',monospace;font-size:10px;color:#999">03</span><p style="margin:6px 0 0;font-size:13.5px;line-height:1.5;color:#333">Serif italic is reserved for the couple's world — every wedding word is a small ceremony.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════ 2d CHROMATIC — every module its own world ══════════ -->
+<div class="dv-opt" id="2d" data-screen-label="Direction 2d Chromatic">
+<div class="dv-olabel"><a class="dv-oid" href="#2d">2d</a>CHROMATIC — the literal "different dimensions": each module section is a world with its own hue; portals carry you between them. Wix-bold, most playful.</div>
+<div class="dv-card" style="width:1180px">
+  <div style="position:relative;height:700px;overflow:hidden;font-family:'Instrument Sans',sans-serif;display:grid;grid-template-columns:1fr 1fr">
+    <!-- left: coral world (guests) -->
+    <div style="position:relative;background:oklch(0.97 0.02 29);padding:80px 40px 40px;border-right:1px solid rgba(0,0,0,.05)">
+      <span style="font-family:'Geist Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.52 0.19 29)">Dimension 03 · Guests</span>
+      <h2 style="margin:12px 0 0;font-size:40px;line-height:1;letter-spacing:-0.035em;font-weight:650;color:oklch(0.3 0.08 29)">The matrix that runs the wedding</h2>
+      <div style="margin-top:24px;background:#fff;border:1px solid oklch(0.88 0.04 29);border-radius:14px;box-shadow:0 24px 60px -24px oklch(0.52 0.19 29/0.35);padding:18px">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:9px;font-size:12.5px;color:#222">
+          <span style="font-size:10px;color:#999;font-family:'Geist Mono',monospace">GUEST</span><span style="font-size:10px;color:#999;font-family:'Geist Mono',monospace;text-align:center">MEHNDI</span><span style="font-size:10px;color:#999;font-family:'Geist Mono',monospace;text-align:center">SANGEET</span><span style="font-size:10px;color:#999;font-family:'Geist Mono',monospace;text-align:center">CEREMONY</span>
+          <span>Priya Shah</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span>
+          <span>Raj Shah</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:#ddd">○</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span>
+          <span>Aarav Shah</span><span style="text-align:center;color:#ddd">○</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span><span style="text-align:center;color:oklch(0.62 0.21 29)">●</span>
+        </div>
+      </div>
+      <!-- portal to next world -->
+      <div style="position:absolute;bottom:-90px;left:50%;transform:translateX(-50%);width:220px;height:220px;border-radius:50%;border:2px solid oklch(0.55 0.18 285/0.5);background:radial-gradient(closest-side,oklch(0.55 0.18 285/0.2),transparent);display:flex;align-items:center;justify-content:center"><span style="font-family:'Geist Mono',monospace;font-size:10px;color:oklch(0.45 0.18 285)">SCROLL ↓</span></div>
+    </div>
+    <!-- right: violet world (rsvps) -->
+    <div style="position:relative;background:oklch(0.25 0.06 285);padding:80px 40px 40px;color:#fff">
+      <span style="font-family:'Geist Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.75 0.12 285)">Dimension 04 · RSVPs</span>
+      <h2 style="margin:12px 0 0;font-size:40px;line-height:1;letter-spacing:-0.035em;font-weight:650">Answers land while you watch</h2>
+      <div style="margin-top:24px;background:oklch(0.3 0.06 285);border:1px solid oklch(1 0 0/0.15);border-radius:14px;padding:18px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;color:oklch(0.85 0.03 285)">Sangeet</span><span style="font-family:'Geist Mono',monospace;font-size:22px;font-weight:600">74<span style="font-size:12px;color:oklch(0.7 0.06 285)">/120</span></span></div>
+        <div style="margin-top:8px;height:6px;border-radius:3px;background:oklch(1 0 0/0.12)"><div style="width:62%;height:100%;border-radius:3px;background:oklch(0.75 0.15 285)"></div></div>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <span style="font-size:11px;background:oklch(1 0 0/0.1);border-radius:999px;padding:4px 10px">＋ Priya said yes · now</span>
+          <span style="font-size:11px;background:oklch(1 0 0/0.1);border-radius:999px;padding:4px 10px">2 veg · 1 kids meal</span>
+        </div>
+      </div>
+      <p style="position:absolute;bottom:28px;left:40px;right:40px;margin:0;font-size:12.5px;line-height:1.55;color:oklch(0.8 0.04 285)">Each module = a hue-shifted world (coral → violet → teal → amber → ivory). Portal rings carry you through. Boldest, most memorable; needs discipline to stay tasteful.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">My recommendation: <a class="dv-oid" href="#2b">2b</a> Obsidian structure with <a class="dv-oid" href="#2a">2a</a>'s light hero and component precision — light → dark dive → ivory wedding dimension → light close. Say the word and I'll build it full-scroll, or pick another. Try: "build 2b", "2c but with the coral matrix from 2d", "show 2a in dark mode".</p>
+</section>
+</x-dc>
+</body>
+</html>
