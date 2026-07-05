@@ -48,6 +48,16 @@ export async function computeReadiness(siteId: string): Promise<Readiness> {
     supabase.from('sites').select('status').eq('id', siteId).maybeSingle(),
   ])
 
+  // Upcoming vendor payments: overdue, or due within 14 days (attention only).
+  const soonStr = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10)
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const { data: duePayments } = await supabase
+    .from('vendor_payments')
+    .select('id, due_date')
+    .eq('site_id', siteId).is('archived_at', null).eq('status', 'scheduled').lte('due_date', soonStr)
+  const overduePay = (duePayments ?? []).filter((p) => p.due_date < todayStr).length
+  const dueSoonPay = (duePayments ?? []).length
+
   const guestIds = new Set((guests ?? []).map((g) => g.id))
   const invitedGuests = new Set((invitations ?? []).map((i) => i.guest_id).filter((id) => guestIds.has(id)))
   const guestById = new Map((guests ?? []).map((g) => [g.id, g]))
@@ -83,6 +93,11 @@ export async function computeReadiness(siteId: string): Promise<Readiness> {
       label: `Clear ${overdue} overdue task${overdue === 1 ? '' : 's'}`, href: '/tasks' },
     { key: 'budget_health', weight: 6, met: estTotal === 0 || paidTotal <= estTotal,
       label: 'Payments have overtaken the budget — review lines', href: '/budget' },
+    { key: 'payments_due', weight: 0, met: dueSoonPay === 0,
+      label: overduePay > 0
+        ? `${overduePay} vendor payment${overduePay === 1 ? '' : 's'} overdue`
+        : `${dueSoonPay} vendor payment${dueSoonPay === 1 ? '' : 's'} due within 14 days`,
+      href: '/payments' },
   ]
 
   const total = checks.reduce((n, c) => n + c.weight, 0)

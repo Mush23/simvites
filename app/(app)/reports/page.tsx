@@ -6,6 +6,7 @@ const REPORTS = [
   { href: '/guests/export', title: 'Guest list', body: 'Every household and guest, with emails, children and plus-ones.' },
   { href: '/rsvps/export', title: 'RSVPs by event', body: 'Guest × event × status, with a column for every question — the caterer sheet.' },
   { href: '/budget/export', title: 'Budget', body: 'Every line with estimate, actual, paid and balance, linked to events and vendors.' },
+  { href: '/payments/export', title: 'Payment schedule', body: 'Every vendor instalment with due date, amount, status and linked budget line.' },
   { href: '/vendors/export', title: 'Vendors', body: 'The full pipeline with quotes, contracts, contacts and event coverage.' },
   { href: '/tasks/export', title: 'Tasks', body: 'The whole checklist with status, priority, due dates and links.' },
 ]
@@ -21,10 +22,10 @@ export default function ReportsPage() {
       <div className="grid gap-5 sm:grid-cols-2">
         {REPORTS.map((r) => (
           <a key={r.href} href={r.href}
-            className="rounded-card border border-line bg-surface p-6 shadow-card transition-transform hover:-translate-y-0.5">
+            className="rounded-card border border-line bg-surface p-6 shadow-card transition-colors hover:border-line-2">
             <p className="text-[15px] font-semibold tracking-tight text-ink">{r.title}</p>
             <p className="mt-2 text-sm text-ink-2">{r.body}</p>
-            <p className="eyebrow mt-4 text-accent-ink">Download CSV →</p>
+            <p className="mt-4 text-[12.5px] font-medium text-accent-ink">Download CSV →</p>
           </a>
         ))}
       </div>
