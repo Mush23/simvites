@@ -1,4 +1,4 @@
-import { getTemplate } from '@/lib/templates/registry'
+import { getTemplate, templateStyle, templateButtonRadius } from '@/lib/templates/registry'
 
 // ═══════════════════════════════════════════════════════════════════════
 // Site Style engine — per-couple customisation on top of the template:
@@ -51,6 +51,7 @@ export interface SiteStyle {
 export function siteStyleProps(theme: unknown) {
   const t = (theme ?? {}) as SiteStyle
   const template = getTemplate(t.template)
+  const style = templateStyle(t.template)
   const vars: Record<string, string> = { ...template.vars }
   const bg = BACKGROUNDS[t.background ?? 'template']
   Object.assign(vars, bg.vars)
@@ -62,9 +63,12 @@ export function siteStyleProps(theme: unknown) {
     vars['--font-instrument'] = fp.display
     vars['--font-hanken'] = fp.sans
   }
+  // Structural style tokens (not just colour): the block CSS reads these.
+  vars['--tpl-btn-radius'] = templateButtonRadius(t.template)
   return {
     style: vars as React.CSSProperties,
     'data-glow': t.glow ?? 'none',
     'data-hover': t.hover ?? 'lift',
+    'data-heading-case': style.headingCase,
   }
 }

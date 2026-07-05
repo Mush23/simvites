@@ -210,6 +210,21 @@ a[class*='bg-primary'] {
   box-shadow: var(--shadow-lg);
 }
 
+/* ── Template style tokens (structural, not just colour) ─────────────────
+   Set by siteStyleProps at [data-site-root]: button geometry + heading case
+   so each template reads differently, on the live site and in previews. */
+[data-site-root] a[class*='bg-accent'],
+[data-site-root] button:not([aria-label='Open menu']):not([aria-label='Close menu']) {
+  border-radius: var(--tpl-btn-radius, 12px);
+}
+[data-heading-case='upper'] .font-display,
+[data-heading-case='upper'] h1,
+[data-heading-case='upper'] h2,
+[data-heading-case='upper'] h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 /* ── Site Style engine: couple-chosen glow + hover on public site cards ── */
 [data-glow='soft'] .shadow-card { box-shadow: var(--shadow), 0 0 28px -8px var(--accent-line); }
 [data-glow='strong'] .shadow-card { box-shadow: var(--shadow), 0 0 44px -6px var(--accent-line), 0 0 12px -4px var(--accent-line); }

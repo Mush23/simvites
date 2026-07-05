@@ -25,6 +25,44 @@ export interface SiteTemplate {
   starterDoc: SiteData
 }
 
+/**
+ * Style tokens that make templates differ structurally, not just in colour:
+ * heading case, button geometry, divider motif and hero alignment. Applied
+ * live at the site root and shown in previews so what you preview is what you
+ * publish.
+ */
+export interface TemplateStyle {
+  headingCase: 'normal' | 'upper'
+  button: 'pill' | 'soft' | 'square'   // 999px | 12px | 3px
+  divider: 'line' | 'diamond' | 'double' | 'none'
+  heroAlign: 'center' | 'left'
+}
+
+const DEFAULT_STYLE: TemplateStyle = { headingCase: 'normal', button: 'soft', divider: 'line', heroAlign: 'center' }
+
+const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
+  'editorial-gold': { headingCase: 'normal', button: 'pill', divider: 'line', heroAlign: 'center' },
+  'editorial-luxury': { headingCase: 'normal', button: 'soft', divider: 'double', heroAlign: 'center' },
+  'midnight-baraat': { headingCase: 'upper', button: 'soft', divider: 'diamond', heroAlign: 'center' },
+  'garden-mehndi': { headingCase: 'normal', button: 'soft', divider: 'line', heroAlign: 'center' },
+  'gallery-white': { headingCase: 'upper', button: 'square', divider: 'none', heroAlign: 'left' },
+  'rose-and-ash': { headingCase: 'normal', button: 'pill', divider: 'diamond', heroAlign: 'center' },
+  'rajwada': { headingCase: 'upper', button: 'square', divider: 'double', heroAlign: 'center' },
+  'coastline': { headingCase: 'upper', button: 'square', divider: 'line', heroAlign: 'center' },
+  'deco-champagne': { headingCase: 'upper', button: 'square', divider: 'double', heroAlign: 'center' },
+  'terracotta-sun': { headingCase: 'normal', button: 'soft', divider: 'diamond', heroAlign: 'left' },
+  'ink-and-jasmine': { headingCase: 'normal', button: 'square', divider: 'line', heroAlign: 'left' },
+  'velvet-sangeet': { headingCase: 'normal', button: 'pill', divider: 'diamond', heroAlign: 'center' },
+}
+const BUTTON_RADIUS: Record<TemplateStyle['button'], string> = { pill: '999px', soft: '12px', square: '3px' }
+
+export function templateStyle(key: string | null | undefined): TemplateStyle {
+  return TEMPLATE_STYLES[key ?? ''] ?? DEFAULT_STYLE
+}
+export function templateButtonRadius(key: string | null | undefined): string {
+  return BUTTON_RADIUS[templateStyle(key).button]
+}
+
 /** Picker-safe projection (no starter docs) for client components. */
 export interface TemplateListing {
   key: string
@@ -32,9 +70,16 @@ export interface TemplateListing {
   description: string
   swatches: [string, string, string]
   mood?: string
+  style: TemplateStyle
+  /** The display font CSS value, for the preview to render real type. */
+  displayFont: string
 }
 export function listTemplates(): TemplateListing[] {
-  return TEMPLATES.map(({ key, name, description, swatches, mood }) => ({ key, name, description, swatches, mood }))
+  return TEMPLATES.map(({ key, name, description, swatches, mood, vars }) => ({
+    key, name, description, swatches, mood,
+    style: templateStyle(key),
+    displayFont: vars['--font-instrument'] ?? 'var(--f-cormorant)',
+  }))
 }
 
 // Fonts are loaded once in app/s/[siteSlug]/layout.tsx via next/font and

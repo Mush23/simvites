@@ -45,6 +45,9 @@ export function SiteSettingsForm({ title, deadlineDefault, templateKey, template
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-display text-[14.5px] text-ink">{t.name}</span>
                 {t.mood && <span className="block text-[11px] text-ink-3">{t.mood}</span>}
+                <a href={`/preview/${t.key}`} target="_blank" rel="noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-[11px] font-medium text-accent-ink underline underline-offset-2">Preview ↗</a>
               </span>
               <span className="flex shrink-0 gap-1">
                 {t.swatches.map((c) => (

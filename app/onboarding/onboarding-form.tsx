@@ -79,6 +79,11 @@ export function OnboardingForm({ templates }: { templates: TemplateListing[] }) 
                 </span>
               </span>
               <span className="text-[11.5px] leading-relaxed text-ink-3">{t.description}</span>
+              <a href={`/preview/${t.key}`} target="_blank" rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-[11.5px] font-medium text-accent-ink underline underline-offset-2 hover:opacity-80">
+                Preview this look ↗
+              </a>
             </label>
           ))}
           {!showAll && templates.length > 4 && (
