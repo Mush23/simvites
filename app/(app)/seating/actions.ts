@@ -26,6 +26,40 @@ export async function deleteTable(tableId: string) {
   return { ok: true }
 }
 
+/** Save a table's position on the canvas (percentages, clamped 0–100). */
+export async function setTablePosition(tableId: string, x: number, y: number) {
+  const supabase = await createClient()
+  const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n * 100) / 100))
+  await supabase.from('seating_tables').update({ pos_x: clamp(x), pos_y: clamp(y) }).eq('id', tableId)
+  // No revalidate: the client already moved it; a refetch would fight the drag.
+  return { ok: true }
+}
+
+export async function setTableShape(tableId: string, shape: 'round' | 'rect') {
+  const supabase = await createClient()
+  await supabase.from('seating_tables').update({ shape }).eq('id', tableId)
+  revalidatePath('/seating')
+  return { ok: true }
+}
+
+/** Upsert the floor-plan background image for an event view (null = all events). */
+export async function setFloorplan(eventId: string | null, imageUrl: string | null) {
+  const site = await getPrimarySite()
+  if (!site) return { error: 'No site.' }
+  const supabase = await createClient()
+  const q = supabase.from('seating_floorplans').select('id').eq('site_id', site.siteId)
+  const { data: current } = eventId
+    ? await q.eq('event_id', eventId).maybeSingle()
+    : await q.is('event_id', null).maybeSingle()
+  if (current) {
+    await supabase.from('seating_floorplans').update({ image_url: imageUrl }).eq('id', current.id)
+  } else {
+    await supabase.from('seating_floorplans').insert({ site_id: site.siteId, event_id: eventId, image_url: imageUrl })
+  }
+  revalidatePath('/seating')
+  return { ok: true }
+}
+
 /**
  * Push the seating plan to every seated household: an email with a fresh
  * personal link — opening it shows each guest their table on the RSVP page.
