@@ -89,6 +89,26 @@ export interface ImportRow {
 }
 
 /**
+ * Smart parse of a messy pasted guest list. Uses AI when configured
+ * (ANTHROPIC_API_KEY) to group households and expand "Raj & Priya Shah"
+ * style rows; otherwise falls back to a simple comma parser. Returns the
+ * rows plus which path was used, so the UI can tell the host.
+ */
+export async function parseGuestPaste(text: string): Promise<{ rows: ImportRow[]; usedAi: boolean }> {
+  const { parseGuestList, aiConfigured } = await import('@/lib/ai')
+  if (aiConfigured()) {
+    const ai = await parseGuestList(text)
+    if (ai && ai.length) return { rows: ai, usedAi: true }
+  }
+  // Fallback: one guest per line — "Household, Full name, email(optional)".
+  const rows: ImportRow[] = text.split('\n').map((l) => l.trim()).filter(Boolean).map((line) => {
+    const [household = '', fullName = '', email = ''] = line.split(',').map((s) => s.trim())
+    return { household, fullName, email: email || undefined }
+  }).filter((r) => r.household && r.fullName)
+  return { rows, usedAi: false }
+}
+
+/**
  * Paste-import: creates missing households (matched by name, case-insensitive)
  * and guests. Duplicate guests (same name + household) are skipped, never
  * silently overwritten (handoff §8).

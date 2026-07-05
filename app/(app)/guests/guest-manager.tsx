@@ -246,15 +246,21 @@ function ImportWizard({ onDone }: { onDone: () => void }) {
   const [text, setText] = useState('')
   const [preview, setPreview] = useState<ImportRow[] | null>(null)
   const [busy, setBusy] = useState(false)
+  const [parsing, setParsing] = useState(false)
+  const [note, setNote] = useState<string | null>(null)
   const [result, setResult] = useState<string | null>(null)
 
-  function parse() {
-    // One guest per line: "Household name, Full name, email(optional)"
-    const rows: ImportRow[] = text.split('\n').map((l) => l.trim()).filter(Boolean).map((line) => {
-      const [household = '', fullName = '', email = ''] = line.split(',').map((s) => s.trim())
-      return { household, fullName, email: email || undefined }
-    }).filter((r) => r.household && r.fullName)
-    setPreview(rows)
+  async function parse() {
+    if (!text.trim()) return
+    setParsing(true); setNote(null)
+    // Server tries AI (if configured), else falls back to a simple parser.
+    const { parseGuestPaste } = await import('./actions')
+    const res = await parseGuestPaste(text)
+    setParsing(false)
+    setPreview(res.rows)
+    setNote(res.usedAi
+      ? `Cleaned up with AI — grouped into ${new Set(res.rows.map((r) => r.household)).size} households. Check it over.`
+      : 'Parsed by columns. Paste "Household, Full name, email" per line, or connect AI for messy lists.')
   }
 
   async function confirm() {
@@ -268,20 +274,21 @@ function ImportWizard({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="rounded-card border border-accent-line bg-accent-soft/40 p-6">
-      <p className="eyebrow mb-2">Paste import</p>
+      <p className="eyebrow mb-2">Import guests</p>
       <p className="mb-3 text-sm text-ink-2">
-        One guest per line: <span className="font-mono text-xs">Household name, Full name, email (optional)</span>.
+        Paste from anywhere — a spreadsheet, WhatsApp, your notes. We tidy it into households and guests
+        (AI clean-up when connected; otherwise use <span className="font-mono text-xs">Household, Full name, email</span> per line).
         Existing guests are skipped, never overwritten.
       </p>
       <textarea
         value={text} onChange={(e) => setText(e.target.value)} rows={6}
-        placeholder={'The Shah Family, Priya Shah, priya@example.com\nThe Shah Family, Raj Shah'}
+        placeholder={'Raj & Priya Shah, priya@example.com\nThe Patels — Anil, Meera and the two kids\nDev Kapoor'}
         className="w-full rounded-md border border-line bg-surface px-3 py-2.5 font-mono text-xs text-ink outline-none focus:border-accent"
       />
-      <div className="mt-3 flex items-center gap-3">
-        <button type="button" onClick={parse}
-          className="rounded-md border border-line bg-surface px-4 py-2 text-sm hover:border-accent">
-          Preview
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <button type="button" onClick={parse} disabled={parsing}
+          className="rounded-md border border-line bg-surface px-4 py-2 text-sm hover:border-accent disabled:opacity-50">
+          {parsing ? 'Tidying…' : 'Tidy & preview'}
         </button>
         {preview && (
           <button type="button" onClick={confirm} disabled={busy}
@@ -291,6 +298,7 @@ function ImportWizard({ onDone }: { onDone: () => void }) {
         )}
         {result && <span className="text-sm text-ink-2">{result}</span>}
       </div>
+      {note && <p className="mt-2 text-xs text-ink-3">{note}</p>}
       {preview && (
         <div className="mt-4 max-h-48 overflow-y-auto rounded-md border border-line bg-surface p-3 text-sm">
           {preview.map((r, i) => (
