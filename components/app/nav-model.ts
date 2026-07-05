@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   House, Globe, CalendarDays, Users, Mail, MailCheck, Armchair,
-  Wallet, Store, ListChecks, Folder, ChartColumn, Settings, CalendarClock,
+  Wallet, Store, ListChecks, Folder, ChartColumn, Settings, CalendarClock, MailOpen,
 } from 'lucide-react'
 
 // One nav model for the sidebar, mobile nav and ⌘K palette (overhaul spec:
@@ -26,6 +26,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/website', label: 'Site editor', icon: Globe },
       { href: '/events', label: 'Events', icon: CalendarDays },
+      { href: '/save-the-date', label: 'Save the Date', icon: MailOpen },
     ],
   },
   {
