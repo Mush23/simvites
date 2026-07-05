@@ -60,6 +60,33 @@ the Postgres connection string (it contains the database password).
   record at your registrar. Custom-domain add-on uses the Vercel Domains API
   (token → `VERCEL_API_TOKEN`), wired in a later phase.
 
+## 🔜 Anthropic — AI import + planning assistant
+Powers the **"Tidy & preview"** guest import and the **Assistant** module.
+Both are *guarded*: the app works fully without a key and switches on the
+moment it's added.
+- Get a key at console.anthropic.com → **API Keys** (`sk-ant-…`).
+- Give me the key → goes to `ANTHROPIC_API_KEY`.
+- Optional `ANTHROPIC_MODEL` (defaults to `claude-haiku-4-5-20251001` — cheap
+  and fast; bump to a larger model for the assistant if you want).
+
+## 🔜 Twilio — two-way SMS + WhatsApp guest messaging
+Powers the **Messages** inbox. Guarded: threads work without it; sending +
+receiving switch on once configured.
+- Twilio console → **Account SID** and **Auth Token**.
+- Buy an SMS-capable number (E.164, e.g. `+447…`) → `TWILIO_SMS_FROM`.
+- For WhatsApp: enable the WhatsApp sender (or the sandbox to trial) → put the
+  number in `TWILIO_WHATSAPP_FROM` (without the `whatsapp:` prefix).
+- Set the number's **inbound webhook** (Messaging → your number → "A message
+  comes in") to: `https://<your-domain>/api/webhooks/twilio` (POST).
+- Give me: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_SMS_FROM`,
+  and/or `TWILIO_WHATSAPP_FROM`.
+
+## ⏳ CRON_SECRET — protects the daily payment-reminder job
+The reminder cron (`/api/cron/payment-reminders`, runs 08:00 daily on Vercel)
+is locked to requests carrying this secret. I've generated a strong value —
+add it as `CRON_SECRET` on Vercel (Vercel Cron sends it automatically). It has
+no external signup.
+
 ---
 
 ### What I run once DATABASE_URL is set

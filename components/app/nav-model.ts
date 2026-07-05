@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react'
 import {
   House, Globe, CalendarDays, Users, Mail, MailCheck, Armchair,
   Wallet, Store, ListChecks, Folder, ChartColumn, Settings, CalendarClock, MailOpen,
+  Sparkles, MessagesSquare,
 } from 'lucide-react'
 
 // One nav model for the sidebar, mobile nav and ⌘K palette (overhaul spec:
@@ -34,6 +35,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/guests', label: 'Guest list', icon: Users },
       { href: '/invitations', label: 'Invitations', icon: Mail, countKey: 'invitations' },
+      { href: '/messages', label: 'Messages', icon: MessagesSquare },
       { href: '/rsvps', label: 'RSVPs', icon: MailCheck },
       { href: '/seating', label: 'Seating', icon: Armchair },
     ],
@@ -48,7 +50,13 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/files', label: 'Files', icon: Folder },
     ],
   },
-  { label: 'Insights', items: [{ href: '/reports', label: 'Reports', icon: ChartColumn }] },
+  {
+    label: 'Insights',
+    items: [
+      { href: '/assistant', label: 'Assistant', icon: Sparkles },
+      { href: '/reports', label: 'Reports', icon: ChartColumn },
+    ],
+  },
 ]
 
 export const SETTINGS_ITEM: NavItem = { href: '/settings', label: 'Settings', icon: Settings }

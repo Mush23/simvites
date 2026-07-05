@@ -8,6 +8,35 @@ export function aiConfigured() {
 
 const MODEL = process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001'
 
+export interface AiMessage { role: 'user' | 'assistant'; content: string }
+
+/**
+ * General chat completion for the planning assistant. `system` carries the
+ * couple's live wedding context; `messages` is the running conversation.
+ * Returns null when AI isn't configured or the call fails.
+ */
+export async function chat(system: string, messages: AiMessage[], maxTokens = 1024): Promise<string | null> {
+  if (!aiConfigured()) return null
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': process.env.ANTHROPIC_API_KEY as string,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system, messages }),
+      signal: AbortSignal.timeout(40_000),
+    })
+    if (!res.ok) return null
+    const data = (await res.json()) as { content?: { type: string; text?: string }[] }
+    const out = data.content?.filter((c) => c.type === 'text').map((c) => c.text).join('\n').trim()
+    return out || null
+  } catch {
+    return null
+  }
+}
+
 export interface AiGuestRow { household: string; fullName: string; email?: string }
 
 /**
