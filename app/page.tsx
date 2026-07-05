@@ -1,141 +1,229 @@
 import Link from 'next/link'
-import { BRAND_NAME } from '@/lib/brand'
-import { ThemeToggle } from '@/components/theme/theme-toggle'
-import { FlowPlayer } from './tour/flow-player'
+import { BRAND_NAME, BASE_DOMAIN } from '@/lib/brand'
+import { DeepZoom } from '@/components/landing/deep-zoom'
 
-// The landing is a scroll journey: float in, dive into a real screen
-// recording of the product, glide through the modules, land on the offer.
-// Key words are gold. Copy carries no dashes.
+// ═══════════════════════════════════════════════════════════════════════
+// Marketing landing (design overhaul): scenes 1–4 live in <DeepZoom> (hero,
+// dive, module tunnel, ivory portal); this file renders the ivory wedding
+// dimension, the USP duo, pricing and the footer. Light, precise, coral.
+// ═══════════════════════════════════════════════════════════════════════
 
-const GOLD = { color: 'oklch(0.68 0.13 80)' }
+export const metadata = {
+  title: `${BRAND_NAME} — every event, every guest, one platform`,
+  description:
+    'Build the wedding website, invite each guest to exactly the right events, and watch RSVPs land live. Planning, guests and the site itself, finally in one place.',
+}
 
-const MODULES = ['Website builder', 'Guest list', 'Invitations', 'RSVPs', 'Seating', 'Budget', 'Vendors', 'Tasks', 'Files', 'Reports']
+const CORAL = 'oklch(0.62 0.21 29)'
 
-const FEATURES = [
-  { t: 'Every guest sees only their events', d: 'One checkbox per guest per event decides everything. Uninvited events simply do not exist for that household. This is the heart of a multi event wedding, done properly.' },
-  { t: 'Personal links, zero accounts', d: 'Each family gets one private link by WhatsApp, email or a printed QR code. They tap, they answer, they get a keepsake PDF. No passwords, no forms, no friction.' },
-  { t: 'A website they will screenshot', d: 'Two editorial templates, real typography, per event colour identities. Click any text and type. Publish when you are ready and never before.' },
-  { t: 'The command centre', d: 'Budget, vendors, tasks, files and seating all talk to each other. Book a caterer once and watch it appear in your budget, your checklist and your dashboard.' },
-  { t: 'Answers you can hand to a caterer', d: 'Live counts per event, meal totals, dietary notes, a chase list of who has not replied, and one clean spreadsheet export for every supplier.' },
-  { t: 'Live updates after the big send', d: 'Seating plan ready? One button tells every seated family. They open their link and see their table. Your site keeps working long after the invites go out.' },
-]
-
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="min-h-screen overflow-x-clip bg-paper text-ink">
-      <header className="mx-auto flex max-w-[1060px] items-center justify-between px-6 py-6">
-        <span className="font-display text-2xl">{BRAND_NAME}</span>
-        <div className="flex items-center gap-5">
-          <Link href="/tour" className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-3 transition-colors hover:text-accent-ink">How it works</Link>
-          <Link href="/login" className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-3 transition-colors hover:text-accent-ink">Sign in</Link>
-          <ThemeToggle />
-        </div>
-      </header>
+    <div className="bg-[#FAFAF8] text-[#191918]">
+      <DeepZoom />
 
-      {/* HERO — floating light, huge serif, gold key words */}
-      <section className="relative px-6 pb-20 pt-16 text-center sm:pt-24">
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          <span className="orb absolute left-[12%] top-[18%] h-56 w-56 rounded-pill" style={{ background: 'oklch(0.68 0.13 80 / 0.16)' }} />
-          <span className="orb orb2 absolute right-[10%] top-[38%] h-72 w-72 rounded-pill" style={{ background: 'var(--accent-soft)' }} />
-        </div>
-        <p className="eyebrow relative mb-5">The wedding platform for multi event celebrations</p>
-        <h1 className="relative mx-auto max-w-3xl font-display text-5xl leading-[1.03] sm:text-7xl">
-          One <span style={GOLD}>beautiful</span> place for the
-          whole celebration, from <span style={GOLD}>first invite</span> to
-          <span style={GOLD}> final headcount</span>.
-        </h1>
-        <p className="relative mx-auto mt-7 max-w-xl text-lg text-ink-2">
-          Build a stunning website, invite every guest to exactly the right events,
-          watch RSVPs land live and run the whole plan from one calm dashboard.
-          All of it <span className="font-semibold" style={GOLD}>zero code</span>.
-        </p>
-        <div className="relative mt-10 flex flex-wrap items-center justify-center gap-4">
-          <Link href="/login" className="bg-accent px-8 py-3.5 font-semibold text-white shadow-card">Start building free</Link>
-          <Link href="/s/aanya-and-dev" className="font-mono text-[11px] uppercase tracking-[0.18em] underline underline-offset-4" style={GOLD}>See a live wedding site</Link>
-        </div>
-        {/* Marquee */}
-        <div className="relative mt-16 overflow-hidden border-y border-line py-3" aria-hidden>
-          <div className="marquee whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.22em] text-ink-3">
-            {[...MODULES, ...MODULES].map((m, i) => (
-              <span key={i} className="mx-6">{m} <span style={GOLD}>✦</span></span>
+      {/* Scene 4b — the wedding dimension (ivory) */}
+      <section id="templates" className="px-6 py-24" style={{ background: 'oklch(0.975 0.006 85)' }}>
+        <div className="mx-auto max-w-[1060px]">
+          <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#97753F]">Templates · the artifact</p>
+          <h2 className="mx-auto mt-4 max-w-[640px] text-center font-display text-[clamp(30px,4.4vw,48px)] leading-[1.08] text-[#211D18]">
+            The tool is software.<br />What your guests get is <em className="italic">a keepsake</em>.
+          </h2>
+          <p className="mx-auto mt-4 max-w-[520px] text-center text-[14px] leading-relaxed text-[#5C544A]">
+            Editorial templates with real typography and per event colour identities.
+            Click any text and type. Nothing goes live until you publish.
+          </p>
+
+          <div className="mt-12 grid gap-6 sm:grid-cols-2">
+            {[
+              {
+                name: 'Editorial Gold', sub: 'Ivory · gold · deep maroon', label: 'COUPLE PHOTO',
+                bg: '#F5EFE3', ink: '#211D18', accent: '#C9A227', kicker: '19 · 09 · 2026 — JAIPUR',
+              },
+              {
+                name: 'Editorial Luxury', sub: 'Cream · ink · antique brass', label: 'VENUE PHOTO',
+                bg: '#F6F1E9', ink: '#211D18', accent: '#B08D57', kicker: 'FOUR EVENTS · ONE WEEKEND',
+              },
+            ].map((t) => (
+              <figure key={t.name} className="overflow-hidden rounded-[14px] border border-[#E0D8CB] bg-white shadow-[0_24px_60px_-24px_rgba(33,29,24,0.25)]">
+                <div className="relative flex h-[230px] flex-col items-center justify-center text-center" style={{ background: t.bg }}>
+                  <span className="absolute left-3 top-3 rounded-sm border border-black/10 px-1.5 py-0.5 font-mono text-[7.5px] tracking-wider text-black/35">{t.label}</span>
+                  <p className="font-display text-[34px] leading-none" style={{ color: t.ink }}>Aanya <em className="italic" style={{ color: t.accent }}>&amp;</em> Dev</p>
+                  <p className="mt-3 font-mono text-[8.5px] uppercase tracking-[0.22em]" style={{ color: t.accent }}>{t.kicker}</p>
+                </div>
+                <figcaption className="flex items-baseline justify-between px-5 py-4">
+                  <span className="font-display text-[17px] text-[#211D18]">{t.name}</span>
+                  <span className="text-[11.5px] text-[#8A8072]">{t.sub}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
+            {[['Mehndi', '#3E7C4F'], ['Sangeet', '#6D3FA9'], ['Ceremony', '#C9A227'], ['Reception', '#7A1F1F']].map(([n, c]) => (
+              <span key={n} className="flex items-center gap-2 rounded-full border border-[#E0D8CB] bg-white px-3.5 py-1.5 text-[12px] text-[#5C544A]">
+                <span className="h-2 w-2 rounded-full" style={{ background: c }} />{n}
+              </span>
             ))}
           </div>
         </div>
       </section>
 
-      {/* THE DIVE — the real screen recording, centre stage */}
-      <section data-land className="mx-auto max-w-2xl px-6 py-16">
-        <p className="eyebrow mb-3 text-center">Watch it happen</p>
-        <h2 className="mb-8 text-center font-display text-4xl">
-          Sixty seconds inside the <span style={GOLD}>editor</span>
-        </h2>
-        <FlowPlayer />
-      </section>
+      {/* Scene 5 — USP duo */}
+      <section id="rsvp" className="px-6 py-24">
+        <div className="mx-auto max-w-[1060px]">
+          <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#8F8D88]">Why couples switch</p>
+          <h2 className="mt-3 text-center text-[clamp(26px,3.6vw,40px)] font-[650] leading-tight tracking-[-0.03em]">
+            Two things nobody else does properly
+          </h2>
 
-      {/* FEATURES — the journey through the platform */}
-      <section className="mx-auto max-w-[1060px] px-6 py-16">
-        <h2 className="mb-10 text-center font-display text-4xl">
-          Built for weddings that span <span style={GOLD}>days</span>, not hours
-        </h2>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f) => (
-            <div key={f.t} data-land
-              className="rounded-card border border-line bg-surface p-6 shadow-card transition-transform duration-300 hover:-translate-y-1 hover:shadow-lift">
-              <p className="font-display text-xl text-ink">{f.t}</p>
-              <p className="mt-2 text-sm leading-relaxed text-ink-2">{f.d}</p>
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+            {/* USP 01 */}
+            <div className="rounded-[14px] border border-[#E8E7E4] bg-white p-7 shadow-[0_1px_2px_rgba(15,15,20,0.04)]">
+              <p className="font-mono text-[9.5px] uppercase tracking-[0.1em]" style={{ color: CORAL }}>USP 01 · Per event invitations</p>
+              <h3 className="mt-2.5 text-[20px] font-[650] tracking-[-0.02em]">Every guest sees only their events</h3>
+              <p className="mt-2 text-[13.5px] leading-relaxed text-[#6A6864]">
+                Grandma gets the ceremony. College friends get the sangeet and the afterparty.
+                Same website, different wedding for each family.
+              </p>
+              <div className="mt-6 flex items-center gap-4">
+                <div className="flex-1 rounded-xl border border-[#E8E7E4] bg-[#FAFAF8] p-3.5">
+                  <p className="mb-2 font-mono text-[8px] uppercase tracking-wider text-[#8F8D88]">The Shah Family · link</p>
+                  <div className="grid grid-cols-[1fr_repeat(3,32px)] gap-y-1.5 text-[11px]">
+                    <span />
+                    {['Mehndi', 'Sangeet', 'Ceremony'].map((e) => <span key={e} className="text-center font-mono text-[7px] uppercase text-[#8F8D88]">{e}</span>)}
+                    {[['Priya', 1, 1, 1], ['Aarav', 0, 1, 1]].map(([n, ...d]) => (
+                      <SharedRow key={n as string} name={n as string} dots={d as number[]} />
+                    ))}
+                  </div>
+                </div>
+                <span className="text-[#8F8D88]">→</span>
+                <div className="w-[132px] shrink-0 rounded-[18px] border-[3px] border-[#191918] bg-[#F5EFE3] px-3 py-4 text-center">
+                  <p className="font-display text-[13px] text-[#211D18]">Aanya &amp; Dev</p>
+                  <p className="mt-2 text-[8.5px] text-[#5C544A]">Sangeet · Fri 7pm</p>
+                  <p className="text-[8.5px] text-[#5C544A]">Ceremony · Sat 11am</p>
+                  <p className="mt-2 font-mono text-[7px] uppercase tracking-wide text-[#97753F]">Mehndi? Not on Aarav&apos;s list.</p>
+                </div>
+              </div>
             </div>
-          ))}
+
+            {/* USP 02 */}
+            <div className="rounded-[14px] border border-[#E8E7E4] bg-white p-7 shadow-[0_1px_2px_rgba(15,15,20,0.04)]">
+              <p className="font-mono text-[9.5px] uppercase tracking-[0.1em]" style={{ color: CORAL }}>USP 02 · The RSVP engine</p>
+              <h3 className="mt-2.5 text-[20px] font-[650] tracking-[-0.02em]">One tap for the family, answers for the caterer</h3>
+              <p className="mt-2 text-[13.5px] leading-relaxed text-[#6A6864]">
+                A household answers once, per person, per event, with your custom questions.
+                You get live totals and one clean export.
+              </p>
+              <div className="mt-6 flex items-center gap-4">
+                <div className="flex-1 rounded-xl border border-[#E8E7E4] bg-[#FAFAF8] p-3.5 text-[11px]">
+                  <p className="font-medium">Sangeet · are you in?</p>
+                  <p className="mt-2 flex gap-1.5">
+                    <span className="rounded-md px-2 py-1 text-[10px] font-semibold text-white" style={{ background: '#1B9E5F' }}>Joyfully yes</span>
+                    <span className="rounded-md border border-[#DBDAD6] px-2 py-1 text-[10px] text-[#6A6864]">Sadly no</span>
+                  </p>
+                  <p className="mt-2.5 text-[10px] text-[#8F8D88]">Meal</p>
+                  <p className="mt-1 flex gap-1.5">
+                    {['Veg', 'Chicken', 'Kids'].map((m, i) => (
+                      <span key={m} className={`rounded-md px-2 py-0.5 text-[10px] ${i === 0 ? 'bg-[#191918] text-white' : 'border border-[#DBDAD6] text-[#6A6864]'}`}>{m}</span>
+                    ))}
+                  </p>
+                </div>
+                <span className="text-[#8F8D88]">→</span>
+                <div className="w-[132px] shrink-0 rounded-xl border border-[#E8E7E4] bg-white p-3">
+                  <p className="font-mono text-[7.5px] uppercase tracking-wider text-[#8F8D88]">Live totals</p>
+                  {[['Attending', '74'], ['Vegetarian', '46'], ['Nut allergies', '3']].map(([l, v]) => (
+                    <p key={l} className="mt-1.5 flex justify-between text-[10px] text-[#6A6864]">{l}<b className="font-mono text-[#191918]">{v}</b></p>
+                  ))}
+                  <p className="mt-2 text-[9px] font-medium" style={{ color: CORAL }}>Export for the caterer ↓</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* TEMPLATES */}
-      <section data-land className="border-y border-line bg-paper-2 px-6 py-16 text-center">
-        <h2 className="font-display text-4xl">Two looks, both <span style={GOLD}>yours</span></h2>
-        <p className="mx-auto mt-3 max-w-md text-ink-2">Pick a template, swap any time. Your live site never changes until you publish.</p>
-        <div className="mx-auto mt-8 flex max-w-lg flex-wrap justify-center gap-5">
-          {[{ n: 'Editorial Gold', s: ['#F5EFE3', '#C9A227', '#7A1F1F'] }, { n: 'Editorial Luxury', s: ['#F6F1E9', '#211D18', '#B08D57'] }].map((t) => (
-            <div key={t.n} className="w-52 rounded-card border border-line bg-surface p-5 shadow-card transition-transform hover:-translate-y-1">
-              <div className="flex justify-center gap-2">{t.s.map((c) => <span key={c} className="h-6 w-6 rounded-pill border border-line" style={{ background: c }} />)}</div>
-              <p className="mt-3 font-display text-lg text-ink">{t.n}</p>
-            </div>
-          ))}
+      {/* Pricing */}
+      <section id="pricing" className="px-6 pb-24">
+        <div className="mx-auto max-w-[760px] overflow-hidden rounded-[22px] p-10 text-center sm:p-14"
+          style={{ background: 'oklch(0.13 0.004 270)', boxShadow: '0 40px 90px -20px rgba(0,0,0,0.45)' }}>
+          <div className="pointer-events-none absolute" aria-hidden />
+          <p className="font-mono text-[9.5px] uppercase tracking-[0.14em]" style={{ color: 'oklch(0.68 0.19 30)' }}>Early access</p>
+          <h2 className="mx-auto mt-3 max-w-[480px] text-[clamp(26px,3.6vw,38px)] font-[650] leading-tight tracking-[-0.03em] text-white">
+            Build everything free. Pay once when you send.
+          </h2>
+          <p className="mx-auto mt-4 max-w-[520px] text-[13.5px] leading-relaxed text-white/60">
+            No subscription. One payment unlocks publishing and sending, and your site stays live for
+            18 months after the wedding. Early couples shape the product and keep founder pricing.
+          </p>
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/login" className="rounded-[10px] px-5 py-2.5 text-[13.5px] font-semibold text-white" style={{ background: CORAL }}>
+              Start your site
+            </Link>
+            <a href="mailto:maharshi.sim@hotmail.com" className="rounded-[10px] border border-white/20 px-5 py-2.5 text-[13.5px] font-medium text-white/85">
+              Talk to the founder
+            </a>
+          </div>
+          <div className="mx-auto mt-10 max-w-[440px] space-y-4 text-left">
+            {[
+              ['Everything unlocked while you build', 'Website, guests, matrix, planning. Free until send day.'],
+              ['One payment, no subscription', 'Pay when you publish and send invites. That is it.'],
+              ['Live 18 months after the wedding', 'Photos, thank yous and the memory stay up.'],
+            ].map(([t, d]) => (
+              <p key={t} className="flex gap-3 text-[13px]">
+                <span className="mt-0.5 flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ background: '#1B9E5F' }}>✓</span>
+                <span className="text-white/85"><b className="font-semibold text-white">{t}</b><br /><span className="text-white/55">{d}</span></span>
+              </p>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* OFFER */}
-      <section data-land className="px-6 py-20 text-center">
-        <p className="eyebrow mb-3">Early access</p>
-        <h2 className="mx-auto max-w-lg font-display text-4xl">
-          Build everything <span style={GOLD}>free</span>. Pay once when you are ready to send.
-        </h2>
-        <p className="mx-auto mt-4 max-w-md text-ink-2">
-          No subscription. One payment unlocks publishing and sending, and your site stays
-          live for 18 months after the wedding. Early couples shape the product and keep founder pricing.
+      {/* Footer */}
+      <footer className="border-t border-[#E8E7E4] px-6 py-14">
+        <div className="mx-auto grid max-w-[1060px] gap-10 sm:grid-cols-4">
+          <div>
+            <p className="flex items-center gap-1.5 text-[13px] font-semibold tracking-tight">
+              <span className="flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-bold text-white" style={{ background: CORAL }}>S</span>
+              {BRAND_NAME}
+            </p>
+            <p className="mt-3 max-w-[220px] text-[12px] leading-relaxed text-[#8F8D88]">
+              The platform for multi event weddings. Website, invitations, RSVPs and planning, connected.
+            </p>
+          </div>
+          {[
+            ['Product', [['#product', 'The editor'], ['#rsvp', 'Invitations & RSVP'], ['#templates', 'Templates'], ['#pricing', 'Pricing']]],
+            ['Company', [['mailto:maharshi.sim@hotmail.com', 'Early access'], ['mailto:maharshi.sim@hotmail.com', 'Talk to the founder'], ['#', 'Changelog']]],
+            ['Legal', [['#', 'Privacy'], ['#', 'Terms'], ['mailto:maharshi.sim@hotmail.com', 'Contact']]],
+          ].map(([group, links]) => (
+            <div key={group as string}>
+              <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.1em] text-[#8F8D88]">{group as string}</p>
+              <ul className="mt-3 space-y-2">
+                {(links as [string, string][]).map(([h, l]) => (
+                  <li key={l}><a href={h} className="text-[12.5px] text-[#6A6864] hover:text-[#191918]">{l}</a></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <p className="mx-auto mt-12 flex max-w-[1060px] items-center justify-between text-[11px] text-[#8F8D88]">
+          <span>© 2026 {BRAND_NAME}. Made for the big weekend.</span>
+          <span className="font-mono">{BASE_DOMAIN}</span>
         </p>
-        <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
-          <Link href="/login" className="bg-accent px-8 py-3.5 font-semibold text-white shadow-card">Start your site</Link>
-          <a href="mailto:maharshi.sim@hotmail.com?subject=Simvites%20early%20access"
-            className="font-mono text-[11px] uppercase tracking-[0.18em] underline underline-offset-4" style={GOLD}>
-            Talk to the founder
-          </a>
-        </div>
-      </section>
-
-      <footer className="mx-auto max-w-[1060px] px-6 py-12 text-center">
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">Made with {BRAND_NAME}</p>
       </footer>
-
-      <style>{`
-        @keyframes orbfloat { from { transform: translateY(0) scale(1) } to { transform: translateY(-28px) scale(1.12) } }
-        .orb { filter: blur(46px); animation: orbfloat 9s ease-in-out infinite alternate }
-        .orb2 { animation-duration: 13s; animation-delay: -4s }
-        @keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
-        .marquee { display: inline-block; animation: marquee 28s linear infinite }
-        @keyframes landin { from { opacity: 0.001; transform: translateY(26px) } to { opacity: 1; transform: none } }
-        @supports (animation-timeline: view()) {
-          [data-land] { animation: landin 0.9s cubic-bezier(0.16,1,0.3,1) both; animation-timeline: view(); animation-range: entry 0% entry 38%; }
-        }
-      `}</style>
     </div>
+  )
+}
+
+function SharedRow({ name, dots }: { name: string; dots: number[] }) {
+  return (
+    <>
+      <span className="text-[#191918]">{name}</span>
+      {dots.map((d, i) => (
+        <span key={i} className="text-center">
+          <span className={`inline-block h-2.5 w-2.5 rounded-full ${d ? '' : 'border border-[#DBDAD6]'}`}
+            style={d ? { background: CORAL } : undefined} />
+        </span>
+      ))}
+    </>
   )
 }
