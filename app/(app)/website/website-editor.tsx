@@ -11,6 +11,8 @@ import {
   createPage, renamePage, setPageHidden, deletePage,
 } from './actions'
 import { SECTION_PRESETS } from '@/lib/puck/presets'
+import { askConfirm, askPrompt, notify } from '@/components/ui/overlays'
+import { Pencil, Trash2, Eye, EyeOff } from 'lucide-react'
 import { FONT_PAIRS, BACKGROUNDS, ACCENTS, GLOWS, HOVERS, type SiteStyle } from '@/lib/site-style'
 
 export interface EditorPage {
@@ -60,21 +62,22 @@ function PagesMenu({ pages, currentId }: { pages: EditorPage[]; currentId: strin
                 <>
                   <button type="button" title="Rename this page" className="text-xs text-ink-3 hover:text-ink"
                     onClick={async () => {
-                      const t = window.prompt('New page name', p.title)
+                      const t = await askPrompt({ title: 'Rename page', placeholder: 'Page name', initial: p.title, confirmLabel: 'Rename' })
                       if (t) { await renamePage(p.id, t); router.refresh() }
-                    }}>✏️</button>
+                    }}><Pencil size={13} strokeWidth={1.7} /></button>
                   <button type="button" title={p.hidden ? 'Show in the site menu' : 'Hide from the site menu'}
                     className="text-xs text-ink-3 hover:text-ink"
                     onClick={async () => { await setPageHidden(p.id, !p.hidden); router.refresh() }}>
-                    {p.hidden ? '🙈' : '👁'}
+                    {p.hidden ? <EyeOff size={13} strokeWidth={1.7} /> : <Eye size={13} strokeWidth={1.7} />}
                   </button>
                   <button type="button" title="Delete this page" className="text-xs text-ink-3 hover:text-bad"
                     onClick={async () => {
-                      if (!window.confirm(`Delete "${p.title}"? This cannot be undone.`)) return
+                      if (!(await askConfirm({ title: `Delete "${p.title}"?`, body: 'The page and its sections are removed permanently.', confirmLabel: 'Delete page' }))) return
                       await deletePage(p.id)
+                      notify('Page deleted')
                       if (p.id === currentId) router.push('/website')
                       router.refresh()
-                    }}>🗑</button>
+                    }}><Trash2 size={13} strokeWidth={1.7} /></button>
                 </>
               )}
             </div>

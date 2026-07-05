@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { uploadFile, deleteFile } from './actions'
+import { askConfirm, notify } from '@/components/ui/overlays'
 
 export interface Option { id: string; name: string }
 export interface FileRow {
@@ -85,7 +86,10 @@ export function FileManager({ files, events, vendors }: {
                 Download
               </a>
               <button type="button"
-                onClick={() => { if (confirm(`Delete ${f.name}?`)) deleteFile(f.id).then(refresh) }}
+                onClick={async () => {
+                  if (!(await askConfirm({ title: `Delete ${f.name}?`, body: 'This file is removed permanently.', confirmLabel: 'Delete' }))) return
+                  await deleteFile(f.id); notify('File deleted'); refresh()
+                }}
                 aria-label={`Delete ${f.name}`}
                 className="font-mono text-[9px] uppercase text-ink-3 hover:text-bad">✕</button>
             </div>

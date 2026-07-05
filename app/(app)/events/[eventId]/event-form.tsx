@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { updateEvent, archiveEvent } from '../actions'
+import { askConfirm, notify } from '@/components/ui/overlays'
 
 interface EventRow {
   id: string
@@ -84,7 +85,10 @@ export function EventForm({ event }: { event: EventRow }) {
         {error && <span className="text-sm text-bad">{error}</span>}
         <button
           type="button"
-          onClick={() => { if (confirm('Archive this event?')) archiveEvent(event.id) }}
+          onClick={async () => {
+            if (!(await askConfirm({ title: `Archive ${event.name}?`, body: 'It disappears from your site and guest invitations, but nothing is deleted.' }))) return
+            notify('Event archived'); archiveEvent(event.id)
+          }}
           className="ml-auto font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3 hover:text-bad"
         >
           Archive

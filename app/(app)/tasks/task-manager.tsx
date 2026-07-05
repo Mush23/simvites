@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createTask, setTaskStatus, archiveTask, addStarterPack } from './actions'
+import { askConfirm, notify } from '@/components/ui/overlays'
 
 export interface Option { id: string; name: string }
 export interface TaskRow {
@@ -137,7 +138,10 @@ function TaskItem({ task, events, vendors, onChanged }: {
           {new Date(task.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
         </span>
       )}
-      <button type="button" onClick={() => { if (confirm('Archive this task?')) archiveTask(task.id).then(onChanged) }}
+      <button type="button" onClick={async () => {
+        if (!(await askConfirm({ title: 'Archive this task?', body: 'It moves out of your lists but is never deleted.' }))) return
+        await archiveTask(task.id); notify('Task archived'); onChanged()
+      }}
         aria-label={`Archive ${task.title}`}
         className="font-mono text-[9px] uppercase text-ink-3 hover:text-bad">✕</button>
     </div>

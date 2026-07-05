@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { addTable, deleteTable, seatGuest } from './actions'
+import { askConfirm, notify } from '@/components/ui/overlays'
 
 interface TableRow { id: string; name: string; capacity: number; eventName: string | null }
 interface GuestRow { id: string; name: string; household: string }
@@ -72,7 +73,10 @@ export function SeatingManager({ tables, seats, guests, events }: {
                 ))}
                 {seated.length === 0 && <li className="text-sm text-ink-3">Empty table.</li>}
               </ul>
-              <button type="button" onClick={() => { if (confirm(`Delete ${t.name}?`)) deleteTable(t.id).then(refresh) }}
+              <button type="button" onClick={async () => {
+                if (!(await askConfirm({ title: `Delete ${t.name}?`, body: 'Its guests return to the unseated list.', confirmLabel: 'Delete table' }))) return
+                await deleteTable(t.id); notify('Table deleted'); refresh()
+              }}
                 className="mt-4 border border-line bg-paper-2 px-3 py-1.5 text-xs text-ink-3 hover:text-bad">Delete table</button>
             </section>
           )

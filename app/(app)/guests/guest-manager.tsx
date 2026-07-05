@@ -6,6 +6,7 @@ import {
   addGuest, addHousehold, archiveGuest, archiveHousehold, importGuests, setInvitation,
   type ImportRow,
 } from './actions'
+import { askConfirm, notify } from '@/components/ui/overlays'
 
 export interface MatrixEvent { id: string; name: string }
 export interface MatrixGuest {
@@ -98,7 +99,10 @@ function HouseholdCard({ household, events, onChanged }: {
             </span>
           )}
           <button type="button"
-            onClick={() => { if (confirm(`Archive ${household.name} and its guests?`)) archiveHousehold(household.id).then(onChanged) }}
+            onClick={async () => {
+              if (!(await askConfirm({ title: `Archive ${household.name}?`, body: 'The household and its guests move out of your lists. Nothing is deleted.' }))) return
+              await archiveHousehold(household.id); notify(`${household.name} archived`); onChanged()
+            }}
             className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3 hover:text-bad">
             Archive
           </button>
@@ -194,7 +198,10 @@ function GuestRow({ guest, events, onChanged }: {
       ))}
       <td className="text-right">
         <button type="button" aria-label={`Archive ${guest.fullName}`}
-          onClick={() => { if (confirm(`Archive ${guest.fullName}?`)) archiveGuest(guest.id).then(onChanged) }}
+          onClick={async () => {
+            if (!(await askConfirm({ title: `Archive ${guest.fullName}?`, body: 'They leave the guest list and event invitations. Nothing is deleted.' }))) return
+            await archiveGuest(guest.id); notify(`${guest.fullName} archived`); onChanged()
+          }}
           className="font-mono text-[9px] uppercase text-ink-3 hover:text-bad">
           ✕
         </button>

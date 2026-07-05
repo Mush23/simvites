@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { updateVendor, archiveVendor } from '../actions'
+import { askConfirm, notify } from '@/components/ui/overlays'
 
 interface VendorRow {
   id: string
@@ -68,7 +69,10 @@ export function VendorForm({ vendor }: { vendor: VendorRow }) {
         {status === 'saving' && <span className="eyebrow">Saving…</span>}
         {error && <span className="text-sm text-bad">{error}</span>}
         <button type="button"
-          onClick={() => { if (confirm('Archive this vendor?')) archiveVendor(vendor.id) }}
+          onClick={async () => {
+            if (!(await askConfirm({ title: `Archive ${vendor.name}?`, body: 'Their budget lines stay; the vendor leaves your pipeline.' }))) return
+            notify('Vendor archived'); archiveVendor(vendor.id)
+          }}
           className="ml-auto font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3 hover:text-bad">
           Archive
         </button>

@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatPence } from '@/lib/money'
 import { createBudgetItem, updateBudgetItem, archiveBudgetItem } from './actions'
+import { askConfirm, notify } from '@/components/ui/overlays'
 
 export interface Option { id: string; name: string }
 export interface BudgetItemRow {
@@ -141,7 +142,10 @@ function BudgetRow({ item, events, vendors, onChanged }: {
           <Text name="due_date" label="Due" type="date" defaultValue={item.due_date ?? ''} w="w-36" />
           <button type="submit" className="rounded-md bg-accent px-4 py-2.5 font-semibold text-white">Save</button>
           <button type="button"
-            onClick={() => { if (confirm('Archive this line?')) archiveBudgetItem(item.id).then(onChanged) }}
+            onClick={async () => {
+              if (!(await askConfirm({ title: 'Archive this budget line?', body: 'It leaves your totals but is never deleted.' }))) return
+              await archiveBudgetItem(item.id); notify('Budget line archived'); onChanged()
+            }}
             className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3 hover:text-bad">
             Archive
           </button>

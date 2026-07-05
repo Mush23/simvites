@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { generateHouseholdLink, revokeLinks, sendInvitation } from './actions'
+import { askConfirm, notify } from '@/components/ui/overlays'
 
 export interface HouseholdInviteRow {
   id: string
@@ -71,7 +72,12 @@ function HouseholdRow({ row, onChanged }: { row: HouseholdInviteRow; onChanged: 
   }
 
   async function onRevoke() {
-    if (!confirm(`Invalidate every link previously shared with ${row.name}?`)) return
+    if (!(await askConfirm({
+      title: `Revoke ${row.name}'s links?`,
+      body: 'Every link previously shared with this household stops working immediately.',
+      confirmLabel: 'Revoke links',
+    }))) return
+    notify('Links revoked')
     setBusy(true)
     await revokeLinks(row.id)
     setBusy(false)

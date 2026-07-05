@@ -3,91 +3,132 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { Menu, X, LogOut } from 'lucide-react'
 import { BRAND_NAME } from '@/lib/brand'
 import { cn } from '@/lib/utils'
+import { NAV_GROUPS, SETTINGS_ITEM, type NavItem } from './nav-model'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 
-const MODULES: { href: string; label: string }[] = [
-  { href: '/dashboard', label: 'Command Centre' },
-  { href: '/website', label: 'Website' },
-  { href: '/events', label: 'Events' },
-  { href: '/guests', label: 'Guests' },
-  { href: '/invitations', label: 'Invitations' },
-  { href: '/rsvps', label: 'RSVPs' },
-  { href: '/seating', label: 'Seating' },
-  { href: '/budget', label: 'Budget' },
-  { href: '/vendors', label: 'Vendors' },
-  { href: '/tasks', label: 'Tasks' },
-  { href: '/files', label: 'Files' },
-  { href: '/reports', label: 'Reports' },
-  { href: '/settings', label: 'Settings' },
-]
+// ═══════════════════════════════════════════════════════════════════════
+// App sidebar (overhaul): 230px, surface bg, grouped nav with mono group
+// labels, 16px lucide icons, active = surface-2 + inset coral bar.
+// ═══════════════════════════════════════════════════════════════════════
 
-/** Mobile slide-over nav — the same 12 modules, reachable by thumb. */
-export function MobileNav() {
-  const pathname = usePathname()
-  const [open, setOpen] = useState(false)
+export interface SidebarSite {
+  title: string
+  slug: string
+  status: string
+  email: string
+  counts?: Partial<Record<'invitations', number>>
+}
 
+function NavLink({ item, active, count, onClick }: {
+  item: NavItem; active: boolean; count?: number; onClick?: () => void
+}) {
+  const Icon = item.icon
   return (
-    <div className="md:hidden">
-      <button type="button" onClick={() => setOpen(true)} aria-label="Open menu" aria-expanded={open}
-        className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-line text-ink">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
-      </button>
-      {open && (
-        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setOpen(false)}>
-          <nav aria-label="Modules" onClick={(e) => e.stopPropagation()}
-            className="h-full w-72 overflow-y-auto border-r border-line bg-paper-2 px-4 py-6">
-            <div className="mb-5 flex items-center justify-between px-2">
-              <span className="font-display text-2xl text-ink">{BRAND_NAME}</span>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Close menu"
-                className="flex min-h-11 min-w-11 items-center justify-center text-ink-3">✕</button>
-            </div>
-            {MODULES.map((m) => {
-              const active = pathname === m.href || pathname.startsWith(`${m.href}/`)
-              return (
-                <Link key={m.href} href={m.href} onClick={() => setOpen(false)}
-                  className={cn('mb-1 block rounded-md px-3 py-3 text-[15px]',
-                    active ? 'bg-surface text-ink shadow-card' : 'text-ink-2')}>
-                  {m.label}
-                </Link>
-              )
-            })}
-          </nav>
-        </div>
+    <Link href={item.href} onClick={onClick}
+      className={cn(
+        'mb-0.5 flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13.5px] transition-colors',
+        active
+          ? 'bg-surface-2 font-semibold text-ink shadow-[inset_2px_0_0_var(--accent)]'
+          : 'font-medium text-ink-2 hover:bg-surface-2 hover:text-ink',
+      )}>
+      <Icon size={16} strokeWidth={1.7} className={active ? 'text-ink' : 'text-ink-3'} />
+      <span className="flex-1">{item.label}</span>
+      {typeof count === 'number' && count > 0 && (
+        <span className="rounded-full bg-warn-soft px-1.5 py-px font-mono text-[9.5px] font-semibold text-warn">
+          {count}
+        </span>
       )}
-    </div>
+    </Link>
   )
 }
 
-export function Sidebar() {
+function NavBody({ site, onNavigate }: { site: SidebarSite; onNavigate?: () => void }) {
   const pathname = usePathname()
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-line bg-paper-2 md:flex">
-      <div className="px-6 py-6">
-        <Link href="/dashboard" className="font-display text-2xl text-ink">
+    <>
+      <div className="px-4 pb-2 pt-5">
+        <Link href="/dashboard" onClick={onNavigate} className="px-1 text-[13px] font-semibold tracking-tight text-ink">
           {BRAND_NAME}
         </Link>
+        {/* Site switcher: the ARTIFACT speaks serif — the couple's name. */}
+        <div className="mt-3 flex items-center gap-2 rounded-lg border border-line bg-paper px-2.5 py-2">
+          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', site.status === 'published' ? 'bg-ok' : 'bg-warn')} />
+          <span className="min-w-0 flex-1 truncate font-display text-[15px] leading-none text-ink">{site.title}</span>
+          <span className="font-mono text-[9px] uppercase tracking-wider text-ink-3">
+            {site.status === 'published' ? 'live' : 'draft'}
+          </span>
+        </div>
       </div>
-      <nav className="flex-1 px-3">
-        {MODULES.map((m) => {
-          const active = pathname === m.href || pathname.startsWith(`${m.href}/`)
-          return (
-            <Link
-              key={m.href}
-              href={m.href}
-              className={cn(
-                'mb-0.5 block rounded-md px-3 py-2 text-sm transition-colors',
-                active
-                  ? 'bg-surface text-ink shadow-card'
-                  : 'text-ink-2 hover:bg-surface/60 hover:text-ink',
-              )}
-            >
-              {m.label}
-            </Link>
-          )
-        })}
+
+      <nav className="flex-1 overflow-y-auto px-2.5 pb-3">
+        {NAV_GROUPS.map((g) => (
+          <div key={g.label} className="mt-4 first:mt-2">
+            <p className="microlabel mb-1.5 px-2.5">{g.label}</p>
+            {g.items.map((item) => (
+              <NavLink key={item.href} item={item} active={isActive(item.href)}
+                count={item.countKey ? site.counts?.[item.countKey] : undefined} onClick={onNavigate} />
+            ))}
+          </div>
+        ))}
       </nav>
+
+      <div className="border-t border-line px-2.5 py-3">
+        <NavLink item={SETTINGS_ITEM} active={isActive(SETTINGS_ITEM.href)} onClick={onNavigate} />
+        <div className="mt-1 flex items-center justify-between px-2.5 py-1">
+          <span className="text-[12px] text-ink-3">Appearance</span>
+          <ThemeToggle />
+        </div>
+        <div className="mt-1 flex items-center gap-2 rounded-lg px-2.5 py-1.5">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-2 text-[10px] font-semibold uppercase text-ink-2">
+            {site.email.slice(0, 1)}
+          </span>
+          <span className="min-w-0 flex-1 truncate text-[11.5px] text-ink-3">{site.email}</span>
+          <form action="/auth/signout" method="post">
+            <button type="submit" title="Sign out" aria-label="Sign out"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-ink-3 hover:bg-surface-2 hover:text-ink">
+              <LogOut size={14} strokeWidth={1.7} />
+            </button>
+          </form>
+        </div>
+      </div>
+    </>
+  )
+}
+
+export function Sidebar({ site }: { site: SidebarSite }) {
+  return (
+    <aside className="sticky top-0 hidden h-screen w-[230px] shrink-0 flex-col border-r border-line bg-surface md:flex">
+      <NavBody site={site} />
     </aside>
+  )
+}
+
+/** Mobile slide-over nav — same model, reachable by thumb. */
+export function MobileNav({ site }: { site: SidebarSite }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="md:hidden">
+      <button type="button" onClick={() => setOpen(true)} aria-label="Open menu" aria-expanded={open}
+        className="flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-line text-ink">
+        <Menu size={17} strokeWidth={1.7} />
+      </button>
+      {open && (
+        <div className="fixed inset-0 z-50 bg-black/45 backdrop-blur-[2px]" onClick={() => setOpen(false)}>
+          <div onClick={(e) => e.stopPropagation()}
+            className="relative flex h-full w-[270px] flex-col overflow-y-auto border-r border-line bg-surface">
+            <button type="button" onClick={() => setOpen(false)} aria-label="Close menu"
+              className="absolute right-3 top-4 flex h-9 w-9 items-center justify-center rounded-lg text-ink-3">
+              <X size={16} strokeWidth={1.7} />
+            </button>
+            <NavBody site={site} onNavigate={() => setOpen(false)} />
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

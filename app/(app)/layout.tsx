@@ -1,43 +1,44 @@
 import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/auth'
 import { getPrimarySite } from '@/lib/workspace'
-import { Sidebar, MobileNav } from '@/components/app/sidebar'
-import { ThemeToggle } from '@/components/theme/theme-toggle'
+import { createClient } from '@/lib/supabase/server'
+import { Sidebar, type SidebarSite } from '@/components/app/sidebar'
+import { AppHeader } from '@/components/app/app-header'
+import { CommandMenu } from '@/components/app/command-menu'
+import { OverlayProvider } from '@/components/ui/overlays'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser()
   const site = await getPrimarySite()
   if (!site) redirect('/onboarding')
 
+  // Attention badge: households without an invite link yet (overhaul spec).
+  const supabase = await createClient()
+  const [{ data: hh }, { data: tokens }] = await Promise.all([
+    supabase.from('households').select('id').eq('site_id', site.siteId).is('archived_at', null),
+    supabase.from('guest_access_tokens').select('household_id').eq('site_id', site.siteId).eq('revoked', false),
+  ])
+  const withLink = new Set((tokens ?? []).map((t) => t.household_id))
+  const unsent = (hh ?? []).filter((h) => !withLink.has(h.id)).length
+
+  const sidebarSite: SidebarSite = {
+    title: site.title,
+    slug: site.slug,
+    status: site.status,
+    email: user.email ?? '',
+    counts: { invitations: unsent ?? 0 },
+  }
+
   return (
-    <div className="flex min-h-screen bg-paper text-ink">
-      <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="app-header sticky top-0 z-40 flex items-center justify-between border-b border-line px-6 py-3.5">
-          <div className="flex items-center gap-3">
-            <MobileNav />
-            <span className="font-display text-lg text-ink">{site.title}</span>
-            <span className="rounded-pill border border-line px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-ink-3">
-              {site.status}
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3 sm:inline">
-              {user.email}
-            </span>
-            <ThemeToggle />
-            <form action="/auth/signout" method="post">
-              <button
-                type="submit"
-                className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3 transition-colors hover:text-accent-ink"
-              >
-                Sign out
-              </button>
-            </form>
-          </div>
-        </header>
-        <main className="flex-1">{children}</main>
+    <OverlayProvider>
+      <div className="flex min-h-screen bg-paper text-ink">
+        <Sidebar site={sidebarSite} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <AppHeader site={sidebarSite} />
+          <main className="flex-1">{children}</main>
+        </div>
       </div>
-    </div>
+      <CommandMenu siteSlug={site.slug} />
+    </OverlayProvider>
   )
 }
