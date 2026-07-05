@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   House, Globe, CalendarDays, Users, Mail, MailCheck, Armchair,
-  Wallet, Store, ListChecks, Folder, ChartColumn, Settings,
+  Wallet, Store, ListChecks, Folder, ChartColumn, Settings, CalendarClock,
 } from 'lucide-react'
 
 // One nav model for the sidebar, mobile nav and ⌘K palette (overhaul spec:
@@ -12,7 +12,7 @@ export interface NavItem {
   label: string
   icon: LucideIcon
   /** Key into the counts record the layout computes (badge). */
-  countKey?: 'invitations'
+  countKey?: 'invitations' | 'payments'
 }
 export interface NavGroup {
   label: string
@@ -41,6 +41,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Planning',
     items: [
       { href: '/budget', label: 'Budget', icon: Wallet },
+      { href: '/payments', label: 'Payments', icon: CalendarClock, countKey: 'payments' },
       { href: '/vendors', label: 'Vendors', icon: Store },
       { href: '/tasks', label: 'Tasks', icon: ListChecks },
       { href: '/files', label: 'Files', icon: Folder },

@@ -12,21 +12,26 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const site = await getPrimarySite()
   if (!site) redirect('/onboarding')
 
-  // Attention badge: households without an invite link yet (overhaul spec).
+  // Attention badges: households without an invite link yet, and payments
+  // that are overdue or due within 14 days (overhaul spec).
   const supabase = await createClient()
-  const [{ data: hh }, { data: tokens }] = await Promise.all([
+  const soon = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10)
+  const [{ data: hh }, { data: tokens }, { data: duePayments }] = await Promise.all([
     supabase.from('households').select('id').eq('site_id', site.siteId).is('archived_at', null),
     supabase.from('guest_access_tokens').select('household_id').eq('site_id', site.siteId).eq('revoked', false),
+    supabase.from('vendor_payments').select('id').eq('site_id', site.siteId)
+      .is('archived_at', null).eq('status', 'scheduled').lte('due_date', soon),
   ])
   const withLink = new Set((tokens ?? []).map((t) => t.household_id))
   const unsent = (hh ?? []).filter((h) => !withLink.has(h.id)).length
+  const paymentsDue = (duePayments ?? []).length
 
   const sidebarSite: SidebarSite = {
     title: site.title,
     slug: site.slug,
     status: site.status,
     email: user.email ?? '',
-    counts: { invitations: unsent ?? 0 },
+    counts: { invitations: unsent ?? 0, payments: paymentsDue },
   }
 
   return (

@@ -19,7 +19,7 @@ export interface SidebarSite {
   slug: string
   status: string
   email: string
-  counts?: Partial<Record<'invitations', number>>
+  counts?: Partial<Record<'invitations' | 'payments', number>>
 }
 
 function NavLink({ item, active, count, onClick }: {
