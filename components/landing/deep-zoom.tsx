@@ -163,13 +163,14 @@ export function DeepZoom() {
       // dark field 0.03–0.17
       if (q.dark) q.dark.style.opacity = String(seg(p, 0.03, 0.17))
 
-      // demo frame: tilt-in 0→0.14, hold, recede 0.44–0.56
+      // demo frame: tilt-in 0→0.14, hold, recede 0.44–0.56. Rests lower &
+      // smaller (30vh / 0.58) so it never crowds the hero at the top.
       if (q.frame) {
         const enter = seg(p, 0, 0.14)
         const exit = seg(p, 0.44, 0.56)
-        const scale = 0.6 + enter * 0.4 - exit * 0.34
+        const scale = 0.58 + enter * 0.42 - exit * 0.34
         const rot = 11 * (1 - enter)
-        const yShift = (1 - enter) * 24 - exit * 6
+        const yShift = (1 - enter) * 30 - exit * 6
         q.frame.style.transform = `perspective(1600px) translateY(${yShift}vh) rotateX(${rot}deg) scale(${scale})`
         q.frame.style.opacity = String(1 - seg(p, 0.5, 0.56))
         q.frame.style.filter = exit > 0 ? `blur(${exit * 3}px)` : 'none'
@@ -209,17 +210,17 @@ export function DeepZoom() {
   return (
     <>
       {/* Fixed glass nav pill */}
-      <nav className="fixed left-1/2 top-4 z-50 flex -translate-x-1/2 items-center gap-1 rounded-[13px] border border-black/[0.07] px-2 py-1.5 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.25)]"
+      <nav className="fixed left-1/2 top-4 z-50 flex max-w-[calc(100vw-24px)] -translate-x-1/2 flex-nowrap items-center gap-0.5 whitespace-nowrap rounded-[13px] border border-black/[0.07] px-2 py-1.5 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.25)] sm:gap-1"
         style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(14px)' }}>
-        <Link href="/" className="flex items-center gap-1.5 px-2 text-[13px] font-semibold tracking-tight text-[#191918]">
+        <Link href="/" className="flex shrink-0 items-center gap-1.5 px-2 text-[13px] font-semibold tracking-tight text-[#191918]">
           <span className="flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-bold text-white" style={{ background: 'oklch(0.62 0.21 29)' }}>S</span>
           {BRAND_NAME}
         </Link>
         {[['#product', 'Product'], ['#templates', 'Templates'], ['#rsvp', 'RSVP'], ['#pricing', 'Pricing']].map(([h, l]) => (
-          <a key={h} href={h} className="hidden rounded-lg px-2.5 py-1 text-[13px] font-medium text-[#6A6864] hover:text-[#191918] sm:block">{l}</a>
+          <a key={h} href={h} className="hidden shrink-0 rounded-lg px-2.5 py-1 text-[13px] font-medium text-[#6A6864] hover:text-[#191918] md:block">{l}</a>
         ))}
-        <Link href="/login" className="rounded-lg px-2.5 py-1 text-[13px] font-medium text-[#6A6864] hover:text-[#191918]">Sign in</Link>
-        <Link href="/login" className="rounded-lg px-3 py-1.5 text-[13px] font-semibold text-white" style={{ background: 'oklch(0.62 0.21 29)' }}>
+        <Link href="/login" className="shrink-0 rounded-lg px-2.5 py-1 text-[13px] font-medium text-[#6A6864] hover:text-[#191918]">Sign in</Link>
+        <Link href="/login" className="shrink-0 rounded-lg px-3 py-1.5 text-[13px] font-semibold text-white" style={{ background: 'oklch(0.62 0.21 29)' }}>
           Start free
         </Link>
       </nav>
@@ -245,19 +246,20 @@ export function DeepZoom() {
             <div className="absolute inset-0" style={{ background: 'radial-gradient(700px 480px at 50% 45%, oklch(0.62 0.21 29 / 0.12), transparent 70%)' }} />
           </div>
 
-          {/* hero copy */}
-          <div data-s="hero" className="relative mx-auto flex h-[46vh] max-w-[860px] flex-col items-center justify-end px-6 pb-6 text-center">
+          {/* hero copy — top-anchored below the fixed nav, sized to content so
+              the headline can never be clipped (mobile or desktop). */}
+          <div data-s="hero" className="relative mx-auto flex max-w-[880px] flex-col items-center px-5 pb-6 pt-[104px] text-center sm:pt-[124px]">
             <span className="rounded-full border border-black/10 bg-white px-3 py-1 font-mono text-[9.5px] uppercase tracking-[0.08em] text-[#6A6864]">
               Per event invitations · live RSVP · zero code
             </span>
-            <h1 className="mt-5 font-sans text-[clamp(44px,6.4vw,80px)] font-[650] leading-[0.98] tracking-[-0.045em] text-[#191918]">
+            <h1 className="mt-4 font-sans text-[clamp(34px,7vw,76px)] font-[650] leading-[1.0] tracking-[-0.04em] text-[#191918]">
               Every event. Every guest.<br />One platform.
             </h1>
-            <p className="mt-5 max-w-[560px] text-[15px] leading-relaxed text-[#6A6864]">
+            <p className="mt-4 max-w-[560px] text-[14px] leading-relaxed text-[#6A6864] sm:text-[15px]">
               Build the wedding website, invite each guest to exactly the right events, and watch RSVPs land live.
               Planning, guests and the site itself, finally in one place.
             </p>
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <Link href="/login" className="rounded-[10px] bg-[#191918] px-5 py-2.5 text-[13.5px] font-semibold text-white">
                 Start building free
               </Link>
@@ -267,9 +269,9 @@ export function DeepZoom() {
             </div>
           </div>
 
-          {/* demo frame */}
-          <div data-s="frame" className="absolute left-1/2 top-1/2 w-[min(980px,92vw)] -translate-x-1/2 -translate-y-1/2"
-            style={{ transform: 'perspective(1600px) translateY(24vh) rotateX(11deg) scale(0.6)', willChange: 'transform, opacity' }}>
+          {/* demo frame — sits in the lower third at rest; scroll scales it up */}
+          <div data-s="frame" className="absolute left-1/2 top-1/2 w-[min(980px,94vw)] -translate-x-1/2 -translate-y-1/2"
+            style={{ transform: 'perspective(1600px) translateY(30vh) rotateX(11deg) scale(0.58)', willChange: 'transform, opacity' }}>
             <LiveDemo active={demoActive} />
           </div>
 
