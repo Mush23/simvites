@@ -6,7 +6,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Search, ExternalLink } from 'lucide-react'
+import { Search, ExternalLink, Bell } from 'lucide-react'
 import { pageTitleFor } from './nav-model'
 import { MobileNav, type SidebarSite } from './sidebar'
 import { publishSiteNow } from '@/app/(app)/actions'
@@ -14,7 +14,47 @@ import { useOverlays } from '@/components/ui/overlays'
 
 type PublishState = 'idle' | 'publishing' | 'live' | 'locked'
 
-export function AppHeader({ site }: { site: SidebarSite }) {
+export interface HeaderNotification { href: string; text: string; tone: 'ok' | 'warn' | 'bad' }
+
+function NotificationBell({ items }: { items: HeaderNotification[] }) {
+  const [open, setOpen] = useState(false)
+  const tone = (t: HeaderNotification['tone']) =>
+    t === 'ok' ? 'var(--ok)' : t === 'bad' ? 'var(--bad)' : 'var(--warn)'
+  return (
+    <div className="relative">
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-label="Notifications"
+        className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-line text-ink-2 hover:border-line-2 hover:text-ink">
+        <Bell size={15} strokeWidth={1.7} />
+        {items.length > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 font-mono text-[9px] font-semibold text-white">
+            {items.length}
+          </span>
+        )}
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-11 z-50 w-80 rounded-xl border border-line bg-surface p-1.5 shadow-lift">
+            <p className="microlabel px-2.5 pb-1 pt-1.5">Needs your attention</p>
+            {items.length === 0 && (
+              <p className="px-2.5 py-3 text-[13px] text-ink-3">All caught up — nothing needs you right now.</p>
+            )}
+            {items.map((n, i) => (
+              <Link key={i} href={n.href} onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-ink hover:bg-surface-2">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: tone(n.tone) }} />
+                <span className="min-w-0 flex-1">{n.text}</span>
+                <span aria-hidden className="text-ink-3">→</span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+export function AppHeader({ site, notifications = [] }: { site: SidebarSite; notifications?: HeaderNotification[] }) {
   const pathname = usePathname()
   const { toast } = useOverlays()
   const [pub, setPub] = useState<PublishState>('idle')
@@ -47,6 +87,7 @@ export function AppHeader({ site }: { site: SidebarSite }) {
           <span className={`h-1.5 w-1.5 rounded-full ${site.status === 'published' ? 'bg-ok' : 'bg-warn'}`} />
           {site.status === 'published' ? 'Live' : 'Draft'}
         </span>
+        <NotificationBell items={notifications} />
         <Link href={`/s/${site.slug}`} target="_blank"
           className="flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-[13px] font-medium text-ink hover:border-line-2">
           Preview <ExternalLink size={12} strokeWidth={1.7} className="text-ink-3" />

@@ -50,5 +50,14 @@ export default async function GuestRsvpPage({
     )
   }
 
-  return themed(<RsvpFlow ctx={ctx} />)
+  return themed(
+    <>
+      <RsvpFlow ctx={ctx} />
+      <p className="bg-paper pb-10 text-center">
+        <a href="/schedule" className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-ink underline underline-offset-4">
+          View your personal schedule →
+        </a>
+      </p>
+    </>
+  )
 }

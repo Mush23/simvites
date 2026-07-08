@@ -7,6 +7,7 @@ import {
   type ImportRow,
 } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
+import { restoreArchived, restoreHousehold } from '@/app/(app)/actions'
 import { X } from 'lucide-react'
 
 export interface MatrixEvent { id: string; name: string; accent?: string | null }
@@ -155,7 +156,12 @@ function HouseholdCard({ household, events, onChanged }: {
           <button type="button"
             onClick={async () => {
               if (!(await askConfirm({ title: `Archive ${household.name}?`, body: 'The household and its guests move out of your lists. Nothing is deleted.' }))) return
-              await archiveHousehold(household.id); notify(`${household.name} archived`); onChanged()
+              await archiveHousehold(household.id)
+              notify(`${household.name} archived`, {
+                actionLabel: 'Undo',
+                onAction: () => { restoreHousehold(household.id).then(onChanged) },
+              })
+              onChanged()
             }}
             className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3 hover:text-bad">
             Archive
@@ -274,7 +280,12 @@ function GuestRow({ guest, events, onChanged }: {
         <button type="button" aria-label={`Archive ${guest.fullName}`}
           onClick={async () => {
             if (!(await askConfirm({ title: `Archive ${guest.fullName}?`, body: 'They leave the guest list and event invitations. Nothing is deleted.' }))) return
-            await archiveGuest(guest.id); notify(`${guest.fullName} archived`); onChanged()
+            await archiveGuest(guest.id)
+            notify(`${guest.fullName} archived`, {
+              actionLabel: 'Undo',
+              onAction: () => { restoreArchived('guests', guest.id).then(onChanged) },
+            })
+            onChanged()
           }}
           className="font-mono text-[9px] uppercase text-ink-3 hover:text-bad">
           ✕

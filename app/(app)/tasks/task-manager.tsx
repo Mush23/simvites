@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createTask, setTaskStatus, archiveTask, addStarterPack } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
+import { restoreArchived } from '@/app/(app)/actions'
 import { X } from 'lucide-react'
 
 export interface Option { id: string; name: string }
@@ -141,7 +142,12 @@ function TaskItem({ task, events, vendors, onChanged }: {
       )}
       <button type="button" onClick={async () => {
         if (!(await askConfirm({ title: 'Archive this task?', body: 'It moves out of your lists but is never deleted.' }))) return
-        await archiveTask(task.id); notify('Task archived'); onChanged()
+        await archiveTask(task.id)
+        notify('Task archived', {
+          actionLabel: 'Undo',
+          onAction: () => { restoreArchived('tasks', task.id).then(onChanged) },
+        })
+        onChanged()
       }}
         aria-label={`Archive ${task.title}`}
         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-3 hover:bg-bad-soft hover:text-bad"><X size={14} strokeWidth={1.7} /></button>

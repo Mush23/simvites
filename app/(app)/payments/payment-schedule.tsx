@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { Check, Bell, Plus, X, CalendarClock } from 'lucide-react'
 import { formatPence } from '@/lib/money'
 import { createPayment, setPaymentPaid, deletePayment } from './actions'
+import { restoreArchived } from '@/app/(app)/actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
 
 export interface Opt { id: string; name: string }
@@ -59,7 +60,12 @@ export function PaymentSchedule({ rows, vendors, budgetItems }: {
 
   async function onDelete(r: PaymentRow) {
     if (!(await askConfirm({ title: `Delete "${r.label}"?`, body: 'This removes it from your schedule.', confirmLabel: 'Delete' }))) return
-    await deletePayment(r.id); notify('Payment removed'); refresh()
+    await deletePayment(r.id)
+    notify('Payment removed', {
+      actionLabel: 'Undo',
+      onAction: () => { restoreArchived('vendor_payments', r.id).then(refresh) },
+    })
+    refresh()
   }
 
   // Group by month, scheduled first (by date), paid rows fall to the bottom.

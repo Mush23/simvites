@@ -211,9 +211,15 @@ export const siteConfig: Config<SiteBlocks> = {
 
 // ── Sprint A injection: EVERY block gains the Style group (5 variants +
 // accent/corners/shading/glow/hover/appear) via one generic wrapper. Values
-// live in the page doc → frozen into snapshots like all content. ──────────
+// live in the page doc → frozen into snapshots like all content. In the
+// EDITOR only, each block is additionally wrapped in EditorBlockChrome
+// (hover name chip + "Add below" insert menu) — the public render never
+// sees it. ─────────────────────────────────────────────────────────────
+import { EditorBlockChrome } from './block-chrome'
+
 for (const key of Object.keys(siteConfig.components)) {
   const comp = siteConfig.components[key as keyof SiteBlocks] as unknown as {
+    label?: string
     fields: Record<string, unknown>
     defaultProps: Record<string, unknown>
     render: (p: Record<string, unknown>) => React.ReactNode
@@ -221,9 +227,17 @@ for (const key of Object.keys(siteConfig.components)) {
   comp.fields.styleOpts = styleField
   comp.defaultProps = { ...comp.defaultProps, styleOpts: { ...DEFAULT_STYLE } }
   const orig = comp.render
-  comp.render = (p) => (
-    <Styled opts={p.styleOpts as StyleOpts | undefined}>{orig(p)}</Styled>
-  )
+  const label = comp.label ?? key
+  comp.render = (p) => {
+    const inner = <Styled opts={p.styleOpts as StyleOpts | undefined}>{orig(p)}</Styled>
+    const editing = (p.puck as { isEditing?: boolean } | undefined)?.isEditing
+    if (!editing) return inner
+    return (
+      <EditorBlockChrome id={String(p.id ?? '')} label={label}>
+        {inner}
+      </EditorBlockChrome>
+    )
+  }
 }
 
 export type SiteData = Data<SiteBlocks>

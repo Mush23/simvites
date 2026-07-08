@@ -78,7 +78,7 @@ export async function updateSiteStyle(style: Record<string, string>) {
 // ── Multi-page management (Sprint D). RLS (can_write_site) scopes writes. ──
 
 /** Slugs that would shadow built-in routes under /s/[siteSlug]/. */
-const RESERVED_PAGE_SLUGS = new Set(['rsvp'])
+const RESERVED_PAGE_SLUGS = new Set(['rsvp', 'schedule'])
 
 export async function createPage(title: string): Promise<{ id?: string; error?: string }> {
   const workspace = await getPrimarySite()

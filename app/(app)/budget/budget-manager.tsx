@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { formatPence } from '@/lib/money'
 import { createBudgetItem, updateBudgetItem, archiveBudgetItem } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
+import { restoreArchived } from '@/app/(app)/actions'
 
 export interface Option { id: string; name: string }
 export interface BudgetItemRow {
@@ -144,7 +145,12 @@ function BudgetRow({ item, events, vendors, onChanged }: {
           <button type="button"
             onClick={async () => {
               if (!(await askConfirm({ title: 'Archive this budget line?', body: 'It leaves your totals but is never deleted.' }))) return
-              await archiveBudgetItem(item.id); notify('Budget line archived'); onChanged()
+              await archiveBudgetItem(item.id)
+              notify('Budget line archived', {
+                actionLabel: 'Undo',
+                onAction: () => { restoreArchived('budget_items', item.id).then(onChanged) },
+              })
+              onChanged()
             }}
             className="text-[12.5px] font-medium text-ink-3 hover:text-bad">
             Archive

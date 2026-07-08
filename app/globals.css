@@ -201,6 +201,43 @@ a[class*='bg-primary'] {
   [data-banim='slide'] { animation: b-slide 0.9s cubic-bezier(0.16,1,0.3,1) both; animation-timeline: view(); animation-range: entry 0% entry 35%; }
 }
 
+/* ── Editor block chrome: hover name chip + "Add below" pill ─────────────
+   Editor-only (EditorBlockChrome renders only when puck.isEditing). */
+.ebc-chip {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  z-index: 30;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+.ebc-add {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+.ebc:hover > .ebc-chip { opacity: 1; }
+.ebc:hover > .ebc-add,
+.ebc-add:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* ── Sprint B: editor preview-width toggle (desktop / tablet / phone) ────
    The .editor-vp wrapper (Puck preview override) reads --editor-vw from the
    editor wrapper; at narrow widths it gets a device-style frame. */

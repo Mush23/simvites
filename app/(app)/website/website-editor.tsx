@@ -229,7 +229,7 @@ function PresetsMenu() {
     const at = content.length > 0 && content[content.length - 1].type === 'SiteFooterBlock'
       ? content.length - 1 : content.length
     content.splice(at, 0, item)
-    dispatch({ type: 'setData', data: { ...appState.data, content } })
+    dispatch({ type: 'setData', data: { ...appState.data, content }, recordHistory: true })
     setOpen(false)
   }
 
