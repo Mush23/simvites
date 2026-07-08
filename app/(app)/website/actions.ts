@@ -75,6 +75,50 @@ export async function updateSiteStyle(style: Record<string, string>) {
   return { ok: true }
 }
 
+// ── AI section composer (guarded): prompt → a written, allowlisted block. ──
+
+const AI_BLOCK_TYPES = new Set(['StoryBlock', 'Faq', 'GiftsNote', 'Travel', 'EventDetail'])
+
+export async function aiComposeSection(prompt: string): Promise<{
+  type?: string; props?: Record<string, unknown>; error?: string; notConfigured?: boolean
+}> {
+  const { aiConfigured, chat } = await import('@/lib/ai')
+  if (!aiConfigured()) return { notConfigured: true }
+  const workspace = await getPrimarySite()
+  if (!workspace) return { error: 'No site.' }
+  const clean = prompt.trim().slice(0, 600)
+  if (!clean) return { error: 'Describe the section first.' }
+
+  const system =
+    'You write sections for a couple\'s wedding website. Return ONLY a JSON object, no prose: ' +
+    '{"type": one of "StoryBlock"|"Faq"|"GiftsNote"|"Travel"|"EventDetail", "props": {...}}.\n' +
+    'Props by type:\n' +
+    '- StoryBlock: {"kicker": string, "title": string, "paragraphs": [{"text": string}]} (1-3 warm paragraphs)\n' +
+    '- Faq: {"heading": string, "items": [{"q": string, "a": string}]} (3-6 questions)\n' +
+    '- GiftsNote: {"heading": string, "body": string}\n' +
+    '- Travel: {"heading": string, "body": string} (line breaks allowed)\n' +
+    '- EventDetail: {"title": string, "meta": string, "body": string}\n' +
+    'Pick the type that best fits the request. Write in the couple\'s own warm voice, ' +
+    'specific over generic, UK English, and never use dashes as punctuation.'
+
+  const out = await chat(system, [{ role: 'user', content: clean }], 1200)
+  if (!out) return { error: 'The AI is unavailable right now. Try again in a moment.' }
+
+  try {
+    const start = out.indexOf('{')
+    const end = out.lastIndexOf('}')
+    if (start === -1 || end === -1) return { error: 'The AI gave an unusable answer. Try rephrasing.' }
+    const parsed = JSON.parse(out.slice(start, end + 1)) as { type?: unknown; props?: unknown }
+    if (typeof parsed.type !== 'string' || !AI_BLOCK_TYPES.has(parsed.type) ||
+        typeof parsed.props !== 'object' || parsed.props === null) {
+      return { error: 'The AI gave an unusable answer. Try rephrasing.' }
+    }
+    return { type: parsed.type, props: parsed.props as Record<string, unknown> }
+  } catch {
+    return { error: 'The AI gave an unusable answer. Try rephrasing.' }
+  }
+}
+
 // ── Multi-page management (Sprint D). RLS (can_write_site) scopes writes. ──
 
 /** Slugs that would shadow built-in routes under /s/[siteSlug]/. */

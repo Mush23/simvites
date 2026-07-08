@@ -7,6 +7,7 @@ import { siteStyleProps } from '@/lib/site-style'
 import { GUEST_COOKIE, verifyGuestSession } from '@/lib/guest-session'
 import { createAdminClient } from '@/lib/supabase/server'
 import { SiteNav } from '@/components/site/site-nav'
+import { BackdropFx } from '@/components/site/backdrop-fx'
 
 // Share-friendly metadata: the couple's names + an invitation line, so
 // WhatsApp/iMessage previews read like an invitation, not a URL.
@@ -53,9 +54,12 @@ export default async function PublicSitePage({
   }
 
   return (
-    <div data-site-root className="min-h-screen bg-paper text-ink" {...styleProps}>
-      <SiteNav pages={snap.pages} theme={snap.theme} />
-      <Render config={siteConfig} data={data} metadata={{ events: snap.events, guestName }} />
+    <div data-site-root className="relative min-h-screen bg-paper text-ink" {...styleProps}>
+      <BackdropFx theme={snap.theme} />
+      <div className="relative z-[1]">
+        <SiteNav pages={snap.pages} theme={snap.theme} />
+        <Render config={siteConfig} data={data} metadata={{ events: snap.events, guestName }} />
+      </div>
     </div>
   )
 }

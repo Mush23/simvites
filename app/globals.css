@@ -263,6 +263,86 @@ a[class*='bg-primary'] {
   letter-spacing: 0.06em;
 }
 
+/* ── Backdrop effects (Style panel → "Backdrop effect") ──────────────────
+   Pure CSS, tinted by the template's own accent vars, transform-only
+   animations (silenced by the global reduced-motion rule). The layer sits
+   at z-0 behind the z-1 content wrapper. */
+[data-backdrop='mesh'] {
+  background:
+    radial-gradient(56rem 40rem at 12% 8%, var(--accent-soft), transparent 70%),
+    radial-gradient(48rem 36rem at 88% 30%, color-mix(in oklab, var(--accent-line) 26%, transparent), transparent 70%),
+    radial-gradient(60rem 44rem at 50% 100%, var(--accent-soft), transparent 72%);
+}
+[data-backdrop='aurora']::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(42rem 30rem at 30% 30%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 70%),
+    radial-gradient(38rem 30rem at 70% 60%, color-mix(in oklab, var(--accent-line) 22%, transparent), transparent 70%);
+  animation: bd-aurora 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes bd-aurora {
+  from { transform: translate3d(-4%, -3%, 0) rotate(-4deg) scale(1); }
+  to { transform: translate3d(4%, 3%, 0) rotate(4deg) scale(1.12); }
+}
+[data-backdrop='petals']::before,
+[data-backdrop='petals']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -100%;
+  height: 200%;
+  background-image:
+    radial-gradient(5px 7px at 12% 10%, var(--accent-line), transparent 60%),
+    radial-gradient(4px 6px at 34% 42%, color-mix(in oklab, var(--accent) 40%, transparent), transparent 60%),
+    radial-gradient(6px 8px at 58% 22%, var(--accent-line), transparent 60%),
+    radial-gradient(4px 5px at 76% 55%, color-mix(in oklab, var(--accent) 34%, transparent), transparent 60%),
+    radial-gradient(5px 7px at 90% 32%, var(--accent-line), transparent 60%),
+    radial-gradient(4px 6px at 22% 78%, color-mix(in oklab, var(--accent) 30%, transparent), transparent 60%);
+  background-size: 100% 50%;
+  opacity: 0.5;
+  animation: bd-petals 38s linear infinite;
+  will-change: transform;
+}
+[data-backdrop='petals']::after {
+  animation-duration: 55s;
+  animation-delay: -18s;
+  opacity: 0.3;
+  transform: scale(1.4);
+}
+@keyframes bd-petals {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, 50%, 0); }
+}
+[data-backdrop='shimmer']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 45%;
+  background: linear-gradient(105deg, transparent, color-mix(in oklab, var(--accent-soft) 80%, white) 50%, transparent);
+  animation: bd-shimmer 9s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes bd-shimmer {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(400%); }
+}
+
+/* Typographic niceties on the artifact: balanced headlines + a selection
+   colour drawn from the template's own accent. */
+[data-site-root] h1,
+[data-site-root] h2 {
+  text-wrap: balance;
+}
+[data-site-root] ::selection {
+  background: color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
 /* ── Site Style engine: couple-chosen glow + hover on public site cards ── */
 [data-glow='soft'] .shadow-card { box-shadow: var(--shadow), 0 0 28px -8px var(--accent-line); }
 [data-glow='strong'] .shadow-card { box-shadow: var(--shadow), 0 0 44px -6px var(--accent-line), 0 0 12px -4px var(--accent-line); }

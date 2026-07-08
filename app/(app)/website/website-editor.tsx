@@ -8,12 +8,12 @@ import type { SiteEvent } from '@/components/site/blocks'
 import { useRouter } from 'next/navigation'
 import {
   savePageDraft, saveAndPublish, uploadSiteImage, updateSiteStyle,
-  createPage, renamePage, setPageHidden, deletePage,
+  createPage, renamePage, setPageHidden, deletePage, aiComposeSection,
 } from './actions'
 import { SECTION_PRESETS } from '@/lib/puck/presets'
 import { askConfirm, askPrompt, notify } from '@/components/ui/overlays'
 import { Pencil, Trash2, Eye, EyeOff, FileText, ChevronDown, Palette, ExternalLink, Info, LayoutTemplate } from 'lucide-react'
-import { FONT_PAIRS, BACKGROUNDS, ACCENTS, GLOWS, HOVERS, type SiteStyle } from '@/lib/site-style'
+import { FONT_PAIRS, BACKGROUNDS, ACCENTS, GLOWS, HOVERS, BACKDROPS, type SiteStyle } from '@/lib/site-style'
 
 export interface EditorPage {
   id: string
@@ -134,6 +134,7 @@ function StylePanel({ current }: { current: SiteStyle }) {
           <Sel k="accent" label="Accent colour" options={ACCENTS} />
           <Sel k="glow" label="Card glow" options={GLOWS} />
           <Sel k="hover" label="Hover animation" options={HOVERS} />
+          <Sel k="backdrop" label="Backdrop effect (live site)" options={BACKDROPS} />
 
           {/* Brand kit (Sprint D): monogram + initials shown in the site menu */}
           <div className="border-t border-line pt-3">
@@ -256,6 +257,67 @@ function PresetsMenu() {
   )
 }
 
+/** AI section composer — describe a section, get it written and inserted. */
+function AiSectionMenu() {
+  const getPuck = useGetPuck()
+  const [open, setOpen] = useState(false)
+  const [prompt, setPrompt] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [note, setNote] = useState<string | null>(null)
+
+  async function compose() {
+    if (!prompt.trim() || busy) return
+    setBusy(true); setNote(null)
+    const res = await aiComposeSection(prompt)
+    setBusy(false)
+    if (res.notConfigured) { setNote('AI is not connected yet. Add an ANTHROPIC_API_KEY to switch this on.'); return }
+    if (res.error || !res.type) { setNote(res.error ?? 'Something went wrong.'); return }
+
+    // Merge onto the block's defaults (styleOpts etc.), insert above the footer.
+    const { siteConfig: cfg } = await import('@/lib/puck/config')
+    const defaults = (cfg.components[res.type as keyof typeof cfg.components] as { defaultProps?: Record<string, unknown> })?.defaultProps ?? {}
+    const { appState, dispatch } = getPuck()
+    const content = [...appState.data.content]
+    const item = {
+      type: res.type,
+      props: { ...defaults, ...res.props, id: `${res.type}-${crypto.randomUUID()}` },
+    } as (typeof content)[number]
+    const at = content.length > 0 && content[content.length - 1].type === 'SiteFooterBlock'
+      ? content.length - 1 : content.length
+    content.splice(at, 0, item)
+    dispatch({ type: 'setData', data: { ...appState.data, content }, recordHistory: true })
+    setOpen(false); setPrompt('')
+    notify('Section written and added — read it over and tweak anything')
+  }
+
+  return (
+    <div className="relative">
+      <button type="button" id="ai-section" onClick={() => setOpen((o) => !o)}
+        title="Describe a section and AI writes it for you"
+        className="flex items-center gap-1 rounded-pill border border-line bg-paper-2 px-3 py-1.5 text-sm text-ink hover:border-accent">
+        ✦ AI section
+      </button>
+      {open && (
+        <div className="absolute right-0 top-11 z-50 w-80 rounded-card border border-line bg-surface p-3 shadow-lift">
+          <p className="mb-2 text-[12px] font-medium text-ink-2">What should this section say?</p>
+          <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3}
+            placeholder={'e.g. "Our story — we met at university in London, bonded over bad coffee, got engaged in Santorini last summer"'}
+            className="w-full rounded-lg border border-line bg-paper px-2.5 py-2 text-[12.5px] text-ink outline-none focus:border-accent" />
+          <div className="mt-2 flex items-center gap-2">
+            <button type="button" onClick={compose} disabled={busy || !prompt.trim()}
+              className="bg-accent px-3 py-1.5 text-[12.5px] font-semibold text-white disabled:opacity-50">
+              {busy ? 'Writing…' : 'Write it'}
+            </button>
+            <button type="button" onClick={() => setOpen(false)}
+              className="border border-line px-3 py-1.5 text-[12.5px] font-medium text-ink">Cancel</button>
+          </div>
+          {note && <p className="mt-2 text-[11.5px] text-ink-3">{note}</p>}
+        </div>
+      )}
+    </div>
+  )
+}
+
 /** Undo / redo, surfaced from Puck's built-in history (also on Ctrl+Z / Ctrl+Y). */
 function HistoryButtons() {
   const history = usePuckSel((s) => s.history)
@@ -290,7 +352,7 @@ function EmptyCanvasHint() {
 }
 
 const puckOverrides: Partial<Overrides> = {
-  headerActions: ({ children }) => (<><PresetsMenu /><HistoryButtons />{children}</>),
+  headerActions: ({ children }) => (<><AiSectionMenu /><PresetsMenu /><HistoryButtons />{children}</>),
   preview: ({ children }) => (
     <div className="editor-vp" style={{ maxWidth: 'var(--editor-vw, 100%)', margin: '0 auto' }}>
       <EmptyCanvasHint />

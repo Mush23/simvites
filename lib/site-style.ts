@@ -35,6 +35,15 @@ export const ACCENTS = {
 export const GLOWS = { none: 'None', soft: 'Soft', strong: 'Strong' } as const
 export const HOVERS = { lift: 'Lift', grow: 'Grow', tilt: 'Tilt', none: 'Still' } as const
 
+/** Full-page backdrop effects (Framer-parity ask): pure CSS, template-tinted. */
+export const BACKDROPS = {
+  none: 'None',
+  mesh: 'Soft mesh',
+  aurora: 'Aurora drift',
+  petals: 'Floating petals',
+  shimmer: 'Silk shimmer',
+} as const
+
 export interface SiteStyle {
   template?: string
   fontPair?: keyof typeof FONT_PAIRS
@@ -42,9 +51,16 @@ export interface SiteStyle {
   accent?: keyof typeof ACCENTS
   glow?: keyof typeof GLOWS
   hover?: keyof typeof HOVERS
+  backdrop?: keyof typeof BACKDROPS
   /** Brand Kit (Sprint D): uploaded monogram image + fallback initials ("A & D"). */
   monogram?: string
   initials?: string
+}
+
+/** The chosen backdrop effect for a site theme ('none' hides the layer). */
+export function backdropOf(theme: unknown): keyof typeof BACKDROPS {
+  const b = (theme as SiteStyle | null | undefined)?.backdrop
+  return b && b in BACKDROPS ? b : 'none'
 }
 
 /** Merge template vars + couple's overrides → wrapper props for the site root. */
