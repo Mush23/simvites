@@ -31,6 +31,19 @@ export function GuestManager({ events, households }: { events: MatrixEvent[]; ho
 
   const totalGuests = households.reduce((n, h) => n + h.guests.length, 0)
 
+  // Search + side filter (overhaul spec: search pill + filter chips + summary)
+  const [q, setQ] = useState('')
+  const [sideFilter, setSideFilter] = useState<string>('all')
+  const sides = [...new Set(households.map((h) => (h.side ?? '').trim()).filter(Boolean))]
+  const needle = q.trim().toLowerCase()
+  const shown = households.filter((h) => {
+    if (sideFilter !== 'all' && (h.side ?? '').trim() !== sideFilter) return false
+    if (!needle) return true
+    return h.name.toLowerCase().includes(needle) ||
+      h.guests.some((g) => g.fullName.toLowerCase().includes(needle) || (g.email ?? '').toLowerCase().includes(needle))
+  })
+  const shownGuests = shown.reduce((n, h) => n + h.guests.length, 0)
+
   return (
     <div className="space-y-8">
       {/* Toolbar */}
@@ -65,13 +78,42 @@ export function GuestManager({ events, households }: { events: MatrixEvent[]; ho
 
       {showImport && <ImportWizard onDone={() => { setShowImport(false); refresh() }} />}
 
+      {/* Search + filters + live summary */}
+      {households.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2.5">
+          <input value={q} onChange={(e) => setQ(e.target.value)}
+            placeholder="Search households, guests, emails…"
+            className="w-64 rounded-lg border border-line bg-surface px-3.5 py-2 text-[13.5px] text-ink outline-none focus:border-accent" />
+          <button type="button" onClick={() => setSideFilter('all')}
+            className={`rounded-full px-3 py-1 text-[12.5px] font-medium transition-colors ${
+              sideFilter === 'all' ? 'bg-ink text-paper' : 'border border-line text-ink-2 hover:border-line-2'}`}>
+            All
+          </button>
+          {sides.map((s) => (
+            <button key={s} type="button" onClick={() => setSideFilter(sideFilter === s ? 'all' : s)}
+              className={`rounded-full px-3 py-1 text-[12.5px] font-medium transition-colors ${
+                sideFilter === s ? 'bg-ink text-paper' : 'border border-line text-ink-2 hover:border-line-2'}`}>
+              {s}
+            </button>
+          ))}
+          <span className="ml-auto text-[12px] text-ink-3">
+            Showing {shown.length} of {households.length} households · {shownGuests} guests
+          </span>
+        </div>
+      )}
+
       {households.length === 0 && (
         <div className="rounded-card border border-dashed border-line bg-paper-2 p-10 text-center text-ink-2">
           No households yet. Add one above, or paste your whole list at once.
         </div>
       )}
+      {households.length > 0 && shown.length === 0 && (
+        <div className="rounded-card border border-dashed border-line bg-paper-2 p-8 text-center text-ink-2">
+          Nothing matches &ldquo;{q}&rdquo;{sideFilter !== 'all' ? ` on the ${sideFilter} side` : ''}.
+        </div>
+      )}
 
-      {households.map((h) => (
+      {shown.map((h) => (
         <HouseholdCard key={h.id} household={h} events={events} onChanged={refresh} />
       ))}
     </div>

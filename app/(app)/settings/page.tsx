@@ -6,6 +6,7 @@ import { UNLOCK_AMOUNT } from '@/lib/stripe'
 import { BASE_DOMAIN, BRAND_NAME } from '@/lib/brand'
 import { SiteSettingsForm } from './settings-form'
 import { UnlockCard } from './unlock-card'
+import { PasswordForm } from '@/components/auth/password-form'
 
 export const metadata = { title: `Settings · ${BRAND_NAME}` }
 
@@ -111,6 +112,17 @@ export default async function SettingsPage({
               Add collaborator
             </button>
           </form>
+        </section>
+
+        <section className="rounded-card border border-line bg-surface p-7 shadow-card">
+          <p className="eyebrow mb-2">Account security</p>
+          <p className="mb-4 text-sm text-ink-2">
+            Change the password you sign in with. Forgot it? Use &ldquo;Forgot password?&rdquo; on the
+            login page and we&apos;ll email you a reset link.
+          </p>
+          <div className="max-w-sm">
+            <PasswordForm cta="Change password" />
+          </div>
         </section>
       </div>
     </div>

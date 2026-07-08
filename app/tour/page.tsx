@@ -41,7 +41,7 @@ export default function TourPage() {
         </section>
 
         {/* The live demo loop */}
-        <section className="mx-auto max-w-3xl rounded-[18px] p-5 sm:p-7" style={{ background: 'oklch(0.13 0.004 270)' }}>
+        <section className="mx-auto max-w-3xl rounded-[18px] p-5 sm:p-7" style={{ background: '#0A1220' }}>
           <LiveDemo />
         </section>
 

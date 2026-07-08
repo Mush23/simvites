@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Puck, createUsePuck, useGetPuck, type Overrides } from '@puckeditor/core'
 import '@puckeditor/core/puck.css'
 import { siteConfig, type SiteData } from '@/lib/puck/config'
@@ -12,7 +12,7 @@ import {
 } from './actions'
 import { SECTION_PRESETS } from '@/lib/puck/presets'
 import { askConfirm, askPrompt, notify } from '@/components/ui/overlays'
-import { Pencil, Trash2, Eye, EyeOff, FileText, ChevronDown, Palette } from 'lucide-react'
+import { Pencil, Trash2, Eye, EyeOff, FileText, ChevronDown, Palette, ExternalLink, Info, LayoutTemplate } from 'lucide-react'
 import { FONT_PAIRS, BACKGROUNDS, ACCENTS, GLOWS, HOVERS, type SiteStyle } from '@/lib/site-style'
 
 export interface EditorPage {
@@ -273,10 +273,27 @@ function HistoryButtons() {
 // Stable identities (Puck re-mounts its UI if overrides change). The preview
 // width is driven by a CSS variable set on the wrapper, so the device toggle
 // never touches this object.
+/** Friendly empty-canvas state for brand-new pages (advanced-editor feel). */
+function EmptyCanvasHint() {
+  const count = usePuckSel((s) => s.appState.data.content.length)
+  if (count > 0) return null
+  return (
+    <div className="pointer-events-none flex flex-col items-center gap-2 px-6 py-16 text-center">
+      <LayoutTemplate size={22} strokeWidth={1.5} className="text-ink-3" />
+      <p className="text-[13.5px] font-medium text-ink">This page is blank — let’s fix that.</p>
+      <p className="max-w-[340px] text-[12.5px] text-ink-3">
+        Drag a block in from the left panel, or use <span className="font-medium text-ink-2">✚ Add section</span> in
+        the toolbar for a beautifully pre-styled start.
+      </p>
+    </div>
+  )
+}
+
 const puckOverrides: Partial<Overrides> = {
   headerActions: ({ children }) => (<><PresetsMenu /><HistoryButtons />{children}</>),
   preview: ({ children }) => (
     <div className="editor-vp" style={{ maxWidth: 'var(--editor-vw, 100%)', margin: '0 auto' }}>
+      <EmptyCanvasHint />
       {children}
     </div>
   ),
@@ -323,47 +340,75 @@ export function WebsiteEditor({
     else { setIsPublished(true); setStatus('published') }
   }, [siteId, pageId])
 
+  // ⌘S / Ctrl+S — flush the autosave immediately (advanced-editor reflex).
+  useEffect(() => {
+    const onKey = async (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        if (timer.current) clearTimeout(timer.current)
+        setStatus('saving')
+        const res = await savePageDraft(pageId, latest.current)
+        setStatus('error' in res && res.error ? 'error' : 'saved')
+        notify('Draft saved')
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [pageId])
+
   return (
     <div className="flex h-[calc(100vh-57px)] flex-col">
-      <div className="flex items-center justify-between border-b border-line bg-paper px-5 py-2.5">
-        <div className="flex items-center gap-3">
-          <span className="text-[14.5px] font-semibold tracking-tight text-ink">Website</span>
-          <span className="rounded-pill border border-line px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
-            {templateName}
-          </span>
-          <PagesMenu pages={pages} currentId={pageId} />
-          <StatusPill status={status} />
+      {/* Toolbar — grouped clusters: context | canvas tools | ship */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface px-4 py-2">
+        <span className="text-[14.5px] font-semibold tracking-tight text-ink">Website</span>
+        <span className="rounded-full border border-line px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-ink-3">
+          {templateName}
+        </span>
+        <PagesMenu pages={pages} currentId={pageId} />
+
+        <span aria-hidden className="hidden h-5 w-px bg-line md:block" />
+
+        <div className="flex items-center gap-0.5 rounded-lg border border-line bg-paper-2 p-0.5" role="group" aria-label="Preview width">
+          {DEVICES.map((d) => (
+            <button key={d.key} type="button" title={d.help} onClick={() => setDevice(d.key)}
+              className={`!rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                device === d.key ? 'bg-surface text-ink shadow-card' : 'text-ink-3 hover:text-ink'
+              }`}>
+              {d.label}
+            </button>
+          ))}
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 rounded-pill border border-line bg-paper-2 p-1" role="group" aria-label="Preview width">
-            {DEVICES.map((d) => (
-              <button key={d.key} type="button" title={d.help} onClick={() => setDevice(d.key)}
-                className={`rounded-pill px-2.5 py-1 text-xs transition-colors ${
-                  device === d.key ? 'bg-accent-soft text-accent-ink' : 'text-ink-3 hover:text-ink'
-                }`}>
-                {d.label}
-              </button>
-            ))}
-          </div>
-          <StylePanel current={currentStyle} />
-          <ImageUploader />
+        <StylePanel current={currentStyle} />
+        <ImageUploader />
+
+        <div className="ml-auto flex items-center gap-2.5">
+          <StatusPill status={status} />
           {status === 'locked' && (
             <a href="/settings" id="unlock-cta"
-              className="rounded-md border border-accent-line bg-accent-soft px-3.5 py-2 text-sm text-accent-ink transition-colors hover:border-accent">
-              Publishing is part of the unlock — see billing →
+              className="rounded-lg border border-accent-line bg-accent-soft px-3 py-1.5 text-[13px] font-medium text-accent-ink">
+              Unlock to publish →
             </a>
           )}
           {isPublished && (
             <a href={`/s/${slug}`} target="_blank" rel="noreferrer"
-              className="font-mono text-[10px] uppercase tracking-[0.16em] text-accent-ink underline underline-offset-4">
-              View site →
+              className="flex items-center gap-1 rounded-lg border border-line px-3 py-1.5 text-[13px] font-medium text-ink hover:border-line-2">
+              View live <ExternalLink size={12} strokeWidth={1.7} className="text-ink-3" />
             </a>
           )}
           <button id="publish-site" type="button" onClick={publish} disabled={status === 'publishing'}
-            className="rounded-md bg-accent px-5 py-2 font-semibold text-white disabled:opacity-50">
+            className="bg-accent px-4 py-1.5 text-[13px] font-semibold text-white disabled:opacity-50">
             {status === 'publishing' ? 'Publishing…' : 'Publish'}
           </button>
         </div>
+      </div>
+
+      {/* Gentle how-to strip — the zero-code promise, spelled out */}
+      <div className="flex items-center gap-2 border-b border-line bg-paper-2 px-4 py-1.5 text-[11.5px] text-ink-3">
+        <Info size={12} strokeWidth={1.7} className="shrink-0" />
+        <span className="truncate">
+          Click any text on the page and type · drag blocks in from the left · <span className="font-medium text-ink-2">✚ Add section</span> for
+          ready-made looks · everything autosaves (<kbd className="rounded border border-line bg-surface px-1 font-mono text-[9.5px]">⌘S</kbd> to save now)
+        </span>
       </div>
       {/* iframe disabled + style-engine vars on the wrapper = true WYSIWYG canvas */}
       <div className="min-h-0 flex-1" data-site-root data-device={device}

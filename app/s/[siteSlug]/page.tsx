@@ -8,6 +8,23 @@ import { GUEST_COOKIE, verifyGuestSession } from '@/lib/guest-session'
 import { createAdminClient } from '@/lib/supabase/server'
 import { SiteNav } from '@/components/site/site-nav'
 
+// Share-friendly metadata: the couple's names + an invitation line, so
+// WhatsApp/iMessage previews read like an invitation, not a URL.
+export async function generateMetadata({ params }: { params: Promise<{ siteSlug: string }> }) {
+  const { siteSlug } = await params
+  const snap = await getPublishedSnapshot(siteSlug)
+  if (!snap) return { title: 'Wedding' }
+  return {
+    title: `${snap.title} — you're invited`,
+    description: 'All the celebrations, details and RSVP in one place.',
+    openGraph: {
+      title: `${snap.title} — you're invited`,
+      description: 'All the celebrations, details and RSVP in one place.',
+      type: 'website',
+    },
+  }
+}
+
 // Public published site (snapshot only), rendered under the site's TEMPLATE
 // theme — CSS-variable overrides at [data-site-root], so the same block
 // library serves every template.

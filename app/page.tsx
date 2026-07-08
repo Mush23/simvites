@@ -18,7 +18,7 @@ const CORAL = 'oklch(0.62 0.21 29)'
 
 export default function LandingPage() {
   return (
-    <div className="bg-[#FAFAF8] text-[#191918]">
+    <div className="bg-[#FAF8F3] text-[#191918]">
       <DeepZoom />
 
       {/* Scene 4b — the wedding dimension (ivory) */}
@@ -78,7 +78,7 @@ export default function LandingPage() {
 
           <div className="mt-12 grid gap-6 lg:grid-cols-2">
             {/* USP 01 */}
-            <div className="rounded-[14px] border border-[#E8E7E4] bg-white p-7 shadow-[0_1px_2px_rgba(15,15,20,0.04)]">
+            <div className="rounded-[14px] border border-[#EAE5DA] bg-white p-7 shadow-[0_1px_2px_rgba(15,15,20,0.04)]">
               <p className="font-mono text-[9.5px] uppercase tracking-[0.1em]" style={{ color: CORAL }}>USP 01 · Per event invitations</p>
               <h3 className="mt-2.5 text-[20px] font-[650] tracking-[-0.02em]">Every guest sees only their events</h3>
               <p className="mt-2 text-[13.5px] leading-relaxed text-[#6A6864]">
@@ -86,7 +86,7 @@ export default function LandingPage() {
                 Same website, different wedding for each family.
               </p>
               <div className="mt-6 flex items-center gap-4">
-                <div className="flex-1 rounded-xl border border-[#E8E7E4] bg-[#FAFAF8] p-3.5">
+                <div className="flex-1 rounded-xl border border-[#EAE5DA] bg-[#FAF8F3] p-3.5">
                   <p className="mb-2 font-mono text-[8px] uppercase tracking-wider text-[#8F8D88]">The Shah Family · link</p>
                   <div className="grid grid-cols-[1fr_repeat(3,32px)] gap-y-1.5 text-[11px]">
                     <span />
@@ -107,7 +107,7 @@ export default function LandingPage() {
             </div>
 
             {/* USP 02 */}
-            <div className="rounded-[14px] border border-[#E8E7E4] bg-white p-7 shadow-[0_1px_2px_rgba(15,15,20,0.04)]">
+            <div className="rounded-[14px] border border-[#EAE5DA] bg-white p-7 shadow-[0_1px_2px_rgba(15,15,20,0.04)]">
               <p className="font-mono text-[9.5px] uppercase tracking-[0.1em]" style={{ color: CORAL }}>USP 02 · The RSVP engine</p>
               <h3 className="mt-2.5 text-[20px] font-[650] tracking-[-0.02em]">One tap for the family, answers for the caterer</h3>
               <p className="mt-2 text-[13.5px] leading-relaxed text-[#6A6864]">
@@ -115,7 +115,7 @@ export default function LandingPage() {
                 You get live totals and one clean export.
               </p>
               <div className="mt-6 flex items-center gap-4">
-                <div className="flex-1 rounded-xl border border-[#E8E7E4] bg-[#FAFAF8] p-3.5 text-[11px]">
+                <div className="flex-1 rounded-xl border border-[#EAE5DA] bg-[#FAF8F3] p-3.5 text-[11px]">
                   <p className="font-medium">Sangeet · are you in?</p>
                   <p className="mt-2 flex gap-1.5">
                     <span className="rounded-md px-2 py-1 text-[10px] font-semibold text-white" style={{ background: '#1B9E5F' }}>Joyfully yes</span>
@@ -129,7 +129,7 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <span className="text-[#8F8D88]">→</span>
-                <div className="w-[132px] shrink-0 rounded-xl border border-[#E8E7E4] bg-white p-3">
+                <div className="w-[132px] shrink-0 rounded-xl border border-[#EAE5DA] bg-white p-3">
                   <p className="font-mono text-[7.5px] uppercase tracking-wider text-[#8F8D88]">Live totals</p>
                   {[['Attending', '74'], ['Vegetarian', '46'], ['Nut allergies', '3']].map(([l, v]) => (
                     <p key={l} className="mt-1.5 flex justify-between text-[10px] text-[#6A6864]">{l}<b className="font-mono text-[#191918]">{v}</b></p>
@@ -145,7 +145,7 @@ export default function LandingPage() {
       {/* Pricing */}
       <section id="pricing" className="px-6 pb-24">
         <div className="mx-auto max-w-[760px] overflow-hidden rounded-[22px] p-10 text-center sm:p-14"
-          style={{ background: 'oklch(0.13 0.004 270)', boxShadow: '0 40px 90px -20px rgba(0,0,0,0.45)' }}>
+          style={{ background: '#0A1220', boxShadow: '0 40px 90px -20px rgba(0,0,0,0.45)' }}>
           <div className="pointer-events-none absolute" aria-hidden />
           <p className="font-mono text-[9.5px] uppercase tracking-[0.14em]" style={{ color: 'oklch(0.68 0.19 30)' }}>Early access</p>
           <h2 className="mx-auto mt-3 max-w-[480px] text-[clamp(26px,3.6vw,38px)] font-[650] leading-tight tracking-[-0.03em] text-white">
@@ -179,7 +179,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[#E8E7E4] px-6 py-14">
+      <footer className="border-t border-[#EAE5DA] px-6 py-14">
         <div className="mx-auto grid max-w-[1060px] gap-10 sm:grid-cols-4">
           <div>
             <p className="flex items-center gap-1.5 text-[13px] font-semibold tracking-tight">

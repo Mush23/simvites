@@ -40,19 +40,19 @@
   --shadow-lift: var(--shadow-lg);
 }
 
-/* ── LIGHT — 2026 overhaul: neutral, fast, precise. One electric coral.
-   (The couple-facing artifact keeps its ivory identity via template vars
-   overriding these at [data-site-root].) ── */
+/* ── LIGHT — warm ivory ground, white cards, one electric coral (founder
+   direction 2026-07-06: ivory, not grey-neutral). The couple-facing artifact
+   keeps its own identity via template vars at [data-site-root]. ── */
 :root {
-  --paper: #FAFAF8;
-  --paper-2: #F5F4F2;
+  --paper: #FAF8F3;
+  --paper-2: #F3EFE6;
   --surface: #FFFFFF;
-  --surface-2: #F5F4F2;
-  --ink: #191918;
-  --ink-2: #6A6864;
-  --ink-3: #8F8D88;
-  --line: #E8E7E4;
-  --line-2: #DBDAD6;
+  --surface-2: #F4F1E9;
+  --ink: #1A1916;
+  --ink-2: #6B675E;
+  --ink-3: #928D81;
+  --line: #EAE5DA;
+  --line-2: #DCD5C6;
   --accent: oklch(0.62 0.21 29);
   --accent-ink: oklch(0.55 0.19 29);
   --accent-soft: rgba(222, 71, 38, 0.08);
@@ -65,21 +65,22 @@
   --warn-soft: #FAF0DD;
   --bad-soft: #FBEAE6;
   --info-soft: #E8EDFB;
-  --shadow: 0 1px 2px rgba(15, 15, 20, 0.04);
-  --shadow-lg: 0 40px 90px -20px rgba(0, 0, 0, 0.45);
+  --shadow: 0 1px 2px rgba(30, 25, 15, 0.05);
+  --shadow-lg: 0 40px 90px -20px rgba(20, 16, 8, 0.45);
 }
 
-/* ── DARK — near-black, same hue logic at 14–16% alpha softs ── */
+/* ── DARK — slick deep navy (founder direction), coral lifts, same hue
+   logic for softs at 14–18% alpha ── */
 .dark {
-  --paper: #101012;
-  --paper-2: #1F1F23;
-  --surface: #17171A;
-  --surface-2: #1F1F23;
-  --ink: #F2F2F0;
-  --ink-2: #B0AEA9;
-  --ink-3: #7C7A76;
-  --line: #26262B;
-  --line-2: #303036;
+  --paper: #0A1220;
+  --paper-2: #0E1830;
+  --surface: #111C33;
+  --surface-2: #1A2742;
+  --ink: #EEF2FA;
+  --ink-2: #A9B4CC;
+  --ink-3: #7683A1;
+  --line: #223252;
+  --line-2: #2C3F63;
   --accent: oklch(0.68 0.19 30);
   --accent-ink: oklch(0.74 0.17 30);
   --accent-soft: rgba(242, 109, 86, 0.14);
@@ -87,13 +88,13 @@
   --ok: #3DD68C;
   --warn: #F0B25A;
   --bad: #F26D56;
-  --info: #7E97E8;
+  --info: #8CA3F0;
   --ok-soft: rgba(61, 214, 140, 0.15);
   --warn-soft: rgba(240, 178, 90, 0.15);
-  --bad-soft: rgba(242, 109, 86, 0.15);
-  --info-soft: rgba(62, 99, 221, 0.18);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 40px 90px -20px rgba(0, 0, 0, 0.65);
+  --bad-soft: rgba(242, 109, 86, 0.16);
+  --info-soft: rgba(110, 139, 232, 0.18);
+  --shadow: 0 1px 2px rgba(2, 6, 16, 0.5);
+  --shadow-lg: 0 40px 90px -20px rgba(2, 6, 16, 0.7);
 }
 
 @layer base {

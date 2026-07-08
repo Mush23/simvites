@@ -226,24 +226,17 @@ export function DeepZoom() {
       </nav>
 
       {/* Scenes 1–4: the 560vh dive */}
-      <section ref={sectionRef} id="product" className="relative" style={{ height: reduced ? 'auto' : '560vh', background: '#FAFAF8' }}>
+      <section ref={sectionRef} id="product" className="relative" style={{ height: reduced ? 'auto' : '560vh', background: '#FAF8F3' }}>
         <div ref={stageRef} className={reduced ? 'relative' : 'sticky top-0 h-screen overflow-hidden'}>
-          {/* faint grid, masked radially */}
+          {/* soft ivory glow behind the hero (no grid — founder direction) */}
           <div aria-hidden className="absolute inset-0"
-            style={{
-              backgroundImage: 'linear-gradient(rgba(25,25,24,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(25,25,24,.045) 1px, transparent 1px)',
-              backgroundSize: '56px 56px',
-              maskImage: 'radial-gradient(ellipse 90% 70% at 50% 30%, black 40%, transparent 75%)',
-            }} />
+            style={{ background: 'radial-gradient(900px 520px at 50% 18%, rgba(255,255,255,0.9), transparent 70%)' }} />
 
-          {/* dark field */}
-          <div data-s="dark" aria-hidden className="absolute inset-0 opacity-0" style={{ background: 'oklch(0.13 0.004 270)' }}>
-            <div className="absolute inset-0 opacity-40"
-              style={{
-                backgroundImage: 'linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px)',
-                backgroundSize: '80px 80px',
-              }} />
-            <div className="absolute inset-0" style={{ background: 'radial-gradient(700px 480px at 50% 45%, oklch(0.62 0.21 29 / 0.12), transparent 70%)' }} />
+          {/* navy field — slick deep blue with a coral bloom */}
+          <div data-s="dark" aria-hidden className="absolute inset-0 opacity-0"
+            style={{ background: 'linear-gradient(180deg, #0A1220 0%, #0C1526 55%, #0A1220 100%)' }}>
+            <div className="absolute inset-0" style={{ background: 'radial-gradient(720px 500px at 50% 42%, oklch(0.62 0.21 29 / 0.14), transparent 70%)' }} />
+            <div className="absolute inset-0" style={{ background: 'radial-gradient(900px 600px at 80% 90%, rgba(70,110,200,0.10), transparent 70%)' }} />
           </div>
 
           {/* hero copy — top-anchored below the fixed nav, sized to content so
@@ -285,8 +278,8 @@ export function DeepZoom() {
               <div data-s={`card${i}`}
                 className="absolute left-1/2 top-1/2 w-[min(420px,88vw)] rounded-[14px] border p-5 opacity-0"
                 style={{
-                  background: 'oklch(0.22 0.006 270)', borderColor: 'rgba(255,255,255,0.13)',
-                  boxShadow: '0 30px 90px -20px oklch(0.62 0.21 29 / 0.25), 0 30px 60px -30px rgba(0,0,0,.6)',
+                  background: '#111C33', borderColor: 'rgba(150,180,255,0.16)',
+                  boxShadow: '0 30px 90px -20px oklch(0.62 0.21 29 / 0.25), 0 30px 60px -30px rgba(2,6,16,.7)',
                   transform: 'translate(-50%, -50%) scale(0.38)', willChange: 'transform, opacity',
                 }}>
                 <div className="mb-3 flex items-center justify-between">

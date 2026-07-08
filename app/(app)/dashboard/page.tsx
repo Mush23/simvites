@@ -72,6 +72,71 @@ export default async function DashboardPage() {
             hint={r.stats.overdueTasks ? `${r.stats.overdueTasks} overdue` : 'none overdue'} />
         </div>
       </div>
+
+      <LiveActivity siteId={site!.siteId} />
     </div>
+  )
+}
+
+/** Live activity — recent RSVPs + platform events, newest first (spec). */
+async function LiveActivity({ siteId }: { siteId: string }) {
+  const { createClient } = await import('@/lib/supabase/server')
+  const supabase = await createClient()
+  const [{ data: responses }, { data: log }, { data: guests }, { data: events }] = await Promise.all([
+    supabase.from('responses').select('guest_id, event_id, status, responded_at')
+      .eq('site_id', siteId).not('responded_at', 'is', null)
+      .order('responded_at', { ascending: false }).limit(6),
+    supabase.from('activity_log').select('verb, created_at')
+      .eq('site_id', siteId).order('created_at', { ascending: false }).limit(6),
+    supabase.from('guests').select('id, full_name').eq('site_id', siteId),
+    supabase.from('events').select('id, name, accent').eq('site_id', siteId),
+  ])
+  const gName = new Map((guests ?? []).map((g) => [g.id, g.full_name]))
+  const eById = new Map((events ?? []).map((e) => [e.id, e]))
+
+  const VERB_LABEL: Record<string, string> = {
+    published: 'Site published',
+    sent_seating_update: 'Seating plan sent to guests',
+    admin_comped_unlock: 'Unlock activated',
+    admin_revoked_unlock: 'Unlock revoked',
+  }
+
+  interface FeedItem { at: string; color: string; text: string }
+  const items: FeedItem[] = [
+    ...(responses ?? []).map((resp) => ({
+      at: resp.responded_at as string,
+      color: resp.status === 'attending' ? 'var(--ok)' : resp.status === 'declined' ? 'var(--bad)' : 'var(--warn)',
+      text: `${gName.get(resp.guest_id) ?? 'A guest'} ${resp.status === 'attending' ? 'said yes to' : resp.status === 'declined' ? 'declined' : 'answered for'} ${eById.get(resp.event_id)?.name ?? 'an event'}`,
+    })),
+    ...(log ?? []).map((l) => ({
+      at: l.created_at as string,
+      color: 'var(--accent)',
+      text: VERB_LABEL[l.verb] ?? l.verb.replaceAll('_', ' '),
+    })),
+  ].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 8)
+
+  if (!items.length) return null
+  const rel = (iso: string) => {
+    const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000))
+    if (mins < 1) return 'just now'
+    if (mins < 60) return `${mins}m ago`
+    const hrs = Math.round(mins / 60)
+    if (hrs < 24) return `${hrs}h ago`
+    return `${Math.round(hrs / 24)}d ago`
+  }
+
+  return (
+    <section className="mt-6 rounded-card border border-line bg-surface p-6 shadow-card">
+      <p className="text-[12px] font-medium text-ink-2">Live activity</p>
+      <div className="mt-3 space-y-2.5">
+        {items.map((it, i) => (
+          <p key={i} className="flex items-center gap-2.5 text-[13px] text-ink-2">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: it.color }} />
+            <span className="min-w-0 flex-1 truncate text-ink">{it.text}</span>
+            <span className="shrink-0 font-mono text-[10.5px] text-ink-3">{rel(it.at)}</span>
+          </p>
+        ))}
+      </div>
+    </section>
   )
 }

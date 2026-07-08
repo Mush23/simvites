@@ -57,6 +57,17 @@ export default function LoginPage() {
     }
   }
 
+  async function forgotPassword() {
+    if (!email) { setError('Enter your email first, then tap "Forgot password?" again.'); return }
+    setPending(true); setError(null); setNotice(null)
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset`,
+    })
+    setPending(false)
+    if (error) setError(error.message)
+    else setNotice('Check your email — we sent a link to set a new password.')
+  }
+
   // 3b — link-sent state
   if (linkSent) {
     return (
@@ -131,12 +142,22 @@ export default function LoginPage() {
             </form>
 
             {tab === 'password' && (
-              <p className="mt-5 text-center text-[13px] text-ink-3">
-                {signup ? 'Already have an account? ' : 'New here? '}
-                <button onClick={() => { setSignup(!signup); setError(null) }} className="text-accent-ink underline underline-offset-4">
-                  {signup ? 'Sign in' : 'Create one'}
-                </button>
-              </p>
+              <div className="mt-5 space-y-1.5 text-center text-[13px] text-ink-3">
+                <p>
+                  {signup ? 'Already have an account? ' : 'New here? '}
+                  <button onClick={() => { setSignup(!signup); setError(null) }} className="text-accent-ink underline underline-offset-4">
+                    {signup ? 'Sign in' : 'Create one'}
+                  </button>
+                </p>
+                {!signup && (
+                  <p>
+                    <button type="button" onClick={forgotPassword} disabled={pending}
+                      className="text-ink-3 underline underline-offset-4 hover:text-ink disabled:opacity-50">
+                      Forgot password?
+                    </button>
+                  </p>
+                )}
+              </div>
             )}
 
             <div className="my-6 flex items-center gap-3 text-[11px] text-ink-3">
@@ -153,12 +174,7 @@ export default function LoginPage() {
 
       {/* Right — the artifact */}
       <div className="relative hidden items-center justify-center overflow-hidden lg:flex"
-        style={{ background: 'oklch(0.13 0.004 270)' }}>
-        <div aria-hidden className="absolute inset-0 opacity-[0.35]"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px)',
-            backgroundSize: '56px 56px',
-          }} />
+        style={{ background: 'linear-gradient(180deg, #0A1220 0%, #0C1526 60%, #0A1220 100%)' }}>
         <div aria-hidden className="absolute inset-0"
           style={{ background: 'radial-gradient(600px 420px at 65% 40%, oklch(0.62 0.21 29 / 0.16), transparent 70%)' }} />
 
