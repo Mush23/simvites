@@ -23,6 +23,31 @@ export default async function FilesPage() {
         title="Contracts & documents"
         description="Stored privately; downloads use short-lived signed links. Link each file to its event or vendor."
       />
+
+      {/* V2: teach on first visit — what belongs here and why it pays off */}
+      {(files ?? []).length === 0 && (
+        <div className="mb-6 rounded-card border border-line bg-surface p-6 shadow-card">
+          <p className="text-[14px] font-semibold text-ink">One safe home for the paperwork</p>
+          <p className="mt-1 text-[13px] text-ink-3">
+            Upload below, link each file to its vendor or event, and it&apos;s findable from their pages too.
+            Couples usually keep:
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ['📄', 'Vendor contracts', 'The signed terms — attached to the vendor.'],
+              ['💷', 'Quotes & invoices', 'Every figure, next to its budget line.'],
+              ['🗺️', 'Venue floor plans', 'Feed the seating planner from here.'],
+              ['✨', 'Inspiration & briefs', 'Mood boards your decorator will love.'],
+            ].map(([icon, t, d]) => (
+              <div key={t} className="rounded-[10px] border border-line bg-paper p-3.5">
+                <p className="text-[18px]">{icon}</p>
+                <p className="mt-1 text-[12.5px] font-semibold text-ink">{t}</p>
+                <p className="text-[11.5px] leading-snug text-ink-3">{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <FileManager
         files={(files ?? []) as FileRow[]}
         events={(events ?? []) as Option[]}

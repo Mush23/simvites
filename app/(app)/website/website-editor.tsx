@@ -13,7 +13,7 @@ import {
 import { SECTION_PRESETS } from '@/lib/puck/presets'
 import { askConfirm, askPrompt, notify } from '@/components/ui/overlays'
 import { Pencil, Trash2, Eye, EyeOff, FileText, ChevronDown, Palette, ExternalLink, Info, LayoutTemplate } from 'lucide-react'
-import { BACKGROUNDS, ACCENTS, GLOWS, HOVERS, BACKDROPS, BUTTONS, NAVS, type SiteStyle } from '@/lib/site-style'
+import { BACKGROUNDS, ACCENTS, GLOWS, HOVERS, BACKDROPS, BUTTONS, NAVS, VIBES, type SiteStyle } from '@/lib/site-style'
 import { DISPLAY_FACES, BODY_FACES } from '@/lib/template-fonts'
 import { listTemplates } from '@/lib/templates/registry'
 
@@ -263,8 +263,18 @@ function ColorPick({ k, label, value, onSet }: {
 function StylePanel({ current }: { current: SiteStyle }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [vibing, setVibing] = useState<string | null>(null)
   async function set(key: string, value: string) {
     await updateSiteStyle({ [key]: value })
+    router.refresh()
+  }
+  async function applyVibe(key: string) {
+    const vibe = VIBES.find((v) => v.key === key)
+    if (!vibe || vibing) return
+    setVibing(key)
+    await updateSiteStyle(vibe.patch as Record<string, string>)
+    setVibing(null)
+    notify(`${vibe.name} applied — fine-tune anything below`)
     router.refresh()
   }
   const Sel = ({ k, label, options }: { k: keyof SiteStyle; label: string; options: Record<string, { label: string } | string> }) => (
@@ -288,23 +298,50 @@ function StylePanel({ current }: { current: SiteStyle }) {
       </button>
       {open && (
         <div className="absolute right-0 top-12 z-50 max-h-[70vh] w-72 space-y-3 overflow-y-auto rounded-card border border-line bg-surface p-4 shadow-lift">
-          <Sel k="displayFont" label={`Heading font (${Object.keys(DISPLAY_FACES).length} faces)`} options={{ '': { label: 'Template default' }, ...DISPLAY_FACES }} />
-          <Sel k="bodyFont" label={`Body font (${Object.keys(BODY_FACES).length} faces)`} options={{ '': { label: 'Template default' }, ...BODY_FACES }} />
-          <Sel k="background" label="Background preset" options={BACKGROUNDS} />
-          <Sel k="accent" label="Accent preset" options={ACCENTS} />
-
-          {/* D3: colour pickers — any colour, fanned into the full token family */}
-          <div className="grid grid-cols-3 gap-2 border-t border-line pt-3">
-            <ColorPick k="customAccent" label="Accent" value={current.customAccent} onSet={set} />
-            <ColorPick k="customPaper" label="Background" value={current.customPaper} onSet={set} />
-            <ColorPick k="customInk" label="Text" value={current.customInk} onSet={set} />
+          {/* V1: vibes first — one tap sets the whole mood, no design degree needed */}
+          <div>
+            <span className="eyebrow mb-1.5 block">Pick a vibe — one tap styles everything</span>
+            <div className="grid grid-cols-2 gap-2">
+              {VIBES.map((v) => (
+                <button key={v.key} type="button" onClick={() => applyVibe(v.key)} title={v.blurb}
+                  className="!rounded-[10px] border border-line p-2 text-left transition-colors hover:border-accent">
+                  <span className="flex h-5 w-full overflow-hidden rounded-md border border-line">
+                    {v.swatches.map((c) => <span key={c} className="h-full flex-1" style={{ background: c }} />)}
+                  </span>
+                  <span className="mt-1 block text-[11.5px] font-medium leading-tight text-ink">
+                    {vibing === v.key ? 'Applying…' : v.name}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
-          <Sel k="buttonStyle" label="Button design" options={BUTTONS} />
-          <Sel k="nav" label="Menu design" options={NAVS} />
-          <Sel k="glow" label="Card glow" options={GLOWS} />
-          <Sel k="hover" label="Hover animation" options={HOVERS} />
-          <Sel k="backdrop" label="Backdrop effect (live site)" options={BACKDROPS} />
+          {/* Everything granular lives under the fold — power without overwhelm */}
+          <details className="group border-t border-line pt-3">
+            <summary className="flex cursor-pointer list-none items-center justify-between text-[12.5px] font-medium text-ink-2 hover:text-ink [&::-webkit-details-marker]:hidden">
+              Fine-tune — fonts, colours, buttons, motion
+              <span className="text-ink-3 transition-transform group-open:rotate-90">›</span>
+            </summary>
+            <div className="mt-3 space-y-3">
+              <Sel k="displayFont" label={`Heading font (${Object.keys(DISPLAY_FACES).length} faces)`} options={{ '': { label: 'Template default' }, ...DISPLAY_FACES }} />
+              <Sel k="bodyFont" label={`Body font (${Object.keys(BODY_FACES).length} faces)`} options={{ '': { label: 'Template default' }, ...BODY_FACES }} />
+              <Sel k="background" label="Background preset" options={BACKGROUNDS} />
+              <Sel k="accent" label="Accent preset" options={ACCENTS} />
+
+              {/* D3: colour pickers — any colour, fanned into the full token family */}
+              <div className="grid grid-cols-3 gap-2 border-t border-line pt-3">
+                <ColorPick k="customAccent" label="Accent" value={current.customAccent} onSet={set} />
+                <ColorPick k="customPaper" label="Background" value={current.customPaper} onSet={set} />
+                <ColorPick k="customInk" label="Text" value={current.customInk} onSet={set} />
+              </div>
+
+              <Sel k="buttonStyle" label="Button design" options={BUTTONS} />
+              <Sel k="nav" label="Menu design" options={NAVS} />
+              <Sel k="glow" label="Card glow" options={GLOWS} />
+              <Sel k="hover" label="Hover animation" options={HOVERS} />
+              <Sel k="backdrop" label="Backdrop effect (live site)" options={BACKDROPS} />
+            </div>
+          </details>
 
           {/* Brand kit (Sprint D): monogram + initials shown in the site menu */}
           <div className="border-t border-line pt-3">

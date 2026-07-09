@@ -64,6 +64,66 @@ export const BACKDROPS = {
   shimmer: 'Silk shimmer',
 } as const
 
+/**
+ * Vibe presets (founder direction: "fewer decisions") — one tap sets fonts,
+ * button + menu design, backdrop and motion together as a coherent mood.
+ * Values are plain SiteStyle patches, so applying one is a single
+ * updateSiteStyle() call and every choice can still be fine-tuned after.
+ */
+export const VIBES: {
+  key: string
+  name: string
+  blurb: string
+  /** Three chips for the picker card: paper / display-ink / accent. */
+  swatches: [string, string, string]
+  patch: Partial<SiteStyle>
+}[] = [
+  {
+    key: 'royal-heritage',
+    name: 'Royal Heritage',
+    blurb: 'Classic serif, gold accents, a silk shimmer — the grand affair.',
+    swatches: ['#F5EFE3', '#3A2E20', '#C9A227'],
+    patch: {
+      displayFont: 'cormorant', bodyFont: 'jost', accent: 'gold', background: 'template',
+      buttonStyle: 'pill', nav: 'centered', backdrop: 'shimmer',
+      glow: 'soft', hover: 'lift', customAccent: '', customPaper: '', customInk: '',
+    },
+  },
+  {
+    key: 'modern-romance',
+    name: 'Modern Romance',
+    blurb: 'Romantic serif on soft blush, petals drifting — candlelit and close.',
+    swatches: ['#F9F0ED', '#3E2228', '#B4556E'],
+    patch: {
+      displayFont: 'playfair', bodyFont: 'inter', background: 'blush', accent: 'template',
+      buttonStyle: 'soft', nav: 'glass', backdrop: 'petals',
+      glow: 'soft', hover: 'grow', customAccent: '#B4556E', customPaper: '', customInk: '',
+    },
+  },
+  {
+    key: 'garden-party',
+    name: 'Garden Party',
+    blurb: 'Engraved caps, sage and sunlight — daytime celebrations outdoors.',
+    swatches: ['#F1F4EC', '#2E5339', '#6E7A63'],
+    patch: {
+      displayFont: 'marcellus', bodyFont: 'lato', background: 'sage', accent: 'sageDeep',
+      buttonStyle: 'soft', nav: 'banner', backdrop: 'mesh',
+      glow: 'none', hover: 'lift', customAccent: '', customPaper: '', customInk: '',
+    },
+  },
+  {
+    key: 'midnight-glam',
+    name: 'Midnight Glam',
+    blurb: 'Roman caps on deep night, aurora light — the afterparty energy.',
+    swatches: ['#1E1B16', '#F2EDE4', '#C97E4E'],
+    patch: {
+      displayFont: 'cinzel', bodyFont: 'poppins', background: 'night', accent: 'template',
+      buttonStyle: 'outline', nav: 'minimal', backdrop: 'aurora',
+      glow: 'strong', hover: 'grow', customAccent: '#C97E4E', customPaper: '', customInk: '',
+    },
+  },
+]
+
 export interface SiteStyle {
   template?: string
   fontPair?: keyof typeof FONT_PAIRS
