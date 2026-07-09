@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { fetchAll } from '@/lib/supabase/fetch-all'
 import { formatPence } from '@/lib/money'
 import { EventForm } from './event-form'
 import { ItineraryManager, type ItineraryItem } from './itinerary-manager'
@@ -81,12 +82,16 @@ async function ConnectedTab({ tab, eventId, siteId }: { tab: Tab; eventId: strin
   const supabase = await createClient()
 
   if (tab === 'guests' || tab === 'rsvp') {
-    const [{ data: invitations }, { data: guests }, { data: households }, { data: responses }] =
+    const [invitations, guests, households, responses] =
       await Promise.all([
-        supabase.from('invitations').select('guest_id').eq('event_id', eventId),
-        supabase.from('guests').select('id, full_name, household_id').eq('site_id', siteId).is('archived_at', null),
-        supabase.from('households').select('id, name').eq('site_id', siteId),
-        supabase.from('responses').select('guest_id, status').eq('event_id', eventId),
+        fetchAll<{ guest_id: string }>(() =>
+          supabase.from('invitations').select('guest_id').eq('event_id', eventId)),
+        fetchAll<{ id: string; full_name: string; household_id: string }>(() =>
+          supabase.from('guests').select('id, full_name, household_id').eq('site_id', siteId).is('archived_at', null)),
+        fetchAll<{ id: string; name: string }>(() =>
+          supabase.from('households').select('id, name').eq('site_id', siteId)),
+        fetchAll<{ guest_id: string; status: string }>(() =>
+          supabase.from('responses').select('guest_id, status').eq('event_id', eventId)),
       ])
     const gById = new Map((guests ?? []).map((g) => [g.id, g]))
     const hh = new Map((households ?? []).map((h) => [h.id, h.name]))

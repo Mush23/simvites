@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { formatEventDateTime } from '@/lib/utils'
@@ -8,36 +9,61 @@ export const metadata = { title: 'RSVPs · Occasio' }
 export default async function RsvpsPage() {
   const site = await getPrimarySite()
   const supabase = await createClient()
+  const siteId = site!.siteId
 
-  const [{ data: events }, { data: invitations }, { data: responses }, { data: guests }, { data: households }, { data: questions }, { data: answers }] =
+  // Paginate the sets that can exceed the 1000-row cap so counts stay correct
+  // on large weddings (a truncated fetch would under-report invited/responses).
+  const [{ data: events }, invitations, responses, guests, households, { data: questions }, answers] =
     await Promise.all([
-      supabase.from('events').select('id, name, starts_at, capacity').eq('site_id', site!.siteId)
+      supabase.from('events').select('id, name, starts_at, capacity').eq('site_id', siteId)
         .is('archived_at', null).order('sort_order').order('starts_at'),
-      supabase.from('invitations').select('guest_id, event_id').eq('site_id', site!.siteId),
-      supabase.from('responses').select('guest_id, event_id, status, responded_at').eq('site_id', site!.siteId),
-      supabase.from('guests').select('id, full_name, household_id').eq('site_id', site!.siteId).is('archived_at', null),
-      supabase.from('households').select('id, name').eq('site_id', site!.siteId).is('archived_at', null),
-      supabase.from('rsvp_questions').select('id, key, label, type, options').eq('site_id', site!.siteId).is('archived_at', null),
-      supabase.from('rsvp_answers').select('guest_id, question_id, value').eq('site_id', site!.siteId),
+      fetchAll<{ guest_id: string; event_id: string }>(() =>
+        supabase.from('invitations').select('guest_id, event_id').eq('site_id', siteId)),
+      fetchAll<{ guest_id: string; event_id: string; status: string; responded_at: string | null }>(() =>
+        supabase.from('responses').select('guest_id, event_id, status, responded_at').eq('site_id', siteId)),
+      fetchAll<{ id: string; full_name: string; household_id: string }>(() =>
+        supabase.from('guests').select('id, full_name, household_id').eq('site_id', siteId).is('archived_at', null)),
+      fetchAll<{ id: string; name: string }>(() =>
+        supabase.from('households').select('id, name').eq('site_id', siteId).is('archived_at', null)),
+      supabase.from('rsvp_questions').select('id, key, label, type, options').eq('site_id', siteId).is('archived_at', null),
+      fetchAll<{ guest_id: string; question_id: string; value: unknown }>(() =>
+        supabase.from('rsvp_answers').select('guest_id, question_id, value').eq('site_id', siteId)),
     ])
 
-  const guestById = new Map((guests ?? []).map((g) => [g.id, g]))
-  const hhById = new Map((households ?? []).map((h) => [h.id, h.name]))
+  const guestById = new Map(guests.map((g) => [g.id, g]))
+  const hhById = new Map(households.map((h) => [h.id, h.name]))
+
+  // Precompute per-event invited/responder sets once (O(invites + responses))
+  // instead of re-scanning inside the per-event map.
+  const invitedByEvent = new Map<string, string[]>()
+  for (const i of invitations) {
+    if (!guestById.has(i.guest_id)) continue
+    const arr = invitedByEvent.get(i.event_id) ?? []
+    arr.push(i.guest_id)
+    invitedByEvent.set(i.event_id, arr)
+  }
+  const respByEvent = new Map<string, { attending: number; declined: number; responders: Set<string> }>()
+  for (const r of responses) {
+    if (!guestById.has(r.guest_id)) continue
+    const agg = respByEvent.get(r.event_id) ?? { attending: 0, declined: 0, responders: new Set<string>() }
+    if (r.status === 'attending') agg.attending++
+    else if (r.status === 'declined') agg.declined++
+    agg.responders.add(r.guest_id)
+    respByEvent.set(r.event_id, agg)
+  }
 
   const perEvent = (events ?? []).map((e) => {
-    const invited = (invitations ?? []).filter((i) => i.event_id === e.id && guestById.has(i.guest_id))
-    const resp = (responses ?? []).filter((r) => r.event_id === e.id && guestById.has(r.guest_id))
-    const attending = resp.filter((r) => r.status === 'attending')
-    const declined = resp.filter((r) => r.status === 'declined')
+    const invited = invitedByEvent.get(e.id) ?? []
+    const agg = respByEvent.get(e.id) ?? { attending: 0, declined: 0, responders: new Set<string>() }
     return {
       ...e,
       invited: invited.length,
-      attending: attending.length,
-      declined: declined.length,
-      pending: Math.max(0, invited.length - attending.length - declined.length),
+      attending: agg.attending,
+      declined: agg.declined,
+      pending: Math.max(0, invited.length - agg.attending - agg.declined),
       nonResponders: invited
-        .filter((i) => !resp.some((r) => r.guest_id === i.guest_id))
-        .map((i) => guestById.get(i.guest_id)!.full_name),
+        .filter((gid) => !agg.responders.has(gid))
+        .map((gid) => guestById.get(gid)!.full_name),
     }
   })
 

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { toCsv, csvResponse } from '@/lib/csv'
 
@@ -10,16 +11,18 @@ export async function GET() {
   const site = await getPrimarySite()
   if (!site) return new Response('No site', { status: 404 })
 
-  const [{ data: households }, { data: guests }] = await Promise.all([
-    supabase.from('households').select('id, name, side').eq('site_id', site.siteId).is('archived_at', null),
-    supabase.from('guests').select('household_id, full_name, email, is_child, plus_one_allowed, dietary')
-      .eq('site_id', site.siteId).is('archived_at', null).order('created_at'),
+  const [households, guests] = await Promise.all([
+    fetchAll<{ id: string; name: string; side: string | null }>(() =>
+      supabase.from('households').select('id, name, side').eq('site_id', site.siteId).is('archived_at', null)),
+    fetchAll<{ household_id: string; full_name: string; email: string | null; is_child: boolean; plus_one_allowed: boolean; dietary: string | null }>(() =>
+      supabase.from('guests').select('household_id, full_name, email, is_child, plus_one_allowed, dietary')
+        .eq('site_id', site.siteId).is('archived_at', null).order('created_at')),
   ])
-  const hh = new Map((households ?? []).map((h) => [h.id, h]))
+  const hh = new Map(households.map((h) => [h.id, h]))
 
   const csv = toCsv(
     ['Household', 'Side', 'Guest', 'Email', 'Child', 'Plus one allowed'],
-    (guests ?? []).map((g) => [
+    guests.map((g) => [
       hh.get(g.household_id)?.name ?? '', hh.get(g.household_id)?.side ?? '',
       g.full_name, g.email ?? '', g.is_child ? 'yes' : '', g.plus_one_allowed ? 'yes' : '',
     ]),

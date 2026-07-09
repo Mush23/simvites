@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { SeatingPlanner, type PlannerTable } from './seating-planner'
@@ -9,14 +10,18 @@ export default async function SeatingPage() {
   const site = await getPrimarySite()
   const supabase = await createClient()
 
-  const [{ data: tables }, { data: seats }, { data: guests }, { data: households }, { data: events }, { data: floorplans }] =
+  const siteId = site!.siteId
+  const [{ data: tables }, seats, guests, households, { data: events }, { data: floorplans }] =
     await Promise.all([
-      supabase.from('seating_tables').select('id, name, capacity, event_id, pos_x, pos_y, shape').eq('site_id', site!.siteId).order('sort_order').order('created_at'),
-      supabase.from('seat_assignments').select('table_id, guest_id').eq('site_id', site!.siteId),
-      supabase.from('guests').select('id, full_name, household_id').eq('site_id', site!.siteId).is('archived_at', null).order('created_at'),
-      supabase.from('households').select('id, name').eq('site_id', site!.siteId),
-      supabase.from('events').select('id, name').eq('site_id', site!.siteId).is('archived_at', null).order('sort_order'),
-      supabase.from('seating_floorplans').select('event_id, image_url').eq('site_id', site!.siteId),
+      supabase.from('seating_tables').select('id, name, capacity, event_id, pos_x, pos_y, shape').eq('site_id', siteId).order('sort_order').order('created_at'),
+      fetchAll<{ table_id: string; guest_id: string }>(() =>
+        supabase.from('seat_assignments').select('table_id, guest_id').eq('site_id', siteId)),
+      fetchAll<{ id: string; full_name: string; household_id: string }>(() =>
+        supabase.from('guests').select('id, full_name, household_id').eq('site_id', siteId).is('archived_at', null).order('created_at')),
+      fetchAll<{ id: string; name: string }>(() =>
+        supabase.from('households').select('id, name').eq('site_id', siteId)),
+      supabase.from('events').select('id, name').eq('site_id', siteId).is('archived_at', null).order('sort_order'),
+      supabase.from('seating_floorplans').select('event_id, image_url').eq('site_id', siteId),
     ])
 
   const hh = new Map((households ?? []).map((h) => [h.id, h.name]))

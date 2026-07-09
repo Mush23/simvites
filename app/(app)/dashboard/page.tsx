@@ -82,13 +82,15 @@ export default async function DashboardPage() {
 async function LiveActivity({ siteId }: { siteId: string }) {
   const { createClient } = await import('@/lib/supabase/server')
   const supabase = await createClient()
-  const [{ data: responses }, { data: log }, { data: guests }, { data: events }] = await Promise.all([
+  const { fetchAll } = await import('@/lib/supabase/fetch-all')
+  const [{ data: responses }, { data: log }, guests, { data: events }] = await Promise.all([
     supabase.from('responses').select('guest_id, event_id, status, responded_at')
       .eq('site_id', siteId).not('responded_at', 'is', null)
       .order('responded_at', { ascending: false }).limit(6),
     supabase.from('activity_log').select('verb, created_at')
       .eq('site_id', siteId).order('created_at', { ascending: false }).limit(6),
-    supabase.from('guests').select('id, full_name').eq('site_id', siteId),
+    fetchAll<{ id: string; full_name: string }>(() =>
+      supabase.from('guests').select('id, full_name').eq('site_id', siteId)),
     supabase.from('events').select('id, name, accent').eq('site_id', siteId),
   ])
   const gName = new Map((guests ?? []).map((g) => [g.id, g.full_name]))

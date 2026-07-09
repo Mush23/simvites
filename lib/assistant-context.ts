@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { fetchAll } from '@/lib/supabase/fetch-all'
 import { formatPence } from '@/lib/money'
 
 /**
@@ -11,16 +12,22 @@ export async function buildAssistantContext(siteId: string, siteTitle: string): 
   const today = new Date().toISOString().slice(0, 10)
 
   const [
-    { data: events }, { data: guests }, { data: households }, { data: invitations },
-    { data: responses }, { data: answers }, { data: questions },
+    { data: events }, guests, households, invitations,
+    responses, answers, { data: questions },
     { data: vendors }, { data: budget }, { data: tasks }, { data: payments },
   ] = await Promise.all([
     supabase.from('events').select('id, name, starts_at, venue_name, capacity').eq('site_id', siteId).is('archived_at', null).order('starts_at'),
-    supabase.from('guests').select('id, full_name, household_id, is_child').eq('site_id', siteId).is('archived_at', null),
-    supabase.from('households').select('id, name').eq('site_id', siteId).is('archived_at', null),
-    supabase.from('invitations').select('guest_id, event_id').eq('site_id', siteId),
-    supabase.from('responses').select('guest_id, event_id, status').eq('site_id', siteId),
-    supabase.from('rsvp_answers').select('question_id, value').eq('site_id', siteId),
+    // Guest-scaled sets: page past the 1000-row cap so the AI cites exact figures.
+    fetchAll<{ id: string; full_name: string; household_id: string; is_child: boolean }>(() =>
+      supabase.from('guests').select('id, full_name, household_id, is_child').eq('site_id', siteId).is('archived_at', null)),
+    fetchAll<{ id: string; name: string }>(() =>
+      supabase.from('households').select('id, name').eq('site_id', siteId).is('archived_at', null)),
+    fetchAll<{ guest_id: string; event_id: string }>(() =>
+      supabase.from('invitations').select('guest_id, event_id').eq('site_id', siteId)),
+    fetchAll<{ guest_id: string; event_id: string; status: string }>(() =>
+      supabase.from('responses').select('guest_id, event_id, status').eq('site_id', siteId)),
+    fetchAll<{ question_id: string; value: unknown }>(() =>
+      supabase.from('rsvp_answers').select('question_id, value').eq('site_id', siteId)),
     supabase.from('rsvp_questions').select('id, label, type').eq('site_id', siteId).is('archived_at', null),
     supabase.from('vendors').select('name, category, status, contracted_amount, quote_amount').eq('site_id', siteId).is('archived_at', null),
     supabase.from('budget_items').select('label, estimated_amount, actual_amount, paid_amount').eq('site_id', siteId).is('archived_at', null),

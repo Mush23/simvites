@@ -1,6 +1,7 @@
 import 'server-only'
 import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/server'
+import { fetchAll } from '@/lib/supabase/fetch-all'
 import { GUEST_COOKIE, verifyGuestSession } from '@/lib/guest-session'
 
 // Guest RSVP context. Loaded with the SERVICE ROLE after cookie validation —
@@ -76,17 +77,29 @@ export async function getGuestRsvpContext(siteSlug: string): Promise<GuestRsvpCo
   interface QRow { id: string; key: string; label: string; help_text: string | null; type: QuestionView['type']; options: unknown; required: boolean; show_if: unknown; event_id: string | null; sort_order: number }
   interface ARow { guest_id: string; question_id: string; value: unknown }
 
-  const [{ data: guestsRaw }, { data: invitationsRaw }, { data: eventsRaw }, { data: responsesRaw }, { data: questionsRaw }, { data: answersRaw }] =
+  // This household's guests first (small, never truncated), then scope the
+  // household-specific fetches to those ids — a guest past row 1000 must still
+  // see their own invitations. Site-wide responses (for capacity) are paged.
+  const { data: guestsRaw } = await db.from('guests').select('id, full_name, is_child')
+    .eq('household_id', household.id).is('archived_at', null).order('created_at')
+  const householdGuestIds = ((guestsRaw ?? []) as GuestRow[]).map((g) => g.id)
+
+  const [invitationsRaw, { data: eventsRaw }, responsesRaw, { data: questionsRaw }, answersRaw] =
     await Promise.all([
-      db.from('guests').select('id, full_name, is_child').eq('household_id', household.id)
-        .is('archived_at', null).order('created_at'),
-      db.from('invitations').select('guest_id, event_id').eq('site_id', site.id),
+      householdGuestIds.length
+        ? db.from('invitations').select('guest_id, event_id').eq('site_id', site.id).in('guest_id', householdGuestIds)
+            .then((r: { data: unknown }): InviteRow[] => (r.data ?? []) as InviteRow[])
+        : Promise.resolve([] as InviteRow[]),
       db.from('events').select('id, name, starts_at, venue_name, capacity, rsvp_deadline, sort_order')
         .eq('site_id', site.id).is('archived_at', null),
-      db.from('responses').select('guest_id, event_id, status').eq('site_id', site.id),
+      fetchAll<{ guest_id: string; event_id: string; status: string }>(() =>
+        db.from('responses').select('guest_id, event_id, status').eq('site_id', site.id)),
       db.from('rsvp_questions').select('id, key, label, help_text, type, options, required, show_if, event_id, sort_order')
         .eq('site_id', site.id).is('archived_at', null).order('sort_order'),
-      db.from('rsvp_answers').select('guest_id, question_id, value').eq('site_id', site.id),
+      householdGuestIds.length
+        ? db.from('rsvp_answers').select('guest_id, question_id, value').eq('site_id', site.id).in('guest_id', householdGuestIds)
+            .then((r: { data: unknown }): ARow[] => (r.data ?? []) as ARow[])
+        : Promise.resolve([] as ARow[]),
     ])
 
   // Seating: table name per guest (if the hosts have seated them).

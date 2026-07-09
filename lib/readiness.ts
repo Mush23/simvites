@@ -1,5 +1,6 @@
 import 'server-only'
 import { createClient } from '@/lib/supabase/server'
+import { fetchAll } from '@/lib/supabase/fetch-all'
 
 // Dashboard readiness = a weighted checklist computed server-side (handoff §6).
 // Weights live HERE so tuning is a one-file change.
@@ -32,15 +33,20 @@ export async function computeReadiness(siteId: string): Promise<Readiness> {
   const supabase = await createClient()
 
   const [
-    { data: events }, { data: guests }, { data: invitations }, { data: responses },
-    { data: households }, { data: vendors }, { data: tasks }, { data: budget },
+    { data: events }, guests, invitations, responses,
+    households, { data: vendors }, { data: tasks }, { data: budget },
     { count: tokens }, { data: site },
   ] = await Promise.all([
     supabase.from('events').select('id, venue_name, starts_at').eq('site_id', siteId).is('archived_at', null),
-    supabase.from('guests').select('id, household_id').eq('site_id', siteId).is('archived_at', null),
-    supabase.from('invitations').select('guest_id').eq('site_id', siteId),
-    supabase.from('responses').select('guest_id, status').eq('site_id', siteId),
-    supabase.from('households').select('id').eq('site_id', siteId).is('archived_at', null),
+    // Guest-scaled sets: page past the 1000-row cap so the score/stats are exact.
+    fetchAll<{ id: string; household_id: string }>(() =>
+      supabase.from('guests').select('id, household_id').eq('site_id', siteId).is('archived_at', null)),
+    fetchAll<{ guest_id: string }>(() =>
+      supabase.from('invitations').select('guest_id').eq('site_id', siteId)),
+    fetchAll<{ guest_id: string; status: string }>(() =>
+      supabase.from('responses').select('guest_id, status').eq('site_id', siteId)),
+    fetchAll<{ id: string }>(() =>
+      supabase.from('households').select('id').eq('site_id', siteId).is('archived_at', null)),
     supabase.from('vendors').select('id, status').eq('site_id', siteId).is('archived_at', null),
     supabase.from('tasks').select('id, status, due_date').eq('site_id', siteId).is('archived_at', null),
     supabase.from('budget_items').select('estimated_amount, actual_amount, paid_amount').eq('site_id', siteId).is('archived_at', null),

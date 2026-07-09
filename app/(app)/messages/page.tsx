@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { smsConfigured, whatsappConfigured } from '@/lib/twilio'
@@ -10,10 +11,14 @@ export default async function MessagesPage() {
   const site = await getPrimarySite()
   const supabase = await createClient()
 
-  const [{ data: households }, { data: guests }, { data: messages }] = await Promise.all([
-    supabase.from('households').select('id, name').eq('site_id', site!.siteId).is('archived_at', null).order('name'),
-    supabase.from('guests').select('id, household_id, phone').eq('site_id', site!.siteId).is('archived_at', null),
-    supabase.from('messages').select('id, household_id, direction, channel, body, status, created_at').eq('site_id', site!.siteId).order('created_at'),
+  const siteId = site!.siteId
+  const [households, guests, messages] = await Promise.all([
+    fetchAll<{ id: string; name: string }>(() =>
+      supabase.from('households').select('id, name').eq('site_id', siteId).is('archived_at', null).order('name')),
+    fetchAll<{ id: string; household_id: string; phone: string | null }>(() =>
+      supabase.from('guests').select('id, household_id, phone').eq('site_id', siteId).is('archived_at', null)),
+    fetchAll<{ id: string; household_id: string | null; direction: string; channel: string; body: string; status: string; created_at: string }>(() =>
+      supabase.from('messages').select('id, household_id, direction, channel, body, status, created_at').eq('site_id', siteId).order('created_at')),
   ])
 
   const phoneByHh = new Map<string, boolean>()

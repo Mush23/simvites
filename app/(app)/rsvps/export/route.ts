@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { toCsv, csvResponse } from '@/lib/csv'
 
@@ -14,15 +15,21 @@ export async function GET() {
   const site = await getPrimarySite()
   if (!site) return new Response('No site', { status: 404 })
 
-  const [{ data: events }, { data: invitations }, { data: responses }, { data: guests }, { data: households }, { data: questions }, { data: answers }] =
+  // Every guest × event row must be present — page past the 1000-row cap.
+  const [{ data: events }, invitations, responses, guests, households, { data: questions }, answers] =
     await Promise.all([
       supabase.from('events').select('id, name').eq('site_id', site.siteId).is('archived_at', null).order('sort_order'),
-      supabase.from('invitations').select('guest_id, event_id').eq('site_id', site.siteId),
-      supabase.from('responses').select('guest_id, event_id, status, responded_at').eq('site_id', site.siteId),
-      supabase.from('guests').select('id, full_name, household_id').eq('site_id', site.siteId).is('archived_at', null),
-      supabase.from('households').select('id, name').eq('site_id', site.siteId),
+      fetchAll<{ guest_id: string; event_id: string }>(() =>
+        supabase.from('invitations').select('guest_id, event_id').eq('site_id', site.siteId)),
+      fetchAll<{ guest_id: string; event_id: string; status: string; responded_at: string | null }>(() =>
+        supabase.from('responses').select('guest_id, event_id, status, responded_at').eq('site_id', site.siteId)),
+      fetchAll<{ id: string; full_name: string; household_id: string }>(() =>
+        supabase.from('guests').select('id, full_name, household_id').eq('site_id', site.siteId).is('archived_at', null)),
+      fetchAll<{ id: string; name: string }>(() =>
+        supabase.from('households').select('id, name').eq('site_id', site.siteId)),
       supabase.from('rsvp_questions').select('id, label').eq('site_id', site.siteId).is('archived_at', null).order('sort_order'),
-      supabase.from('rsvp_answers').select('guest_id, question_id, value').eq('site_id', site.siteId),
+      fetchAll<{ guest_id: string; question_id: string; value: unknown }>(() =>
+        supabase.from('rsvp_answers').select('guest_id, question_id, value').eq('site_id', site.siteId)),
     ])
 
   const evById = new Map((events ?? []).map((e) => [e.id, e.name]))

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { emailConfigured } from '@/lib/email'
@@ -10,13 +11,16 @@ export default async function InvitationsPage() {
   const site = await getPrimarySite()
   const supabase = await createClient()
 
-  const [{ data: households }, { data: guests }, { data: tokens }, { data: sends }] =
+  const siteId = site!.siteId
+  const [households, guests, tokens, { data: sends }] =
     await Promise.all([
-      supabase.from('households').select('id, name').eq('site_id', site!.siteId)
-        .is('archived_at', null).order('created_at'),
-      supabase.from('guests').select('household_id, email').eq('site_id', site!.siteId).is('archived_at', null),
-      supabase.from('guest_access_tokens').select('household_id, revoked').eq('site_id', site!.siteId),
-      supabase.from('activity_log').select('entity_id, created_at').eq('site_id', site!.siteId)
+      fetchAll<{ id: string; name: string }>(() =>
+        supabase.from('households').select('id, name').eq('site_id', siteId).is('archived_at', null).order('created_at')),
+      fetchAll<{ household_id: string; email: string | null }>(() =>
+        supabase.from('guests').select('household_id, email').eq('site_id', siteId).is('archived_at', null)),
+      fetchAll<{ household_id: string; revoked: boolean }>(() =>
+        supabase.from('guest_access_tokens').select('household_id, revoked').eq('site_id', siteId)),
+      supabase.from('activity_log').select('entity_id, created_at').eq('site_id', siteId)
         .eq('verb', 'sent_invites').order('created_at', { ascending: false }),
     ])
   const { data: opens } = await supabase.from('activity_log')
