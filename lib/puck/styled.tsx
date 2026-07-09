@@ -7,19 +7,27 @@
 // so they freeze into publish snapshots like all content.
 // ═══════════════════════════════════════════════════════════════════════
 
+// Type-only link from registry → config makes this import cycle-safe at runtime.
+import { TEMPLATES } from '@/lib/templates/registry'
+
 export interface StyleOpts {
-  variant?: 'classic' | 'framed' | 'banded' | 'minimal' | 'grand'
+  variant?:
+    | 'classic' | 'framed' | 'banded' | 'minimal' | 'grand'
+    | 'gilded' | 'arch' | 'postcard' | 'editorial' | 'velvet'
   accent?: 'inherit' | 'gold' | 'terracotta' | 'oxblood' | 'sage' | 'ink'
   corners?: 'inherit' | 'sharp' | 'soft' | 'round'
   shadow?: 'inherit' | 'none' | 'soft' | 'deep'
   glow?: 'inherit' | 'none' | 'soft' | 'strong'
   hover?: 'inherit' | 'lift' | 'grow' | 'tilt' | 'none'
   anim?: 'none' | 'rise' | 'fade' | 'zoom' | 'slide'
+  /** D4: borrow another template's palette for just this block. */
+  skin?: string
 }
 
 export const DEFAULT_STYLE: StyleOpts = {
   variant: 'classic', accent: 'inherit', corners: 'inherit',
   shadow: 'inherit', glow: 'inherit', hover: 'inherit', anim: 'rise',
+  skin: 'inherit',
 }
 
 const ACCENT_VARS: Record<string, Record<string, string>> = {
@@ -35,6 +43,12 @@ const CORNER_VARS: Record<string, string> = { sharp: '4px', soft: '13px', round:
 export function Styled({ opts, children }: { opts?: StyleOpts; children: React.ReactNode }) {
   const o = { ...DEFAULT_STYLE, ...(opts ?? {}) }
   const vars: Record<string, string> = {}
+  // D4: a block can wear ANOTHER template's whole identity (palette + display
+  // face). Applied first so accent/corner overrides still win on top.
+  if (o.skin && o.skin !== 'inherit') {
+    const skin = TEMPLATES.find((t) => t.key === o.skin)
+    if (skin) Object.assign(vars, skin.vars)
+  }
   if (o.accent && o.accent !== 'inherit') Object.assign(vars, ACCENT_VARS[o.accent] ?? {})
   if (o.corners && o.corners !== 'inherit') vars['--radius-card'] = CORNER_VARS[o.corners]
 
@@ -59,13 +73,25 @@ export const styleField = {
   label: 'Style — look, colour & motion',
   objectFields: {
     variant: {
-      type: 'select' as const, label: 'Look (5 options)',
+      type: 'select' as const, label: 'Look (10 options)',
       options: [
-        { label: 'Classic', value: 'classic' },
-        { label: 'Framed', value: 'framed' },
-        { label: 'Banded', value: 'banded' },
-        { label: 'Minimal', value: 'minimal' },
-        { label: 'Grand', value: 'grand' },
+        { label: 'Timeless', value: 'classic' },
+        { label: 'Keepsake Frame', value: 'framed' },
+        { label: 'Silk Band', value: 'banded' },
+        { label: 'Whisper', value: 'minimal' },
+        { label: 'Royal Flourish', value: 'grand' },
+        { label: 'Gilded Edge', value: 'gilded' },
+        { label: 'Grand Arch', value: 'arch' },
+        { label: 'Postcard', value: 'postcard' },
+        { label: 'Editorial Rule', value: 'editorial' },
+        { label: 'Velvet Night', value: 'velvet' },
+      ],
+    },
+    skin: {
+      type: 'select' as const, label: 'Borrow a template\'s palette',
+      options: [
+        { label: 'This site\'s template', value: 'inherit' },
+        ...TEMPLATES.map((t) => ({ label: t.name, value: t.key })),
       ],
     },
     accent: {

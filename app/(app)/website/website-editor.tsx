@@ -13,7 +13,8 @@ import {
 import { SECTION_PRESETS } from '@/lib/puck/presets'
 import { askConfirm, askPrompt, notify } from '@/components/ui/overlays'
 import { Pencil, Trash2, Eye, EyeOff, FileText, ChevronDown, Palette, ExternalLink, Info, LayoutTemplate } from 'lucide-react'
-import { FONT_PAIRS, BACKGROUNDS, ACCENTS, GLOWS, HOVERS, BACKDROPS, type SiteStyle } from '@/lib/site-style'
+import { BACKGROUNDS, ACCENTS, GLOWS, HOVERS, BACKDROPS, BUTTONS, NAVS, type SiteStyle } from '@/lib/site-style'
+import { DISPLAY_FACES, BODY_FACES } from '@/lib/template-fonts'
 
 export interface EditorPage {
   id: string
@@ -101,6 +102,36 @@ function PagesMenu({ pages, currentId }: { pages: EditorPage[]; currentId: strin
 }
 
 /** The customisation panel stakeholders asked for: fonts, colours, glow, motion. */
+/** D3: a labelled colour swatch — native picker, debounced (the picker fires
+ * continuously while dragging), with a reset back to the template colour. */
+function ColorPick({ k, label, value, onSet }: {
+  k: keyof SiteStyle; label: string; value?: string
+  onSet: (key: string, value: string) => Promise<void>
+}) {
+  const [local, setLocal] = useState(value || '#888888')
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => { setLocal(value || '#888888') }, [value])
+  return (
+    <label className="block text-center text-xs">
+      <span className="eyebrow mb-1 block text-[9px]">{label}</span>
+      <input type="color" value={local}
+        onChange={(e) => {
+          const v = e.target.value
+          setLocal(v)
+          if (timer.current) clearTimeout(timer.current)
+          timer.current = setTimeout(() => onSet(k, v), 450)
+        }}
+        className="h-8 w-full cursor-pointer rounded-md border border-line bg-paper-2 p-0.5" />
+      {value ? (
+        <button type="button" onClick={() => onSet(k, '')}
+          className="mt-0.5 text-[9px] text-ink-3 underline hover:text-ink">reset</button>
+      ) : (
+        <span className="mt-0.5 block text-[9px] text-ink-3">template</span>
+      )}
+    </label>
+  )
+}
+
 function StylePanel({ current }: { current: SiteStyle }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -128,17 +159,28 @@ function StylePanel({ current }: { current: SiteStyle }) {
         <Palette size={14} strokeWidth={1.7} className="text-ink-3" /> Style
       </button>
       {open && (
-        <div className="absolute right-0 top-12 z-50 w-64 space-y-3 rounded-card border border-line bg-surface p-4 shadow-lift">
-          <Sel k="fontPair" label="Fonts" options={FONT_PAIRS} />
-          <Sel k="background" label="Background" options={BACKGROUNDS} />
-          <Sel k="accent" label="Accent colour" options={ACCENTS} />
+        <div className="absolute right-0 top-12 z-50 max-h-[70vh] w-72 space-y-3 overflow-y-auto rounded-card border border-line bg-surface p-4 shadow-lift">
+          <Sel k="displayFont" label="Heading font (12 faces)" options={{ '': { label: 'Template default' }, ...DISPLAY_FACES }} />
+          <Sel k="bodyFont" label="Body font (5 faces)" options={{ '': { label: 'Template default' }, ...BODY_FACES }} />
+          <Sel k="background" label="Background preset" options={BACKGROUNDS} />
+          <Sel k="accent" label="Accent preset" options={ACCENTS} />
+
+          {/* D3: colour pickers — any colour, fanned into the full token family */}
+          <div className="grid grid-cols-3 gap-2 border-t border-line pt-3">
+            <ColorPick k="customAccent" label="Accent" value={current.customAccent} onSet={set} />
+            <ColorPick k="customPaper" label="Background" value={current.customPaper} onSet={set} />
+            <ColorPick k="customInk" label="Text" value={current.customInk} onSet={set} />
+          </div>
+
+          <Sel k="buttonStyle" label="Button design" options={BUTTONS} />
+          <Sel k="nav" label="Menu design" options={NAVS} />
           <Sel k="glow" label="Card glow" options={GLOWS} />
           <Sel k="hover" label="Hover animation" options={HOVERS} />
           <Sel k="backdrop" label="Backdrop effect (live site)" options={BACKDROPS} />
 
           {/* Brand kit (Sprint D): monogram + initials shown in the site menu */}
           <div className="border-t border-line pt-3">
-            <span className="eyebrow mb-1.5 block">Brand kit — monogram</span>
+            <span className="eyebrow mb-1.5 block">Brand kit — logo / monogram</span>
             <div className="flex items-center gap-2">
               {current.monogram ? (
                 // eslint-disable-next-line @next/next/no-img-element

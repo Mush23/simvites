@@ -184,6 +184,62 @@ a[class*='bg-primary'] {
 [data-variant='grand'] { font-size: 1.09em; padding-block: 2.25rem; }
 [data-variant='grand'] .font-display { letter-spacing: -0.015em; }
 
+/* 5 more looks (D1) — every element now has 10 wearable designs, and since
+   they are template-var driven, each template restyles all ten. */
+[data-variant='gilded'] {
+  margin: 1.5rem auto;
+  max-width: min(64rem, calc(100% - 2.5rem));
+  border: 1px solid var(--accent-line);
+  outline: 1px solid var(--accent-line);
+  outline-offset: 6px;
+  border-radius: var(--radius-card, 13px);
+  background: var(--surface);
+  overflow: hidden;
+}
+[data-variant='arch'] {
+  margin: 2rem auto 1.25rem;
+  max-width: min(58rem, calc(100% - 2rem));
+  border: 1px solid var(--accent-line);
+  border-radius: clamp(3.5rem, 16vw, 12rem) clamp(3.5rem, 16vw, 12rem) var(--radius-card, 13px) var(--radius-card, 13px);
+  background: var(--accent-soft);
+  overflow: hidden;
+  padding-top: 1.5rem;
+}
+[data-variant='postcard'] {
+  margin: 2rem auto;
+  max-width: min(56rem, calc(100% - 2.5rem));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card, 13px);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg, 0 24px 60px -18px rgba(33, 29, 24, 0.25));
+  transform: rotate(-0.65deg);
+  transition: transform 0.35s ease;
+  overflow: hidden;
+}
+[data-variant='postcard']:hover { transform: rotate(0deg); }
+[data-variant='editorial'] {
+  border-top: 2px solid var(--accent);
+  border-bottom: 1px solid var(--line);
+  padding-block: 2rem 1.5rem;
+}
+[data-variant='editorial'] .eyebrow { color: var(--accent-ink); }
+[data-variant='velvet'] {
+  /* A dramatic dark panel tinted by the block's accent. Literal values, not
+     swapped vars — var self-reference cycles resolve to invalid. */
+  --paper: #14110c;
+  --paper-2: #1b1712;
+  --surface: #201b15;
+  --surface-2: #292319;
+  --ink: #f5f0e6;
+  --ink-2: #cfc6b4;
+  --ink-3: #a29882;
+  --line: rgba(245, 240, 230, 0.14);
+  --line-2: rgba(245, 240, 230, 0.22);
+  background: color-mix(in oklab, var(--accent) 12%, #14110c);
+  color: var(--ink);
+  padding-block: 1.25rem;
+}
+
 /* Per-block shading override */
 [data-shadow='none'] .shadow-card { box-shadow: none; }
 [data-shadow='soft'] .shadow-card { box-shadow: var(--shadow); }
@@ -261,6 +317,31 @@ a[class*='bg-primary'] {
 [data-heading-case='upper'] h3 {
   text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+
+/* D3: button treatments — restyle accent fills sitewide from one select.
+   High-specificity double attribute beats the utility classes. */
+[data-site-root][data-button='outline'] a[class*='bg-accent'],
+[data-site-root][data-button='outline'] button[class*='bg-accent'] {
+  background: transparent !important;
+  color: var(--accent) !important;
+  border: 1.5px solid var(--accent);
+}
+[data-site-root][data-button='ghost'] a[class*='bg-accent'],
+[data-site-root][data-button='ghost'] button[class*='bg-accent'] {
+  background: var(--accent-soft) !important;
+  color: var(--accent-ink) !important;
+}
+[data-site-root][data-button='underline'] a[class*='bg-accent'],
+[data-site-root][data-button='underline'] button[class*='bg-accent'] {
+  background: transparent !important;
+  color: var(--accent-ink) !important;
+  border-radius: 0;
+  padding-inline: 0.25rem;
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: var(--accent-line);
 }
 
 /* ── Backdrop effects (Style panel → "Backdrop effect") ──────────────────

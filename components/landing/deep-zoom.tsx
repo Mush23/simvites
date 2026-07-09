@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { BRAND_NAME } from '@/lib/brand'
 import { LiveDemo } from './live-demo'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v))
 /** 0→1 across [a,b] of progress. */
@@ -210,26 +211,26 @@ export function DeepZoom() {
   return (
     <>
       {/* Fixed glass nav pill */}
-      <nav className="fixed left-1/2 top-4 z-50 flex max-w-[calc(100vw-24px)] -translate-x-1/2 flex-nowrap items-center gap-0.5 whitespace-nowrap rounded-[13px] border border-black/[0.07] px-2 py-1.5 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.25)] sm:gap-1"
-        style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(14px)' }}>
-        <Link href="/" className="flex shrink-0 items-center gap-1.5 px-2 text-[13px] font-semibold tracking-tight text-[#191918]">
+      <nav className="fixed left-1/2 top-4 z-50 flex max-w-[calc(100vw-24px)] -translate-x-1/2 flex-nowrap items-center gap-0.5 whitespace-nowrap rounded-[13px] border border-black/[0.07] bg-white/75 px-2 py-1.5 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.25)] backdrop-blur-xl dark:border-white/10 dark:bg-[#0E1830]/85 sm:gap-1">
+        <Link href="/" className="flex shrink-0 items-center gap-1.5 px-2 text-[13px] font-semibold tracking-tight text-[#191918] dark:text-[#EEF2FA]">
           <span className="flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-bold text-white" style={{ background: 'oklch(0.62 0.21 29)' }}>S</span>
           {BRAND_NAME}
         </Link>
-        {[['#product', 'Product'], ['#templates', 'Templates'], ['#rsvp', 'RSVP'], ['#pricing', 'Pricing']].map(([h, l]) => (
-          <a key={h} href={h} className="hidden shrink-0 rounded-lg px-2.5 py-1 text-[13px] font-medium text-[#6A6864] hover:text-[#191918] md:block">{l}</a>
+        {[['#product', 'Product'], ['#templates', 'Templates'], ['#rsvp', 'RSVP'], ['#faq', 'FAQ'], ['#pricing', 'Pricing']].map(([h, l]) => (
+          <a key={h} href={h} className="hidden shrink-0 rounded-lg px-2.5 py-1 text-[13px] font-medium text-[#6A6864] hover:text-[#191918] dark:text-[#8FA0C4] dark:hover:text-[#EEF2FA] md:block">{l}</a>
         ))}
-        <Link href="/login" className="shrink-0 rounded-lg px-2.5 py-1 text-[13px] font-medium text-[#6A6864] hover:text-[#191918]">Sign in</Link>
+        <Link href="/login" className="shrink-0 rounded-lg px-2.5 py-1 text-[13px] font-medium text-[#6A6864] hover:text-[#191918] dark:text-[#8FA0C4] dark:hover:text-[#EEF2FA]">Sign in</Link>
+        <ThemeToggle className="h-7 w-7 shrink-0 border-black/10 text-[#6A6864] dark:border-white/15 dark:text-[#8FA0C4]" />
         <Link href="/login" className="shrink-0 rounded-lg px-3 py-1.5 text-[13px] font-semibold text-white" style={{ background: 'oklch(0.62 0.21 29)' }}>
           Start free
         </Link>
       </nav>
 
       {/* Scenes 1–4: the 560vh dive */}
-      <section ref={sectionRef} id="product" className="relative" style={{ height: reduced ? 'auto' : '560vh', background: '#FAF8F3' }}>
+      <section ref={sectionRef} id="product" className="relative bg-[#FAF8F3] dark:bg-[#0A1220]" style={{ height: reduced ? 'auto' : '560vh' }}>
         <div ref={stageRef} className={reduced ? 'relative' : 'sticky top-0 h-screen overflow-hidden'}>
           {/* soft ivory glow behind the hero (no grid — founder direction) */}
-          <div aria-hidden className="absolute inset-0"
+          <div aria-hidden className="absolute inset-0 dark:opacity-0"
             style={{ background: 'radial-gradient(900px 520px at 50% 18%, rgba(255,255,255,0.9), transparent 70%)' }} />
 
           {/* navy field — slick deep blue with a coral bloom */}
@@ -242,21 +243,21 @@ export function DeepZoom() {
           {/* hero copy — top-anchored below the fixed nav, sized to content so
               the headline can never be clipped (mobile or desktop). */}
           <div data-s="hero" className="relative mx-auto flex max-w-[880px] flex-col items-center px-5 pb-6 pt-[104px] text-center sm:pt-[124px]">
-            <span className="rounded-full border border-black/10 bg-white px-3 py-1 font-mono text-[9.5px] uppercase tracking-[0.08em] text-[#6A6864]">
+            <span className="rounded-full border border-black/10 bg-white px-3 py-1 font-mono text-[9.5px] uppercase tracking-[0.08em] text-[#6A6864] dark:border-white/15 dark:bg-[#111C33] dark:text-[#8FA0C4]">
               Per event invitations · live RSVP · zero code
             </span>
-            <h1 className="mt-4 font-sans text-[clamp(34px,7vw,76px)] font-[650] leading-[1.0] tracking-[-0.04em] text-[#191918]">
+            <h1 className="mt-4 font-sans text-[clamp(34px,7vw,76px)] font-[650] leading-[1.0] tracking-[-0.04em] text-[#191918] dark:text-[#EEF2FA]">
               Every event. Every guest.<br />One platform.
             </h1>
-            <p className="mt-4 max-w-[560px] text-[14px] leading-relaxed text-[#6A6864] sm:text-[15px]">
+            <p className="mt-4 max-w-[560px] text-[14px] leading-relaxed text-[#6A6864] dark:text-[#8FA0C4] sm:text-[15px]">
               Build the wedding website, invite each guest to exactly the right events, and watch RSVPs land live.
               Planning, guests and the site itself, finally in one place.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <Link href="/login" className="rounded-[10px] bg-[#191918] px-5 py-2.5 text-[13.5px] font-semibold text-white">
+              <Link href="/login" className="rounded-[10px] bg-[#191918] px-5 py-2.5 text-[13.5px] font-semibold text-white dark:bg-[#EEF2FA] dark:text-[#0A1220]">
                 Start building free
               </Link>
-              <a href="#product" className="rounded-[10px] border border-black/15 bg-white px-5 py-2.5 text-[13.5px] font-medium text-[#191918]">
+              <a href="#product" className="rounded-[10px] border border-black/15 bg-white px-5 py-2.5 text-[13.5px] font-medium text-[#191918] dark:border-white/15 dark:bg-[#111C33] dark:text-[#EEF2FA]">
                 ▶ Watch the 60 second take
               </a>
             </div>
@@ -268,7 +269,7 @@ export function DeepZoom() {
             <LiveDemo active={demoActive} />
           </div>
 
-          <p data-s="hint" className="absolute bottom-5 left-0 right-0 text-center font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#8F8D88]">
+          <p data-s="hint" className="absolute bottom-5 left-0 right-0 text-center font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#8F8D88] dark:text-[#5B6A8C]">
             Scroll to dive in ↓
           </p>
 

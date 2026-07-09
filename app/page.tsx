@@ -18,10 +18,11 @@ const CORAL = 'oklch(0.62 0.21 29)'
 
 export default function LandingPage() {
   return (
-    <div className="bg-[#FAF8F3] text-[#191918]">
+    <div className="bg-[#FAF8F3] text-[#191918] dark:bg-[#0A1220] dark:text-[#EEF2FA]">
       <DeepZoom />
 
-      {/* Scene 4b — the wedding dimension (ivory) */}
+      {/* Scene 4b — the wedding dimension (ivory; templates stay ivory in dark
+          mode on purpose — the artifact keeps its own identity) */}
       <section id="templates" className="px-6 py-24" style={{ background: 'oklch(0.975 0.006 85)' }}>
         <div className="mx-auto max-w-[1060px]">
           <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#97753F]">Templates · the artifact</p>
@@ -71,17 +72,17 @@ export default function LandingPage() {
       {/* Scene 5 — USP duo */}
       <section id="rsvp" className="px-6 py-24">
         <div className="mx-auto max-w-[1060px]">
-          <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#8F8D88]">Why couples switch</p>
+          <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#8F8D88] dark:text-[#5B6A8C]">Why couples switch</p>
           <h2 className="mt-3 text-center text-[clamp(26px,3.6vw,40px)] font-[650] leading-tight tracking-[-0.03em]">
             Two things nobody else does properly
           </h2>
 
           <div className="mt-12 grid gap-6 lg:grid-cols-2">
             {/* USP 01 */}
-            <div className="rounded-[14px] border border-[#EAE5DA] bg-white p-7 shadow-[0_1px_2px_rgba(15,15,20,0.04)]">
+            <div className="rounded-[14px] border border-[#EAE5DA] bg-white p-7 shadow-[0_1px_2px_rgba(15,15,20,0.04)] dark:border-[#223252] dark:bg-[#111C33]">
               <p className="font-mono text-[9.5px] uppercase tracking-[0.1em]" style={{ color: CORAL }}>USP 01 · Per event invitations</p>
               <h3 className="mt-2.5 text-[20px] font-[650] tracking-[-0.02em]">Every guest sees only their events</h3>
-              <p className="mt-2 text-[13.5px] leading-relaxed text-[#6A6864]">
+              <p className="mt-2 text-[13.5px] leading-relaxed text-[#6A6864] dark:text-[#8FA0C4]">
                 Grandma gets the ceremony. College friends get the sangeet and the afterparty.
                 Same website, different wedding for each family.
               </p>
@@ -107,10 +108,10 @@ export default function LandingPage() {
             </div>
 
             {/* USP 02 */}
-            <div className="rounded-[14px] border border-[#EAE5DA] bg-white p-7 shadow-[0_1px_2px_rgba(15,15,20,0.04)]">
+            <div className="rounded-[14px] border border-[#EAE5DA] bg-white p-7 shadow-[0_1px_2px_rgba(15,15,20,0.04)] dark:border-[#223252] dark:bg-[#111C33]">
               <p className="font-mono text-[9.5px] uppercase tracking-[0.1em]" style={{ color: CORAL }}>USP 02 · The RSVP engine</p>
               <h3 className="mt-2.5 text-[20px] font-[650] tracking-[-0.02em]">One tap for the family, answers for the caterer</h3>
-              <p className="mt-2 text-[13.5px] leading-relaxed text-[#6A6864]">
+              <p className="mt-2 text-[13.5px] leading-relaxed text-[#6A6864] dark:text-[#8FA0C4]">
                 A household answers once, per person, per event, with your custom questions.
                 You get live totals and one clean export.
               </p>
@@ -138,6 +139,70 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What you get — the full picture, so nobody has to guess (D7) */}
+      <section id="what-you-get" className="px-6 pb-24">
+        <div className="mx-auto max-w-[1060px]">
+          <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#8F8D88] dark:text-[#5B6A8C]">Everything included</p>
+          <h2 className="mt-3 text-center text-[clamp(26px,3.6vw,40px)] font-[650] leading-tight tracking-[-0.03em]">
+            One platform, the whole wedding
+          </h2>
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              ['🕌', 'Multi-event website', '18 templates, 10 looks per section, your fonts and colours — published as a keepsake your guests treasure.'],
+              ['✉️', 'Personal invitations', 'Every household gets its own private link — by email, WhatsApp or a QR on the printed card.'],
+              ['✓', 'Per-event RSVP', 'Custom questions, meal choices, deadlines and capacity — answered per person, per event.'],
+              ['🪑', 'Seating planner', 'Upload your floor plan, drag tables into place, seat every name. Guests see their table on their invite.'],
+              ['💷', 'Budget & payments', 'Vendor payment schedules linked to your budget, with reminders before every due date.'],
+              ['🤖', 'AI planning help', 'Paste any messy guest list and it becomes households. Ask the assistant anything about your own wedding.'],
+            ].map(([icon, title, body]) => (
+              <div key={title as string} className="rounded-[14px] border border-[#EAE5DA] bg-white p-6 dark:border-[#223252] dark:bg-[#111C33]">
+                <p className="text-[20px]">{icon}</p>
+                <h3 className="mt-2 text-[15px] font-[650] tracking-[-0.01em]">{title}</h3>
+                <p className="mt-1.5 text-[12.5px] leading-relaxed text-[#6A6864] dark:text-[#8FA0C4]">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ (D7) — the questions every couple actually asks */}
+      <section id="faq" className="px-6 pb-24">
+        <div className="mx-auto max-w-[760px]">
+          <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#8F8D88] dark:text-[#5B6A8C]">Questions, answered</p>
+          <h2 className="mt-3 text-center text-[clamp(26px,3.6vw,40px)] font-[650] leading-tight tracking-[-0.03em]">
+            Before you ask
+          </h2>
+          <div className="mt-10 space-y-3">
+            {[
+              ['Do my guests need an app or an account?',
+                'No. Guests tap their personal link and RSVP in the browser — no downloads, no passwords, no accounts. It works on any phone.'],
+              ['Can different guests see different events?',
+                'Yes — that is the whole point. You invite each guest to exactly the right events, and their website only shows those. Grandma never sees the afterparty.'],
+              ['How do payments work?',
+                'Everything is free while you build. One payment unlocks publishing and sending invitations — no subscription, and your site stays live for 18 months after the wedding.'],
+              ['Can I change the design after publishing?',
+                'Any time. Edit, restyle or add events, then publish again — guests always see the latest version, and your RSVPs are never lost.'],
+              ['What if my guest list is a messy spreadsheet?',
+                'Paste it in. The importer (with AI help) groups families into households, splits “Raj & Priya Shah” into two guests, and previews everything before it saves.'],
+              ['Do you support Indian wedding events?',
+                'It is built for them: mehndi, haldi, sangeet, baraat, nikah, pheras, walima, receptions — any number of events, each with its own colour, capacity and guest list.'],
+              ['Can family help me manage it?',
+                'Yes — invite collaborators from Settings. They sign in with their own email and can help with guests, RSVPs and planning.'],
+              ['What happens to RSVP answers?',
+                'They roll up live per event — attending, declined, pending, meals and dietary notes — and export as one clean CSV your caterer will love.'],
+            ].map(([q, a]) => (
+              <details key={q as string} className="group rounded-[12px] border border-[#EAE5DA] bg-white px-5 py-4 dark:border-[#223252] dark:bg-[#111C33]">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[14.5px] font-[600] tracking-[-0.01em] [&::-webkit-details-marker]:hidden">
+                  {q}
+                  <span className="text-[#8F8D88] transition-transform group-open:rotate-45 dark:text-[#5B6A8C]">＋</span>
+                </summary>
+                <p className="mt-3 text-[13px] leading-relaxed text-[#6A6864] dark:text-[#8FA0C4]">{a}</p>
+              </details>
+            ))}
           </div>
         </div>
       </section>
@@ -179,7 +244,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[#EAE5DA] px-6 py-14">
+      <footer className="border-t border-[#EAE5DA] px-6 py-14 dark:border-[#223252]">
         <div className="mx-auto grid max-w-[1060px] gap-10 sm:grid-cols-4">
           <div>
             <p className="flex items-center gap-1.5 text-[13px] font-semibold tracking-tight">
@@ -199,7 +264,7 @@ export default function LandingPage() {
               <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.1em] text-[#8F8D88]">{group as string}</p>
               <ul className="mt-3 space-y-2">
                 {(links as [string, string][]).map(([h, l]) => (
-                  <li key={l}><a href={h} className="text-[12.5px] text-[#6A6864] hover:text-[#191918]">{l}</a></li>
+                  <li key={l}><a href={h} className="text-[12.5px] text-[#6A6864] hover:text-[#191918] dark:text-[#8FA0C4] dark:hover:text-[#EEF2FA]">{l}</a></li>
                 ))}
               </ul>
             </div>

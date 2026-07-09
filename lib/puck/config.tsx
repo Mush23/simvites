@@ -37,6 +37,7 @@ interface FamilyProps { heading: string; sides: { side: string; name: string; pa
 interface GalleryProps { heading: string; images: { url: string; caption: string }[] }
 interface HotelProps { heading: string; hotelName: string; address: string; blockCode: string; phone: string; bookingUrl: string; notes: string }
 interface GiftsProps { heading: string; body: string }
+interface FreeformBlockProps extends FreeformProps { }
 
 export interface SiteBlocks {
   Hero: HeroProps
@@ -51,6 +52,7 @@ export interface SiteBlocks {
   Travel: TravelProps
   Faq: FaqProps
   GiftsNote: GiftsProps
+  FreeformBlock: FreeformBlockProps
   SiteFooterBlock: FooterProps
 }
 
@@ -60,8 +62,10 @@ export interface SiteBlocks {
 const text = (label: string, inline = false) => ({ type: 'text' as const, label, contentEditable: inline })
 const area = (label: string, inline = false) => ({ type: 'textarea' as const, label, contentEditable: inline })
 
-import { ImageFieldInput, type ImageValue } from './image-field'
+import { ImageFieldInput, imageUrlOf, type ImageValue } from './image-field'
 import { Styled, styleField, DEFAULT_STYLE, type StyleOpts } from './styled'
+import { FreeformSection, type FreeformProps } from '@/components/site/freeform'
+import { FreeformEditor } from './freeform-editor'
 // `focal: true` adds the click-to-set focus point (hero-style full-bleed images).
 const image = (label: string, focal = false) => ({
   type: 'custom' as const,
@@ -199,6 +203,97 @@ export const siteConfig: Config<SiteBlocks> = {
       },
       defaultProps: { heading: 'Questions', items: [{ q: 'When should I arrive?', a: 'Doors open 30 minutes before each event.' }] },
       render: (p) => <SiteFaq {...p} />,
+    },
+    FreeformBlock: {
+      label: 'Freeform canvas',
+      fields: {
+        ratio: {
+          type: 'select' as const, label: 'Canvas shape (kept on every device)',
+          options: [
+            { label: 'Wide (16:9)', value: '16/9' },
+            { label: 'Classic (4:3)', value: '4/3' },
+            { label: 'Square', value: '1/1' },
+            { label: 'Portrait (4:5)', value: '4/5' },
+          ],
+        },
+        wash: {
+          type: 'select' as const, label: 'Background wash',
+          options: [
+            { label: 'Paper', value: 'paper' },
+            { label: 'Sunken', value: 'sunken' },
+            { label: 'Accent blush', value: 'blush' },
+            { label: 'Night', value: 'night' },
+            { label: 'Transparent', value: 'none' },
+          ],
+        },
+        items: {
+          type: 'array' as const, label: 'Items — drag them on the canvas',
+          getItemSummary: (it: { kind?: string; text?: string }) =>
+            it.kind === 'image' ? 'Photo' : (it.text || 'Text').slice(0, 24),
+          arrayFields: {
+            kind: {
+              type: 'select' as const, label: 'Type',
+              options: [{ label: 'Text', value: 'text' }, { label: 'Photo', value: 'image' }],
+            },
+            text: { type: 'textarea' as const, label: 'Text (double-click on canvas to edit too)' },
+            url: {
+              type: 'custom' as const, label: 'Photo',
+              render: ({ value, onChange }: { value: string | undefined; onChange: (v: string) => void }) => (
+                <ImageFieldInput value={value ?? ''} onChange={(v) => onChange(imageUrlOf(v))} />
+              ),
+            },
+            size: { type: 'number' as const, label: 'Text size (relative)', min: 1, max: 20 },
+            font: {
+              type: 'select' as const, label: 'Font',
+              options: [
+                { label: 'Display', value: 'display' },
+                { label: 'Body', value: 'sans' },
+                { label: 'Script', value: 'script' },
+              ],
+            },
+            color: {
+              type: 'select' as const, label: 'Colour',
+              options: [
+                { label: 'Ink', value: 'ink' },
+                { label: 'Soft ink', value: 'soft' },
+                { label: 'Accent', value: 'accent' },
+                { label: 'Paper', value: 'paper' },
+              ],
+            },
+            align: {
+              type: 'select' as const, label: 'Align',
+              options: [
+                { label: 'Centre', value: 'center' },
+                { label: 'Left', value: 'left' },
+                { label: 'Right', value: 'right' },
+              ],
+            },
+            rotate: { type: 'number' as const, label: 'Rotate (°)', min: -45, max: 45 },
+            // Precision fallbacks — dragging on the canvas is the main path.
+            x: { type: 'number' as const, label: 'Left (%)', min: 0, max: 100 },
+            y: { type: 'number' as const, label: 'Top (%)', min: 0, max: 100 },
+            w: { type: 'number' as const, label: 'Width (%)', min: 4, max: 100 },
+          },
+          defaultItemProps: {
+            kind: 'text', text: 'Your words here', url: '',
+            x: 30, y: 40, w: 40, size: 5, font: 'display', color: 'ink', align: 'center', rotate: 0,
+          },
+        },
+      },
+      defaultProps: {
+        ratio: '16/9', wash: 'sunken',
+        items: [
+          { kind: 'text', text: 'Aanya & Dev', x: 25, y: 30, w: 50, size: 9, font: 'display', color: 'ink', align: 'center', rotate: 0 },
+          { kind: 'text', text: 'are getting married', x: 30, y: 58, w: 40, size: 3, font: 'script', color: 'accent', align: 'center', rotate: 0 },
+        ],
+      },
+      render: (p) => {
+        const editing = (p.puck as { isEditing?: boolean } | undefined)?.isEditing
+        const props = { ratio: p.ratio, wash: p.wash, items: p.items }
+        return editing
+          ? <FreeformEditor id={String(p.id ?? '')} {...props} />
+          : <FreeformSection {...props} />
+      },
     },
     SiteFooterBlock: {
       label: 'Footer',

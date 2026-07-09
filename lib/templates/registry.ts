@@ -53,6 +53,13 @@ const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
   'terracotta-sun': { headingCase: 'normal', button: 'soft', divider: 'diamond', heroAlign: 'left' },
   'ink-and-jasmine': { headingCase: 'normal', button: 'square', divider: 'line', heroAlign: 'left' },
   'velvet-sangeet': { headingCase: 'normal', button: 'pill', divider: 'diamond', heroAlign: 'center' },
+  // D2 additions
+  'peacock-court': { headingCase: 'upper', button: 'pill', divider: 'double', heroAlign: 'center' },
+  'saffron-disco': { headingCase: 'upper', button: 'pill', divider: 'diamond', heroAlign: 'center' },
+  'lotus-milk': { headingCase: 'normal', button: 'soft', divider: 'none', heroAlign: 'center' },
+  'monsoon-ink': { headingCase: 'normal', button: 'square', divider: 'line', heroAlign: 'left' },
+  'henna-noir': { headingCase: 'upper', button: 'square', divider: 'diamond', heroAlign: 'center' },
+  'marigold-morning': { headingCase: 'normal', button: 'pill', divider: 'line', heroAlign: 'center' },
 }
 const BUTTON_RADIUS: Record<TemplateStyle['button'], string> = { pill: '999px', soft: '12px', square: '3px' }
 
@@ -160,7 +167,7 @@ const luxuryStarter: SiteData = {
 export const TEMPLATES: SiteTemplate[] = [
   {
     key: 'editorial-gold',
-    name: 'Editorial Gold',
+    name: 'Golden Hour',
     description: 'Cream, gold and deep red with a classic serif — warm, ceremonial, celebratory. The original.',
     swatches: ['#F5EFE3', '#C9A227', '#7A1F1F'],
     mood: 'Ceremonial',
@@ -169,7 +176,7 @@ export const TEMPLATES: SiteTemplate[] = [
   },
   {
     key: 'editorial-luxury',
-    name: 'Editorial Luxury',
+    name: 'Ivory Atelier',
     description: 'Warm ivory and ink with brass hairlines — quiet, modern, gallery-calm.',
     swatches: ['#F6F1E9', '#211D18', '#B08D57'],
     mood: 'Gallery-calm',
@@ -217,7 +224,7 @@ const NEW_TEMPLATES: SiteTemplate[] = [
     starterDoc: goldStarter,
   },
   {
-    key: 'gallery-white', name: 'Gallery White', mood: 'Photography-led',
+    key: 'gallery-white', name: 'Cloud Gallery', mood: 'Photography-led',
     description: 'Pure white, ink type, grey whispers — the photographs do the talking.',
     swatches: ['#FFFFFF', '#111110', '#8C8C88'],
     vars: {
@@ -259,7 +266,7 @@ const NEW_TEMPLATES: SiteTemplate[] = [
     starterDoc: goldStarter,
   },
   {
-    key: 'coastline', name: 'Coastline', mood: 'Destination',
+    key: 'coastline', name: 'Salt & Sky', mood: 'Destination',
     description: 'Driftwood sand and sea slate with tracked caps — vows by the water.',
     swatches: ['#F2EDE3', '#3E4E5C', '#5B7485'],
     vars: {
@@ -325,6 +332,91 @@ const NEW_TEMPLATES: SiteTemplate[] = [
       '--accent': '#C97E4E', '--accent-ink': '#D89263',
       '--accent-soft': 'rgba(201,126,78,0.16)', '--accent-line': 'rgba(201,126,78,0.5)',
       ...face('--f-playfair'),
+    },
+    starterDoc: goldStarter,
+  },
+  // ── D2: six more, pushing well past "safe" palettes ─────────────────────
+  {
+    key: 'peacock-court', name: 'Peacock Court', mood: 'Jewel-box regal',
+    description: 'Deep teal, emerald and true gold with roman caps — a durbar in full plume.',
+    swatches: ['#0D3B3E', '#F2EBD8', '#D9A62E'],
+    vars: {
+      '--paper': '#0D3B3E', '--paper-2': '#0A3134', '--surface': '#124A4E', '--surface-2': '#17575B',
+      '--ink': '#F2EBD8', '--ink-2': '#CBC3A8', '--ink-3': '#9FA087',
+      '--line': '#1D5B5F', '--line-2': '#2A6D71',
+      '--accent': '#D9A62E', '--accent-ink': '#D9A62E',
+      '--accent-soft': 'rgba(217,166,46,0.14)', '--accent-line': 'rgba(217,166,46,0.5)',
+      ...face('--f-cinzel'),
+    },
+    starterDoc: goldStarter,
+  },
+  {
+    key: 'saffron-disco', name: 'Saffron Disco', mood: 'Sangeet party',
+    description: 'Hot pink on deep aubergine with saffron flashes — the sangeet that never sits down.',
+    swatches: ['#2B1030', '#FFD9EC', '#FF4FA0'],
+    vars: {
+      '--paper': '#2B1030', '--paper-2': '#240D29', '--surface': '#38173E', '--surface-2': '#431E4A',
+      '--ink': '#FFE4F1', '--ink-2': '#E3B7CF', '--ink-3': '#B78AA6',
+      '--line': '#4A2352', '--line-2': '#5C2F66',
+      '--accent': '#FF4FA0', '--accent-ink': '#FF7AB8',
+      '--accent-soft': 'rgba(255,79,160,0.16)', '--accent-line': 'rgba(255,79,160,0.5)',
+      ...face('--f-dmserif'),
+    },
+    starterDoc: goldStarter,
+  },
+  {
+    key: 'lotus-milk', name: 'Lotus Milk', mood: 'Soft minimal',
+    description: 'Milk white and lotus pink, barely-there lines — a whisper of a wedding site.',
+    swatches: ['#FDFBFA', '#3C3335', '#D98A9E'],
+    vars: {
+      '--paper': '#FDFBFA', '--paper-2': '#F8F1F2', '--surface': '#FFFFFF', '--surface-2': '#F8F1F2',
+      '--ink': '#3C3335', '--ink-2': '#6E6163', '--ink-3': '#9C8D90',
+      '--line': '#F0E4E6', '--line-2': '#E2D0D3',
+      '--accent': '#D98A9E', '--accent-ink': '#B76B80',
+      '--accent-soft': '#FAE9ED', '--accent-line': '#E9BFC9',
+      ...face('--f-prata'),
+    },
+    starterDoc: luxuryStarter,
+  },
+  {
+    key: 'monsoon-ink', name: 'Monsoon Ink', mood: 'Moody letterpress',
+    description: 'Storm-grey paper, indigo ink and one silver rule — love letters in the rain.',
+    swatches: ['#E9EAEC', '#252A3A', '#66708C'],
+    vars: {
+      '--paper': '#E9EAEC', '--paper-2': '#DFE1E5', '--surface': '#F4F5F6', '--surface-2': '#DFE1E5',
+      '--ink': '#252A3A', '--ink-2': '#4A5164', '--ink-3': '#767D90',
+      '--line': '#D2D5DB', '--line-2': '#BFC3CC',
+      '--accent': '#3D4560', '--accent-ink': '#4A5478',
+      '--accent-soft': '#E2E4EC', '--accent-line': '#9BA3B8',
+      ...face('--f-lora'),
+    },
+    starterDoc: luxuryStarter,
+  },
+  {
+    key: 'henna-noir', name: 'Henna Noir', mood: 'After dark',
+    description: 'True black with copper henna warmth — intimate, modern, a little daring.',
+    swatches: ['#111010', '#F1E4D4', '#C46A3B'],
+    vars: {
+      '--paper': '#111010', '--paper-2': '#0B0A0A', '--surface': '#1A1817', '--surface-2': '#242120',
+      '--ink': '#F1E4D4', '--ink-2': '#C7B8A5', '--ink-3': '#95897A',
+      '--line': '#2B2725', '--line-2': '#3A3431',
+      '--accent': '#C46A3B', '--accent-ink': '#D67E4E',
+      '--accent-soft': 'rgba(196,106,59,0.14)', '--accent-line': 'rgba(196,106,59,0.5)',
+      ...face('--f-librebodoni'),
+    },
+    starterDoc: luxuryStarter,
+  },
+  {
+    key: 'marigold-morning', name: 'Marigold Morning', mood: 'Daytime joy',
+    description: 'Marigold garlands on fresh white with leaf green — haldi-morning happiness.',
+    swatches: ['#FFFDF6', '#4C3A12', '#E8A020'],
+    vars: {
+      '--paper': '#FFFDF6', '--paper-2': '#FBF3DD', '--surface': '#FFFFFF', '--surface-2': '#FBF3DD',
+      '--ink': '#4C3A12', '--ink-2': '#7A6234', '--ink-3': '#A08A5C',
+      '--line': '#F0E4C4', '--line-2': '#E2D2A6',
+      '--accent': '#E8A020', '--accent-ink': '#B97D14',
+      '--accent-soft': '#FCF0D6', '--accent-line': '#EFC878',
+      ...face('--f-greatvibes'),
     },
     starterDoc: goldStarter,
   },
