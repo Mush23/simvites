@@ -22,6 +22,9 @@ export interface DirectoryVendor {
   instagram: string | null
   rating: number | null
   featured: boolean
+  /** E4: partner perk, e.g. "10% off through Simvites" + optional promo code. */
+  discount?: string | null
+  promo_code?: string | null
   mentions: { quote: string; author: string | null; source: string | null }[]
 }
 
@@ -106,6 +109,20 @@ export function Recommendations({ vendors, addedIds }: {
               </div>
 
               {v.blurb && <p className="mt-2.5 text-[13px] leading-relaxed text-ink-2">{v.blurb}</p>}
+
+              {/* E4: partner perk — the reason to book through the platform */}
+              {v.discount && (
+                <p className="mt-2.5 flex flex-wrap items-center gap-2 rounded-lg border border-accent-line bg-accent-soft px-3 py-2 text-[12.5px] font-medium text-accent-ink">
+                  🎁 {v.discount}
+                  {v.promo_code && (
+                    <button type="button" title="Copy code"
+                      onClick={() => { navigator.clipboard.writeText(v.promo_code!).catch(() => {}); notify(`Code ${v.promo_code} copied`) }}
+                      className="rounded border border-accent-line bg-surface px-2 py-0.5 font-mono text-[11px] tracking-wide hover:border-accent">
+                      {v.promo_code} ⧉
+                    </button>
+                  )}
+                </p>
+              )}
 
               <p className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-ink-3">
                 {v.location && <span>{v.location}</span>}

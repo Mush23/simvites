@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { PageHeader, StatCard } from '@/components/app/ui'
 import { adminToggleUnlock, adminArchiveSite, adminExtendExpiry } from './actions'
 import { ResetButton } from './reset-button'
-import { UNLOCK_AMOUNT } from '@/lib/stripe'
+import { PriceEditor } from './price-editor'
 import { formatPence } from '@/lib/money'
 
 export const metadata = { title: 'Platform admin · Occasio' }
@@ -60,7 +60,9 @@ export default async function PlatformAdminPage() {
 
   const paidSites = siteRows.filter((s) => s.is_unlocked).length
   const liveSites = siteRows.filter((s) => s.status === 'published' && !s.archived_at).length
-  const revenue = paidSites * UNLOCK_AMOUNT
+  const { getUnlockPrice } = await import('@/lib/pricing')
+  const price = await getUnlockPrice()
+  const revenue = paidSites * price.amount
 
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-7">
@@ -72,8 +74,21 @@ export default async function PlatformAdminPage() {
         <StatCard label="Sites" value={siteRows.length} hint={`${liveSites} live`} />
         <StatCard label="Users" value={profileRows.length} />
         <StatCard label="Unlocked" value={paidSites} />
-        <StatCard label="Revenue" value={formatPence(revenue)} hint="at £149 / unlock" />
+        <StatCard label="Revenue" value={formatPence(revenue)} hint={`at ${formatPence(price.amount)} / unlock`} />
         <StatCard label="RSVPs" value={responses ?? 0} />
+      </div>
+
+      {/* E4/E5: platform levers — the founder's own controls */}
+      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-card border border-line bg-surface p-4 shadow-card">
+        <div className="min-w-56 flex-1">
+          <p className="text-[13.5px] font-semibold text-ink">Platform controls</p>
+          <p className="text-[12px] text-ink-3">Pricing applies to new checkouts immediately. The directory is what couples see under Vendors → Recommended.</p>
+        </div>
+        <PriceEditor currentPence={price.amount} />
+        <a href="/admin/directory"
+          className="rounded-md border border-line bg-paper-2 px-4 py-2 text-[13px] font-medium text-ink hover:border-accent">
+          Vendor directory &amp; discounts →
+        </a>
       </div>
 
       <section className="mt-9">

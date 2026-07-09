@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
-import { getStripe, UNLOCK_AMOUNT, UNLOCK_CURRENCY, UNLOCK_PRODUCT_NAME } from '@/lib/stripe'
+import { getStripe, UNLOCK_PRODUCT_NAME } from '@/lib/stripe'
+import { getUnlockPrice } from '@/lib/pricing'
 import { track } from '@/lib/analytics'
 
 function appBaseUrl() {
@@ -22,16 +23,19 @@ export async function startUnlockCheckout(): Promise<{ url?: string; error?: str
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  // E5: price comes from platform_settings (admin-editable), constant fallback.
+  const price = await getUnlockPrice()
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
     line_items: [{
       quantity: 1,
       price_data: {
-        currency: UNLOCK_CURRENCY,
-        unit_amount: UNLOCK_AMOUNT,
+        currency: price.currency,
+        unit_amount: price.amount,
         product_data: { name: UNLOCK_PRODUCT_NAME },
       },
     }],
+    allow_promotion_codes: true,
     metadata: { site_id: site.siteId, product: 'unlock' },
     success_url: `${appBaseUrl()}/settings?unlocked=1`,
     cancel_url: `${appBaseUrl()}/settings`,

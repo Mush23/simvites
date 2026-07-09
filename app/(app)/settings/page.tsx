@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { formatPence } from '@/lib/money'
-import { UNLOCK_AMOUNT } from '@/lib/stripe'
+import { getUnlockPrice } from '@/lib/pricing'
 import { BASE_DOMAIN, BRAND_NAME } from '@/lib/brand'
 import { SiteSettingsForm } from './settings-form'
 import { UnlockCard } from './unlock-card'
@@ -55,6 +55,7 @@ export default async function SettingsPage({
     .eq('id', site!.siteId)
     .maybeSingle()
   const templateKey = (row?.theme as { template?: string } | null)?.template ?? 'editorial-gold'
+  const price = await getUnlockPrice()
 
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-7">
@@ -82,7 +83,7 @@ export default async function SettingsPage({
 
         <UnlockCard
           unlocked={!!row?.is_unlocked}
-          priceDisplay={formatPence(UNLOCK_AMOUNT)}
+          priceDisplay={formatPence(price.amount)}
         />
 
         <section className="rounded-card border border-line bg-surface p-7 shadow-card">

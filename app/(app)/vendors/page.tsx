@@ -38,7 +38,7 @@ export default async function VendorsPage() {
   // Recommendations directory (global, curated) + which ones this site adopted.
   const { data: directory } = await supabase
     .from('vendor_directory')
-    .select('id, category, name, tagline, blurb, location, price_band, website, instagram, rating, featured, vendor_mentions(quote, author, source)')
+    .select('id, category, name, tagline, blurb, location, price_band, website, instagram, rating, featured, discount, promo_code, vendor_mentions(quote, author, source)')
     .is('archived_at', null)
     .order('featured', { ascending: false })
     .order('sort_order')
@@ -53,6 +53,7 @@ export default async function VendorsPage() {
     id: d.id, category: d.category, name: d.name, tagline: d.tagline, blurb: d.blurb,
     location: d.location, price_band: d.price_band, website: d.website, instagram: d.instagram,
     rating: d.rating, featured: d.featured,
+    discount: d.discount, promo_code: d.promo_code,
     mentions: (d.vendor_mentions ?? []) as DirectoryVendor['mentions'],
   }))
   const addedIds = (adopted ?? []).map((a) => a.source_directory_id as string)

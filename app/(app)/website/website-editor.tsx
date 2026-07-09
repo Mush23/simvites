@@ -15,6 +15,7 @@ import { askConfirm, askPrompt, notify } from '@/components/ui/overlays'
 import { Pencil, Trash2, Eye, EyeOff, FileText, ChevronDown, Palette, ExternalLink, Info, LayoutTemplate } from 'lucide-react'
 import { BACKGROUNDS, ACCENTS, GLOWS, HOVERS, BACKDROPS, BUTTONS, NAVS, type SiteStyle } from '@/lib/site-style'
 import { DISPLAY_FACES, BODY_FACES } from '@/lib/template-fonts'
+import { listTemplates } from '@/lib/templates/registry'
 
 export interface EditorPage {
   id: string
@@ -102,6 +103,123 @@ function PagesMenu({ pages, currentId }: { pages: EditorPage[]; currentId: strin
 }
 
 /** The customisation panel stakeholders asked for: fonts, colours, glow, motion. */
+/** E2: Design menu — every template as a swatch card, switch in one click,
+ * with live preview links. Answers "how do I even see the other designs?". */
+function DesignMenu({ current, templateName, slug }: { current: SiteStyle; templateName: string; slug: string }) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [busy, setBusy] = useState<string | null>(null)
+  const activeKey = current.template ?? 'editorial-gold'
+
+  async function pick(key: string) {
+    if (key === activeKey || busy) return
+    setBusy(key)
+    await updateSiteStyle({ template: key })
+    setBusy(null)
+    notify('Template switched — your words and photos stay put')
+    router.refresh()
+  }
+
+  return (
+    <div className="relative">
+      <button type="button" onClick={() => setOpen((o) => !o)}
+        title="Switch templates — your content stays, the whole look changes"
+        className="flex items-center gap-1.5 border border-line bg-paper-2 px-3 py-2 text-[13px] font-medium text-ink hover:border-line-2">
+        <LayoutTemplate size={14} strokeWidth={1.7} className="text-ink-3" />
+        {templateName} <ChevronDown size={12} strokeWidth={1.7} className="text-ink-3" />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-12 z-50 max-h-[70vh] w-[340px] overflow-y-auto rounded-card border border-line bg-surface p-3 shadow-lift">
+          <p className="mb-2 px-1 text-[11px] text-ink-3">
+            One click restyles everything — colours, fonts, buttons. Your text and photos never move.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {listTemplates().map((t) => (
+              <div key={t.key}
+                className={`rounded-[10px] border p-2 text-left transition-colors ${
+                  t.key === activeKey ? 'border-accent bg-accent-soft' : 'border-line hover:border-line-2'
+                }`}>
+                <button type="button" onClick={() => pick(t.key)} className="block w-full text-left">
+                  <span className="flex h-9 w-full overflow-hidden rounded-md border border-line">
+                    {t.swatches.map((c) => <span key={c} className="h-full flex-1" style={{ background: c }} />)}
+                  </span>
+                  <span className="mt-1.5 block text-[12px] font-medium leading-tight text-ink">
+                    {busy === t.key ? 'Switching…' : t.name}
+                  </span>
+                  <span className="block text-[10px] text-ink-3">{t.mood}</span>
+                </button>
+                <a href={`/preview/${t.key}`} target="_blank" rel="noreferrer"
+                  className="mt-1 inline-block text-[10px] text-accent-ink underline underline-offset-2">
+                  Full preview ↗
+                </a>
+              </div>
+            ))}
+          </div>
+          <a href={`/s/${slug}`} target="_blank" rel="noreferrer"
+            className="mt-2 block px-1 text-[11px] text-ink-3 hover:text-ink">Your live site ↗</a>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** E2: first-visit coach strip — dismissable; the "?" sheet stays forever. */
+function CoachStrip() {
+  const [hidden, setHidden] = useState(true)
+  useEffect(() => { setHidden(localStorage.getItem('editor-coach-dismissed') === '1') }, [])
+  if (hidden) return null
+  return (
+    <div className="flex items-center gap-2 border-b border-line bg-paper-2 px-4 py-1.5 text-[11.5px] text-ink-3">
+      <Info size={12} strokeWidth={1.7} className="shrink-0" />
+      <span className="truncate">
+        Click any text on the page and type · hover a section for its name + tools · drag blocks in from the left ·{' '}
+        <span className="font-medium text-ink-2">✚ Add section</span> for ready-made looks · everything autosaves
+        (<kbd className="rounded border border-line bg-surface px-1 font-mono text-[9.5px]">⌘S</kbd> to save now) ·
+        the <span className="font-medium text-ink-2">?</span> button remembers all of this for you
+      </span>
+      <button type="button" aria-label="Dismiss tips"
+        onClick={() => { localStorage.setItem('editor-coach-dismissed', '1'); setHidden(true) }}
+        className="ml-auto shrink-0 rounded px-1.5 text-ink-3 hover:text-ink">✕</button>
+    </div>
+  )
+}
+
+/** E2: the "?" help sheet — every editor move in one place, always reachable. */
+function HelpMenu() {
+  const [open, setOpen] = useState(false)
+  const ROWS: [string, string][] = [
+    ['Edit any text', 'Click it on the page and type. It saves by itself.'],
+    ['Move a section', 'Drag it by its edge, or use the arrows in its toolbar.'],
+    ['Add a section', 'Drag from the left panel, or ✚ Add section for ready-made looks.'],
+    ['Restyle one section', 'Click it, then open “Style — look, colour & motion” on the right: 10 looks, borrowed palettes, animations.'],
+    ['Restyle everything', 'The Style button: fonts, your own colours, buttons, menus, backdrops.'],
+    ['Change template', 'The template name in the toolbar — switch any time, content stays.'],
+    ['Photos', 'Upload image copies a link — paste it into any photo field. Or search free photos inside the field.'],
+    ['Freeform canvas', 'A section where you drag words and photos anywhere — it keeps its exact shape on phones.'],
+    ['Undo', '↺ in the toolbar, or Ctrl+Z. Publish only goes live when you say so.'],
+  ]
+  return (
+    <div className="relative">
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-label="Editor help"
+        title="How everything works"
+        className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-paper-2 text-[12.5px] font-semibold text-ink-2 hover:border-accent hover:text-accent-ink">
+        ?
+      </button>
+      {open && (
+        <div className="absolute right-0 top-11 z-50 max-h-[70vh] w-[330px] overflow-y-auto rounded-card border border-line bg-surface p-4 shadow-lift">
+          <p className="microlabel mb-2.5">How the editor works</p>
+          {ROWS.map(([t, d]) => (
+            <div key={t} className="border-b border-line py-2 last:border-0">
+              <p className="text-[12.5px] font-semibold text-ink">{t}</p>
+              <p className="text-[11.5px] leading-snug text-ink-3">{d}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 /** D3: a labelled colour swatch — native picker, debounced (the picker fires
  * continuously while dragging), with a reset back to the template colour. */
 function ColorPick({ k, label, value, onSet }: {
@@ -111,6 +229,10 @@ function ColorPick({ k, label, value, onSet }: {
   const [local, setLocal] = useState(value || '#888888')
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => { setLocal(value || '#888888') }, [value])
+  const commitHex = (raw: string) => {
+    const v = raw.startsWith('#') ? raw : `#${raw}`
+    if (/^#[0-9a-fA-F]{6}$/.test(v)) { setLocal(v); onSet(k, v) }
+  }
   return (
     <label className="block text-center text-xs">
       <span className="eyebrow mb-1 block text-[9px]">{label}</span>
@@ -122,6 +244,12 @@ function ColorPick({ k, label, value, onSet }: {
           timer.current = setTimeout(() => onSet(k, v), 450)
         }}
         className="h-8 w-full cursor-pointer rounded-md border border-line bg-paper-2 p-0.5" />
+      {/* E3: paste-a-hex path — brand codes come from Pinterest and stationers */}
+      <input type="text" defaultValue={value ?? ''} placeholder="#hex" maxLength={7} spellCheck={false}
+        key={value ?? 'unset'}
+        onBlur={(e) => { if (e.target.value.trim()) commitHex(e.target.value.trim()) }}
+        onKeyDown={(e) => { if (e.key === 'Enter') commitHex((e.target as HTMLInputElement).value.trim()) }}
+        className="mt-1 w-full rounded border border-line bg-paper-2 px-1 py-0.5 text-center font-mono text-[9.5px] text-ink outline-none focus:border-accent" />
       {value ? (
         <button type="button" onClick={() => onSet(k, '')}
           className="mt-0.5 text-[9px] text-ink-3 underline hover:text-ink">reset</button>
@@ -160,8 +288,8 @@ function StylePanel({ current }: { current: SiteStyle }) {
       </button>
       {open && (
         <div className="absolute right-0 top-12 z-50 max-h-[70vh] w-72 space-y-3 overflow-y-auto rounded-card border border-line bg-surface p-4 shadow-lift">
-          <Sel k="displayFont" label="Heading font (12 faces)" options={{ '': { label: 'Template default' }, ...DISPLAY_FACES }} />
-          <Sel k="bodyFont" label="Body font (5 faces)" options={{ '': { label: 'Template default' }, ...BODY_FACES }} />
+          <Sel k="displayFont" label={`Heading font (${Object.keys(DISPLAY_FACES).length} faces)`} options={{ '': { label: 'Template default' }, ...DISPLAY_FACES }} />
+          <Sel k="bodyFont" label={`Body font (${Object.keys(BODY_FACES).length} faces)`} options={{ '': { label: 'Template default' }, ...BODY_FACES }} />
           <Sel k="background" label="Background preset" options={BACKGROUNDS} />
           <Sel k="accent" label="Accent preset" options={ACCENTS} />
 
@@ -394,7 +522,10 @@ function EmptyCanvasHint() {
 }
 
 const puckOverrides: Partial<Overrides> = {
-  headerActions: ({ children }) => (<><AiSectionMenu /><PresetsMenu /><HistoryButtons />{children}</>),
+  // Note: `children` (Puck's own Publish + mini undo icons) is intentionally
+  // dropped — three Publish buttons on one screen confused everyone. Ours in
+  // the toolbar carries the status/lock states and is the single source.
+  headerActions: () => (<><AiSectionMenu /><PresetsMenu /><HistoryButtons /></>),
   preview: ({ children }) => (
     <div className="editor-vp" style={{ maxWidth: 'var(--editor-vw, 100%)', margin: '0 auto' }}>
       <EmptyCanvasHint />
@@ -461,13 +592,11 @@ export function WebsiteEditor({
   }, [pageId])
 
   return (
-    <div className="flex h-[calc(100vh-57px)] flex-col">
+    <div className="puck-shell flex h-[calc(100vh-57px)] flex-col">
       {/* Toolbar — grouped clusters: context | canvas tools | ship */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface px-4 py-2">
         <span className="text-[14.5px] font-semibold tracking-tight text-ink">Website</span>
-        <span className="rounded-full border border-line px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-ink-3">
-          {templateName}
-        </span>
+        <DesignMenu current={currentStyle} templateName={templateName} slug={slug} />
         <PagesMenu pages={pages} currentId={pageId} />
 
         <span aria-hidden className="hidden h-5 w-px bg-line md:block" />
@@ -486,6 +615,7 @@ export function WebsiteEditor({
         <ImageUploader />
 
         <div className="ml-auto flex items-center gap-2.5">
+          <HelpMenu />
           <StatusPill status={status} />
           {status === 'locked' && (
             <a href="/settings" id="unlock-cta"
@@ -506,14 +636,7 @@ export function WebsiteEditor({
         </div>
       </div>
 
-      {/* Gentle how-to strip — the zero-code promise, spelled out */}
-      <div className="flex items-center gap-2 border-b border-line bg-paper-2 px-4 py-1.5 text-[11.5px] text-ink-3">
-        <Info size={12} strokeWidth={1.7} className="shrink-0" />
-        <span className="truncate">
-          Click any text on the page and type · drag blocks in from the left · <span className="font-medium text-ink-2">✚ Add section</span> for
-          ready-made looks · everything autosaves (<kbd className="rounded border border-line bg-surface px-1 font-mono text-[9.5px]">⌘S</kbd> to save now)
-        </span>
-      </div>
+      <CoachStrip />
       {/* iframe disabled + style-engine vars on the wrapper = true WYSIWYG canvas */}
       <div className="min-h-0 flex-1" data-site-root data-device={device}
         {...styleProps}

@@ -488,3 +488,109 @@ a[class*='bg-primary'] {
   letter-spacing: 0.18em;
   color: var(--ink-3);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   E1 — Editor chrome overhaul (founder review: "not intuitive").
+   Puck's stock panels are grey, cramped, azure-flavoured and scrollbar-
+   heavy. Everything below rebrands the WORKSPACE (never the artifact):
+   warm surfaces, coral selection language, card-style block list,
+   full-height panels, whisper scrollbars.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Whisper scrollbars, platform-wide: thin, track-less, visible on intent. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--line-2);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--ink-3); background-clip: content-box; }
+
+/* The editor shell: Puck inherits our theme instead of its grey/azure. */
+.puck-shell {
+  /* Coral takes over every Puck affordance (selection, drop lines, buttons) */
+  --puck-color-azure-04: oklch(0.55 0.21 29);
+  --puck-color-azure-05: oklch(0.62 0.21 29);
+  --puck-color-azure-06: oklch(0.66 0.19 29);
+  --puck-color-azure-07: oklch(0.72 0.15 29);
+  --puck-color-azure-08: oklch(0.8 0.1 29);
+  --puck-color-azure-09: oklch(0.9 0.05 29);
+  --puck-color-azure-10: oklch(0.94 0.035 29);
+  --puck-color-azure-11: oklch(0.96 0.025 29);
+  --puck-color-azure-12: oklch(0.975 0.015 29);
+}
+
+/* Panels span the full column and sit on our surface tokens. The unclassed
+   `div.Puck` between our wrapper and the layout is auto-height by default —
+   THAT was why panels stopped short and the whole page scrolled. */
+.puck-shell div.Puck { height: 100%; }
+.puck-shell [class*='_PuckLayout'] { height: 100%; }
+.puck-shell [class*='_Sidebar_'],
+.puck-shell [class*='_SidebarSection_'] {
+  background: var(--surface);
+}
+.puck-shell [class*='_SidebarSection-title'] {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+.puck-shell [class*='_SidebarSection-content'] { padding: 14px 16px 18px; }
+
+/* Left panel: the block library reads as a deck of draggable cards. */
+.puck-shell [class*='_ComponentList-content'] {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.puck-shell [class*='_DrawerItem'] [class*='_DrawerItem-draggable'],
+.puck-shell [class*='_Drawer-draggable'] {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  padding: 9px 11px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+  transition: border-color 140ms ease, background 140ms ease;
+  cursor: grab;
+}
+.puck-shell [class*='_DrawerItem'] [class*='_DrawerItem-draggable']:hover,
+.puck-shell [class*='_Drawer-draggable']:hover {
+  border-color: var(--accent);
+  background: var(--surface);
+}
+
+/* Canvas: say WHERE you are. Hover = dashed coral whisper; selected = a
+   confident 2px coral ring. (The name chip appears with it via .ebc-chip.) */
+.puck-shell [class*='_DraggableComponent--hover'] > [class*='_DraggableComponent-overlay'] {
+  outline: 1.5px dashed oklch(0.62 0.21 29 / 0.55) !important;
+  outline-offset: -1.5px;
+}
+.puck-shell [class*='_DraggableComponent--isSelected'] > [class*='_DraggableComponent-overlay'] {
+  outline: 2px solid oklch(0.62 0.21 29) !important;
+  outline-offset: -2px;
+  box-shadow: 0 0 0 4px oklch(0.62 0.21 29 / 0.12);
+}
+
+/* Fields panel: breathing room between controls; inputs on our tokens. */
+.puck-shell [class*='_Input'] { margin-bottom: 2px; }
+.puck-shell input[type='text'],
+.puck-shell textarea,
+.puck-shell select {
+  border-radius: 8px;
+}
+
+/* The floating action bar (block toolbar) picks up the workspace look. */
+.puck-shell [class*='_ActionBar_'] {
+  border-radius: 9px;
+  box-shadow: var(--shadow-lg, 0 12px 32px -12px rgba(0, 0, 0, 0.35));
+}
