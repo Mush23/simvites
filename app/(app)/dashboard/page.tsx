@@ -1,14 +1,83 @@
 import Link from 'next/link'
 import { getPrimarySite } from '@/lib/workspace'
-import { computeReadiness } from '@/lib/readiness'
+import { computeReadiness, type Readiness } from '@/lib/readiness'
 import { PageHeader, StatCard } from '@/components/app/ui'
 import { BRAND_NAME } from '@/lib/brand'
+import type { SiteStyle } from '@/lib/site-style'
 
 export const metadata = { title: `Command Centre · ${BRAND_NAME}` }
+
+/**
+ * First-five-minutes checklist: a linear journey from empty site to sent
+ * invitations. Derived from live data (never a stored flag), so it ticks
+ * itself off and disappears entirely once the couple is activated.
+ */
+function GettingStarted({ r, theme }: { r: Readiness; theme: SiteStyle }) {
+  const met = (key: string) => r.checks.find((c) => c.key === key)?.met ?? false
+  const styled = Boolean(
+    theme.displayFont || theme.bodyFont || theme.buttonStyle || theme.backdrop ||
+    theme.customAccent || theme.fontPair || theme.nav ||
+    (theme.background && theme.background !== 'template') ||
+    (theme.accent && theme.accent !== 'template'),
+  )
+
+  const steps = [
+    { done: styled, title: 'Choose your look', body: 'Pick a vibe — one tap styles fonts, colours and motion together.', href: '/website', cta: 'Open the editor' },
+    { done: met('events') && met('event_details'), title: 'Make the events yours', body: 'Give every celebration its venue, date and time.', href: '/events', cta: 'Edit events' },
+    { done: met('guests'), title: 'Build your guest list', body: 'Add households, or paste any spreadsheet and let the importer tidy it.', href: '/guests', cta: 'Add guests' },
+    { done: met('published'), title: 'Publish your website', body: 'Nothing goes live until you say so — preview as much as you like.', href: '/website', cta: 'Publish' },
+    { done: met('links_out'), title: 'Send the invitations', body: 'Every household gets its own private link — email, WhatsApp or QR.', href: '/invitations', cta: 'Send invites' },
+  ]
+  const doneCount = steps.filter((s) => s.done).length
+  if (doneCount === steps.length) return null
+  const current = steps.findIndex((s) => !s.done)
+
+  return (
+    <section className="mb-6 rounded-card border border-accent-line bg-surface p-5 shadow-card">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-[14px] font-semibold tracking-tight text-ink">Your path to the big send</p>
+        <p className="font-mono text-[11px] text-ink-3">{doneCount} of {steps.length} done</p>
+      </div>
+      <ol className="mt-4 grid gap-2.5 lg:grid-cols-5">
+        {steps.map((s, i) => {
+          const isCurrent = i === current
+          return (
+            <li key={s.title}
+              className={`rounded-[10px] border p-3 ${
+                s.done ? 'border-line bg-paper opacity-60'
+                : isCurrent ? 'border-accent bg-accent-soft'
+                : 'border-line bg-paper'
+              }`}>
+              <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10.5px] font-bold ${
+                s.done ? 'bg-ok text-white' : isCurrent ? 'bg-accent text-white' : 'border border-line-2 text-ink-3'
+              }`}>
+                {s.done ? '✓' : i + 1}
+              </span>
+              <p className={`mt-2 text-[12.5px] font-semibold leading-tight ${s.done ? 'text-ink-3 line-through' : 'text-ink'}`}>
+                {s.title}
+              </p>
+              <p className="mt-1 text-[11px] leading-snug text-ink-3">{s.body}</p>
+              {isCurrent && (
+                <Link href={s.href}
+                  className="mt-2.5 inline-block rounded-md bg-accent px-3 py-1.5 text-[11.5px] font-semibold text-white">
+                  {s.cta} →
+                </Link>
+              )}
+            </li>
+          )
+        })}
+      </ol>
+    </section>
+  )
+}
 
 export default async function DashboardPage() {
   const site = await getPrimarySite()
   const r = await computeReadiness(site!.siteId)
+  const { createClient } = await import('@/lib/supabase/server')
+  const supabase = await createClient()
+  const { data: siteRow } = await supabase.from('sites').select('theme').eq('id', site!.siteId).maybeSingle()
+  const theme = (siteRow?.theme ?? {}) as SiteStyle
 
   const headline =
     r.score >= 85 ? "You're in great shape."
@@ -27,6 +96,8 @@ export default async function DashboardPage() {
             : 'Everything on the checklist is handled. Enjoy the calm.'
         }
       />
+
+      <GettingStarted r={r} theme={theme} />
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_2fr]">
         {/* Readiness ring card (overhaul: 84px SVG ring, coral arc) */}
