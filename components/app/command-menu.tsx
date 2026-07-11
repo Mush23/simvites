@@ -17,6 +17,7 @@ export function CommandMenu({ siteSlug }: { siteSlug: string }) {
   const [q, setQ] = useState('')
   const [sel, setSel] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
 
   interface Cmd { key: string; label: string; hint?: string; icon?: React.ReactNode; run: () => void }
   const commands = useMemo<Cmd[]>(() => [
@@ -70,7 +71,18 @@ export function CommandMenu({ siteSlug }: { siteSlug: string }) {
 
   return (
     <div className="fixed inset-0 z-[80] bg-black/45 pt-[14vh] backdrop-blur-[3px]" onClick={() => setOpen(false)}>
-      <div onClick={(e) => e.stopPropagation()}
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label="Command menu"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          // Keep Tab inside the palette while it is open.
+          if (e.key !== 'Tab' || !panelRef.current) return
+          const focusables = panelRef.current.querySelectorAll<HTMLElement>('input, button')
+          if (!focusables.length) return
+          const first = focusables[0]
+          const last = focusables[focusables.length - 1]
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+        }}
         className="mx-auto w-[560px] max-w-[calc(100vw-32px)] overflow-hidden rounded-[14px] border border-line bg-surface shadow-lift"
         style={{ animation: 'dlg-in 160ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both' }}>
         <input ref={inputRef} value={q}

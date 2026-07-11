@@ -82,6 +82,12 @@ export function AppHeader({ site, notifications = [] }: { site: SidebarSite; not
         <span className="flex-1">Search…</span>
         <kbd className="rounded border border-line bg-surface px-1 font-mono text-[9.5px] text-ink-3">⌘K</kbd>
       </button>
+      {/* Mobile: the palette needs a touch trigger — the pill above is hidden <sm */}
+      <button type="button" aria-label="Search"
+        onClick={() => window.dispatchEvent(new Event('open-command-menu'))}
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-ink-2 hover:border-line-2 hover:text-ink sm:hidden">
+        <Search size={15} strokeWidth={1.7} />
+      </button>
 
       <div className="ml-auto flex items-center gap-2.5">
         {onEditor ? (

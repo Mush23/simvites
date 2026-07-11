@@ -73,6 +73,7 @@ export function OverlayProvider({ children }: { children: React.ReactNode }) {
   const [dialog, setDialog] = useState<DialogState>(null)
   const idRef = useRef(1)
   const promptRef = useRef<HTMLInputElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   const toast = useCallback((text: string, opts?: Omit<Toast, 'id' | 'text'>) => {
     const id = idRef.current++
@@ -93,11 +94,32 @@ export function OverlayProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    if (dialog?.kind === 'prompt') setTimeout(() => promptRef.current?.focus(), 30)
     if (!dialog) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(null) }
+    // Move focus into the dialog (prompt input, else the Cancel button) and
+    // trap Tab inside it; restore focus to the opener on close.
+    const opener = document.activeElement as HTMLElement | null
+    setTimeout(() => {
+      if (dialog.kind === 'prompt') promptRef.current?.focus()
+      else dialogRef.current?.querySelector<HTMLElement>('button')?.focus()
+    }, 30)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { close(null); return }
+      if (e.key !== 'Tab' || !dialogRef.current) return
+      const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
+        'button, input, [href], select, textarea, [tabindex]:not([tabindex="-1"])',
+      )
+      if (!focusables.length) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      const active = document.activeElement
+      if (e.shiftKey && (active === first || !dialogRef.current.contains(active))) {
+        e.preventDefault(); last.focus()
+      } else if (!e.shiftKey && (active === last || !dialogRef.current.contains(active))) {
+        e.preventDefault(); first.focus()
+      }
+    }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    return () => { window.removeEventListener('keydown', onKey); opener?.focus?.() }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialog])
 
@@ -131,10 +153,11 @@ export function OverlayProvider({ children }: { children: React.ReactNode }) {
       {dialog && (
         <div className="fixed inset-0 z-[90] flex items-start justify-center bg-black/45 pt-[18vh] backdrop-blur-[3px]"
           onClick={() => close(null)}>
-          <div onClick={(e) => e.stopPropagation()}
+          <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="overlay-dialog-title"
+            onClick={(e) => e.stopPropagation()}
             className="w-[420px] max-w-[calc(100vw-32px)] rounded-[14px] border border-line bg-surface p-5 shadow-lift"
             style={{ animation: 'dlg-in 160ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both' }}>
-            <h2 className="text-base font-semibold tracking-tight text-ink">{dialog.opts.title}</h2>
+            <h2 id="overlay-dialog-title" className="text-base font-semibold tracking-tight text-ink">{dialog.opts.title}</h2>
             {dialog.opts.body && <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-2">{dialog.opts.body}</p>}
             {dialog.kind === 'prompt' && (
               <input ref={promptRef} defaultValue={dialog.opts.initial ?? ''} placeholder={dialog.opts.placeholder}
@@ -157,7 +180,7 @@ export function OverlayProvider({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <div className="pointer-events-none fixed bottom-4 right-4 z-[95] flex flex-col gap-2">
+      <div aria-live="polite" className="pointer-events-none fixed bottom-4 right-4 z-[95] flex flex-col gap-2">
         {toasts.map((t) => (
           <div key={t.id}
             className="pointer-events-auto flex items-center gap-2.5 rounded-xl border border-white/10 bg-[#17171A] py-2.5 pl-3 pr-4 text-[13px] text-[#F2F2F0] shadow-lift"
