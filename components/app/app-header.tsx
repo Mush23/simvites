@@ -58,6 +58,7 @@ export function AppHeader({ site, notifications = [] }: { site: SidebarSite; not
   const pathname = usePathname()
   const { toast } = useOverlays()
   const [pub, setPub] = useState<PublishState>('idle')
+  const onEditor = pathname === '/website' || pathname.startsWith('/website/')
 
   async function publish() {
     setPub('publishing')
@@ -83,25 +84,38 @@ export function AppHeader({ site, notifications = [] }: { site: SidebarSite; not
       </button>
 
       <div className="ml-auto flex items-center gap-2.5">
-        <span className="hidden items-center gap-1.5 font-mono text-[10px] text-ink-3 lg:flex">
-          <span className={`h-1.5 w-1.5 rounded-full ${site.status === 'published' ? 'bg-ok' : 'bg-warn'}`} />
-          {site.status === 'published' ? 'Live' : 'Draft'}
-        </span>
-        <NotificationBell items={notifications} />
-        <Link href={`/s/${site.slug}`} target="_blank"
-          className="flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-[13px] font-medium text-ink hover:border-line-2">
-          Preview <ExternalLink size={12} strokeWidth={1.7} className="text-ink-3" />
-        </Link>
-        {pub === 'locked' ? (
-          <Link href="/settings" className="rounded-lg border border-accent-line bg-accent-soft px-3 py-1.5 text-[13px] font-medium text-accent-ink">
-            Unlock to publish →
-          </Link>
+        {onEditor ? (
+          /* 1a: on /website the editor toolbar owns the ship controls — the
+             header keeps only the live-status whisper, so there is ONE Publish. */
+          <span className="hidden items-center gap-1.5 font-mono text-[10px] text-ink-3 sm:flex">
+            <span className={`h-1.5 w-1.5 rounded-full ${site.status === 'published' ? 'bg-ok' : 'bg-warn'}`} />
+            {site.status === 'published' ? 'Live · edits are drafts until you publish' : 'Draft · publish when you are ready'}
+          </span>
         ) : (
-          <button type="button" onClick={publish} disabled={pub === 'publishing'}
-            className={`rounded-md px-3.5 py-1.5 text-[13px] font-semibold text-white disabled:opacity-60 ${
-              pub === 'live' ? 'bg-ok' : 'bg-accent'}`}>
-            {pub === 'publishing' ? 'Publishing…' : pub === 'live' ? 'Live ✓' : 'Publish'}
-          </button>
+          <span className="hidden items-center gap-1.5 font-mono text-[10px] text-ink-3 lg:flex">
+            <span className={`h-1.5 w-1.5 rounded-full ${site.status === 'published' ? 'bg-ok' : 'bg-warn'}`} />
+            {site.status === 'published' ? 'Live' : 'Draft'}
+          </span>
+        )}
+        <NotificationBell items={notifications} />
+        {!onEditor && (
+          <>
+            <Link href={`/s/${site.slug}`} target="_blank"
+              className="flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-[13px] font-medium text-ink hover:border-line-2">
+              Preview <ExternalLink size={12} strokeWidth={1.7} className="text-ink-3" />
+            </Link>
+            {pub === 'locked' ? (
+              <Link href="/settings" className="rounded-lg border border-accent-line bg-accent-soft px-3 py-1.5 text-[13px] font-medium text-accent-ink">
+                Unlock to publish →
+              </Link>
+            ) : (
+              <button type="button" onClick={publish} disabled={pub === 'publishing'}
+                className={`rounded-md px-3.5 py-1.5 text-[13px] font-semibold text-white disabled:opacity-60 ${
+                  pub === 'live' ? 'bg-ok' : 'bg-accent'}`}>
+                {pub === 'publishing' ? 'Publishing…' : pub === 'live' ? 'Live ✓' : 'Publish'}
+              </button>
+            )}
+          </>
         )}
       </div>
     </header>

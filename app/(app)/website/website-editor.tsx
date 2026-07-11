@@ -12,7 +12,7 @@ import {
 } from './actions'
 import { SECTION_PRESETS } from '@/lib/puck/presets'
 import { askConfirm, askPrompt, notify } from '@/components/ui/overlays'
-import { Pencil, Trash2, Eye, EyeOff, FileText, ChevronDown, Palette, ExternalLink, Info, LayoutTemplate } from 'lucide-react'
+import { Pencil, Trash2, Eye, EyeOff, FileText, ChevronDown, Palette, ExternalLink, Info, LayoutTemplate, Monitor, Tablet, Smartphone, Undo2, Redo2 } from 'lucide-react'
 import { BACKGROUNDS, ACCENTS, GLOWS, HOVERS, BACKDROPS, BUTTONS, NAVS, VIBES, type SiteStyle } from '@/lib/site-style'
 import { DISPLAY_FACES, BODY_FACES } from '@/lib/template-fonts'
 import { listTemplates } from '@/lib/templates/registry'
@@ -90,7 +90,7 @@ function PagesMenu({ pages, currentId }: { pages: EditorPage[]; currentId: strin
               placeholder="New page name, e.g. Travel"
               className="min-w-0 flex-1 rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent" />
             <button type="button" onClick={add} disabled={busy}
-              className="rounded-pill bg-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
+              className="rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
               {busy ? '…' : 'Add'}
             </button>
           </div>
@@ -173,7 +173,7 @@ function CoachStrip() {
       <Info size={12} strokeWidth={1.7} className="shrink-0" />
       <span className="truncate">
         Click any text on the page and type · hover a section for its name + tools · drag blocks in from the left ·{' '}
-        <span className="font-medium text-ink-2">✚ Add section</span> for ready-made looks · everything autosaves
+        <span className="font-medium text-ink-2">✚ Add section</span> (top right of the page) for ready-made looks · everything autosaves
         (<kbd className="rounded border border-line bg-surface px-1 font-mono text-[9.5px]">⌘S</kbd> to save now) ·
         the <span className="font-medium text-ink-2">?</span> button remembers all of this for you
       </span>
@@ -190,13 +190,13 @@ function HelpMenu() {
   const ROWS: [string, string][] = [
     ['Edit any text', 'Click it on the page and type. It saves by itself.'],
     ['Move a section', 'Drag it by its edge, or use the arrows in its toolbar.'],
-    ['Add a section', 'Drag from the left panel, or ✚ Add section for ready-made looks.'],
+    ['Add a section', 'Drag from the left panel, or ✚ Add section at the top right of the page for ready-made looks.'],
     ['Restyle one section', 'Click it, then open “Style — look, colour & motion” on the right: 10 looks, borrowed palettes, animations.'],
     ['Restyle everything', 'The Style button: fonts, your own colours, buttons, menus, backdrops.'],
     ['Change template', 'The template name in the toolbar — switch any time, content stays.'],
-    ['Photos', 'Upload image copies a link — paste it into any photo field. Or search free photos inside the field.'],
+    ['Photos', 'Drop or upload a photo right inside any photo field — or search free photos there.'],
     ['Freeform canvas', 'A section where you drag words and photos anywhere — it keeps its exact shape on phones.'],
-    ['Undo', '↺ in the toolbar, or Ctrl+Z. Publish only goes live when you say so.'],
+    ['Undo', '↺ at the top right of the page, or Ctrl+Z. Publish only goes live when you say so.'],
   ]
   return (
     <div className="relative">
@@ -206,7 +206,7 @@ function HelpMenu() {
         ?
       </button>
       {open && (
-        <div className="absolute right-0 top-11 z-50 max-h-[70vh] w-[330px] overflow-y-auto rounded-card border border-line bg-surface p-4 shadow-lift">
+        <div className="absolute left-0 top-11 z-50 max-h-[70vh] w-[330px] overflow-y-auto rounded-card border border-line bg-surface p-4 shadow-lift">
           <p className="microlabel mb-2.5">How the editor works</p>
           {ROWS.map(([t, d]) => (
             <div key={t} className="border-b border-line py-2 last:border-0">
@@ -355,7 +355,7 @@ function StylePanel({ current }: { current: SiteStyle }) {
                   {current.initials || 'A·D'}
                 </span>
               )}
-              <label className="cursor-pointer rounded-pill border border-line bg-paper-2 px-3 py-1.5 text-xs text-ink hover:border-accent">
+              <label className="cursor-pointer rounded-md border border-line bg-paper-2 px-3 py-1.5 text-xs text-ink hover:border-accent">
                 {current.monogram ? 'Replace' : 'Upload'}
                 <input type="file" accept="image/*" className="hidden"
                   onChange={async (e) => {
@@ -369,7 +369,7 @@ function StylePanel({ current }: { current: SiteStyle }) {
               </label>
               {current.monogram && (
                 <button type="button" onClick={() => set('monogram', '')}
-                  className="rounded-pill border border-line px-3 py-1.5 text-xs text-ink-3 hover:text-ink">
+                  className="rounded-md border border-line px-3 py-1.5 text-xs text-ink-3 hover:text-ink">
                   Remove
                 </button>
               )}
@@ -387,33 +387,6 @@ function StylePanel({ current }: { current: SiteStyle }) {
         </div>
       )}
     </div>
-  )
-}
-
-/** Upload → URL copied to clipboard, ready to paste into any image field. */
-function ImageUploader() {
-  const [note, setNote] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
-  return (
-    <label title="Upload a photo, then paste the copied link into any image field"
-      className="cursor-pointer rounded-pill border border-line bg-paper-2 px-3.5 py-2 text-sm text-ink transition-colors hover:border-accent">
-      {busy ? 'Uploading…' : note ?? 'Upload image'}
-      <input type="file" accept="image/*" className="hidden"
-        onChange={async (e) => {
-          const f = e.target.files?.[0]
-          if (!f) return
-          setBusy(true); setNote(null)
-          const fd = new FormData(); fd.set('file', f)
-          const res = await uploadSiteImage(fd)
-          setBusy(false)
-          if (res.url) {
-            try { await navigator.clipboard.writeText(res.url) } catch {}
-            setNote('Link copied — paste it ✓')
-            setTimeout(() => setNote(null), 4000)
-          } else setNote(res.error ?? 'Failed')
-          e.target.value = ''
-        }} />
-    </label>
   )
 }
 
@@ -445,7 +418,7 @@ function PresetsMenu() {
     <div className="relative">
       <button type="button" id="presets-menu" onClick={() => setOpen((o) => !o)}
         title="Insert a beautifully pre-styled section"
-        className="rounded-pill border border-line bg-paper-2 px-3 py-1.5 text-sm text-ink hover:border-accent">
+        className="rounded-md px-2.5 py-1.5 text-[12.5px] font-medium text-ink hover:bg-paper-2">
         ✚ Add section
       </button>
       {open && (
@@ -501,8 +474,8 @@ function AiSectionMenu() {
     <div className="relative">
       <button type="button" id="ai-section" onClick={() => setOpen((o) => !o)}
         title="Describe a section and AI writes it for you"
-        className="flex items-center gap-1 rounded-pill border border-line bg-paper-2 px-3 py-1.5 text-sm text-ink hover:border-accent">
-        ✦ AI section
+        className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[12.5px] font-medium text-ink hover:bg-paper-2">
+        ✦ AI
       </button>
       {open && (
         <div className="absolute right-0 top-11 z-50 w-80 rounded-card border border-line bg-surface p-3 shadow-lift">
@@ -528,13 +501,29 @@ function AiSectionMenu() {
 /** Undo / redo, surfaced from Puck's built-in history (also on Ctrl+Z / Ctrl+Y). */
 function HistoryButtons() {
   const history = usePuckSel((s) => s.history)
-  const cls = 'rounded-pill border border-line bg-paper-2 px-3 py-1.5 text-sm text-ink hover:border-accent disabled:opacity-35 disabled:hover:border-line'
+  const cls = 'flex h-7 w-7 items-center justify-center rounded-md text-ink-3 hover:bg-paper-2 hover:text-ink disabled:opacity-35 disabled:hover:bg-transparent'
   return (
-    <div className="mr-1 flex items-center gap-1.5">
+    <div className="flex items-center gap-0.5">
       <button type="button" className={cls} title="Undo (Ctrl+Z)" aria-label="Undo"
-        disabled={!history.hasPast} onClick={() => history.back()}>↺ Undo</button>
+        disabled={!history.hasPast} onClick={() => history.back()}><Undo2 size={14} strokeWidth={1.7} /></button>
       <button type="button" className={cls} title="Redo (Ctrl+Y)" aria-label="Redo"
-        disabled={!history.hasFuture} onClick={() => history.forward()}>↻ Redo</button>
+        disabled={!history.hasFuture} onClick={() => history.forward()}><Redo2 size={14} strokeWidth={1.7} /></button>
+    </div>
+  )
+}
+
+/** 1a: one floating action group, top right of the canvas — insertion and
+ * history live where sections appear, not in chrome. Sticky inside the
+ * canvas scroll, zero-height so it overlays the page. */
+function CanvasActions() {
+  return (
+    <div className="pointer-events-none sticky top-2.5 z-40 flex h-0 justify-end pr-3">
+      <div className="pointer-events-auto flex items-center gap-0.5 rounded-lg border border-line bg-surface p-1 shadow-card">
+        <PresetsMenu />
+        <AiSectionMenu />
+        <span aria-hidden className="mx-0.5 h-5 w-px bg-line" />
+        <HistoryButtons />
+      </div>
     </div>
   )
 }
@@ -559,12 +548,14 @@ function EmptyCanvasHint() {
 }
 
 const puckOverrides: Partial<Overrides> = {
-  // Note: `children` (Puck's own Publish + mini undo icons) is intentionally
-  // dropped — three Publish buttons on one screen confused everyone. Ours in
-  // the toolbar carries the status/lock states and is the single source.
-  headerActions: () => (<><AiSectionMenu /><PresetsMenu /><HistoryButtons /></>),
+  // Note: Puck's own header (its Publish + mini undo icons) is dropped
+  // entirely — three Publish buttons on one screen confused everyone. Ours
+  // in the toolbar carries the status/lock states and is the single source.
+  // Section insertion + history float over the canvas (CanvasActions).
+  header: () => <></>,
   preview: ({ children }) => (
     <div className="editor-vp" style={{ maxWidth: 'var(--editor-vw, 100%)', margin: '0 auto' }}>
+      <CanvasActions />
       <EmptyCanvasHint />
       {children}
     </div>
@@ -572,9 +563,9 @@ const puckOverrides: Partial<Overrides> = {
 }
 
 const DEVICES = [
-  { key: 'desktop', label: '🖥 Desktop', width: '100%', help: 'Full width, as guests see it on a laptop' },
-  { key: 'tablet', label: '⬛ Tablet', width: '768px', help: 'Preview how the page flows at tablet width' },
-  { key: 'mobile', label: '📱 Phone', width: '390px', help: 'Preview how the page flows at phone width' },
+  { key: 'desktop', label: 'Desktop', icon: Monitor, width: '100%', help: 'Full width, as guests see it on a laptop' },
+  { key: 'tablet', label: 'Tablet', icon: Tablet, width: '768px', help: 'Preview how the page flows at tablet width' },
+  { key: 'mobile', label: 'Phone', icon: Smartphone, width: '390px', help: 'Preview how the page flows at phone width' },
 ] as const
 type DeviceKey = (typeof DEVICES)[number]['key']
 
@@ -630,29 +621,30 @@ export function WebsiteEditor({
 
   return (
     <div className="puck-shell flex h-[calc(100vh-57px)] flex-col">
-      {/* Toolbar — grouped clusters: context | canvas tools | ship */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface px-4 py-2">
-        <span className="text-[14.5px] font-semibold tracking-tight text-ink">Website</span>
+      {/* Toolbar — ONE row, three named zones: Site / View / Ship (1a) */}
+      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2 border-b border-line bg-surface px-4 py-2">
+        <span className="microlabel" aria-hidden>Site</span>
         <DesignMenu current={currentStyle} templateName={templateName} slug={slug} />
         <PagesMenu pages={pages} currentId={pageId} />
+        <StylePanel current={currentStyle} />
 
-        <span aria-hidden className="hidden h-5 w-px bg-line md:block" />
+        <span aria-hidden className="mx-1 hidden h-5 w-px bg-line md:block" />
 
-        <div className="flex items-center gap-0.5 rounded-lg border border-line bg-paper-2 p-0.5" role="group" aria-label="Preview width">
+        <span className="microlabel" aria-hidden>View</span>
+        <div className="flex items-center gap-0.5 rounded-pill border border-line bg-paper-2 p-0.5" role="group" aria-label="Preview width">
           {DEVICES.map((d) => (
-            <button key={d.key} type="button" title={d.help} onClick={() => setDevice(d.key)}
-              className={`!rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+            <button key={d.key} type="button" title={d.help} aria-label={d.label}
+              aria-pressed={device === d.key} onClick={() => setDevice(d.key)}
+              className={`flex h-[26px] w-[30px] items-center justify-center rounded-pill transition-colors ${
                 device === d.key ? 'bg-surface text-ink shadow-card' : 'text-ink-3 hover:text-ink'
               }`}>
-              {d.label}
+              <d.icon size={13} strokeWidth={1.7} />
             </button>
           ))}
         </div>
-        <StylePanel current={currentStyle} />
-        <ImageUploader />
+        <HelpMenu />
 
         <div className="ml-auto flex items-center gap-2.5">
-          <HelpMenu />
           <StatusPill status={status} />
           {status === 'locked' && (
             <a href="/settings" id="unlock-cta"
