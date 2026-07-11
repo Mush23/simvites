@@ -1,7 +1,7 @@
 // Skeleton for every app module — calm, on-token, no spinner anxiety.
 export default function Loading() {
   return (
-    <div className="mx-auto max-w-[1060px] animate-pulse px-6 py-10" aria-busy="true" aria-label="Loading">
+    <div className="mx-auto max-w-[1240px] animate-pulse px-6 py-10" aria-busy="true" aria-label="Loading">
       <div className="mb-3 h-3 w-24 rounded bg-paper-2" />
       <div className="mb-8 h-10 w-72 rounded bg-paper-2" />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
