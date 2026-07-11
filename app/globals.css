@@ -31,6 +31,11 @@
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
 
+  /* Admin identity band (4a) — deliberately theme-independent graphite,
+     so "you are in admin" is unmistakable in light and dark alike. */
+  --color-graphite: #1A1916;
+  --color-graphite-accent: #F2A48E;
+
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 10px;

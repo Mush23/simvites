@@ -1,11 +1,10 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { requirePlatformAdmin } from '@/lib/platform-admin'
 import { createAdminClient } from '@/lib/supabase/server'
 import { PageHeader, StatCard } from '@/components/app/ui'
-import { adminToggleUnlock, adminArchiveSite, adminExtendExpiry } from './actions'
 import { ResetButton } from './reset-button'
 import { PriceEditor } from './price-editor'
+import { SitesRegister } from './sites-register'
 import { formatPence } from '@/lib/money'
 
 export const metadata = { title: 'Platform admin · Occasio' }
@@ -91,60 +90,24 @@ export default async function PlatformAdminPage() {
         </a>
       </div>
 
-      <section className="mt-9">
-        <h2 className="mb-3 text-lg font-semibold tracking-tight text-ink">Customers &amp; sites</h2>
-        <div className="space-y-2.5">
-          {siteRows.map((s) => (
-            <div key={s.id} className="rounded-card border border-line bg-surface p-4 shadow-card">
-              <div className="flex flex-wrap items-start gap-3">
-                <div className="min-w-52 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-display text-[16px] text-ink">{s.title}</span>
-                    <span className={`rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.08em] ${
-                      s.archived_at ? 'bg-bad-soft text-bad' : s.status === 'published' ? 'bg-ok-soft text-ok' : 'bg-surface-2 text-ink-3'}`}>
-                      {s.archived_at ? 'archived' : s.status}
-                    </span>
-                    {s.is_unlocked && <span className="rounded-full bg-accent-soft px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.08em] text-accent-ink">paid</span>}
-                  </div>
-                  <p className="mt-0.5 text-[12px] text-ink-3">
-                    {ownerByOrg.get(s.org_id) ?? 'no owner email'} · <span className="font-mono">{s.slug}</span> · joined {fmt(s.created_at)} · expires {fmt(s.expires_at)}
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[11px] text-ink-3">
-                    <span>{eventsBy.get(s.id) ?? 0} events</span>
-                    <span>{guestsBy.get(s.id) ?? 0} guests</span>
-                    <span>{paymentsBy.get(s.id) ?? 0} payments</span>
-                    <span>{messagesBy.get(s.id) ?? 0} messages</span>
-                    {stdBy.get(s.id) && <span className="text-accent-ink">save-the-date live</span>}
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Link href={`/s/${s.slug}`} target="_blank"
-                    className="rounded-lg border border-line bg-paper-2 px-3 py-1.5 text-xs font-medium text-ink hover:border-line-2">
-                    View site ↗
-                  </Link>
-                  <form action={async () => { 'use server'; await adminToggleUnlock(s.id, !s.is_unlocked) }}>
-                    <button type="submit" title="Comp or revoke the paid unlock (a 100% discount)"
-                      className={`rounded-lg px-3 py-1.5 text-xs font-medium ${s.is_unlocked ? 'border border-line bg-paper-2 text-ink-3' : 'bg-accent font-semibold text-white'}`}>
-                      {s.is_unlocked ? 'Revoke unlock' : 'Comp unlock'}
-                    </button>
-                  </form>
-                  <form action={async () => { 'use server'; await adminExtendExpiry(s.id, 18) }}>
-                    <button type="submit" title="Extend hosting 18 months from today"
-                      className="rounded-lg border border-line bg-paper-2 px-3 py-1.5 text-xs font-medium hover:border-line-2">+18 months</button>
-                  </form>
-                  <form action={async () => { 'use server'; await adminArchiveSite(s.id, !s.archived_at) }}>
-                    <button type="submit" title="Archived sites go offline publicly; all data is kept"
-                      className="rounded-lg border border-line bg-paper-2 px-3 py-1.5 text-xs font-medium hover:border-line-2">
-                      {s.archived_at ? 'Restore' : 'Archive'}
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          ))}
-          {siteRows.length === 0 && <p className="text-[13px] text-ink-3">No sites yet.</p>}
-        </div>
-      </section>
+      <SitesRegister rows={siteRows.map((s) => ({
+        id: s.id,
+        title: s.title,
+        slug: s.slug,
+        status: s.status,
+        isUnlocked: s.is_unlocked,
+        archived: Boolean(s.archived_at),
+        ownerEmail: ownerByOrg.get(s.org_id) ?? null,
+        joined: fmt(s.created_at),
+        expires: fmt(s.expires_at),
+        counts: {
+          events: eventsBy.get(s.id) ?? 0,
+          guests: guestsBy.get(s.id) ?? 0,
+          payments: paymentsBy.get(s.id) ?? 0,
+          messages: messagesBy.get(s.id) ?? 0,
+        },
+        stdLive: Boolean(stdBy.get(s.id)),
+      }))} />
 
       <section className="mt-9">
         <h2 className="mb-3 text-lg font-semibold tracking-tight text-ink">User accounts</h2>
@@ -153,7 +116,7 @@ export default async function PlatformAdminPage() {
             <div key={p.id} className="flex items-center justify-between gap-3 rounded-card border border-line bg-surface p-3.5 shadow-card">
               <span className="text-[13.5px] text-ink">{p.email}
                 <span className="ml-2 font-mono text-[9px] uppercase text-ink-3">joined {fmt(p.created_at)}</span></span>
-              <ResetButton userId={p.id} />
+              <ResetButton userId={p.id} email={p.email} />
             </div>
           ))}
         </div>
