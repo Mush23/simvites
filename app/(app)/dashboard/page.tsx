@@ -12,9 +12,12 @@ export const metadata = { title: `Command Centre · ${BRAND_NAME}` }
  * invitations. Derived from live data (never a stored flag), so it ticks
  * itself off and disappears entirely once the couple is activated.
  */
-function GettingStarted({ r, theme }: { r: Readiness; theme: SiteStyle }) {
+function GettingStarted({ r, theme, editedSite }: { r: Readiness; theme: SiteStyle; editedSite: boolean }) {
   const met = (key: string) => r.checks.find((c) => c.key === key)?.met ?? false
-  const styled = Boolean(
+  // "Choose your look" counts once the couple has worked in the editor (any
+  // page draft saved) or published — a couple happy with the default template
+  // must be able to tick it without mutating the theme.
+  const styled = editedSite || met('published') || Boolean(
     theme.displayFont || theme.bodyFont || theme.buttonStyle || theme.backdrop ||
     theme.customAccent || theme.fontPair || theme.nav ||
     (theme.background && theme.background !== 'template') ||
@@ -76,7 +79,12 @@ export default async function DashboardPage() {
   const r = await computeReadiness(site!.siteId)
   const { createClient } = await import('@/lib/supabase/server')
   const supabase = await createClient()
-  const { data: siteRow } = await supabase.from('sites').select('theme').eq('id', site!.siteId).maybeSingle()
+  const [{ data: siteRow }, { count: editedPages }] = await Promise.all([
+    supabase.from('sites').select('theme').eq('id', site!.siteId).maybeSingle(),
+    // Any saved page draft = the couple has actually worked in the editor.
+    supabase.from('pages').select('id', { count: 'exact', head: true })
+      .eq('site_id', site!.siteId).neq('puck_data', '{}'),
+  ])
   const theme = (siteRow?.theme ?? {}) as SiteStyle
 
   const headline =
@@ -97,7 +105,7 @@ export default async function DashboardPage() {
         }
       />
 
-      <GettingStarted r={r} theme={theme} />
+      <GettingStarted r={r} theme={theme} editedSite={(editedPages ?? 0) > 0} />
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_2fr]">
         {/* Readiness ring card (overhaul: 84px SVG ring, coral arc) */}
