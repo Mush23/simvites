@@ -43,7 +43,7 @@ Local: `npm run dev -- -p 3100` → http://localhost:3100.
 | Route | What it is | Check specifically |
 |---|---|---|
 | `/` | Deep-zoom scroll landing: hero → navy dive → module tunnel → ivory portal → templates scene → USP duo → what-you-get (6 cards) → FAQ (8 accordions) → pricing → footer | Scroll choreography at several positions; LiveDemo 22s simulated editor loop; **dark toggle in nav pill** (full navy treatment); mobile nav pill never wraps; headline never clipped |
-| `/tour` | "How it works": FlowPlayer simulated screen recording + explainer cards; fullscreen mode | Auto-advance, tap-to-jump, fullscreen |
+| `/tour` | "How it works": the LiveDemo 22s editor loop + plain-English element guide | Demo loop plays; every element explained |
 | `/preview` | Gallery of all 18 templates | Cards genuinely distinct (fonts, button shapes, dividers, case — not just colour) |
 | `/preview/[template]` | Full-page single template preview ×18 | Try `editorial-gold`, `peacock-court`, `saffron-disco`, `lotus-milk`, `henna-noir`, `marigold-morning` |
 | `/login` | Split screen: ivory invitation card on near-black; magic-link / password tabs; signup switch; forgot password | 420px link-sent state; error states |
@@ -108,4 +108,3 @@ Local: `npm run dev -- -p 3100` → http://localhost:3100.
 - Stripe/Resend/Twilio/Anthropic keys not set in prod — guarded states show.
 - Landing footer legal links are placeholders pre-launch.
 - One site per account (`getPrimarySite`) — multi-site switcher is post-launch.
-- /tour still uses the older FlowPlayer style demo.
