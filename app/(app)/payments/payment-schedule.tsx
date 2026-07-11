@@ -5,6 +5,7 @@
 // red, due-soon rows amber.
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Check, Bell, Plus, X, CalendarClock } from 'lucide-react'
 import { formatPence } from '@/lib/money'
@@ -24,6 +25,9 @@ export interface PaymentRow {
   vendorName: string | null
   budgetItemId: string | null
   note: string | null
+  /** Reached through the linked budget line — powers the hub backlink. */
+  eventId: string | null
+  eventName: string | null
   overdue: boolean
   dueSoon: boolean
 }
@@ -172,6 +176,12 @@ function PaymentCard({ r, onPaid, onDelete }: {
               </span>}
           {!isPaid && r.dueSoon && <Bell size={11} strokeWidth={1.8} className="text-warn" />}
           {r.budgetItemId && <span className="rounded bg-surface-2 px-1.5 py-px font-mono text-[9px] text-ink-3">linked to budget</span>}
+          {r.eventId && r.eventName && (
+            <Link href={`/events/${r.eventId}?tab=budget`} title={`Open the ${r.eventName} hub`}
+              className="font-medium text-ink-3 underline-offset-2 hover:text-accent-ink hover:underline">
+              {r.eventName} →
+            </Link>
+          )}
         </p>
       </div>
 

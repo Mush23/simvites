@@ -10,28 +10,35 @@ export default async function PaymentsPage() {
   const site = await getPrimarySite()
   const supabase = await createClient()
 
-  const [{ data: payments }, { data: vendors }, { data: budgetItems }] = await Promise.all([
+  const [{ data: payments }, { data: vendors }, { data: budgetItems }, { data: events }] = await Promise.all([
     supabase.from('vendor_payments')
       .select('id, label, amount, due_date, status, paid_on, remind_days_before, vendor_id, budget_item_id, note')
       .eq('site_id', site!.siteId)
       .is('archived_at', null)
       .order('due_date', { ascending: true }),
     supabase.from('vendors').select('id, name').eq('site_id', site!.siteId).is('archived_at', null).order('name'),
-    supabase.from('budget_items').select('id, label').eq('site_id', site!.siteId).is('archived_at', null).order('label'),
+    supabase.from('budget_items').select('id, label, event_id').eq('site_id', site!.siteId).is('archived_at', null).order('label'),
+    supabase.from('events').select('id, name').eq('site_id', site!.siteId).is('archived_at', null),
   ])
 
   const vendorName = new Map((vendors ?? []).map((v) => [v.id, v.name]))
+  const eventName = new Map((events ?? []).map((e) => [e.id, e.name]))
+  const budgetEvent = new Map((budgetItems ?? []).map((b) => [b.id, b.event_id as string | null]))
   const today = new Date().toISOString().slice(0, 10)
   const soon = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10)
 
-  const rows: PaymentRow[] = (payments ?? []).map((p) => ({
-    id: p.id, label: p.label, amount: p.amount, dueDate: p.due_date,
-    status: p.status as 'scheduled' | 'paid', paidOn: p.paid_on,
-    vendorId: p.vendor_id, vendorName: p.vendor_id ? vendorName.get(p.vendor_id) ?? null : null,
-    budgetItemId: p.budget_item_id, note: p.note,
-    overdue: p.status === 'scheduled' && p.due_date < today,
-    dueSoon: p.status === 'scheduled' && p.due_date >= today && p.due_date <= soon,
-  }))
+  const rows: PaymentRow[] = (payments ?? []).map((p) => {
+    const eventId = p.budget_item_id ? budgetEvent.get(p.budget_item_id) ?? null : null
+    return {
+      id: p.id, label: p.label, amount: p.amount, dueDate: p.due_date,
+      status: p.status as 'scheduled' | 'paid', paidOn: p.paid_on,
+      vendorId: p.vendor_id, vendorName: p.vendor_id ? vendorName.get(p.vendor_id) ?? null : null,
+      budgetItemId: p.budget_item_id, note: p.note,
+      eventId, eventName: eventId ? eventName.get(eventId) ?? null : null,
+      overdue: p.status === 'scheduled' && p.due_date < today,
+      dueSoon: p.status === 'scheduled' && p.due_date >= today && p.due_date <= soon,
+    }
+  })
 
   const scheduled = rows.filter((r) => r.status === 'scheduled')
   const outstanding = scheduled.reduce((n, r) => n + r.amount, 0)

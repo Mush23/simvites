@@ -36,7 +36,12 @@ export function EventForm({ event }: { event: EventRow }) {
   async function action(formData: FormData) {
     setStatus('saving'); setError(null)
     const res = await updateEvent(event.id, formData)
-    if (res?.error) { setError(res.error); setStatus('error') } else setStatus('saved')
+    if (res?.error) { setError(res.error); setStatus('error') }
+    else {
+      setStatus('saved')
+      // Auto-clear so "Saved" never reads stale minutes later.
+      setTimeout(() => setStatus((s) => (s === 'saved' ? 'idle' : s)), 3000)
+    }
   }
 
   return (

@@ -150,12 +150,15 @@ export default function LoginPage() {
 
             {tab === 'password' && (
               <div className="mt-5 space-y-1.5 text-center text-[13px] text-ink-3">
-                <p>
-                  {signup ? 'Already have an account? ' : 'New here? '}
-                  <button onClick={() => { setSignup(!signup); setError(null) }} className="rounded-md text-accent-ink underline underline-offset-4">
-                    {signup ? 'Sign in' : 'Create one'}
-                  </button>
-                </p>
+                {/* No "Create one" here — the big create button below covers it. */}
+                {signup && (
+                  <p>
+                    Already have an account?{' '}
+                    <button onClick={() => { setSignup(false); setError(null) }} className="rounded-md text-accent-ink underline underline-offset-4">
+                      Sign in
+                    </button>
+                  </p>
+                )}
                 {!signup && (
                   <p>
                     <button type="button" onClick={forgotPassword} disabled={pending}

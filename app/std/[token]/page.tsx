@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/server'
-import { StdCard, type StdData } from '@/components/save-the-date/std-card'
+import { StdCard, stdPaletteOf, type StdData } from '@/components/save-the-date/std-card'
 import { formatEventDateTime } from '@/lib/utils'
 import { PrintButton } from './print-button'
 
@@ -46,8 +46,13 @@ export default async function PublicStdPage({ params }: { params: Promise<{ toke
     palette: std.palette, events,
   }
 
+  // Stage tinted from the card's own palette, so the page feels of a piece
+  // with the keepsake instead of a fixed ivory.
+  const pal = stdPaletteOf(std.palette)
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[#EFEAE0] px-4 py-12">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-12"
+      style={{ background: `color-mix(in oklab, ${pal.accent} 9%, ${pal.bg})` }}>
       <div data-print-target className="w-full max-w-[440px]">
         <StdCard data={data} />
       </div>

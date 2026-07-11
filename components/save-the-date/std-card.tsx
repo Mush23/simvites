@@ -24,6 +24,9 @@ const PALETTES: Record<string, { bg: string; ink: string; accent: string; sub: s
   midnight: { bg: '#0F1B32', ink: '#EFE6D2', accent: '#D4AF6A', sub: '#B7AC93', font: 'var(--f-cormorant)' },
 }
 
+/** The resolved palette for a key — lets the public stage tint itself to match. */
+export const stdPaletteOf = (key: string) => PALETTES[key] ?? PALETTES.template
+
 export function StdCard({ data, forPrint = false }: { data: StdData; forPrint?: boolean }) {
   const p = PALETTES[data.palette] ?? PALETTES.template
   return (

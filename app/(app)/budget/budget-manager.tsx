@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatPence } from '@/lib/money'
 import { createBudgetItem, updateBudgetItem, archiveBudgetItem } from './actions'
@@ -101,14 +102,14 @@ function BudgetRow({ item, events, vendors, onChanged }: {
 
   return (
     <div className="rounded-card border border-line bg-surface shadow-card">
-      <button type="button" onClick={() => setOpen((o) => !o)}
-        className="rounded-md flex w-full flex-wrap items-center justify-between gap-3 p-4 text-left">
-        <div className="min-w-0">
+      <div className="flex w-full flex-wrap items-center justify-between gap-3 p-4">
+        <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open}
+          className="rounded-md min-w-0 flex-1 text-left">
           <p className="font-medium text-ink">{item.label}</p>
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
             {[eventName, vendorName].filter(Boolean).join(' · ') || 'unlinked'}
           </p>
-        </div>
+        </button>
         <div className="flex items-center gap-4">
           <span className="text-sm text-ink-2">
             {formatPence(item.paid_amount)} paid · {formatPence(balance)} due
@@ -117,8 +118,14 @@ function BudgetRow({ item, events, vendors, onChanged }: {
           <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
             {STATUS_LABEL[item.status] ?? item.status}
           </span>
+          {item.event_id && eventName && (
+            <Link href={`/events/${item.event_id}?tab=budget`} title={`Open the ${eventName} hub`}
+              className="rounded-md text-[11.5px] font-medium text-ink-3 hover:text-accent-ink">
+              Hub →
+            </Link>
+          )}
         </div>
-      </button>
+      </div>
 
       {open && (
         <form action={onSave} className="flex flex-wrap items-end gap-3 border-t border-line p-4">

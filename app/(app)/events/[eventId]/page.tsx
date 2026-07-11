@@ -60,7 +60,7 @@ export default async function EventHubPage({
           </div>
         )}
         {tab === 'itinerary' && <ItineraryTab eventId={eventId} />}
-        {tab !== 'overview' && tab !== 'itinerary' && <ConnectedTab tab={tab} eventId={eventId} siteId={event.site_id} />}
+        {tab !== 'overview' && tab !== 'itinerary' && <ConnectedTab tab={tab} eventId={eventId} siteId={event.site_id} capacity={event.capacity} />}
       </div>
     </div>
   )
@@ -78,7 +78,7 @@ async function ItineraryTab({ eventId }: { eventId: string }) {
 }
 
 /** Read-only connected views — the same rows the modules own, scoped to this event. */
-async function ConnectedTab({ tab, eventId, siteId }: { tab: Tab; eventId: string; siteId: string }) {
+async function ConnectedTab({ tab, eventId, siteId, capacity }: { tab: Tab; eventId: string; siteId: string; capacity?: number | null }) {
   const supabase = await createClient()
 
   if (tab === 'guests' || tab === 'rsvp') {
@@ -116,6 +116,18 @@ async function ConnectedTab({ tab, eventId, siteId }: { tab: Tab; eventId: strin
     }
     return (
       <div>
+        {/* The number that actually matters: attending against the room. */}
+        {typeof capacity === 'number' && capacity > 0 && (
+          <p className="mb-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span className="font-mono text-[26px] font-semibold tracking-tight nums text-ink">{counts.attending}</span>
+            <span className="text-[13.5px] text-ink-2">attending of</span>
+            <span className="font-mono text-[26px] font-semibold tracking-tight nums text-ink">{capacity}</span>
+            <span className="text-[13.5px] text-ink-2">capacity</span>
+            {counts.attending >= capacity && (
+              <span className="rounded-pill bg-warn-soft px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-warn">Full</span>
+            )}
+          </p>
+        )}
         <div className="mb-6 grid max-w-md grid-cols-3 gap-3 text-center">
           {(['attending', 'declined', 'pending'] as const).map((k) => (
             <div key={k} className="rounded-md bg-paper-2 py-3">
