@@ -7,7 +7,7 @@ export const metadata = { title: `How it works · ${BRAND_NAME}` }
 
 // Beginner tutorial: every element of the platform, in plain English.
 const ELEMENTS = [
-  { name: 'Templates & website', what: 'Your public wedding site. Pick one of twelve looks, then click any block, hero, story, schedule, gallery, hotel, and edit it like a document. Nothing goes live until you press Publish.' },
+  { name: 'Templates & website', what: 'Your public wedding site. Pick the look that feels like you — every template is a full design, not a colour swap — then click any block, hero, story, schedule, gallery, hotel, and edit it like a document. Nothing goes live until you press Publish.' },
   { name: 'Events', what: 'One entry per celebration, Mehndi, Sangeet, Ceremony, Reception, anything. Each has its own date, venue, colour and RSVP deadline. Every other part of the product reuses these.' },
   { name: 'Guests & the invite matrix', what: 'Households and named guests, with one checkbox per guest per event. That checkbox is the whole magic: it decides what each guest can see and answer. Paste your list in from a spreadsheet.' },
   { name: 'Invitations', what: 'Every household gets one private link, no accounts, no codes to mistype. Copy it, WhatsApp it, or email it. You can see who has opened theirs.' },

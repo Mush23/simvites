@@ -44,8 +44,8 @@ export function AssistantChat({ configured }: { configured: boolean }) {
         </span>
         <p className="text-[15px] font-semibold text-ink">The assistant isn’t connected yet</p>
         <p className="mx-auto mt-1.5 max-w-md text-[13.5px] text-ink-2">
-          Add an <span className="font-mono text-[12px]">ANTHROPIC_API_KEY</span> to switch on the planning assistant.
-          Once connected, it answers from your live wedding data and drafts messages for you.
+          The assistant isn&rsquo;t switched on yet — it&rsquo;s coming with early access.
+          Once it arrives, it answers from your live wedding data and drafts messages for you.
         </p>
       </div>
     )

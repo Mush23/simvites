@@ -13,7 +13,7 @@ export default function TemplateGalleryPage() {
       <div className="mx-auto max-w-[1100px]">
         <header className="mb-10 text-center">
           <Link href="/" className="text-[13px] font-semibold tracking-tight">{BRAND_NAME}</Link>
-          <h1 className="mt-4 text-[clamp(28px,4vw,44px)] font-[650] tracking-[-0.03em]">Twelve looks, one wedding</h1>
+          <h1 className="mt-4 text-[clamp(28px,4vw,44px)] font-[650] tracking-[-0.03em]">{TEMPLATES.length} looks, one wedding</h1>
           <p className="mx-auto mt-3 max-w-xl text-[14px] text-ink-2">
             Every template brings its own typography, palette and details — not just a colour swap.
             Pick a starting point; you can change anything later.

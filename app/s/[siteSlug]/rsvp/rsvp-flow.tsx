@@ -277,7 +277,7 @@ function EventChoiceRow({ event, status, error, onChange }: {
         </div>
         {locked ? (
           <span className="rounded-pill bg-paper-2 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
-            {status === 'pending' ? 'Closed' : status}
+            {status === 'pending' ? 'Closed' : status === 'attending' ? 'Going ✓' : 'Can’t make it'}
           </span>
         ) : (
           <div className="flex rounded-md border border-line bg-paper-2 p-1" role="group" aria-label={`${event.name} response`}>

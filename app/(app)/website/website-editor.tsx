@@ -450,7 +450,7 @@ function AiSectionMenu() {
     setBusy(true); setNote(null)
     const res = await aiComposeSection(prompt)
     setBusy(false)
-    if (res.notConfigured) { setNote('AI is not connected yet. Add an ANTHROPIC_API_KEY to switch this on.'); return }
+    if (res.notConfigured) { setNote('AI writing isn’t switched on yet — it’s coming with early access.'); return }
     if (res.error || !res.type) { setNote(res.error ?? 'Something went wrong.'); return }
 
     // Merge onto the block's defaults (styleOpts etc.), insert above the footer.

@@ -257,8 +257,18 @@ export function DeepZoom() {
               <Link href="/login" className="rounded-[10px] bg-[#191918] px-5 py-2.5 text-[13.5px] font-semibold text-white dark:bg-[#EEF2FA] dark:text-[#0A1220]">
                 Start building free
               </Link>
-              <a href="#product" className="rounded-[10px] border border-black/15 bg-white px-5 py-2.5 text-[13.5px] font-medium text-[#191918] dark:border-white/15 dark:bg-[#111C33] dark:text-[#EEF2FA]">
-                ▶ Watch the 60 second take
+              <a href="#product"
+                onClick={(e) => {
+                  // Land where the demo frame is fully scaled in (p≈0.2 of the
+                  // dive), not at the top of the 560vh stage.
+                  const el = sectionRef.current
+                  if (!el || reduced) return
+                  e.preventDefault()
+                  const y = el.offsetTop + (el.offsetHeight - window.innerHeight) * 0.2
+                  window.scrollTo({ top: y, behavior: 'smooth' })
+                }}
+                className="rounded-[10px] border border-black/15 bg-white px-5 py-2.5 text-[13.5px] font-medium text-[#191918] dark:border-white/15 dark:bg-[#111C33] dark:text-[#EEF2FA]">
+                ▶ Watch it build a site — 22s
               </a>
             </div>
           </div>
