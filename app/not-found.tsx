@@ -11,7 +11,7 @@ export default function NotFound() {
           The link may be old, or the site it points to hasn&apos;t been published yet.
         </p>
         <Link href="/"
-          className="mt-8 inline-block rounded-md bg-accent px-7 py-3 font-semibold text-white transition-transform hover:-translate-y-px">
+          className="mt-8 inline-block rounded-md bg-accent px-7 py-3 font-semibold text-white transition-colors hover:bg-accent-ink">
           Go home
         </Link>
       </div>

@@ -42,7 +42,7 @@ export default async function EventsPage() {
           <li key={e.id}>
             <Link
               href={`/events/${e.id}`}
-              className="flex items-center justify-between rounded-card border border-line bg-surface p-5 shadow-card transition-transform hover:-translate-y-0.5"
+              className="flex items-center justify-between rounded-card border border-line bg-surface p-5 shadow-card transition-colors hover:border-line-2 hover:bg-paper-2"
             >
               <div>
                 <p className="text-[15px] font-semibold tracking-tight text-ink">{e.name}</p>

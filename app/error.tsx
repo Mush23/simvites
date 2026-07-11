@@ -13,7 +13,7 @@ export default function GlobalError({ reset }: { error: Error; reset: () => void
           Nothing is lost — your data is safe. Try again, and if it keeps happening, tell us.
         </p>
         <button type="button" onClick={reset}
-          className="mt-8 rounded-md bg-accent px-7 py-3 font-semibold text-white transition-transform hover:-translate-y-px">
+          className="mt-8 rounded-md bg-accent px-7 py-3 font-semibold text-white transition-colors hover:bg-accent-ink">
           Try again
         </button>
       </div>

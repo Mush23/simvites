@@ -223,5 +223,5 @@ function Row({ main, sub, pill, trailing, href }: {
     </>
   )
   const cls = 'flex items-center justify-between rounded-card border border-line bg-surface p-3.5 shadow-card'
-  return href ? <Link href={href} className={`${cls} transition-transform hover:-translate-y-0.5`}>{inner}</Link> : <div className={cls}>{inner}</div>
+  return href ? <Link href={href} className={`${cls} transition-colors hover:border-line-2 hover:bg-paper-2`}>{inner}</Link> : <div className={cls}>{inner}</div>
 }
