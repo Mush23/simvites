@@ -61,8 +61,9 @@
   --line-2: #DCD5C6;
   --accent: oklch(0.62 0.21 29);
   --accent-ink: oklch(0.55 0.19 29);
-  --accent-soft: rgba(222, 71, 38, 0.08);
-  --accent-line: rgba(222, 71, 38, 0.35);
+  /* Derived from --accent so the soft family can never drift from it. */
+  --accent-soft: color-mix(in oklab, var(--accent) 8%, transparent);
+  --accent-line: color-mix(in oklab, var(--accent) 35%, transparent);
   --ok: #1B9E5F;
   --warn: #B87A1E;
   --bad: #D2402A;
@@ -89,8 +90,8 @@
   --line-2: #2C3F63;
   --accent: oklch(0.68 0.19 30);
   --accent-ink: oklch(0.74 0.17 30);
-  --accent-soft: rgba(242, 109, 86, 0.14);
-  --accent-line: rgba(242, 109, 86, 0.4);
+  --accent-soft: color-mix(in oklab, var(--accent) 14%, transparent);
+  --accent-line: color-mix(in oklab, var(--accent) 40%, transparent);
   --ok: #3DD68C;
   --warn: #F0B25A;
   --bad: #F26D56;
