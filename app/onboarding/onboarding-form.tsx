@@ -29,11 +29,14 @@ function MoveLabel({ n, title, hint }: { n: string; title: string; hint?: string
   )
 }
 
-export function OnboardingForm({ templates }: { templates: TemplateListing[] }) {
+export function OnboardingForm({ templates, preselect }: { templates: TemplateListing[]; preselect?: string }) {
   const [state, action, pending] = useActionState(createWorkspace, initial)
   const [slug, setSlug] = useState('')
-  const [showAll, setShowAll] = useState(false)
+  const preIx = preselect ? templates.findIndex((t) => t.key === preselect) : -1
+  // If the chosen look sits past the fold, open the full grid so its radio renders.
+  const [showAll, setShowAll] = useState(preIx >= 4)
   const shown = showAll ? templates : templates.slice(0, 4)
+  const checkedIx = preIx >= 0 ? preIx : 0
 
   return (
     <form action={action} className="space-y-8">
@@ -70,7 +73,7 @@ export function OnboardingForm({ templates }: { templates: TemplateListing[] }) 
             <label key={t.key}
               className="group flex cursor-pointer flex-col gap-2 rounded-xl border border-line bg-surface p-3.5 transition-colors has-checked:border-accent has-checked:shadow-[0_0_0_1px_var(--accent)]">
               <span className="flex items-center gap-2">
-                <input type="radio" name="template" value={t.key} defaultChecked={i === 0} className="accent-[var(--accent)]" />
+                <input type="radio" name="template" value={t.key} defaultChecked={i === checkedIx} className="accent-[var(--accent)]" />
                 <span className="font-display text-[15px] text-ink">{t.name}</span>
                 <span className="ml-auto flex gap-1">
                   {t.swatches.map((c) => (

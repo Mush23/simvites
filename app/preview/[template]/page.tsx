@@ -26,7 +26,7 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
       <div className="mx-auto max-w-[560px]">
         <div className="mb-6 flex items-center justify-between">
           <Link href="/preview" className="text-[13px] font-medium text-ink-2 hover:text-ink">← All templates</Link>
-          <Link href="/login" className="rounded-lg bg-accent px-4 py-2 text-[13px] font-semibold text-white">Use this template</Link>
+          <Link href={`/login?template=${t.key}`} className="rounded-lg bg-accent px-4 py-2 text-[13px] font-semibold text-white">Use this template</Link>
         </div>
         <TemplatePreview template={full} />
         <div className="mt-6 text-center">

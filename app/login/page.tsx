@@ -5,7 +5,7 @@
 // card: "The tool is software. What your guests get is a keepsake.").
 // Same Supabase OTP/password flows as before.
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Mail } from 'lucide-react'
@@ -26,6 +26,13 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [linkSent, setLinkSent] = useState(false)
+
+  // Remember a template chosen on /preview/[template] so onboarding can
+  // preselect it — a cookie survives the email-link round trip.
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get('template')
+    if (t) document.cookie = `preferred-template=${encodeURIComponent(t)}; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax`
+  }, [])
 
   async function sendLink(e?: React.FormEvent) {
     e?.preventDefault()

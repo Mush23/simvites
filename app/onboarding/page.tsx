@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { requireUser } from '@/lib/auth'
 import { getPrimarySite } from '@/lib/workspace'
 import { BRAND_NAME } from '@/lib/brand'
@@ -8,9 +9,20 @@ import { OnboardingForm } from './onboarding-form'
 
 export const metadata = { title: `Create your site · ${BRAND_NAME}` }
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ template?: string }>
+}) {
   await requireUser()
   if (await getPrimarySite()) redirect('/dashboard')
+
+  // Preselect the look chosen on /preview/[template]: ?template= wins,
+  // else the cookie set on /login. Unknown keys fall back to the default.
+  const [{ template: fromQuery }, cookieStore] = await Promise.all([searchParams, cookies()])
+  const templates = listTemplates()
+  const wanted = fromQuery ?? cookieStore.get('preferred-template')?.value
+  const preselect = templates.some((t) => t.key === wanted) ? wanted : undefined
 
   return (
     <div className="flex min-h-screen flex-col bg-paper text-ink">
@@ -25,7 +37,7 @@ export default async function OnboardingPage() {
             Three quick moves. One site holds everything — events, guests, RSVPs and planning.
           </p>
           <div className="mt-8 rounded-[14px] border border-line bg-surface p-6 shadow-card sm:p-8">
-            <OnboardingForm templates={listTemplates()} />
+            <OnboardingForm templates={templates} preselect={preselect} />
           </div>
         </div>
       </main>
