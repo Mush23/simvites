@@ -143,12 +143,12 @@ export function OverlayProvider({ children }: { children: React.ReactNode }) {
             )}
             <div className="mt-5 flex justify-end gap-2">
               <button type="button" onClick={() => close(null)}
-                className="border border-line px-3.5 py-2 text-[13px] font-medium text-ink hover:border-line-2">
+                className="rounded-md border border-line px-3.5 py-2 text-[13px] font-medium text-ink hover:border-line-2">
                 Cancel
               </button>
               <button type="button"
                 onClick={() => close(dialog.kind === 'prompt' ? (promptRef.current?.value ?? '') : true)}
-                className={`px-3.5 py-2 text-[13px] font-semibold text-white ${
+                className={`rounded-md px-3.5 py-2 text-[13px] font-semibold text-white ${
                   dialog.kind === 'confirm' && (dialog.opts.destructive ?? true) ? 'bg-bad' : 'bg-accent'}`}>
                 {dialog.opts.confirmLabel ?? (dialog.kind === 'prompt' ? 'Save' : 'Confirm')}
               </button>
@@ -172,7 +172,7 @@ export function OverlayProvider({ children }: { children: React.ReactNode }) {
             {t.actionLabel && (
               <button type="button"
                 onClick={() => { t.onAction?.(); setToasts((x) => x.filter((y) => y.id !== t.id)) }}
-                className="ml-1 font-semibold text-[oklch(0.72_0.18_30)] hover:underline">
+                className="rounded-md ml-1 font-semibold text-[oklch(0.72_0.18_30)] hover:underline">
                 {t.actionLabel}
               </button>
             )}

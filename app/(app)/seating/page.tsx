@@ -40,7 +40,7 @@ export default async function SeatingPage() {
         />
         <form action={async () => { 'use server'; await (await import('./actions')).sendSeatingUpdate() }}>
           <button type="submit" title="Email every seated household a fresh personal link — opening it shows their table"
-            className="bg-accent px-4 py-2 text-sm font-semibold text-white">
+            className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white">
             Send seating plan to guests
           </button>
         </form>

@@ -89,7 +89,7 @@ export function EventForm({ event }: { event: EventRow }) {
             if (!(await askConfirm({ title: `Archive ${event.name}?`, body: 'It disappears from your site and guest invitations, but nothing is deleted.' }))) return
             notify('Event archived'); archiveEvent(event.id)
           }}
-          className="ml-auto text-[12.5px] font-medium text-ink-3 hover:text-bad"
+          className="rounded-md ml-auto text-[12.5px] font-medium text-ink-3 hover:text-bad"
         >
           Archive
         </button>

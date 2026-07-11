@@ -149,7 +149,7 @@ export function Recommendations({ vendors, addedIds }: {
                   </span>
                 ) : (
                   <button type="button" onClick={() => add(v)} disabled={busy === v.id}
-                    className="flex items-center gap-1.5 bg-accent px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-60">
+                    className="rounded-md flex items-center gap-1.5 bg-accent px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-60">
                     <Plus size={14} strokeWidth={2} /> {busy === v.id ? 'Adding…' : 'Add to my vendors'}
                   </button>
                 )}

@@ -28,7 +28,7 @@ export function VendorImport() {
   return (
     <div className="mt-4">
       <button type="button" onClick={() => setOpen((o) => !o)}
-        className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3 hover:text-accent-ink">
+        className="rounded-md font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3 hover:text-accent-ink">
         {open ? 'Close paste import' : 'Paste import'}
       </button>
       {open && (

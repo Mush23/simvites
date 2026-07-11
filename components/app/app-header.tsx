@@ -98,7 +98,7 @@ export function AppHeader({ site, notifications = [] }: { site: SidebarSite; not
           </Link>
         ) : (
           <button type="button" onClick={publish} disabled={pub === 'publishing'}
-            className={`px-3.5 py-1.5 text-[13px] font-semibold text-white disabled:opacity-60 ${
+            className={`rounded-md px-3.5 py-1.5 text-[13px] font-semibold text-white disabled:opacity-60 ${
               pub === 'live' ? 'bg-ok' : 'bg-accent'}`}>
             {pub === 'publishing' ? 'Publishing…' : pub === 'live' ? 'Live ✓' : 'Publish'}
           </button>

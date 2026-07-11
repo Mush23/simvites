@@ -47,7 +47,7 @@ function PagesMenu({ pages, currentId }: { pages: EditorPage[]; currentId: strin
     <div className="relative">
       <button type="button" id="pages-menu" onClick={() => setOpen((o) => !o)}
         title="Add pages, rename them, or hide them from the menu"
-        className="flex items-center gap-1.5 border border-line bg-paper-2 px-3 py-2 text-[13px] font-medium text-ink hover:border-line-2">
+        className="rounded-md flex items-center gap-1.5 border border-line bg-paper-2 px-3 py-2 text-[13px] font-medium text-ink hover:border-line-2">
         <FileText size={14} strokeWidth={1.7} className="text-ink-3" /> {current?.title ?? 'Pages'} <ChevronDown size={12} strokeWidth={1.7} className="text-ink-3" />
       </button>
       {open && (
@@ -55,24 +55,24 @@ function PagesMenu({ pages, currentId }: { pages: EditorPage[]; currentId: strin
           {pages.map((p) => (
             <div key={p.id} className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm ${
               p.id === currentId ? 'bg-accent-soft text-accent-ink' : 'text-ink hover:bg-paper-2'}`}>
-              <button type="button" className="min-w-0 flex-1 truncate text-left"
+              <button type="button" className="rounded-md min-w-0 flex-1 truncate text-left"
                 onClick={() => { setOpen(false); router.push(`/website?page=${p.id}`); router.refresh() }}>
                 {p.title}{p.is_home && <span className="ml-1.5 font-mono text-[9px] uppercase tracking-wider text-ink-3">home</span>}
                 {p.hidden && <span className="ml-1.5 font-mono text-[9px] uppercase tracking-wider text-warn">hidden</span>}
               </button>
               {!p.is_home && (
                 <>
-                  <button type="button" title="Rename this page" className="text-xs text-ink-3 hover:text-ink"
+                  <button type="button" title="Rename this page" className="rounded-md text-xs text-ink-3 hover:text-ink"
                     onClick={async () => {
                       const t = await askPrompt({ title: 'Rename page', placeholder: 'Page name', initial: p.title, confirmLabel: 'Rename' })
                       if (t) { await renamePage(p.id, t); router.refresh() }
                     }}><Pencil size={13} strokeWidth={1.7} /></button>
                   <button type="button" title={p.hidden ? 'Show in the site menu' : 'Hide from the site menu'}
-                    className="text-xs text-ink-3 hover:text-ink"
+                    className="rounded-md text-xs text-ink-3 hover:text-ink"
                     onClick={async () => { await setPageHidden(p.id, !p.hidden); router.refresh() }}>
                     {p.hidden ? <EyeOff size={13} strokeWidth={1.7} /> : <Eye size={13} strokeWidth={1.7} />}
                   </button>
-                  <button type="button" title="Delete this page" className="text-xs text-ink-3 hover:text-bad"
+                  <button type="button" title="Delete this page" className="rounded-md text-xs text-ink-3 hover:text-bad"
                     onClick={async () => {
                       if (!(await askConfirm({ title: `Delete "${p.title}"?`, body: 'The page and its sections are removed permanently.', confirmLabel: 'Delete page' }))) return
                       await deletePage(p.id)
@@ -124,7 +124,7 @@ function DesignMenu({ current, templateName, slug }: { current: SiteStyle; templ
     <div className="relative">
       <button type="button" onClick={() => setOpen((o) => !o)}
         title="Switch templates — your content stays, the whole look changes"
-        className="flex items-center gap-1.5 border border-line bg-paper-2 px-3 py-2 text-[13px] font-medium text-ink hover:border-line-2">
+        className="rounded-md flex items-center gap-1.5 border border-line bg-paper-2 px-3 py-2 text-[13px] font-medium text-ink hover:border-line-2">
         <LayoutTemplate size={14} strokeWidth={1.7} className="text-ink-3" />
         {templateName} <ChevronDown size={12} strokeWidth={1.7} className="text-ink-3" />
       </button>
@@ -139,7 +139,7 @@ function DesignMenu({ current, templateName, slug }: { current: SiteStyle; templ
                 className={`rounded-[10px] border p-2 text-left transition-colors ${
                   t.key === activeKey ? 'border-accent bg-accent-soft' : 'border-line hover:border-line-2'
                 }`}>
-                <button type="button" onClick={() => pick(t.key)} className="block w-full text-left">
+                <button type="button" onClick={() => pick(t.key)} className="rounded-md block w-full text-left">
                   <span className="flex h-9 w-full overflow-hidden rounded-md border border-line">
                     {t.swatches.map((c) => <span key={c} className="h-full flex-1" style={{ background: c }} />)}
                   </span>
@@ -252,7 +252,7 @@ function ColorPick({ k, label, value, onSet }: {
         className="mt-1 w-full rounded border border-line bg-paper-2 px-1 py-0.5 text-center font-mono text-[9.5px] text-ink outline-none focus:border-accent" />
       {value ? (
         <button type="button" onClick={() => onSet(k, '')}
-          className="mt-0.5 text-[9px] text-ink-3 underline hover:text-ink">reset</button>
+          className="rounded-md mt-0.5 text-[9px] text-ink-3 underline hover:text-ink">reset</button>
       ) : (
         <span className="mt-0.5 block text-[9px] text-ink-3">template</span>
       )}
@@ -293,7 +293,7 @@ function StylePanel({ current }: { current: SiteStyle }) {
     <div className="relative">
       <button type="button" onClick={() => setOpen((o) => !o)}
         title="Fonts, colours, glow and hover animation"
-        className="flex items-center gap-1.5 border border-line bg-paper-2 px-3 py-2 text-[13px] font-medium text-ink hover:border-line-2">
+        className="rounded-md flex items-center gap-1.5 border border-line bg-paper-2 px-3 py-2 text-[13px] font-medium text-ink hover:border-line-2">
         <Palette size={14} strokeWidth={1.7} className="text-ink-3" /> Style
       </button>
       {open && (
@@ -512,11 +512,11 @@ function AiSectionMenu() {
             className="w-full rounded-lg border border-line bg-paper px-2.5 py-2 text-[12.5px] text-ink outline-none focus:border-accent" />
           <div className="mt-2 flex items-center gap-2">
             <button type="button" onClick={compose} disabled={busy || !prompt.trim()}
-              className="bg-accent px-3 py-1.5 text-[12.5px] font-semibold text-white disabled:opacity-50">
+              className="rounded-md bg-accent px-3 py-1.5 text-[12.5px] font-semibold text-white disabled:opacity-50">
               {busy ? 'Writing…' : 'Write it'}
             </button>
             <button type="button" onClick={() => setOpen(false)}
-              className="border border-line px-3 py-1.5 text-[12.5px] font-medium text-ink">Cancel</button>
+              className="rounded-md border border-line px-3 py-1.5 text-[12.5px] font-medium text-ink">Cancel</button>
           </div>
           {note && <p className="mt-2 text-[11.5px] text-ink-3">{note}</p>}
         </div>
@@ -667,7 +667,7 @@ export function WebsiteEditor({
             </a>
           )}
           <button id="publish-site" type="button" onClick={publish} disabled={status === 'publishing'}
-            className="bg-accent px-4 py-1.5 text-[13px] font-semibold text-white disabled:opacity-50">
+            className="rounded-md bg-accent px-4 py-1.5 text-[13px] font-semibold text-white disabled:opacity-50">
             {status === 'publishing' ? 'Publishing…' : 'Publish'}
           </button>
         </div>

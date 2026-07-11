@@ -125,7 +125,7 @@ export function StdEditor({ record, events, defaultNames }: {
                   e.target.value = ''
                 }} />
             </label>
-            {photoUrl && <button type="button" onClick={() => setPhotoUrl('')} className="text-[12.5px] text-ink-3 hover:text-ink">Remove</button>}
+            {photoUrl && <button type="button" onClick={() => setPhotoUrl('')} className="rounded-md text-[12.5px] text-ink-3 hover:text-ink">Remove</button>}
           </div>
         </div>
 
@@ -159,11 +159,11 @@ export function StdEditor({ record, events, defaultNames }: {
 
         <div className="flex flex-wrap items-center gap-2 border-t border-line pt-4">
           <button type="button" onClick={save} disabled={busy}
-            className="bg-accent px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-60">
+            className="rounded-md bg-accent px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-60">
             {busy ? 'Saving…' : 'Save'}
           </button>
           <button type="button" onClick={togglePublish}
-            className={`px-4 py-2 text-[13px] font-semibold ${published ? 'border border-line text-ink' : 'bg-ink text-paper'}`}>
+            className={`rounded-md px-4 py-2 text-[13px] font-semibold ${published ? 'border border-line text-ink' : 'bg-ink text-paper'}`}>
             {published ? 'Unpublish' : 'Publish & get link'}
           </button>
           {published && <span className="flex items-center gap-1.5 text-[12.5px] text-ok"><span className="h-1.5 w-1.5 rounded-full bg-ok" /> Live</span>}
@@ -175,7 +175,7 @@ export function StdEditor({ record, events, defaultNames }: {
             <p className="mb-3 text-[13px] font-semibold text-ink">Share it</p>
             <div className="mb-3 flex items-center gap-2 rounded-lg border border-line bg-paper px-3 py-2">
               <span className="min-w-0 flex-1 truncate font-mono text-[11.5px] text-ink-2">{shareUrl}</span>
-              <button type="button" onClick={copyLink} className="flex items-center gap-1 text-[12px] font-medium text-accent-ink">
+              <button type="button" onClick={copyLink} className="rounded-md flex items-center gap-1 text-[12px] font-medium text-accent-ink">
                 {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy</>}
               </button>
             </div>

@@ -163,7 +163,7 @@ function HouseholdCard({ household, events, onChanged }: {
               })
               onChanged()
             }}
-            className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3 hover:text-bad">
+            className="rounded-md font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3 hover:text-bad">
             Archive
           </button>
         </div>
@@ -287,7 +287,7 @@ function GuestRow({ guest, events, onChanged }: {
             })
             onChanged()
           }}
-          className="font-mono text-[9px] uppercase text-ink-3 hover:text-bad">
+          className="rounded-md font-mono text-[9px] uppercase text-ink-3 hover:text-bad">
           ✕
         </button>
       </td>

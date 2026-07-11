@@ -10,7 +10,7 @@ export function ResetButton({ userId }: { userId: string }) {
   ) : (
     <button type="button" title="Set a one-time temporary password to give this user"
       onClick={async () => { const r = await adminResetPassword(userId); setOut(r.temp ?? r.error ?? 'failed') }}
-      className="border border-line bg-paper-2 px-3 py-1.5 text-xs hover:border-accent">
+      className="rounded-md border border-line bg-paper-2 px-3 py-1.5 text-xs hover:border-accent">
       Reset password
     </button>
   )

@@ -29,7 +29,7 @@ export function PriceEditor({ currentPence }: { currentPence: number }) {
           inputMode="decimal" className="w-16 bg-transparent text-[13.5px] font-semibold text-ink outline-none" />
       </label>
       <button type="button" onClick={save} disabled={busy || Number(pounds) * 100 === currentPence}
-        className="bg-accent px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-40">
+        className="rounded-md bg-accent px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-40">
         {busy ? 'Saving…' : 'Set price'}
       </button>
     </div>

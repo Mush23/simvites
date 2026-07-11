@@ -73,7 +73,7 @@ export function VendorForm({ vendor }: { vendor: VendorRow }) {
             if (!(await askConfirm({ title: `Archive ${vendor.name}?`, body: 'Their budget lines stay; the vendor leaves your pipeline.' }))) return
             notify('Vendor archived'); archiveVendor(vendor.id)
           }}
-          className="ml-auto text-[12.5px] font-medium text-ink-3 hover:text-bad">
+          className="rounded-md ml-auto text-[12.5px] font-medium text-ink-3 hover:text-bad">
           Archive
         </button>
       </div>

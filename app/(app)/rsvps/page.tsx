@@ -108,7 +108,7 @@ export default async function RsvpsPage() {
         <div className="flex flex-wrap gap-3">
           <form action={async () => { 'use server'; await (await import('./actions')).sendReminders() }}>
             <button type="submit" title="Email every household that hasn't responded, with a fresh personal link"
-              className="bg-accent px-4 py-2 text-sm font-semibold text-white">
+              className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white">
               Remind pending households
             </button>
           </form>

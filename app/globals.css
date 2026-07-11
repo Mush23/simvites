@@ -33,8 +33,8 @@
 
   --radius-sm: 6px;
   --radius-md: 8px;
+  --radius-lg: 10px;
   --radius-card: 12px;
-  --radius-lg: 18px;
   --radius-pill: 999px;
 
   --shadow-card: var(--shadow);
@@ -141,17 +141,19 @@
   }
 }
 
-/* ── Controls: 8px radius, quiet color transitions, NO hover jiggle ──
-   (Overhaul: pills survive only as chips/badges — spans, not buttons.)
-   Un-layered on purpose so it beats pill-era utility classes everywhere
-   in the tool without touching each file. The couple-facing artifact keeps
-   its own button geometry via [data-site-root] scoping below. */
-button:not([aria-label='Open menu']):not([aria-label='Close menu']),
-a[class*='bg-accent'],
-a[class*='bg-primary'] {
-  border-radius: 8px;
-  transition: background-color 150ms ease, border-color 150ms ease,
-              color 150ms ease, opacity 150ms ease;
+/* ── Controls: quiet color transitions, NO hover jiggle ──
+   Radius now comes from explicit rounded-* utilities on each control
+   (doctrine scale: sm 6 / md 8 / lg 10 / card 12 / pill 999) — the old
+   un-layered 8px override that beat utility classes is gone. The
+   couple-facing artifact keeps its own button geometry via
+   [data-site-root] scoping below. */
+@layer base {
+  button,
+  a[class*='bg-accent'],
+  a[class*='bg-primary'] {
+    transition: background-color 150ms ease, border-color 150ms ease,
+                color 150ms ease, opacity 150ms ease;
+  }
 }
 [data-site-root] button,
 [data-site-root] a[class*='bg-accent'] {

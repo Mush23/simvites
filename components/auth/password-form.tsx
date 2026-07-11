@@ -50,7 +50,7 @@ export function PasswordForm({ redirectTo, cta = 'Set new password' }: {
       {error && <p className="text-[13px] text-bad">{error}</p>}
       {done && !redirectTo && <p className="text-[13px] text-ok">Password updated.</p>}
       <button type="submit" disabled={pending}
-        className="w-full bg-accent px-6 py-2.5 text-[13.5px] font-semibold text-white disabled:opacity-50">
+        className="rounded-md w-full bg-accent px-6 py-2.5 text-[13.5px] font-semibold text-white disabled:opacity-50">
         {pending ? 'Saving…' : cta}
       </button>
     </form>

@@ -102,7 +102,7 @@ function BudgetRow({ item, events, vendors, onChanged }: {
   return (
     <div className="rounded-card border border-line bg-surface shadow-card">
       <button type="button" onClick={() => setOpen((o) => !o)}
-        className="flex w-full flex-wrap items-center justify-between gap-3 p-4 text-left">
+        className="rounded-md flex w-full flex-wrap items-center justify-between gap-3 p-4 text-left">
         <div className="min-w-0">
           <p className="font-medium text-ink">{item.label}</p>
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
@@ -152,7 +152,7 @@ function BudgetRow({ item, events, vendors, onChanged }: {
               })
               onChanged()
             }}
-            className="text-[12.5px] font-medium text-ink-3 hover:text-bad">
+            className="rounded-md text-[12.5px] font-medium text-ink-3 hover:text-bad">
             Archive
           </button>
           {error && <p className="w-full text-sm text-bad">{error}</p>}

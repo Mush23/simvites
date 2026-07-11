@@ -82,11 +82,11 @@ export default function LoginPage() {
             It works once and expires in about an hour.
           </p>
           <button type="button" onClick={() => sendLink()} disabled={pending}
-            className="mt-5 w-full border border-line px-4 py-2.5 text-[13px] font-medium text-ink hover:border-line-2 disabled:opacity-50">
+            className="rounded-md mt-5 w-full border border-line px-4 py-2.5 text-[13px] font-medium text-ink hover:border-line-2 disabled:opacity-50">
             {pending ? 'Sending…' : 'Resend the link'}
           </button>
           <button type="button" onClick={() => setLinkSent(false)}
-            className="mt-3 text-[12.5px] text-ink-3 underline underline-offset-4 hover:text-ink">
+            className="rounded-md mt-3 text-[12.5px] text-ink-3 underline underline-offset-4 hover:text-ink">
             Go back
           </button>
         </div>
@@ -134,7 +134,7 @@ export default function LoginPage() {
               {notice && <p className="text-[13px] text-ok">{notice}</p>}
               <button
                 type="submit" disabled={pending}
-                className="w-full bg-accent px-6 py-2.5 text-[13.5px] font-semibold text-white disabled:opacity-50"
+                className="rounded-md w-full bg-accent px-6 py-2.5 text-[13.5px] font-semibold text-white disabled:opacity-50"
               >
                 {pending ? 'Please wait…' : tab === 'link' ? 'Send sign-in link' : signup ? 'Create account' : 'Sign in'}
               </button>
@@ -145,14 +145,14 @@ export default function LoginPage() {
               <div className="mt-5 space-y-1.5 text-center text-[13px] text-ink-3">
                 <p>
                   {signup ? 'Already have an account? ' : 'New here? '}
-                  <button onClick={() => { setSignup(!signup); setError(null) }} className="text-accent-ink underline underline-offset-4">
+                  <button onClick={() => { setSignup(!signup); setError(null) }} className="rounded-md text-accent-ink underline underline-offset-4">
                     {signup ? 'Sign in' : 'Create one'}
                   </button>
                 </p>
                 {!signup && (
                   <p>
                     <button type="button" onClick={forgotPassword} disabled={pending}
-                      className="text-ink-3 underline underline-offset-4 hover:text-ink disabled:opacity-50">
+                      className="rounded-md text-ink-3 underline underline-offset-4 hover:text-ink disabled:opacity-50">
                       Forgot password?
                     </button>
                   </p>

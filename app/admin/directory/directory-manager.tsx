@@ -44,7 +44,7 @@ export function DirectoryManager({ rows }: { rows: DirectoryRow[] }) {
     <div className="mt-6">
       {!editing && (
         <button type="button" onClick={() => setEditing({ ...EMPTY })}
-          className="bg-accent px-4 py-2 text-sm font-semibold text-white">
+          className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white">
           ＋ Add supplier
         </button>
       )}
@@ -86,7 +86,7 @@ export function DirectoryManager({ rows }: { rows: DirectoryRow[] }) {
           {err && <p className="mt-2 text-[12.5px] text-bad">{err}</p>}
           <div className="mt-4 flex gap-2">
             <button type="button" onClick={save} disabled={busy}
-              className="bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+              className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
               {busy ? 'Saving…' : 'Save supplier'}
             </button>
             <button type="button" onClick={() => setEditing(null)}
@@ -110,10 +110,10 @@ export function DirectoryManager({ rows }: { rows: DirectoryRow[] }) {
               </span>
             )}
             <button type="button" onClick={() => setEditing({ ...r })}
-              className="text-[12.5px] text-ink-3 underline-offset-2 hover:text-ink hover:underline">Edit</button>
+              className="rounded-md text-[12.5px] text-ink-3 underline-offset-2 hover:text-ink hover:underline">Edit</button>
             <button type="button"
               onClick={async () => { await adminArchiveDirectoryVendor(r.id, !r.archived_at); router.refresh() }}
-              className="text-[12.5px] text-ink-3 underline-offset-2 hover:text-ink hover:underline">
+              className="rounded-md text-[12.5px] text-ink-3 underline-offset-2 hover:text-ink hover:underline">
               {r.archived_at ? 'Restore' : 'Hide'}
             </button>
           </div>

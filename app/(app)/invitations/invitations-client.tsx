@@ -116,7 +116,7 @@ function HouseholdRow({ row, onChanged }: { row: HouseholdInviteRow; onChanged: 
           </button>
           {row.activeLinks > 0 && (
             <button type="button" onClick={onRevoke} disabled={busy}
-              className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3 hover:text-bad">
+              className="rounded-md font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3 hover:text-bad">
               Revoke
             </button>
           )}
@@ -139,7 +139,7 @@ function HouseholdRow({ row, onChanged }: { row: HouseholdInviteRow; onChanged: 
             WhatsApp
           </a>
           <button type="button" onClick={onQr} title="Show a QR code for printed invitations"
-            className="shrink-0 border border-line bg-paper-2 px-3 py-2 text-sm hover:border-accent">
+            className="rounded-md shrink-0 border border-line bg-paper-2 px-3 py-2 text-sm hover:border-accent">
             QR
           </button>
         </div>

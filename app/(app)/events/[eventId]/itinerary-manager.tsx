@@ -79,7 +79,7 @@ export function ItineraryManager({ eventId, items }: { eventId: string; items: I
             className="w-56 rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-accent" />
         </label>
         <button type="submit" disabled={busy}
-          className="flex items-center gap-1.5 bg-accent px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-60">
+          className="rounded-md flex items-center gap-1.5 bg-accent px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-60">
           <Plus size={14} strokeWidth={2} /> {busy ? 'Adding…' : 'Add'}
         </button>
         {error && <p className="w-full text-[13px] text-bad">{error}</p>}

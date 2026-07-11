@@ -146,7 +146,7 @@ export function SeatingPlanner({ tables, seats, guests, events, floorplans }: {
             className="w-44 rounded-lg border border-line bg-surface px-3 py-2 text-[13px] text-ink outline-none focus:border-accent" />
           <input name="capacity" type="number" defaultValue={10} min={1}
             className="w-20 rounded-lg border border-line bg-surface px-3 py-2 text-[13px] text-ink outline-none focus:border-accent" />
-          <button type="submit" className="flex items-center gap-1.5 bg-accent px-3.5 py-2 text-[13px] font-semibold text-white">
+          <button type="submit" className="rounded-md flex items-center gap-1.5 bg-accent px-3.5 py-2 text-[13px] font-semibold text-white">
             <Plus size={14} strokeWidth={2} /> Add table
           </button>
         </form>
@@ -182,7 +182,7 @@ export function SeatingPlanner({ tables, seats, guests, events, floorplans }: {
                 <div key={gid} className="flex items-center justify-between rounded-md border border-line bg-paper px-2.5 py-1.5 text-[13px]">
                   <span className="text-ink">{guestById.get(gid)?.name ?? 'Guest'}</span>
                   <button type="button" onClick={() => seat(gid, null)} aria-label="Remove from table"
-                    className="text-ink-3 hover:text-bad"><X size={13} strokeWidth={1.8} /></button>
+                    className="rounded-md text-ink-3 hover:text-bad"><X size={13} strokeWidth={1.8} /></button>
                 </div>
               ))}
               {selSeated.length === 0 && <p className="text-[12.5px] text-ink-3">No one seated here yet — add from the list below.</p>}

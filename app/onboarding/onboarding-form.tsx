@@ -115,7 +115,7 @@ export function OnboardingForm({ templates }: { templates: TemplateListing[] }) 
       <div>
         <button
           type="submit" disabled={pending}
-          className="w-full bg-accent px-6 py-3 text-[14px] font-semibold text-white disabled:opacity-50"
+          className="rounded-md w-full bg-accent px-6 py-3 text-[14px] font-semibold text-white disabled:opacity-50"
         >
           {pending ? 'Creating…' : 'Create my site'}
         </button>
