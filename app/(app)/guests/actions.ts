@@ -82,6 +82,33 @@ export async function setInvitation(guestId: string, eventId: string, invited: b
   return { ok: true }
 }
 
+/** Batch: invite or uninvite every guest in a household for one event —
+ * one request instead of N sequential setInvitation calls (2a). */
+export async function setHouseholdInvitations(householdId: string, eventId: string, invited: boolean) {
+  const site = await getPrimarySite()
+  if (!site) return { error: 'No site.' }
+  const supabase = await createClient()
+
+  const { data: guests, error: gErr } = await supabase
+    .from('guests').select('id').eq('household_id', householdId).is('archived_at', null)
+  if (gErr) return { error: gErr.message }
+  const ids = (guests ?? []).map((g) => g.id)
+  if (!ids.length) return { ok: true }
+
+  if (invited) {
+    const { error } = await supabase.from('invitations').upsert(
+      ids.map((guest_id) => ({ site_id: site.siteId, guest_id, event_id: eventId })),
+      { onConflict: 'guest_id,event_id', ignoreDuplicates: true },
+    )
+    if (error) return { error: error.message }
+  } else {
+    const { error } = await supabase.from('invitations').delete().eq('event_id', eventId).in('guest_id', ids)
+    if (error) return { error: error.message }
+  }
+  revalidatePath('/guests')
+  return { ok: true }
+}
+
 export interface ImportRow {
   household: string
   fullName: string

@@ -4,11 +4,11 @@ import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   addGuest, addHousehold, archiveGuest, archiveHousehold, importGuests, setInvitation,
-  type ImportRow,
+  setHouseholdInvitations, type ImportRow,
 } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
 import { restoreArchived, restoreHousehold } from '@/app/(app)/actions'
-import { X } from 'lucide-react'
+import { Archive, Search, X } from 'lucide-react'
 
 export interface MatrixEvent { id: string; name: string; accent?: string | null }
 export interface MatrixGuest {
@@ -23,6 +23,7 @@ export function GuestManager({ events, households }: { events: MatrixEvent[]; ho
   const refresh = () => startTransition(() => router.refresh())
   const [error, setError] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
+  const [showAdd, setShowAdd] = useState(households.length === 0)
 
   async function onAddHousehold(fd: FormData) {
     setError(null)
@@ -32,24 +33,69 @@ export function GuestManager({ events, households }: { events: MatrixEvent[]; ho
 
   const totalGuests = households.reduce((n, h) => n + h.guests.length, 0)
 
-  // Search + side filter (overhaul spec: search pill + filter chips + summary)
+  // 2a: finding is the hero — search + side chips + a "not invited yet"
+  // working filter live in the one primary bar; adding is a button.
   const [q, setQ] = useState('')
   const [sideFilter, setSideFilter] = useState<string>('all')
+  const [onlyUninvited, setOnlyUninvited] = useState(false)
   const sides = [...new Set(households.map((h) => (h.side ?? '').trim()).filter(Boolean))]
+  const isUninvited = (h: MatrixHousehold) => h.guests.every((g) => g.invitedEventIds.length === 0)
+  const uninvitedCount = households.filter(isUninvited).length
   const needle = q.trim().toLowerCase()
   const shown = households.filter((h) => {
     if (sideFilter !== 'all' && (h.side ?? '').trim() !== sideFilter) return false
+    if (onlyUninvited && !isUninvited(h)) return false
     if (!needle) return true
     return h.name.toLowerCase().includes(needle) ||
       h.guests.some((g) => g.fullName.toLowerCase().includes(needle) || (g.email ?? '').toLowerCase().includes(needle))
   })
   const shownGuests = shown.reduce((n, h) => n + h.guests.length, 0)
+  const filtered = needle !== '' || sideFilter !== 'all' || onlyUninvited
+
+  const chip = (active: boolean) =>
+    `rounded-pill px-3 py-1 text-[12.5px] font-medium transition-colors ${
+      active ? 'bg-ink text-paper' : 'border border-line text-ink-2 hover:border-line-2'}`
 
   return (
-    <div className="space-y-8">
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-end justify-between gap-4 rounded-card border border-line bg-surface p-5 shadow-card">
-        <form action={onAddHousehold} className="flex flex-wrap items-end gap-3">
+    <div className="space-y-6">
+      {/* Primary bar: find first, then add (2a) */}
+      <div className="flex flex-wrap items-center gap-2.5 rounded-card border border-line bg-surface px-4 py-2.5 shadow-card">
+        <Search size={15} strokeWidth={1.7} className="shrink-0 text-ink-3" aria-hidden />
+        <input value={q} onChange={(e) => setQ(e.target.value)}
+          placeholder="Find a household, guest or email…"
+          className="min-w-36 flex-1 border-none bg-transparent py-1.5 text-[13.5px] text-ink outline-none" />
+        <button type="button" onClick={() => setSideFilter('all')} className={chip(sideFilter === 'all' && !onlyUninvited)}>
+          All
+        </button>
+        {sides.map((s) => (
+          <button key={s} type="button" onClick={() => setSideFilter(sideFilter === s ? 'all' : s)}
+            className={chip(sideFilter === s)}>
+            {s}
+          </button>
+        ))}
+        {uninvitedCount > 0 && (
+          <button type="button" onClick={() => setOnlyUninvited((v) => !v)} className={chip(onlyUninvited)}>
+            Not invited yet · {uninvitedCount}
+          </button>
+        )}
+        <span className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3 xl:inline">
+          {households.length} households · {totalGuests} guests
+        </span>
+        <span aria-hidden className="h-6 w-px bg-line" />
+        <button type="button" onClick={() => setShowAdd((s) => !s)}
+          className="rounded-md bg-accent px-3.5 py-2 text-[12.5px] font-semibold text-white">
+          ＋ Add household
+        </button>
+        <button type="button" onClick={() => setShowImport((s) => !s)}
+          className="rounded-md border border-line bg-paper-2 px-3 py-2 text-[12.5px] text-ink transition-colors hover:border-accent">
+          {showImport ? 'Close import' : 'Paste import'}
+        </button>
+      </div>
+
+      {/* Add household — a form on demand, not the hero position */}
+      {showAdd && (
+        <form action={onAddHousehold}
+          className="flex flex-wrap items-end gap-3 rounded-card border border-line bg-surface p-5 shadow-card">
           <label className="block">
             <span className="eyebrow mb-1.5 block">New household</span>
             <input name="name" required placeholder="The Shah Family"
@@ -65,42 +111,15 @@ export function GuestManager({ events, households }: { events: MatrixEvent[]; ho
             Add household
           </button>
         </form>
-        <div className="flex items-center gap-4">
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3">
-            {households.length} households · {totalGuests} guests
-          </span>
-          <button type="button" onClick={() => setShowImport((s) => !s)}
-            className="rounded-md border border-line bg-paper-2 px-4 py-2.5 text-sm text-ink transition-colors hover:border-accent">
-            {showImport ? 'Close import' : 'Paste import'}
-          </button>
-        </div>
-      </div>
+      )}
       {error && <p className="text-sm text-bad">{error}</p>}
 
       {showImport && <ImportWizard onDone={() => { setShowImport(false); refresh() }} />}
 
-      {/* Search + filters + live summary */}
-      {households.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2.5">
-          <input value={q} onChange={(e) => setQ(e.target.value)}
-            placeholder="Search households, guests, emails…"
-            className="w-64 rounded-lg border border-line bg-surface px-3.5 py-2 text-[13.5px] text-ink outline-none focus:border-accent" />
-          <button type="button" onClick={() => setSideFilter('all')}
-            className={`rounded-full px-3 py-1 text-[12.5px] font-medium transition-colors ${
-              sideFilter === 'all' ? 'bg-ink text-paper' : 'border border-line text-ink-2 hover:border-line-2'}`}>
-            All
-          </button>
-          {sides.map((s) => (
-            <button key={s} type="button" onClick={() => setSideFilter(sideFilter === s ? 'all' : s)}
-              className={`rounded-full px-3 py-1 text-[12.5px] font-medium transition-colors ${
-                sideFilter === s ? 'bg-ink text-paper' : 'border border-line text-ink-2 hover:border-line-2'}`}>
-              {s}
-            </button>
-          ))}
-          <span className="ml-auto text-[12px] text-ink-3">
-            Showing {shown.length} of {households.length} households · {shownGuests} guests
-          </span>
-        </div>
+      {filtered && households.length > 0 && (
+        <p className="text-[12px] text-ink-3">
+          Showing {shown.length} of {households.length} households · {shownGuests} guests
+        </p>
       )}
 
       {households.length === 0 && (
@@ -132,14 +151,12 @@ function HouseholdCard({ household, events, onChanged }: {
     if (res?.error) setError(res.error); else onChanged()
   }
 
-  /** Column-header click (overhaul): toggle the whole household for an event. */
+  /** Column-header click: toggle the whole household for an event — one
+   * batched server action, not N sequential calls (2a). */
   async function toggleColumn(eventId: string, invite: boolean) {
-    await Promise.all(
-      household.guests
-        .filter((g) => g.invitedEventIds.includes(eventId) !== invite)
-        .map((g) => setInvitation(g.id, eventId, invite)),
-    )
-    notify(invite ? `${household.name} invited` : `${household.name} uninvited`)
+    const res = await setHouseholdInvitations(household.id, eventId, invite)
+    if (res?.error) notify('Could not update the household — try again')
+    else notify(invite ? `${household.name} invited` : `${household.name} uninvited`)
     onChanged()
   }
 
@@ -153,7 +170,7 @@ function HouseholdCard({ household, events, onChanged }: {
               {household.side}
             </span>
           )}
-          <button type="button"
+          <button type="button" title={`Archive ${household.name}`} aria-label={`Archive ${household.name}`}
             onClick={async () => {
               if (!(await askConfirm({ title: `Archive ${household.name}?`, body: 'The household and its guests move out of your lists. Nothing is deleted.' }))) return
               await archiveHousehold(household.id)
@@ -163,8 +180,8 @@ function HouseholdCard({ household, events, onChanged }: {
               })
               onChanged()
             }}
-            className="rounded-md font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3 hover:text-bad">
-            Archive
+            className="-my-3 flex h-11 w-11 items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-bad-soft hover:text-bad">
+            <Archive size={15} strokeWidth={1.7} />
           </button>
         </div>
       </div>
@@ -277,7 +294,7 @@ function GuestRow({ guest, events, onChanged }: {
         )
       })}
       <td className="text-right">
-        <button type="button" aria-label={`Archive ${guest.fullName}`}
+        <button type="button" title={`Archive ${guest.fullName}`} aria-label={`Archive ${guest.fullName}`}
           onClick={async () => {
             if (!(await askConfirm({ title: `Archive ${guest.fullName}?`, body: 'They leave the guest list and event invitations. Nothing is deleted.' }))) return
             await archiveGuest(guest.id)
@@ -287,8 +304,8 @@ function GuestRow({ guest, events, onChanged }: {
             })
             onChanged()
           }}
-          className="rounded-md font-mono text-[9px] uppercase text-ink-3 hover:text-bad">
-          ✕
+          className="-my-2.5 inline-flex h-11 w-11 items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-bad-soft hover:text-bad">
+          <X size={15} strokeWidth={1.7} />
         </button>
       </td>
     </tr>
