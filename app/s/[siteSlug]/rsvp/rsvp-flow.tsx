@@ -39,6 +39,8 @@ export function RsvpFlow({ ctx, brand }: {
   const [topError, setTopError] = useState<string | null>(null)
   // 3c: gaps only start showing once Send has been tapped with gaps open.
   const [showGaps, setShowGaps] = useState(false)
+  // A message for the couple — optional, household-level (original-site port).
+  const [note, setNote] = useState('')
 
   const anyAttending = (guestId: string) =>
     Object.entries(choices).some(([k, v]) => k.startsWith(`${guestId}:`) && v === 'attending')
@@ -116,7 +118,7 @@ export function RsvpFlow({ ctx, brand }: {
     }
 
     setPhase('submitting')
-    const res = await submitGuestRsvp(submissions)
+    const res = await submitGuestRsvp(submissions, note)
     if (res.eventErrors && Object.keys(res.eventErrors).length) {
       setErrors(res.eventErrors)
       setTopError('Some responses could not be saved — see the notes below.')
@@ -232,6 +234,11 @@ export function RsvpFlow({ ctx, brand }: {
             {(mealLine || tableLine) && (
               <p className="mt-3.5 text-[12px] leading-relaxed text-ink-2">
                 {mealLine}{mealLine && tableLine ? <br /> : null}{tableLine}
+              </p>
+            )}
+            {note.trim() && (
+              <p className="mt-2.5 text-[11.5px] italic text-ink-3">
+                Your message is on its way to {ctx.siteTitle} ✓
               </p>
             )}
 
@@ -357,6 +364,18 @@ export function RsvpFlow({ ctx, brand }: {
             </section>
           ))}
         </div>
+
+        {/* A message for the couple — optional, travels with the RSVP */}
+        {!ctx.allDeadlinesPassed && (
+          <label className="mt-8 block rounded-card border border-line bg-surface p-5 shadow-card">
+            <span className="mb-1.5 block text-sm font-medium text-ink">
+              A message for {ctx.siteTitle} <span className="text-xs font-normal text-ink-3">(optional)</span>
+            </span>
+            <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={1000}
+              placeholder="A blessing, a memory, a joke — they read every one."
+              className="w-full rounded-md border border-line bg-paper-2 px-3.5 py-2.5 text-ink outline-none focus:border-accent" />
+          </label>
+        )}
       </main>
 
       {/* Sticky bar: counts and jumps — never truncates, never scolds (3c) */}

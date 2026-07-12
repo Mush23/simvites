@@ -36,7 +36,12 @@ const friendly = (msg: string) => FRIENDLY.find(([re]) => re.test(msg))?.[1] ?? 
  * role; the RPC re-enforces invitation, capacity under lock, deadline and
  * required questions server-side).
  */
-export async function submitGuestRsvp(submissions: GuestSubmission[]): Promise<SubmitResult> {
+export async function submitGuestRsvp(
+  submissions: GuestSubmission[],
+  /** Optional household note for the couple — stored on this submission's
+   * responses (original-site port: "a message for the couple"). */
+  message?: string,
+): Promise<SubmitResult> {
   const session = verifyGuestSession((await cookies()).get(GUEST_COOKIE)?.value)
   if (!session) return { error: 'Your session has expired — please reopen your invitation link.' }
   if (!submissions.length) return { error: 'Nothing to submit.' }
@@ -117,7 +122,7 @@ export async function submitGuestRsvp(submissions: GuestSubmission[]): Promise<S
         p_guest: s.guestId,
         p_event: choice.eventId,
         p_status: choice.status,
-        p_message: null,
+        p_message: message?.trim().slice(0, 1000) || null,
         p_custom: {},
         p_answers: answersForEvent,
       })

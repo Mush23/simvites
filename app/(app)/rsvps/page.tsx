@@ -19,8 +19,8 @@ export default async function RsvpsPage() {
         .is('archived_at', null).order('sort_order').order('starts_at'),
       fetchAll<{ guest_id: string; event_id: string }>(() =>
         supabase.from('invitations').select('guest_id, event_id').eq('site_id', siteId)),
-      fetchAll<{ guest_id: string; event_id: string; status: string; responded_at: string | null }>(() =>
-        supabase.from('responses').select('guest_id, event_id, status, responded_at').eq('site_id', siteId)),
+      fetchAll<{ guest_id: string; event_id: string; status: string; responded_at: string | null; message: string | null }>(() =>
+        supabase.from('responses').select('guest_id, event_id, status, responded_at, message').eq('site_id', siteId)),
       fetchAll<{ id: string; full_name: string; household_id: string }>(() =>
         supabase.from('guests').select('id, full_name, household_id').eq('site_id', siteId).is('archived_at', null)),
       fetchAll<{ id: string; name: string }>(() =>
@@ -96,6 +96,21 @@ export default async function RsvpsPage() {
   const respondedHouseholds = new Set(
     (responses ?? []).map((r) => guestById.get(r.guest_id)?.household_id).filter(Boolean),
   )
+
+  // Messages for the couple — one per household, newest wording wins (the
+  // note rides on every response row of a submission, so dedupe by text).
+  const messages: { household: string; message: string; at: string | null }[] = []
+  const seenMessage = new Set<string>()
+  for (const r of responses) {
+    const msg = (r.message ?? '').trim()
+    if (!msg) continue
+    const hh = hhById.get(guestById.get(r.guest_id)?.household_id ?? '') ?? 'A guest'
+    const key = `${hh}:${msg}`
+    if (seenMessage.has(key)) continue
+    seenMessage.add(key)
+    messages.push({ household: hh, message: msg, at: r.responded_at })
+  }
+  messages.sort((a, b) => (b.at ?? '').localeCompare(a.at ?? ''))
 
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-7">
@@ -193,6 +208,30 @@ export default async function RsvpsPage() {
                   </p>
                 ))}
               </section>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Messages for the couple — a guestbook by stealth (original-site port) */}
+      {messages.length > 0 && (
+        <div className="mt-10">
+          <h2 className="mb-5 text-lg font-semibold tracking-tight text-ink">
+            Messages for you <span className="text-base font-normal text-ink-3">({messages.length})</span>
+          </h2>
+          <div className="grid gap-5 sm:grid-cols-2">
+            {messages.map((m, i) => (
+              <blockquote key={i} className="rounded-card border border-line bg-surface p-6 shadow-card">
+                <p className="font-display text-[17px] leading-relaxed text-ink">“{m.message}”</p>
+                <footer className="mt-3 flex items-baseline justify-between gap-3">
+                  <span className="text-[13px] font-medium text-ink-2">— {m.household}</span>
+                  {m.at && (
+                    <span className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-ink-3">
+                      {new Date(m.at).toLocaleDateString('en-GB')}
+                    </span>
+                  )}
+                </footer>
+              </blockquote>
             ))}
           </div>
         </div>
