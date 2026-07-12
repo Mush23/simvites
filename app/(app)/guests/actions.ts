@@ -109,6 +109,35 @@ export async function setHouseholdInvitations(householdId: string, eventId: stri
   return { ok: true }
 }
 
+/** 2c: invite every guest on one side (or everyone) to an event — the
+ * lens's bulk move, replacing column-header magic. Invite-only, one batch. */
+export async function inviteSideToEvent(side: string | null, eventId: string) {
+  const site = await getPrimarySite()
+  if (!site) return { error: 'No site.' }
+  const supabase = await createClient()
+
+  let hh = supabase.from('households').select('id').eq('site_id', site.siteId).is('archived_at', null)
+  if (side !== null) hh = hh.eq('side', side)
+  const { data: households, error: hErr } = await hh
+  if (hErr) return { error: hErr.message }
+  const hhIds = (households ?? []).map((h) => h.id)
+  if (!hhIds.length) return { ok: true, invited: 0 }
+
+  const { data: guests, error: gErr } = await supabase
+    .from('guests').select('id').in('household_id', hhIds).is('archived_at', null)
+  if (gErr) return { error: gErr.message }
+  const ids = (guests ?? []).map((g) => g.id)
+  if (!ids.length) return { ok: true, invited: 0 }
+
+  const { error } = await supabase.from('invitations').upsert(
+    ids.map((guest_id) => ({ site_id: site.siteId, guest_id, event_id: eventId })),
+    { onConflict: 'guest_id,event_id', ignoreDuplicates: true },
+  )
+  if (error) return { error: error.message }
+  revalidatePath('/guests')
+  return { ok: true, invited: ids.length }
+}
+
 export interface ImportRow {
   household: string
   fullName: string

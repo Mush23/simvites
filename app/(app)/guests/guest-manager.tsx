@@ -4,21 +4,35 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  addGuest, addHousehold, archiveGuest, archiveHousehold, importGuests, setInvitation,
-  setHouseholdInvitations, type ImportRow,
+  addGuest, addHousehold, archiveGuest, archiveHousehold, importGuests, inviteSideToEvent,
+  setInvitation, setHouseholdInvitations, type ImportRow,
 } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
 import { restoreArchived, restoreHousehold } from '@/app/(app)/actions'
+import { formatEventDateTime } from '@/lib/utils'
 import { Search, X } from 'lucide-react'
 
-export interface MatrixEvent { id: string; name: string; accent?: string | null; capacity?: number | null }
+export interface MatrixEvent {
+  id: string; name: string; accent?: string | null; capacity?: number | null
+  startsAt?: string | null; venueName?: string | null
+}
 export interface MatrixGuest {
   id: string; fullName: string; email: string | null
   isChild: boolean; plusOneAllowed: boolean; invitedEventIds: string[]
 }
 export interface MatrixHousehold { id: string; name: string; side: string | null; guests: MatrixGuest[] }
+/** 2c: RSVP data the lens needs — status per guest × event, plus answers. */
+export interface RsvpStatusRow { guestId: string; eventId: string; status: string }
+export interface LensQuestion { id: string; eventId: string | null; label: string; type: string; options: string[] }
+export interface LensAnswer { guestId: string; questionId: string; value: unknown }
 
-export function GuestManager({ events, households }: { events: MatrixEvent[]; households: MatrixHousehold[] }) {
+export function GuestManager({ events, households, responses = [], questions = [], answers = [] }: {
+  events: MatrixEvent[]
+  households: MatrixHousehold[]
+  responses?: RsvpStatusRow[]
+  questions?: LensQuestion[]
+  answers?: LensAnswer[]
+}) {
   const router = useRouter()
   const [, startTransition] = useTransition()
   const refresh = () => startTransition(() => router.refresh())
@@ -28,6 +42,9 @@ export function GuestManager({ events, households }: { events: MatrixEvent[]; ho
   // 2b: guest-level work happens in the drawer; the register stays calm.
   const [openId, setOpenId] = useState<string | null>(null)
   const openHousehold = households.find((h) => h.id === openId) ?? null
+  // 2c: pick a celebration to plan it on its own — 'all' keeps the register.
+  const [lensId, setLensId] = useState<string>('all')
+  const lensEvent = events.find((e) => e.id === lensId) ?? null
 
   async function onAddHousehold(fd: FormData) {
     setError(null)
@@ -120,6 +137,34 @@ export function GuestManager({ events, households }: { events: MatrixEvent[]; ho
 
       {showImport && <ImportWizard onDone={() => { setShowImport(false); refresh() }} />}
 
+      {/* 2c: event lens chips — pick a celebration, or keep the register */}
+      {events.length > 0 && households.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setLensId('all')}
+            className={`min-w-[124px] flex-1 rounded-card border px-3 py-2.5 text-left transition-colors sm:flex-none ${
+              lensId === 'all' ? 'border-accent bg-accent-soft shadow-card' : 'border-line bg-surface hover:border-line-2'}`}>
+            <span className="text-[12px] font-semibold text-ink">All events</span>
+            <span className="mt-0.5 block font-mono text-[9.5px] text-ink-3 nums">{totalGuests} guests</span>
+          </button>
+          {events.map((e) => {
+            const invited = households.reduce((n, h) => n + h.guests.filter((g) => g.invitedEventIds.includes(e.id)).length, 0)
+            const invitedIds = new Set(households.flatMap((h) => h.guests.filter((g) => g.invitedEventIds.includes(e.id)).map((g) => g.id)))
+            const going = responses.filter((r) => r.eventId === e.id && r.status === 'attending' && invitedIds.has(r.guestId)).length
+            return (
+              <button key={e.id} type="button" onClick={() => setLensId(lensId === e.id ? 'all' : e.id)}
+                className={`min-w-[124px] flex-1 rounded-card border px-3 py-2.5 text-left transition-colors sm:flex-none ${
+                  lensId === e.id ? 'border-accent bg-accent-soft shadow-card' : 'border-line bg-surface hover:border-line-2'}`}>
+                <span className="flex items-center gap-1.5 text-[12px] font-semibold text-ink">
+                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: e.accent ?? 'var(--accent)' }} />
+                  {e.name}
+                </span>
+                <span className="mt-0.5 block font-mono text-[9.5px] text-ink-3 nums">{invited} invited · {going} going</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {filtered && households.length > 0 && (
         <p className="text-[12px] text-ink-3">
           Showing {shown.length} of {households.length} households · {shownGuests} guests
@@ -137,11 +182,16 @@ export function GuestManager({ events, households }: { events: MatrixEvent[]; ho
         </div>
       )}
 
-      {shown.length > 0 && (
+      {shown.length > 0 && !lensEvent && (
         <Register households={shown} events={events} openId={openId} onOpen={setOpenId} />
       )}
 
-      {openHousehold && (
+      {shown.length > 0 && lensEvent && (
+        <EventLens event={lensEvent} households={shown} sides={sides}
+          responses={responses} questions={questions} answers={answers} onChanged={refresh} />
+      )}
+
+      {openHousehold && !lensEvent && (
         <HouseholdDrawer
           key={openHousehold.id}
           household={openHousehold}
@@ -151,6 +201,235 @@ export function GuestManager({ events, households }: { events: MatrixEvent[]; ho
         />
       )}
     </div>
+  )
+}
+
+/** 2c: the lens — plan one celebration at a time. Guest chips toggle the
+ * invitation for THIS event (pill = invited, ✓/✗ = answered); RSVP answers
+ * and the chase list live beside the list, so the daily "check + chase"
+ * loop happens here. */
+function EventLens({ event, households, sides, responses, questions, answers, onChanged }: {
+  event: MatrixEvent
+  households: MatrixHousehold[]
+  sides: string[]
+  responses: RsvpStatusRow[]
+  questions: LensQuestion[]
+  answers: LensAnswer[]
+  onChanged: () => void
+}) {
+  const [sideMenu, setSideMenu] = useState(false)
+  const respBy = useMemo(
+    () => new Map(responses.filter((r) => r.eventId === event.id).map((r) => [r.guestId, r.status])),
+    [responses, event.id])
+
+  const invitedGuests = households.flatMap((h) => h.guests).filter((g) => g.invitedEventIds.includes(event.id))
+  const invitedIds = new Set(invitedGuests.map((g) => g.id))
+  const going = invitedGuests.filter((g) => respBy.get(g.id) === 'attending').length
+  const declined = invitedGuests.filter((g) => respBy.get(g.id) === 'declined').length
+  const awaitingGuests = invitedGuests.filter((g) => !respBy.get(g.id) || respBy.get(g.id) === 'pending')
+  const awaiting = awaitingGuests.length
+  const denom = event.capacity && event.capacity > 0 ? Math.max(event.capacity, invitedGuests.length) : invitedGuests.length
+  const pct = (n: number) => (denom ? `${(n / denom) * 100}%` : '0%')
+
+  const rows = households.filter((h) => h.guests.some((g) => g.invitedEventIds.includes(event.id)))
+  const notYetInvited = households.length - rows.length
+
+  async function inviteSide(side: string | null) {
+    setSideMenu(false)
+    const label = side === null ? 'everyone' : `the ${side} side`
+    if (!(await askConfirm({
+      title: `Invite ${label} to ${event.name}?`,
+      body: 'Every guest gets an invitation to this event. No one is uninvited by this.',
+      confirmLabel: 'Invite', destructive: false,
+    }))) return
+    const res = await inviteSideToEvent(side, event.id)
+    if (res?.error) notify('Could not invite — try again')
+    else notify(`${res.invited ?? 0} guests invited to ${event.name}`)
+    onChanged()
+  }
+
+  // Answers so far: this event's questions plus wedding-wide ones, tallied
+  // over this event's invited guests.
+  const tallies = questions
+    .filter((q) => q.eventId === event.id || q.eventId === null)
+    .map((q) => {
+      const counts = new Map<string, number>()
+      for (const a of answers) {
+        if (a.questionId !== q.id || !invitedIds.has(a.guestId)) continue
+        const vals = Array.isArray(a.value) ? a.value : [a.value]
+        for (const v of vals) {
+          const label = typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v)
+          if (!label) continue
+          counts.set(label, (counts.get(label) ?? 0) + 1)
+        }
+      }
+      return { q, rows: [...counts.entries()].sort((a, b) => b[1] - a[1]) }
+    })
+    .filter((t) => t.rows.length > 0)
+
+  return (
+    <div className="space-y-3">
+      {/* Selected event banner: the numbers that run this celebration */}
+      <div className="rounded-card border border-line bg-surface px-4 py-3.5 shadow-card">
+        <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+          <p className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-ink">
+            <span className="h-[9px] w-[9px] rounded-full" style={{ background: event.accent ?? 'var(--accent)' }} />
+            {event.name}
+          </p>
+          <span className="font-mono text-[10px] text-ink-3">
+            {formatEventDateTime(event.startsAt ?? null) ?? 'Date TBC'}
+            {event.venueName ? ` · ${event.venueName}` : ''}
+          </span>
+          <span className="ml-auto flex gap-2">
+            {awaiting > 0 && (
+              <Link href="/invitations" title="Every household has its private link — chase from Invitations"
+                className="rounded-md bg-accent px-3 py-1.5 text-[12px] font-semibold text-white">
+                Chase {awaiting} awaiting →
+              </Link>
+            )}
+            <a href="/rsvps/export"
+              className="rounded-md border border-line bg-paper-2 px-3 py-1.5 text-[12px] text-ink transition-colors hover:border-accent">
+              Export list
+            </a>
+          </span>
+        </div>
+        <div className="mt-2.5 flex flex-wrap items-center gap-3">
+          <div className="flex h-2 min-w-40 flex-1 overflow-hidden rounded-pill bg-surface-2">
+            <span style={{ width: pct(going) }} className="bg-ok" />
+            <span style={{ width: pct(declined) }} className="bg-bad" />
+            <span style={{ width: pct(awaiting) }} className="bg-warn" />
+          </div>
+          <span className="font-mono text-[10.5px] text-ink-2 nums">
+            {invitedGuests.length} invited · <b className="font-semibold text-ok">{going} going</b> · {declined} declined · {awaiting} awaiting
+            {event.capacity != null && <> · <b className="font-semibold text-ink">cap {event.capacity}</b></>}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid items-start gap-3 lg:grid-cols-[1fr_280px]">
+        {/* Who's invited: chips toggle THIS event per guest */}
+        <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
+          <div className="flex items-center gap-2 border-b border-line bg-paper-2 px-4 py-2">
+            <span className="text-[11px] font-medium text-ink-2">Who&rsquo;s invited to {event.name}</span>
+            <div className="relative ml-auto">
+              <button type="button" onClick={() => setSideMenu((s) => !s)}
+                className="rounded-md border border-line bg-surface px-2.5 py-1 text-[11px] font-medium text-ink-2 transition-colors hover:border-accent">
+                ＋ Invite a whole side…
+              </button>
+              {sideMenu && (
+                <div className="absolute right-0 top-8 z-20 w-44 rounded-card border border-line bg-surface p-1 shadow-lift">
+                  <button type="button" onClick={() => inviteSide(null)}
+                    className="block w-full rounded-md px-2.5 py-1.5 text-left text-[12px] text-ink hover:bg-paper-2">
+                    Everyone
+                  </button>
+                  {sides.map((s) => (
+                    <button key={s} type="button" onClick={() => inviteSide(s)}
+                      className="block w-full rounded-md px-2.5 py-1.5 text-left text-[12px] text-ink hover:bg-paper-2">
+                      {s} side
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          {rows.length === 0 && (
+            <p className="p-6 text-center text-[12.5px] text-ink-3">
+              No one is invited to {event.name} yet — use &ldquo;Invite a whole side&rdquo; above,
+              or the All events register.
+            </p>
+          )}
+          {rows.map((h) => (
+            <div key={h.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-line px-4 py-2.5 first-of-type:border-t-0">
+              <span className="w-40 shrink-0">
+                <span className="block truncate text-[13px] font-medium text-ink">{h.name}</span>
+                {h.side && <span className="block font-mono text-[8.5px] uppercase tracking-[0.08em] text-ink-3">{h.side}</span>}
+              </span>
+              <span className="flex min-w-0 flex-wrap gap-1.5">
+                {h.guests.map((g) => (
+                  <GuestEventChip key={`${g.id}:${g.invitedEventIds.includes(event.id)}`}
+                    guest={g} eventId={event.id} status={respBy.get(g.id)} onChanged={onChanged} />
+                ))}
+              </span>
+            </div>
+          ))}
+          {notYetInvited > 0 && rows.length > 0 && (
+            <p className="border-t border-dashed border-line-2 px-4 py-2.5 text-center font-mono text-[9.5px] uppercase tracking-[0.1em] text-ink-3">
+              + {notYetInvited} household{notYetInvited === 1 ? '' : 's'} not invited yet — invite a side above, or use All events
+            </p>
+          )}
+        </div>
+
+        {/* Right rail: answers + the chase list */}
+        <div className="flex flex-col gap-3">
+          {tallies.length > 0 && (
+            <div className="rounded-card border border-line bg-surface px-4 py-3.5 shadow-card">
+              <p className="mb-1.5 text-[11px] font-medium text-ink-2">Answers so far</p>
+              {tallies.map(({ q, rows: opts }) => (
+                <div key={q.id} className="mb-2 last:mb-0">
+                  <p className="microlabel mb-0.5">{q.label}</p>
+                  {opts.map(([label, n]) => (
+                    <p key={label} className="flex justify-between border-b border-line py-1 text-[12.5px] text-ink-2 last:border-0">
+                      {label} <b className="font-mono font-semibold text-ink nums">{n}</b>
+                    </p>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+          {awaiting > 0 && (
+            <div className="rounded-card border border-line bg-surface px-4 py-3.5 shadow-card">
+              <p className="mb-1.5 text-[11px] font-medium text-ink-2">Worth a chase · {awaiting}</p>
+              <p className="text-[12.5px] leading-relaxed text-ink-2">
+                {awaitingGuests.slice(0, 5).map((g) => g.fullName).join(' · ')}
+                {awaiting > 5 && <span className="text-ink-3"> +{awaiting - 5} more</span>}
+              </p>
+              <Link href="/invitations"
+                className="mt-2.5 block w-full rounded-md border border-accent-line bg-accent-soft px-3 py-1.5 text-center text-[12px] font-semibold text-accent-ink transition-colors hover:border-accent">
+                Chase them from Invitations →
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** One guest chip in the lens: toggles the invitation for this event.
+ * Pill = invited (✓ going, ✗ declined), outline = not invited. */
+function GuestEventChip({ guest, eventId, status, onChanged }: {
+  guest: MatrixGuest
+  eventId: string
+  status: string | undefined
+  onChanged: () => void
+}) {
+  const initial = guest.invitedEventIds.includes(eventId)
+  const [on, setOn] = useState(initial)
+
+  async function toggle() {
+    const next = !on
+    setOn(next)
+    const res = await setInvitation(guest.id, eventId, next)
+    if (res?.error) setOn(initial) // roll back on failure
+    else onChanged()
+  }
+
+  const mark = on && status === 'attending' ? '✓' : on && status === 'declined' ? '✗' : ''
+  const cls = !on
+    ? 'border border-line text-ink-3 hover:border-accent'
+    : status === 'attending' ? 'bg-ok-soft text-ok'
+    : status === 'declined' ? 'bg-bad-soft text-bad'
+    : 'bg-accent-soft text-accent-ink'
+
+  return (
+    <button type="button" onClick={toggle}
+      role="checkbox" aria-checked={on}
+      aria-label={`${guest.fullName} invited to this event`}
+      title={on ? 'Click to uninvite from this event' : 'Click to invite to this event'}
+      className={`flex min-h-[30px] items-center gap-1.5 rounded-pill px-3 text-[12px] font-medium transition-colors ${cls}`}>
+      {guest.fullName}
+      {mark && <span className="text-[10px]">{mark}</span>}
+    </button>
   )
 }
 

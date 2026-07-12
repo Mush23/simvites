@@ -14,8 +14,8 @@ export default async function GuestsPage() {
   // Paginate the sets that can exceed PostgREST's 1000-row cap so the invite
   // matrix stays correct on large guest lists (a truncated fetch would silently
   // drop guests/invitations past row 1000).
-  const [{ data: events }, households, guests, invitations] = await Promise.all([
-    supabase.from('events').select('id, name, accent, capacity, sort_order').eq('site_id', siteId)
+  const [{ data: events }, households, guests, invitations, responses, { data: questions }, answers] = await Promise.all([
+    supabase.from('events').select('id, name, accent, capacity, starts_at, venue_name, sort_order').eq('site_id', siteId)
       .is('archived_at', null).order('sort_order').order('starts_at'),
     fetchAll<{ id: string; name: string; side: string | null }>(() =>
       supabase.from('households').select('id, name, side').eq('site_id', siteId).is('archived_at', null).order('created_at')),
@@ -23,6 +23,13 @@ export default async function GuestsPage() {
       supabase.from('guests').select('id, household_id, full_name, email, is_child, plus_one_allowed').eq('site_id', siteId).is('archived_at', null).order('created_at')),
     fetchAll<{ guest_id: string; event_id: string }>(() =>
       supabase.from('invitations').select('guest_id, event_id').eq('site_id', siteId)),
+    // 2c: the lens shows per-event RSVP status, answers and the chase list.
+    fetchAll<{ guest_id: string; event_id: string; status: string }>(() =>
+      supabase.from('responses').select('guest_id, event_id, status').eq('site_id', siteId)),
+    supabase.from('rsvp_questions').select('id, event_id, label, type, options').eq('site_id', siteId)
+      .is('archived_at', null).in('type', ['meal_choice', 'single_choice', 'multi_choice', 'yes_no']).order('sort_order'),
+    fetchAll<{ guest_id: string; question_id: string; value: unknown }>(() =>
+      supabase.from('rsvp_answers').select('guest_id, question_id, value').eq('site_id', siteId)),
   ])
 
   // Group once (O(n)) instead of nested filters (O(households·guests·invites)).
@@ -47,7 +54,15 @@ export default async function GuestsPage() {
         description="Households, named guests, and the invite matrix — who is invited to what drives everything a guest can see and RSVP to."
       />
       <GuestManager
-        events={(events ?? []).map((e) => ({ id: e.id, name: e.name, accent: e.accent, capacity: e.capacity }))}
+        events={(events ?? []).map((e) => ({
+          id: e.id, name: e.name, accent: e.accent, capacity: e.capacity,
+          startsAt: e.starts_at, venueName: e.venue_name,
+        }))}
+        responses={responses.map((r) => ({ guestId: r.guest_id, eventId: r.event_id, status: r.status }))}
+        questions={(questions ?? []).map((q) => ({
+          id: q.id, eventId: q.event_id, label: q.label, type: q.type, options: (q.options ?? []) as string[],
+        }))}
+        answers={answers.map((a) => ({ guestId: a.guest_id, questionId: a.question_id, value: a.value }))}
         households={households.map((h) => ({
           id: h.id,
           name: h.name,
