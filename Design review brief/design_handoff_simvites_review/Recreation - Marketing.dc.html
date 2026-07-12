@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&amp;family=Instrument+Serif:ital@0;1&amp;family=Geist+Mono:wght@400..700&amp;family=Cormorant+Garamond:ital,wght@0,400..700;1,400..700&amp;family=Jost:wght@300..600&amp;family=Fraunces:opsz,wght@9..144,400..600&amp;family=Playfair+Display:ital,wght@0,400..600;1,400&amp;family=Marcellus&amp;family=Cinzel:wght@400..600&amp;family=DM+Serif+Display&amp;family=Prata&amp;family=Italiana&amp;family=Libre+Bodoni:wght@400..600&amp;family=Spectral:wght@300..500&amp;family=Lora:wght@400..600&amp;family=Great+Vibes&amp;family=Inter:wght@400..600&amp;display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#101010; }
+[data-lp] {
+  --l-bg:#FAF8F3; --l-ink:#191918; --l-sub:#6A6864; --l-faint:#8F8D88; --l-card:#FFFFFF; --l-line:#EAE5DA;
+  --l-pill-bg:rgba(255,255,255,0.75); --l-pill-border:rgba(0,0,0,0.07); --l-pill-toggle:rgba(0,0,0,0.1);
+  --l-badge-bg:#FFFFFF; --l-badge-border:rgba(0,0,0,0.1);
+  --l-cta-bg:#191918; --l-cta-ink:#FFFFFF;
+  --l-glow:rgba(255,255,255,0.9);
+}
+[data-lp][data-lmode="dark"] {
+  --l-bg:#0A1220; --l-ink:#EEF2FA; --l-sub:#8FA0C4; --l-faint:#5B6A8C; --l-card:#111C33; --l-line:#223252;
+  --l-pill-bg:rgba(14,24,48,0.85); --l-pill-border:rgba(255,255,255,0.1); --l-pill-toggle:rgba(255,255,255,0.15);
+  --l-badge-bg:#111C33; --l-badge-border:rgba(255,255,255,0.15);
+  --l-cta-bg:#EEF2FA; --l-cta-ink:#0A1220;
+  --l-glow:transparent;
+}
+[data-app] {
+  --paper:#FAF8F3; --paper-2:#F3EFE6; --surface:#FFFFFF; --surface-2:#F4F1E9;
+  --ink:#1A1916; --ink-2:#6B675E; --ink-3:#928D81; --line:#EAE5DA; --line-2:#DCD5C6;
+  --accent:oklch(0.62 0.21 29); --accent-ink:oklch(0.55 0.19 29);
+  --accent-soft:rgba(222,71,38,0.08); --accent-line:rgba(222,71,38,0.35);
+  --ok:#1B9E5F; --bad:#D2402A;
+  --shadow:0 1px 2px rgba(30,25,15,0.05); --shadow-lg:0 40px 90px -20px rgba(20,16,8,0.45);
+}
+* { scrollbar-width:thin; }
+a { color:oklch(0.55 0.19 29); } a:hover { color:oklch(0.62 0.21 29); }
+</style>
+</helmet>
+
+<div ref="{{ rootRef }}" style="font-family:'Instrument Sans',system-ui,sans-serif;">
+
+  <!-- Review scaffolding bar -->
+  <div style="position:sticky; top:0; z-index:100; height:44px; background:#101010; color:#EDEBE6; display:flex; align-items:center; gap:14px; padding:0 16px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.06em;">
+    <span style="text-transform:uppercase; color:#8C897F;">Recreation</span>
+    <span>{{ routeLabel }}</span>
+    <span style="flex:1;"></span>
+    <div style="display:flex; gap:2px; background:#1E1E1C; border-radius:6px; padding:2px;">
+      <sc-for list="{{ tabs }}" as="t">
+        <button onClick="{{ t.pick }}" style="border:none; cursor:pointer; font:inherit; padding:3px 9px; border-radius:4px; background:{{ t.bg }}; color:{{ t.ink }};">{{ t.label }}</button>
+      </sc-for>
+    </div>
+    <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; gap:2px; background:#1E1E1C; border-radius:6px; padding:2px;">
+        <button onClick="{{ setLoginForm }}" style="border:none; cursor:pointer; font:inherit; padding:3px 9px; border-radius:4px; background:{{ lfBg }}; color:{{ lfInk }};">form</button>
+        <button onClick="{{ setLinkSent }}" style="border:none; cursor:pointer; font:inherit; padding:3px 9px; border-radius:4px; background:{{ lsBg }}; color:{{ lsInk }};">link sent</button>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- ═══ / — deep-zoom landing ═══ -->
+  <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+  <div data-lp data-lmode="{{ lmode }}" data-screen-label="Landing" style="background:var(--l-bg); color:var(--l-ink);">
+
+    <!-- fixed glass nav pill -->
+    <nav style="position:fixed; left:50%; top:56px; z-index:50; display:flex; max-width:calc(100vw - 24px); transform:translateX(-50%); flex-wrap:nowrap; align-items:center; gap:4px; white-space:nowrap; border-radius:13px; border:1px solid var(--l-pill-border); background:var(--l-pill-bg); padding:6px 8px; box-shadow:0 8px 30px -12px rgba(0,0,0,0.25); backdrop-filter:blur(20px);">
+      <span style="display:flex; flex-shrink:0; align-items:center; gap:6px; padding:0 8px; font-size:13px; font-weight:600; letter-spacing:-0.025em; color:var(--l-ink);">
+        <span style="display:flex; width:20px; height:20px; align-items:center; justify-content:center; border-radius:8px; font-size:10px; font-weight:700; color:#fff; background:oklch(0.62 0.21 29);">S</span>
+        Simvites
+      </span>
+      <sc-for list="{{ navLinks }}" as="l">
+        <a href="#" style="flex-shrink:0; border-radius:18px; padding:4px 10px; font-size:13px; font-weight:500; color:var(--l-sub); text-decoration:none;" style-hover="color:var(--l-ink);">{{ l }}</a>
+      </sc-for>
+      <a href="#" style="flex-shrink:0; border-radius:18px; padding:4px 10px; font-size:13px; font-weight:500; color:var(--l-sub); text-decoration:none;" style-hover="color:var(--l-ink);">Sign in</a>
+      <button onClick="{{ toggleLmode }}" aria-label="Toggle theme" style="width:28px; height:28px; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; border-radius:99px; border:1px solid var(--l-pill-toggle); background:transparent; color:var(--l-sub); cursor:pointer;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><sc-for list="{{ lmodeIcon }}" as="p"><path d="{{ p }}"></path></sc-for></svg>
+      </button>
+      <a href="#" style="flex-shrink:0; border-radius:8px; padding:6px 12px; font-size:13px; font-weight:600; color:#fff; text-decoration:none; background:oklch(0.62 0.21 29);">Start free</a>
+    </nav>
+
+    <!-- Scenes 1–4: the 560vh dive -->
+    <section data-s="section" style="position:relative; height:560vh; background:var(--l-bg);">
+      <div style="position:sticky; top:44px; height:calc(100vh - 44px); overflow:hidden;">
+        <div aria-hidden="true" style="position:absolute; inset:0; background:radial-gradient(900px 520px at 50% 18%, var(--l-glow), transparent 70%);"></div>
+
+        <div data-s="dark" aria-hidden="true" style="position:absolute; inset:0; opacity:0; background:linear-gradient(180deg, #0A1220 0%, #0C1526 55%, #0A1220 100%);">
+          <div style="position:absolute; inset:0; background:radial-gradient(720px 500px at 50% 42%, oklch(0.62 0.21 29 / 0.14), transparent 70%);"></div>
+          <div style="position:absolute; inset:0; background:radial-gradient(900px 600px at 80% 90%, rgba(70,110,200,0.10), transparent 70%);"></div>
+        </div>
+
+        <div data-s="hero" style="position:relative; margin:0 auto; display:flex; max-width:880px; flex-direction:column; align-items:center; padding:104px 20px 24px; text-align:center;">
+          <span style="border-radius:99px; border:1px solid var(--l-badge-border); background:var(--l-badge-bg); padding:4px 12px; font-family:'Geist Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.08em; color:var(--l-sub);">Per event invitations · live RSVP · zero code</span>
+          <h1 style="margin:16px 0 0; font-size:clamp(34px,7vw,76px); font-weight:650; line-height:1.0; letter-spacing:-0.04em; color:var(--l-ink);">Every event. Every guest.<br>One platform.</h1>
+          <p style="margin:16px 0 0; max-width:560px; font-size:15px; line-height:1.6; color:var(--l-sub);">Build the wedding website, invite each guest to exactly the right events, and watch RSVPs land live. Planning, guests and the site itself, finally in one place.</p>
+          <div style="margin-top:24px; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:12px;">
+            <a href="#" style="border-radius:10px; background:var(--l-cta-bg); padding:10px 20px; font-size:13.5px; font-weight:600; color:var(--l-cta-ink); text-decoration:none;">Start building free</a>
+            <a href="#" style="border-radius:10px; border:1px solid var(--l-badge-border); background:var(--l-badge-bg); padding:10px 20px; font-size:13.5px; font-weight:500; color:var(--l-ink); text-decoration:none;">▶ Watch the 60 second take</a>
+          </div>
+        </div>
+
+        <!-- LiveDemo frame (22s loop, rAF-driven) -->
+        <div data-s="frame" style="position:absolute; left:50%; top:50%; width:min(980px,94vw); margin-left:calc(min(980px,94vw) / -2); margin-top:-24vh; transform:perspective(1600px) translateY(30vh) rotateX(11deg) scale(0.58); will-change:transform,opacity;">
+          <div style="overflow:hidden; border-radius:13px; border:1px solid rgba(0,0,0,0.08); background:#fff; box-shadow:0 60px 120px -30px rgba(10,18,32,0.5);">
+            <div style="display:flex; align-items:center; gap:12px; border-bottom:1px solid #EAE5DA; background:#FAF8F3; padding:10px 16px;">
+              <span style="display:flex; gap:6px;"><i style="width:10px; height:10px; border-radius:99px; background:#FF5F57;"></i><i style="width:10px; height:10px; border-radius:99px; background:#FEBC2E;"></i><i style="width:10px; height:10px; border-radius:99px; background:#28C840;"></i></span>
+              <span data-d="url" style="flex:1; overflow:hidden; white-space:nowrap; border-radius:8px; border:1px solid #EAE5DA; background:#fff; padding:4px 12px; text-align:center; font-family:'Geist Mono',monospace; font-size:10px; color:#928D81;">aanya-and-dev.simvites.co.uk · editing</span>
+              <span style="display:flex; gap:2px; border-radius:8px; border:1px solid #EAE5DA; background:#fff; padding:2px; font-size:9.5px; color:#6B675E;">
+                <i data-d="devdesk" style="border-radius:4px; padding:2px 6px; font-style:normal; background:#F4F1E9;">Desktop</i>
+                <i data-d="devphone" style="border-radius:4px; padding:2px 6px; font-style:normal;">Phone</i>
+              </span>
+              <span data-d="publish" style="border-radius:8px; padding:4px 12px; font-size:10.5px; font-weight:600; color:#fff; background:oklch(0.62 0.21 29);">Publish</span>
+            </div>
+            <div style="position:relative; display:flex; background:#fff; text-align:left; min-height:320px;">
+              <div style="width:120px; flex-shrink:0; border-right:1px solid #EAE5DA; background:#FAF8F3; padding:10px;">
+                <p style="margin:0 0 6px; font-family:'Geist Mono',monospace; font-size:8.5px; text-transform:uppercase; letter-spacing:0.1em; color:#928D81;">Blocks</p>
+                <p style="margin:0 0 2px; border-radius:8px; padding:4px 8px; font-size:10.5px; color:#1A1916;"><span style="margin-right:6px; color:#C9C2B2;">⠿</span>Hero</p>
+                <p style="margin:0 0 2px; border-radius:8px; padding:4px 8px; font-size:10.5px; color:#1A1916;"><span style="margin-right:6px; color:#C9C2B2;">⠿</span>Countdown</p>
+                <p style="margin:0 0 2px; border-radius:8px; padding:4px 8px; font-size:10.5px; color:#1A1916;"><span style="margin-right:6px; color:#C9C2B2;">⠿</span>Schedule</p>
+                <p data-d="libgallery" style="margin:0 0 2px; border-radius:8px; padding:4px 8px; font-size:10.5px; color:#1A1916;"><span style="margin-right:6px; color:#C9C2B2;">⠿</span>Gallery</p>
+                <p style="margin:0 0 2px; border-radius:8px; padding:4px 8px; font-size:10.5px; color:#1A1916;"><span style="margin-right:6px; color:#C9C2B2;">⠿</span>RSVP</p>
+                <p style="margin:0 0 2px; border-radius:8px; padding:4px 8px; font-size:10.5px; color:#1A1916;"><span style="margin-right:6px; color:#C9C2B2;">⠿</span>Hotels</p>
+              </div>
+              <div style="min-width:0; flex:1; background:#EFE9DC; padding:12px;">
+                <div data-d="canvas" style="display:flex; flex-direction:column; gap:6px; transition:all 500ms; width:100%;">
+                  <div data-d="hero" style="border-radius:4px; padding:16px 12px; text-align:center; transition:background-color 300ms; background:#F5EFE3; outline:2px solid transparent; outline-offset:2px;">
+                    <p style="margin:0; font-family:'Geist Mono',monospace; font-size:7px; text-transform:uppercase; letter-spacing:0.2em; color:#97753F;">Together with our families</p>
+                    <p data-d="herotitle" style="margin:4px 0 0; font-family:'Cormorant Garamond',serif; font-size:20px; line-height:1.25; color:#211D18;">Your names</p>
+                    <p style="margin:4px 0 0; font-family:'Geist Mono',monospace; font-size:7.5px; text-transform:uppercase; letter-spacing:0.16em; color:#97753F;">19 September 2026 · Jaipur</p>
+                  </div>
+                  <div style="position:relative;">
+                    <div data-d="countdown" style="position:relative; border-radius:4px; padding:8px 12px; background:#FBF7EE; border:1px solid #E7DFCC;">
+                      <p style="margin:0; display:flex; justify-content:center; gap:8px; font-family:'Geist Mono',monospace; font-size:9px; color:#6E635A;"><span><b style="color:#211D18;">70</b> days</span><span><b style="color:#211D18;">08</b> hrs</span><span><b style="color:#211D18;">21</b> min</span><span><b style="color:#211D18;">54</b> sec</span></p>
+                    </div>
+                    <div data-d="gallery" style="overflow:hidden; border-radius:4px; padding:8px 12px; opacity:0; max-height:0; background:#FBF7EE; border:1px solid #E7DFCC;">
+                      <p style="margin:0 0 4px; font-family:'Geist Mono',monospace; font-size:7.5px; text-transform:uppercase; letter-spacing:0.14em; color:#97753F;">Gallery</p>
+                      <div style="display:flex; gap:4px;"><span style="height:20px; flex:1; border-radius:2px; opacity:0.8; background:#C9A227;"></span><span style="height:20px; flex:1; border-radius:2px; opacity:0.8; background:#7A1F1F;"></span><span style="height:20px; flex:1; border-radius:2px; opacity:0.8; background:#3E7C4F;"></span><span style="height:20px; flex:1; border-radius:2px; opacity:0.8; background:#6D3FA9;"></span></div>
+                    </div>
+                  </div>
+                  <div style="border-radius:4px; padding:8px 12px; background:#FBF7EE; border:1px solid #E7DFCC;">
+                    <p style="margin:0; display:flex; align-items:center; gap:6px; padding:2px 0; font-size:9.5px; color:#211D18;"><span style="width:6px; height:6px; border-radius:99px; background:#3E7C4F;"></span><span style="font-family:'Cormorant Garamond',serif; font-size:11px;">Mehndi</span><span style="margin-left:auto; font-family:'Geist Mono',monospace; font-size:8px; color:#97753F;">Thu 17 · 4pm</span></p>
+                    <p style="margin:0; display:flex; align-items:center; gap:6px; padding:2px 0; font-size:9.5px; color:#211D18;"><span style="width:6px; height:6px; border-radius:99px; background:#6D3FA9;"></span><span style="font-family:'Cormorant Garamond',serif; font-size:11px;">Sangeet</span><span style="margin-left:auto; font-family:'Geist Mono',monospace; font-size:8px; color:#97753F;">Fri 18 · 7pm</span></p>
+                    <p style="margin:0; display:flex; align-items:center; gap:6px; padding:2px 0; font-size:9.5px; color:#211D18;"><span style="width:6px; height:6px; border-radius:99px; background:#C9A227;"></span><span style="font-family:'Cormorant Garamond',serif; font-size:11px;">Ceremony</span><span style="margin-left:auto; font-family:'Geist Mono',monospace; font-size:8px; color:#97753F;">Sat 19 · 11am</span></p>
+                  </div>
+                  <div style="border-radius:4px; padding:8px 12px; text-align:center; background:#7A1F1F;">
+                    <p style="margin:0; font-size:10px; font-weight:500; color:rgba(255,255,255,0.95);">Will you join us? <span style="margin-left:4px; border-radius:99px; background:#fff; padding:2px 8px; font-size:8.5px; font-weight:600; color:#7A1F1F;">RSVP now</span></p>
+                  </div>
+                </div>
+              </div>
+              <div data-d="insp" style="width:132px; flex-shrink:0; border-left:1px solid #EAE5DA; background:#FAF8F3; padding:10px; transition:opacity 300ms; opacity:0.55;">
+                <p style="margin:0 0 6px; font-family:'Geist Mono',monospace; font-size:8.5px; text-transform:uppercase; letter-spacing:0.1em; color:#928D81;">Hero</p>
+                <p style="margin:0; font-size:9px; color:#6B675E;">Names</p>
+                <p style="margin:2px 0 0; border-radius:8px; border:1px solid #DCD5C6; background:#fff; padding:4px 8px; font-size:10px; color:#1A1916;"><span data-d="inspname">Your names</span><span data-d="caret" style="opacity:0;">|</span></p>
+                <p style="margin:8px 0 0; font-size:9px; color:#6B675E;">Date</p>
+                <p style="margin:2px 0 0; border-radius:8px; border:1px solid #DCD5C6; background:#fff; padding:4px 8px; font-size:10px; color:#6B675E;">19 Sep 2026</p>
+                <p style="margin:8px 0 0; font-size:9px; color:#6B675E;">Accent</p>
+                <p style="margin:4px 0 0; display:flex; gap:6px;"><span style="width:16px; height:16px; border-radius:99px; background:#7A1F1F; outline:1px solid rgba(30,25,15,0.15); outline-offset:1px;"></span><span data-d="gold" style="width:16px; height:16px; border-radius:99px; background:#C9A227; outline:1px solid rgba(30,25,15,0.15); outline-offset:1px;"></span><span style="width:16px; height:16px; border-radius:99px; background:#3E7C4F; outline:1px solid rgba(30,25,15,0.15); outline-offset:1px;"></span><span style="width:16px; height:16px; border-radius:99px; background:#6D3FA9; outline:1px solid rgba(30,25,15,0.15); outline-offset:1px;"></span></p>
+                <p style="margin:12px 0 0; font-family:'Geist Mono',monospace; font-size:8px; color:#B4AC9C;">Autosaved · just now</p>
+              </div>
+              <div data-d="toast" style="pointer-events:none; position:absolute; bottom:12px; right:12px; display:flex; align-items:center; gap:8px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); background:#17171A; padding:8px 12px; font-size:10.5px; color:#fff; opacity:0; transform:translateY(12px); transition:all 300ms;">
+                <span style="display:flex; width:16px; height:16px; align-items:center; justify-content:center; border-radius:4px; background:rgba(61,214,140,0.16); font-size:9px; color:#3DD68C;">✓</span>
+                Your site is live
+              </div>
+              <div style="pointer-events:none; position:absolute; inset:0;">
+                <span data-d="ripple" style="position:absolute; left:0; top:0; width:32px; height:32px; border-radius:99px; opacity:0; border:2px solid oklch(0.62 0.21 29); margin-left:-14px; margin-top:-14px;"></span>
+                <svg data-d="cursor" viewBox="0 0 24 24" style="position:absolute; left:0; top:0; width:22px; height:22px; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35)); will-change:transform;"><path d="M5 3l14 8-6.5 1.5L9 19z" fill="#fff" stroke="#111" stroke-width="1.2"></path></svg>
+                <div data-d="veil" style="position:absolute; inset:0; background:#fff; opacity:0;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin:16px auto 0; display:flex; max-width:520px; align-items:center; gap:12px; padding:0 8px;">
+            <span style="display:flex; align-items:center; gap:6px; font-family:'Geist Mono',monospace; font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:oklch(0.68 0.19 30);"><span style="display:inline-block; width:6px; height:6px; border-radius:99px; background:oklch(0.68 0.19 30);"></span>Live demo</span>
+            <span style="position:relative; height:4px; flex:1; overflow:hidden; border-radius:99px; background:rgba(135,135,150,0.3);">
+              <span data-d="bar" style="position:absolute; left:0; top:0; height:100%; border-radius:99px; background:oklch(0.68 0.19 30); width:0;"></span>
+              <span style="position:absolute; top:0; height:100%; width:1px; left:24%; background:rgba(135,135,150,0.5);"></span>
+              <span style="position:absolute; top:0; height:100%; width:1px; left:48%; background:rgba(135,135,150,0.5);"></span>
+              <span style="position:absolute; top:0; height:100%; width:1px; left:70%; background:rgba(135,135,150,0.5);"></span>
+            </span>
+            <span data-d="chapter" style="width:104px; text-align:right; font-size:10.5px; color:#8E92A3;">Edit anything</span>
+            <span data-d="clock" style="font-family:'Geist Mono',monospace; font-size:9.5px; color:#8E92A3;">0:00</span>
+          </div>
+        </div>
+
+        <p data-s="hint" style="position:absolute; bottom:20px; left:0; right:0; margin:0; text-align:center; font-family:'Geist Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.14em; color:var(--l-faint);">Scroll to dive in ↓</p>
+
+        <!-- module tunnel: 4 dimension cards + captions -->
+        <sc-for list="{{ tunnel }}" as="tc">
+          <div>
+            <div data-s="{{ tc.cardKey }}" style="position:absolute; left:50%; top:50%; width:min(420px,88vw); border-radius:14px; border:1px solid rgba(150,180,255,0.16); padding:20px; opacity:0; background:#111C33; box-shadow:0 30px 90px -20px oklch(0.62 0.21 29 / 0.25), 0 30px 60px -30px rgba(2,6,16,0.7); transform:translate(-50%,-50%) scale(0.38); will-change:transform,opacity;">
+              <div style="margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;">
+                <p style="margin:0; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,255,255,0.45);">{{ tc.title }}</p>
+                <sc-if value="{{ tc.action }}" hint-placeholder-val="{{ false }}">
+                  <span style="border-radius:8px; padding:4px 8px; font-size:9.5px; font-weight:600; color:#fff; background:oklch(0.62 0.21 29);">{{ tc.action }}</span>
+                </sc-if>
+              </div>
+              <sc-if value="{{ tc.isMatrix }}" hint-placeholder-val="{{ true }}">
+                <div style="display:grid; grid-template-columns:1.5fr repeat(4,1fr); row-gap:6px; font-size:9.5px;">
+                  <span style="font-family:'Geist Mono',monospace; font-size:8px; text-transform:uppercase; letter-spacing:0.05em; color:rgba(255,255,255,0.4);">Household</span>
+                  <span style="text-align:center; font-family:'Geist Mono',monospace; font-size:8px; text-transform:uppercase; letter-spacing:0.05em; color:rgba(255,255,255,0.4);">Mehndi</span>
+                  <span style="text-align:center; font-family:'Geist Mono',monospace; font-size:8px; text-transform:uppercase; letter-spacing:0.05em; color:rgba(255,255,255,0.4);">Sangeet</span>
+                  <span style="text-align:center; font-family:'Geist Mono',monospace; font-size:8px; text-transform:uppercase; letter-spacing:0.05em; color:rgba(255,255,255,0.4);">Ceremony</span>
+                  <span style="text-align:center; font-family:'Geist Mono',monospace; font-size:8px; text-transform:uppercase; letter-spacing:0.05em; color:rgba(255,255,255,0.4);">Reception</span>
+                  <sc-for list="{{ tc.rows }}" as="r">
+                    <span style="color:rgba(255,255,255,0.8);">{{ r.name }}<sc-if value="{{ r.child }}" hint-placeholder-val="{{ false }}"><span style="margin-left:4px; border-radius:2px; background:rgba(255,255,255,0.1); padding:0 4px; font-family:'Geist Mono',monospace; font-size:7px; color:rgba(255,255,255,0.5);">child</span></sc-if></span>
+                    <sc-for list="{{ r.dots }}" as="d">
+                      <span style="text-align:center;"><span style="display:inline-block; width:10px; height:10px; border-radius:99px; background:{{ d.bg }}; border:{{ d.border }};"></span></span>
+                    </sc-for>
+                  </sc-for>
+                </div>
+                <p style="margin:12px 0 0; font-size:10px; line-height:1.6; color:rgba(255,255,255,0.5);">One dot per guest per event. Uninvited events do not exist for that family.</p>
+              </sc-if>
+              <sc-if value="{{ tc.isRsvp }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-direction:column; gap:8px; font-size:10.5px;">
+                  <div>
+                    <p style="margin:0; display:flex; justify-content:space-between; color:rgba(255,255,255,0.8);"><span style="display:flex; align-items:center; gap:6px;"><i style="width:6px; height:6px; border-radius:99px; font-style:normal; background:#6D3FA9;"></i>Sangeet</span><span style="font-family:'Geist Mono',monospace; font-size:9.5px; color:rgba(255,255,255,0.55);">74 / 120</span></p>
+                    <div style="margin-top:4px; height:4px; overflow:hidden; border-radius:99px; background:rgba(255,255,255,0.1);"><div style="height:100%; border-radius:99px; background:#3DD68C; width:62%;"></div></div>
+                  </div>
+                  <div>
+                    <p style="margin:0; display:flex; justify-content:space-between; color:rgba(255,255,255,0.8);"><span style="display:flex; align-items:center; gap:6px;"><i style="width:6px; height:6px; border-radius:99px; font-style:normal; background:#C9A227;"></i>Ceremony</span><span style="font-family:'Geist Mono',monospace; font-size:9.5px; color:rgba(255,255,255,0.55);">92 / 120</span></p>
+                    <div style="margin-top:4px; height:4px; overflow:hidden; border-radius:99px; background:rgba(255,255,255,0.1);"><div style="height:100%; border-radius:99px; background:#3DD68C; width:77%;"></div></div>
+                  </div>
+                  <p style="margin:0; border-radius:8px; background:rgba(255,255,255,0.06); padding:6px 10px; font-size:9.5px; color:rgba(255,255,255,0.7);">Priya said yes · just now</p>
+                  <p style="margin:0; font-size:9.5px; color:rgba(255,255,255,0.55);">46 veg · 8 kids meals · 3 nut allergies flagged</p>
+                  <p style="margin:4px 0 0; font-size:10px; line-height:1.6; color:rgba(255,255,255,0.5);">Counts, meals and dietary notes ready to hand to the caterer.</p>
+                </div>
+              </sc-if>
+              <sc-if value="{{ tc.isInvite }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-direction:column; gap:10px; font-size:10.5px;">
+                  <p style="margin:0; font-weight:500; color:rgba(255,255,255,0.9);">The Shah Family</p>
+                  <p style="margin:0; border-radius:8px; background:rgba(255,255,255,0.06); padding:6px 10px; font-family:'Geist Mono',monospace; font-size:9px; color:rgba(255,255,255,0.6);">simvites.co.uk/i/9f2c…d41a · opened twice</p>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="display:grid; width:44px; height:44px; flex-shrink:0; grid-template-columns:repeat(4,1fr); gap:1px; overflow:hidden; border-radius:2px; background:#fff; padding:4px; box-sizing:border-box;">
+                      <sc-for list="{{ qrCells }}" as="q"><span style="background:{{ q }};"></span></sc-for>
+                    </span>
+                    <p style="margin:0; font-size:10px; line-height:1.6; color:rgba(255,255,255,0.5);">No guest accounts. One tap from WhatsApp, email or a printed QR.</p>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ tc.isPlanning }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-direction:column; gap:8px; font-size:10.5px;">
+                  <p style="margin:0; display:flex; align-items:baseline; justify-content:space-between; color:rgba(255,255,255,0.8);">Budget used <span style="font-family:'Geist Mono',monospace; font-size:13px; font-weight:600; color:#fff;">£31,400 <span style="font-size:9px; font-weight:400; color:rgba(255,255,255,0.45);">/ 42k</span></span></p>
+                  <div style="height:4px; overflow:hidden; border-radius:99px; background:rgba(255,255,255,0.1);"><div style="height:100%; border-radius:99px; width:75%; background:oklch(0.68 0.19 30);"></div></div>
+                  <p style="margin:4px 0 0; font-family:'Geist Mono',monospace; font-size:8px; text-transform:uppercase; letter-spacing:0.05em; color:rgba(255,255,255,0.4);">This week</p>
+                  <p style="margin:0; font-size:10px; color:rgba(255,255,255,0.7);">✓ Caterer booked → budget updated</p>
+                  <p style="margin:0; font-size:10px; color:rgba(255,255,255,0.7);">✓ Table 4 seated → families told</p>
+                  <p style="margin:0; font-size:10px; color:rgba(255,255,255,0.7);">○ Florist deposit due Friday</p>
+                  <p style="margin:4px 0 0; font-size:10px; line-height:1.6; color:rgba(255,255,255,0.5);">Book a vendor once. Budget, checklist and dashboard all hear about it.</p>
+                </div>
+              </sc-if>
+            </div>
+            <div data-s="{{ tc.capKey }}" style="position:absolute; top:50%; width:240px; transform:translateY(-50%); opacity:0; {{ tc.capSide }}">
+              <p style="margin:0; font-family:'Geist Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.14em; color:oklch(0.68 0.19 30);">{{ tc.dim }}</p>
+              <p style="margin:8px 0 0; font-size:30px; font-weight:650; line-height:1.05; letter-spacing:-0.03em; color:#fff;">{{ tc.caption }}</p>
+            </div>
+          </div>
+        </sc-for>
+
+        <!-- ivory portal -->
+        <div data-s="portal" style="position:absolute; left:50%; top:50%; display:flex; width:130vmax; height:130vmax; margin-left:-65vmax; margin-top:-65vmax; align-items:center; justify-content:center; border-radius:99999px; background:oklch(0.975 0.006 85); transform:scale(0); will-change:transform;">
+          <p data-s="portallabel" style="margin:0; padding:0 24px; text-align:center; opacity:0;">
+            <span style="font-family:'Geist Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.14em; color:#97753F;">Final dimension</span>
+            <span style="margin-top:12px; display:block; font-family:'Instrument Serif',Georgia,serif; font-style:italic; font-size:clamp(30px,4.5vw,52px); color:#211D18;">the part your guests see</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 4b — templates (stays ivory in dark mode on purpose) -->
+    <section style="padding:96px 24px; background:oklch(0.975 0.006 85);">
+      <div style="margin:0 auto; max-width:1060px;">
+        <p style="margin:0; text-align:center; font-family:'Geist Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.14em; color:#97753F;">Templates · the artifact</p>
+        <h2 style="margin:16px auto 0; max-width:640px; text-align:center; font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(30px,4.4vw,48px); line-height:1.08; color:#211D18;">The tool is software.<br>What your guests get is <em style="font-style:italic;">a keepsake</em>.</h2>
+        <p style="margin:16px auto 0; max-width:520px; text-align:center; font-size:14px; line-height:1.6; color:#5C544A;">Editorial templates with real typography and per event colour identities. Click any text and type. Nothing goes live until you publish.</p>
+        <div style="margin-top:48px; display:grid; gap:24px; grid-template-columns:1fr 1fr;">
+          <sc-for list="{{ tplFigures }}" as="f">
+            <figure style="margin:0; overflow:hidden; border-radius:14px; border:1px solid #E0D8CB; background:#fff; box-shadow:0 24px 60px -24px rgba(33,29,24,0.25);">
+              <div style="position:relative; display:flex; height:230px; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:{{ f.bg }};">
+                <span style="position:absolute; left:12px; top:12px; border-radius:2px; border:1px solid rgba(0,0,0,0.1); padding:2px 6px; font-family:'Geist Mono',monospace; font-size:7.5px; letter-spacing:0.05em; color:rgba(0,0,0,0.35);">{{ f.label }}</span>
+                <p style="margin:0; font-family:'Instrument Serif',Georgia,serif; font-size:34px; line-height:1; color:{{ f.ink }};">Aanya <em style="font-style:italic; color:{{ f.accent }};">&amp;</em> Dev</p>
+                <p style="margin:12px 0 0; font-family:'Geist Mono',monospace; font-size:8.5px; text-transform:uppercase; letter-spacing:0.22em; color:{{ f.accent }};">{{ f.kicker }}</p>
+              </div>
+              <figcaption style="display:flex; align-items:baseline; justify-content:space-between; padding:16px 20px;">
+                <span style="font-family:'Instrument Serif',Georgia,serif; font-size:17px; color:#211D18;">{{ f.name }}</span>
+                <span style="font-size:11.5px; color:#8A8072;">{{ f.sub }}</span>
+              </figcaption>
+            </figure>
+          </sc-for>
+        </div>
+        <div style="margin-top:32px; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px;">
+          <sc-for list="{{ eventChips }}" as="c">
+            <span style="display:flex; align-items:center; gap:8px; border-radius:99px; border:1px solid #E0D8CB; background:#fff; padding:6px 14px; font-size:12px; color:#5C544A;"><span style="width:8px; height:8px; border-radius:99px; background:{{ c.color }};"></span>{{ c.name }}</span>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 5 — USP duo -->
+    <section style="padding:96px 24px;">
+      <div style="margin:0 auto; max-width:1060px;">
+        <p style="margin:0; text-align:center; font-family:'Geist Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.1em; color:var(--l-faint);">Why couples switch</p>
+        <h2 style="margin:12px 0 0; text-align:center; font-size:clamp(26px,3.6vw,40px); font-weight:650; line-height:1.25; letter-spacing:-0.03em; color:var(--l-ink);">Two things nobody else does properly</h2>
+        <div style="margin-top:48px; display:grid; gap:24px; grid-template-columns:1fr 1fr;">
+          <div style="border-radius:14px; border:1px solid var(--l-line); background:var(--l-card); padding:28px; box-shadow:0 1px 2px rgba(15,15,20,0.04);">
+            <p style="margin:0; font-family:'Geist Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.1em; color:oklch(0.62 0.21 29);">USP 01 · Per event invitations</p>
+            <h3 style="margin:10px 0 0; font-size:20px; font-weight:650; letter-spacing:-0.02em; color:var(--l-ink);">Every guest sees only their events</h3>
+            <p style="margin:8px 0 0; font-size:13.5px; line-height:1.6; color:var(--l-sub);">Grandma gets the ceremony. College friends get the sangeet and the afterparty. Same website, different wedding for each family.</p>
+            <div style="margin-top:24px; display:flex; align-items:center; gap:16px;">
+              <div style="flex:1; border-radius:12px; border:1px solid var(--l-line); background:var(--l-bg); padding:14px;">
+                <p style="margin:0 0 8px; font-family:'Geist Mono',monospace; font-size:8px; text-transform:uppercase; letter-spacing:0.05em; color:var(--l-faint);">The Shah Family · link</p>
+                <div style="display:grid; grid-template-columns:1fr repeat(3,32px); row-gap:6px; font-size:11px;">
+                  <span></span>
+                  <span style="text-align:center; font-family:'Geist Mono',monospace; font-size:7px; text-transform:uppercase; color:var(--l-faint);">Mehndi</span>
+                  <span style="text-align:center; font-family:'Geist Mono',monospace; font-size:7px; text-transform:uppercase; color:var(--l-faint);">Sangeet</span>
+                  <span style="text-align:center; font-family:'Geist Mono',monospace; font-size:7px; text-transform:uppercase; color:var(--l-faint);">Ceremony</span>
+                  <sc-for list="{{ uspRows }}" as="r">
+                    <span style="color:var(--l-ink);">{{ r.name }}</span>
+                    <sc-for list="{{ r.dots }}" as="d"><span style="text-align:center;"><span style="display:inline-block; width:10px; height:10px; border-radius:99px; background:{{ d.bg }}; border:{{ d.border }};"></span></span></sc-for>
+                  </sc-for>
+                </div>
+              </div>
+              <span style="color:var(--l-faint);">→</span>
+              <div style="width:132px; flex-shrink:0; border-radius:18px; border:3px solid #191918; background:#F5EFE3; padding:16px 12px; text-align:center;">
+                <p style="margin:0; font-family:'Instrument Serif',Georgia,serif; font-size:13px; color:#211D18;">Aanya &amp; Dev</p>
+                <p style="margin:8px 0 0; font-size:8.5px; color:#5C544A;">Sangeet · Fri 7pm</p>
+                <p style="margin:0; font-size:8.5px; color:#5C544A;">Ceremony · Sat 11am</p>
+                <p style="margin:8px 0 0; font-family:'Geist Mono',monospace; font-size:7px; text-transform:uppercase; letter-spacing:0.05em; color:#97753F;">Mehndi? Not on Aarav's list.</p>
+              </div>
+            </div>
+          </div>
+          <div style="border-radius:14px; border:1px solid var(--l-line); background:var(--l-card); padding:28px; box-shadow:0 1px 2px rgba(15,15,20,0.04);">
+            <p style="margin:0; font-family:'Geist Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.1em; color:oklch(0.62 0.21 29);">USP 02 · The RSVP engine</p>
+            <h3 style="margin:10px 0 0; font-size:20px; font-weight:650; letter-spacing:-0.02em; color:var(--l-ink);">One tap for the family, answers for the caterer</h3>
+            <p style="margin:8px 0 0; font-size:13.5px; line-height:1.6; color:var(--l-sub);">A household answers once, per person, per event, with your custom questions. You get live totals and one clean export.</p>
+            <div style="margin-top:24px; display:flex; align-items:center; gap:16px;">
+              <div style="flex:1; border-radius:12px; border:1px solid var(--l-line); background:var(--l-bg); padding:14px; font-size:11px;">
+                <p style="margin:0; font-weight:500; color:var(--l-ink);">Sangeet · are you in?</p>
+                <p style="margin:8px 0 0; display:flex; gap:6px;"><span style="border-radius:8px; padding:4px 8px; font-size:10px; font-weight:600; color:#fff; background:#1B9E5F;">Joyfully yes</span><span style="border-radius:8px; border:1px solid #DBDAD6; padding:4px 8px; font-size:10px; color:var(--l-sub);">Sadly no</span></p>
+                <p style="margin:10px 0 0; font-size:10px; color:var(--l-faint);">Meal</p>
+                <p style="margin:4px 0 0; display:flex; gap:6px;"><span style="border-radius:8px; background:#191918; padding:2px 8px; font-size:10px; color:#fff;">Veg</span><span style="border-radius:8px; border:1px solid #DBDAD6; padding:2px 8px; font-size:10px; color:var(--l-sub);">Chicken</span><span style="border-radius:8px; border:1px solid #DBDAD6; padding:2px 8px; font-size:10px; color:var(--l-sub);">Kids</span></p>
+              </div>
+              <span style="color:var(--l-faint);">→</span>
+              <div style="width:132px; flex-shrink:0; border-radius:12px; border:1px solid var(--l-line); background:var(--l-card); padding:12px;">
+                <p style="margin:0; font-family:'Geist Mono',monospace; font-size:7.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--l-faint);">Live totals</p>
+                <p style="margin:6px 0 0; display:flex; justify-content:space-between; font-size:10px; color:var(--l-sub);">Attending<b style="font-family:'Geist Mono',monospace; color:var(--l-ink);">74</b></p>
+                <p style="margin:6px 0 0; display:flex; justify-content:space-between; font-size:10px; color:var(--l-sub);">Vegetarian<b style="font-family:'Geist Mono',monospace; color:var(--l-ink);">46</b></p>
+                <p style="margin:6px 0 0; display:flex; justify-content:space-between; font-size:10px; color:var(--l-sub);">Nut allergies<b style="font-family:'Geist Mono',monospace; color:var(--l-ink);">3</b></p>
+                <p style="margin:8px 0 0; font-size:9px; font-weight:500; color:oklch(0.62 0.21 29);">Export for the caterer ↓</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- What you get -->
+    <section style="padding:0 24px 96px;">
+      <div style="margin:0 auto; max-width:1060px;">
+        <p style="margin:0; text-align:center; font-family:'Geist Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.1em; color:var(--l-faint);">Everything included</p>
+        <h2 style="margin:12px 0 0; text-align:center; font-size:clamp(26px,3.6vw,40px); font-weight:650; line-height:1.25; letter-spacing:-0.03em; color:var(--l-ink);">One platform, the whole wedding</h2>
+        <div style="margin-top:48px; display:grid; gap:16px; grid-template-columns:repeat(3,1fr);">
+          <sc-for list="{{ features }}" as="f" hint-placeholder-count="6">
+            <div style="border-radius:14px; border:1px solid var(--l-line); background:var(--l-card); padding:24px;">
+              <p style="margin:0; font-size:20px;">{{ f.icon }}</p>
+              <h3 style="margin:8px 0 0; font-size:15px; font-weight:650; letter-spacing:-0.01em; color:var(--l-ink);">{{ f.title }}</h3>
+              <p style="margin:6px 0 0; font-size:12.5px; line-height:1.6; color:var(--l-sub);">{{ f.body }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section style="padding:0 24px 96px;">
+      <div style="margin:0 auto; max-width:760px;">
+        <p style="margin:0; text-align:center; font-family:'Geist Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.1em; color:var(--l-faint);">Questions, answered</p>
+        <h2 style="margin:12px 0 0; text-align:center; font-size:clamp(26px,3.6vw,40px); font-weight:650; line-height:1.25; letter-spacing:-0.03em; color:var(--l-ink);">Before you ask</h2>
+        <div style="margin-top:40px; display:flex; flex-direction:column; gap:12px;">
+          <sc-for list="{{ faqs }}" as="f" hint-placeholder-count="8">
+            <details style="border-radius:12px; border:1px solid var(--l-line); background:var(--l-card); padding:16px 20px;">
+              <summary style="display:flex; cursor:pointer; list-style:none; align-items:center; justify-content:space-between; gap:16px; font-size:14.5px; font-weight:600; letter-spacing:-0.01em; color:var(--l-ink);">{{ f.q }}<span style="color:var(--l-faint);">＋</span></summary>
+              <p style="margin:12px 0 0; font-size:13px; line-height:1.6; color:var(--l-sub);">{{ f.a }}</p>
+            </details>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section style="padding:0 24px 96px;">
+      <div style="position:relative; margin:0 auto; max-width:760px; overflow:hidden; border-radius:22px; padding:56px 40px; text-align:center; background:#0A1220; box-shadow:0 40px 90px -20px rgba(0,0,0,0.45);">
+        <p style="margin:0; font-family:'Geist Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.14em; color:oklch(0.68 0.19 30);">Early access</p>
+        <h2 style="margin:12px auto 0; max-width:480px; font-size:clamp(26px,3.6vw,38px); font-weight:650; line-height:1.25; letter-spacing:-0.03em; color:#fff;">Build everything free. Pay once when you send.</h2>
+        <p style="margin:16px auto 0; max-width:520px; font-size:13.5px; line-height:1.6; color:rgba(255,255,255,0.6);">No subscription. One payment unlocks publishing and sending, and your site stays live for 18 months after the wedding. Early couples shape the product and keep founder pricing.</p>
+        <div style="margin-top:28px; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:12px;">
+          <a href="#" style="border-radius:10px; padding:10px 20px; font-size:13.5px; font-weight:600; color:#fff; text-decoration:none; background:oklch(0.62 0.21 29);">Start your site</a>
+          <a href="#" style="border-radius:10px; border:1px solid rgba(255,255,255,0.2); padding:10px 20px; font-size:13.5px; font-weight:500; color:rgba(255,255,255,0.85); text-decoration:none;">Talk to the founder</a>
+        </div>
+        <div style="margin:40px auto 0; max-width:440px; display:flex; flex-direction:column; gap:16px; text-align:left;">
+          <sc-for list="{{ pricingPoints }}" as="p">
+            <p style="margin:0; display:flex; gap:12px; font-size:13px;">
+              <span style="margin-top:2px; display:flex; width:18px; height:18px; flex-shrink:0; align-items:center; justify-content:center; border-radius:99px; font-size:9px; font-weight:700; color:#fff; background:#1B9E5F;">✓</span>
+              <span style="color:rgba(255,255,255,0.85);"><b style="font-weight:600; color:#fff;">{{ p.t }}</b><br><span style="color:rgba(255,255,255,0.55);">{{ p.d }}</span></span>
+            </p>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="border-top:1px solid var(--l-line); padding:56px 24px;">
+      <div style="margin:0 auto; display:grid; max-width:1060px; gap:40px; grid-template-columns:repeat(4,1fr);">
+        <div>
+          <p style="margin:0; display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; letter-spacing:-0.025em; color:var(--l-ink);">
+            <span style="display:flex; width:20px; height:20px; align-items:center; justify-content:center; border-radius:8px; font-size:10px; font-weight:700; color:#fff; background:oklch(0.62 0.21 29);">S</span>
+            Simvites
+          </p>
+          <p style="margin:12px 0 0; max-width:220px; font-size:12px; line-height:1.6; color:var(--l-faint);">The platform for multi event weddings. Website, invitations, RSVPs and planning, connected.</p>
+        </div>
+        <sc-for list="{{ footerCols }}" as="col">
+          <div>
+            <p style="margin:0; font-family:'Geist Mono',monospace; font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:var(--l-faint);">{{ col.group }}</p>
+            <ul style="margin:12px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px;">
+              <sc-for list="{{ col.links }}" as="l"><li><a href="#" style="font-size:12.5px; color:var(--l-sub); text-decoration:none;" style-hover="color:var(--l-ink);">{{ l }}</a></li></sc-for>
+            </ul>
+          </div>
+        </sc-for>
+      </div>
+      <p style="margin:48px auto 0; display:flex; max-width:1060px; align-items:center; justify-content:space-between; font-size:11px; color:var(--l-faint);">
+        <span>© 2026 Simvites. Made for the big weekend.</span>
+        <span style="font-family:'Geist Mono',monospace;">occasio.events</span>
+      </p>
+    </footer>
+  </div>
+  </sc-if>
+
+  <!-- ═══ /login ═══ -->
+  <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+  <div data-app data-screen-label="Login" style="background:var(--paper); color:var(--ink);">
+    <sc-if value="{{ loginLinkSent }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; min-height:calc(100vh - 44px); align-items:center; justify-content:center; padding:0 24px;">
+        <div style="width:420px; max-width:100%; border-radius:14px; border:1px solid var(--line); background:var(--surface); padding:28px; text-align:center; box-shadow:var(--shadow);">
+          <span style="margin:0 auto; display:flex; width:44px; height:44px; align-items:center; justify-content:center; border-radius:12px; background:var(--accent-soft); color:var(--accent);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+          </span>
+          <h1 style="margin:16px 0 0; font-size:18px; font-weight:600; letter-spacing:-0.025em;">Check your email</h1>
+          <p style="margin:8px 0 0; font-size:13.5px; line-height:1.6; color:var(--ink-2);">We sent a sign-in link to <span style="font-weight:500; color:var(--ink);">aanya@example.com</span>. It works once and expires in about an hour.</p>
+          <button style="margin-top:20px; width:100%; border:1px solid var(--line); background:none; padding:10px 16px; font-size:13px; font-weight:500; color:var(--ink); cursor:pointer; font-family:inherit; border-radius:8px;" style-hover="border-color:var(--line-2);">Resend the link</button>
+          <button onClick="{{ setLoginForm }}" style="margin-top:12px; border:none; background:none; font-size:12.5px; color:var(--ink-3); text-decoration:underline; text-underline-offset:4px; cursor:pointer; font-family:inherit;" style-hover="color:var(--ink);">Go back</button>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ loginForm }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid; min-height:calc(100vh - 44px); grid-template-columns:1fr 1fr;">
+        <div style="display:flex; flex-direction:column; padding:0 48px;">
+          <header style="display:flex; align-items:center; justify-content:space-between; padding:24px 0;">
+            <span style="font-size:13px; font-weight:600; letter-spacing:-0.025em;">Simvites</span>
+            <button aria-label="Toggle theme" style="width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:99px; border:1px solid var(--line); background:transparent; color:var(--ink-2); cursor:pointer;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+          </header>
+          <main style="display:flex; flex:1; align-items:center;">
+            <div style="margin:0 auto; width:100%; max-width:384px; padding-bottom:64px;">
+              <h1 style="margin:0; font-size:28px; font-weight:600; letter-spacing:-0.025em;">Welcome back</h1>
+              <p style="margin:6px 0 0; font-size:13.5px; color:var(--ink-2);">Sign in to your wedding command centre.</p>
+              <div style="margin-top:28px; display:flex; border-radius:18px; border:1px solid var(--line); background:var(--surface-2); padding:4px; text-align:center;">
+                <button onClick="{{ pickLinkTab }}" style="flex:1; border:none; border-radius:8px; padding:6px 12px; font-size:12.5px; font-weight:500; cursor:pointer; font-family:inherit; background:{{ tabLinkBg }}; color:{{ tabLinkInk }}; box-shadow:{{ tabLinkShadow }};">Email link</button>
+                <button onClick="{{ pickPwTab }}" style="flex:1; border:none; border-radius:8px; padding:6px 12px; font-size:12.5px; font-weight:500; cursor:pointer; font-family:inherit; background:{{ tabPwBg }}; color:{{ tabPwInk }}; box-shadow:{{ tabPwShadow }};">Password</button>
+              </div>
+              <div style="margin-top:24px; display:flex; flex-direction:column; gap:16px;">
+                <label style="display:block;">
+                  <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:500; color:var(--ink-2);">Email</span>
+                  <input type="email" style="width:100%; box-sizing:border-box; border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:10px 14px; font-size:14px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);">
+                </label>
+                <sc-if value="{{ pwTab }}" hint-placeholder-val="{{ false }}">
+                  <label style="display:block;">
+                    <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:500; color:var(--ink-2);">Password</span>
+                    <input type="password" style="width:100%; box-sizing:border-box; border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:10px 14px; font-size:14px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);">
+                  </label>
+                </sc-if>
+                <button onClick="{{ maybeSendLink }}" style="width:100%; border:none; border-radius:8px; background:var(--accent); padding:10px 24px; font-size:13.5px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit;">{{ loginCta }}</button>
+                <sc-if value="{{ linkTab }}" hint-placeholder-val="{{ true }}">
+                  <p style="margin:0; text-align:center; font-size:12px; color:var(--ink-3);">No passwords needed — we email you a secure link.</p>
+                </sc-if>
+                <sc-if value="{{ pwTab }}" hint-placeholder-val="{{ false }}">
+                  <div style="text-align:center; font-size:13px; color:var(--ink-3); display:flex; flex-direction:column; gap:6px;">
+                    <p style="margin:0;">New here? <a href="#" style="color:var(--accent-ink); text-decoration:underline; text-underline-offset:4px;">Create one</a></p>
+                    <p style="margin:0;"><a href="#" style="color:var(--ink-3); text-decoration:underline; text-underline-offset:4px;">Forgot password?</a></p>
+                  </div>
+                </sc-if>
+              </div>
+              <div style="margin:24px 0; display:flex; align-items:center; gap:12px; font-size:11px; color:var(--ink-3);"><span style="height:1px; flex:1; background:var(--line);"></span>or<span style="height:1px; flex:1; background:var(--line);"></span></div>
+              <button style="display:block; width:100%; border-radius:18px; border:1px solid var(--line); background:none; padding:10px 24px; text-align:center; font-size:13.5px; font-weight:500; color:var(--ink); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--line-2);">Create your wedding site free</button>
+            </div>
+          </main>
+        </div>
+        <div style="position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; background:linear-gradient(180deg, #0A1220 0%, #0C1526 60%, #0A1220 100%);">
+          <div aria-hidden="true" style="position:absolute; inset:0; background:radial-gradient(600px 420px at 65% 40%, oklch(0.62 0.21 29 / 0.16), transparent 70%);"></div>
+          <div style="position:relative; width:340px; transform:rotate(-1.5deg); border-radius:4px; padding:40px 36px; text-align:center; background:oklch(0.975 0.006 85); color:#211D18; box-shadow:var(--shadow-lg);">
+            <p style="margin:0; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.22em; color:#97753F;">Together with their families</p>
+            <p style="margin:12px 0 0; font-family:'Instrument Serif',Georgia,serif; font-size:34px; line-height:1.25;">Aanya &amp; Dev</p>
+            <div style="margin:16px auto 0; height:1px; width:56px; background:#C4BAAA;"></div>
+            <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px; text-align:left; font-size:12px; color:#5C544A;">
+              <sc-for list="{{ inviteEvents }}" as="e">
+                <p style="margin:0; display:flex; align-items:center; gap:10px;"><span style="width:8px; height:8px; flex-shrink:0; border-radius:99px; background:{{ e.c }};"></span><span style="font-weight:500; color:#211D18;">{{ e.n }}</span><span style="margin-left:auto;">{{ e.d }}</span></p>
+              </sc-for>
+            </div>
+            <span style="margin-top:28px; display:inline-block; background:#7A1F1F; padding:8px 24px; font-size:11px; font-weight:600; letter-spacing:0.025em; color:#fff;">KINDLY RSVP</span>
+          </div>
+          <p style="position:absolute; bottom:40px; left:0; right:0; margin:0; text-align:center; font-size:13px; color:rgba(255,255,255,0.55);">The tool is software. What your guests get is <span style="font-family:'Instrument Serif',Georgia,serif; font-style:italic; color:rgba(255,255,255,0.85);">a keepsake</span>.</p>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ═══ /onboarding ═══ -->
+  <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}">
+  <div data-app data-screen-label="Onboarding" style="display:flex; min-height:calc(100vh - 44px); flex-direction:column; background:var(--paper); color:var(--ink);">
+    <header style="margin:0 auto; display:flex; width:100%; max-width:1060px; align-items:center; justify-content:space-between; padding:24px;">
+      <span style="font-size:13px; font-weight:600; letter-spacing:-0.025em;">Simvites</span>
+      <button aria-label="Toggle theme" style="width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:99px; border:1px solid var(--line); background:transparent; color:var(--ink-2); cursor:pointer;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
+    </header>
+    <main style="display:flex; flex:1; align-items:flex-start; justify-content:center; padding:24px 24px 96px;">
+      <div style="width:100%; max-width:576px;">
+        <h1 style="margin:0; text-align:center; font-size:26px; font-weight:600; letter-spacing:-0.025em;">Create your wedding site</h1>
+        <p style="margin:8px auto 0; max-width:384px; text-align:center; font-size:13.5px; color:var(--ink-2);">Three quick moves. One site holds everything — events, guests, RSVPs and planning.</p>
+        <div style="margin-top:32px; border-radius:14px; border:1px solid var(--line); background:var(--surface); padding:32px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:32px;">
+          <section>
+            <div style="margin-bottom:12px; display:flex; align-items:baseline; gap:10px;">
+              <span style="font-family:'Geist Mono',monospace; font-size:10px; font-weight:600; color:var(--accent);">01</span>
+              <span style="font-size:13.5px; font-weight:600; letter-spacing:-0.025em;">Who's getting married?</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:14px;">
+              <label style="display:block;">
+                <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:500; color:var(--ink-2);">Couple / site name</span>
+                <input placeholder="Aanya &amp; Dev" style="width:100%; box-sizing:border-box; border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:10px 14px; font-size:14px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);">
+              </label>
+              <label style="display:block;">
+                <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:500; color:var(--ink-2);">Web address</span>
+                <div style="display:flex; align-items:center; border-radius:18px; border:1px solid var(--line); background:var(--surface);">
+                  <input placeholder="aanya-and-dev" style="min-width:0; flex:1; background:transparent; border:none; padding:10px 14px; font-size:14px; color:var(--ink); outline:none; font-family:inherit;">
+                  <span style="flex-shrink:0; padding-right:14px; font-family:'Geist Mono',monospace; font-size:11px; color:var(--ink-3);">.occasio.events</span>
+                </div>
+              </label>
+            </div>
+          </section>
+          <section>
+            <div style="margin-bottom:12px; display:flex; align-items:baseline; gap:10px;">
+              <span style="font-family:'Geist Mono',monospace; font-size:10px; font-weight:600; color:var(--accent);">02</span>
+              <span style="font-size:13.5px; font-weight:600; letter-spacing:-0.025em;">Choose your look</span>
+              <span style="font-size:12px; color:var(--ink-3);">change it any time</span>
+            </div>
+            <div style="display:grid; gap:10px; grid-template-columns:1fr 1fr;">
+              <sc-for list="{{ onbTemplates }}" as="t" hint-placeholder-count="4">
+                <label style="display:flex; cursor:pointer; flex-direction:column; gap:8px; border-radius:12px; border:1px solid {{ t.border }}; background:var(--surface); padding:14px; box-shadow:{{ t.ring }};">
+                  <span style="display:flex; align-items:center; gap:8px;">
+                    <input type="radio" name="tpl" checked="{{ t.active }}" style="accent-color:var(--accent); margin:0;">
+                    <span style="font-family:'Instrument Serif',Georgia,serif; font-size:15px; color:var(--ink);">{{ t.name }}</span>
+                    <span style="margin-left:auto; display:flex; gap:4px;"><sc-for list="{{ t.swatches }}" as="c"><span style="width:14px; height:14px; border-radius:99px; border:1px solid var(--line); background:{{ c }};"></span></sc-for></span>
+                  </span>
+                  <span style="font-size:11.5px; line-height:1.6; color:var(--ink-3);">{{ t.desc }}</span>
+                  <a href="#" style="font-size:11.5px; font-weight:500; color:var(--accent-ink); text-decoration:underline; text-underline-offset:2px;">Preview this look ↗</a>
+                </label>
+              </sc-for>
+              <button style="display:flex; min-height:74px; align-items:center; justify-content:center; border-radius:12px; border:1px dashed var(--line-2); background:none; font-size:12.5px; font-weight:500; color:var(--ink-2); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--accent); color:var(--ink);">+14 more looks</button>
+            </div>
+          </section>
+          <section>
+            <div style="margin-bottom:12px; display:flex; align-items:baseline; gap:10px;">
+              <span style="font-family:'Geist Mono',monospace; font-size:10px; font-weight:600; color:var(--accent);">03</span>
+              <span style="font-size:13.5px; font-weight:600; letter-spacing:-0.025em;">Which celebrations?</span>
+              <span style="font-size:12px; color:var(--ink-3);">pick any — rename later</span>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              <sc-for list="{{ starterEvents }}" as="e" hint-placeholder-count="9">
+                <label style="display:flex; min-height:36px; cursor:pointer; align-items:center; gap:8px; border-radius:99px; border:1px solid {{ e.border }}; background:{{ e.bg }}; padding:0 14px; font-size:13px; color:var(--ink);">
+                  <input type="checkbox" checked="{{ e.on }}" style="accent-color:var(--accent); margin:0;">
+                  {{ e.name }}
+                </label>
+              </sc-for>
+            </div>
+          </section>
+          <div>
+            <button style="width:100%; border:none; border-radius:8px; background:var(--accent); padding:12px 24px; font-size:14px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit;">Create my site</button>
+            <p style="margin:10px 0 0; text-align:center; font-size:12px; color:var(--ink-3);">Free while you build. Pay once when you send.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  </sc-if>
+
+  <!-- ═══ /preview — template gallery ═══ -->
+  <sc-if value="{{ isPreview }}" hint-placeholder-val="{{ false }}">
+  <div data-app data-screen-label="Template gallery" style="min-height:calc(100vh - 44px); background:var(--paper); padding:56px 24px; color:var(--ink);">
+    <div style="margin:0 auto; max-width:1100px;">
+      <header style="margin-bottom:40px; text-align:center;">
+        <span style="font-size:13px; font-weight:600; letter-spacing:-0.025em;">Simvites</span>
+        <h1 style="margin:16px 0 0; font-size:clamp(28px,4vw,44px); font-weight:650; letter-spacing:-0.03em;">Twelve looks, one wedding</h1>
+        <p style="margin:12px auto 0; max-width:576px; font-size:14px; color:var(--ink-2);">Every template brings its own typography, palette and details — not just a colour swap. Pick a starting point; you can change anything later.</p>
+      </header>
+      <div style="display:grid; gap:24px; grid-template-columns:repeat(3,1fr);">
+        <sc-for list="{{ gallery }}" as="t" hint-placeholder-count="9">
+          <a href="#" style="display:block; text-decoration:none;">
+            <div style="overflow:hidden; border-radius:10px; border:1px solid {{ t.cardBorder }}; background:{{ t.bg }}; color:{{ t.ink }}; font-family:{{ t.bodyFont }};">
+              <div style="padding:24px; text-align:{{ t.align }};">
+                <p style="margin:0; font-size:9px; text-transform:uppercase; letter-spacing:0.24em; color:{{ t.accentInk }};">Together with our families</p>
+                <h2 style="margin:8px 0 0; font-size:26px; line-height:1.05; font-weight:400; font-family:{{ t.displayFont }}; color:{{ t.ink }}; text-transform:{{ t.case }}; letter-spacing:{{ t.tracking }};">Aanya &amp; Dev</h2>
+                <p style="margin:8px 0 0; font-size:11px; text-transform:uppercase; letter-spacing:0.18em; color:{{ t.accentInk }};">19 · 09 · 2026 — Jaipur</p>
+                <div style="margin:16px 0; display:flex; justify-content:{{ t.divJustify }};">
+                  <sc-if value="{{ t.divLine }}" hint-placeholder-val="{{ true }}"><span style="height:1px; width:56px; background:{{ t.line }};"></span></sc-if>
+                  <sc-if value="{{ t.divDiamond }}" hint-placeholder-val="{{ false }}"><span style="display:flex; align-items:center; gap:8px;"><span style="height:1px; width:32px; background:{{ t.line }};"></span><span style="width:6px; height:6px; transform:rotate(45deg); background:{{ t.line }};"></span><span style="height:1px; width:32px; background:{{ t.line }};"></span></span></sc-if>
+                  <sc-if value="{{ t.divDouble }}" hint-placeholder-val="{{ false }}"><span style="display:flex; flex-direction:column; align-items:center; gap:4px;"><span style="height:1px; width:64px; background:{{ t.line }};"></span><span style="height:1px; width:40px; background:{{ t.line }};"></span></span></sc-if>
+                </div>
+                <div style="text-align:{{ t.align }};">
+                  <span style="display:inline-block; padding:10px 24px; font-size:12px; font-weight:600; color:{{ t.btnInk }}; background:{{ t.accent }}; border-radius:{{ t.btnRadius }}; text-transform:{{ t.case }}; letter-spacing:{{ t.btnTracking }};">Kindly RSVP</span>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:10px; display:flex; align-items:baseline; justify-content:space-between;">
+              <span style="font-family:'Instrument Serif',Georgia,serif; font-size:15px; color:var(--ink);">{{ t.name }}</span>
+              <span style="font-size:11.5px; color:var(--ink-3);">View →</span>
+            </div>
+            <p style="margin:0; font-size:11.5px; color:var(--ink-3);">{{ t.mood }}</p>
+          </a>
+        </sc-for>
+      </div>
+      <div style="margin-top:48px; text-align:center;">
+        <a href="#" style="display:inline-block; border-radius:10px; background:var(--accent); padding:12px 24px; font-size:14px; font-weight:600; color:#fff; text-decoration:none;">Start building free</a>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 900}}">
+class Component extends DCLogic {
+  state = { screen: 'landing', lmode: 'light', loginState: 'form', loginTab: 'link' };
+
+  componentDidMount() {
+    this._raf = 0;
+    this._start = performance.now();
+    const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+    const seg = (p, a, b) => clamp((p - a) / (b - a));
+    const ease = (a) => a < 0.5 ? 2 * a * a : 1 - Math.pow(-2 * a + 2, 2) / 2;
+    const CURSOR = [[0,82,88],[1.55,46,30],[3,84,26],[6,12,52],[6.45,12,52],[7.6,46,44],[8.3,46,44],[10.6,46,62],[11.4,88,34],[11.95,88,34],[12.9,66,8],[13.35,66,8],[15.9,92,8],[16.9,92,8],[18.4,96,96],[22,96,96]];
+    const CHAPTERS = [[0,'Edit anything'],[0.24,'Add & arrange'],[0.48,'Style & preview'],[0.7,'Publish']];
+    const NAMES = 'Aanya & Dev';
+    const TUNNEL_CENTERS = [0.585, 0.675, 0.765, 0.855];
+    const cursorAt = (t) => {
+      for (let i = 0; i < CURSOR.length - 1; i++) {
+        const [t0, x0, y0] = CURSOR[i]; const [t1, x1, y1] = CURSOR[i + 1];
+        if (t >= t0 && t <= t1) { const a = t1 === t0 ? 1 : ease((t - t0) / (t1 - t0)); const arc = Math.sin(a * Math.PI) * 3; return [x0 + (x1 - x0) * a, y0 + (y1 - y0) * a - arc]; }
+      }
+      return [82, 88];
+    };
+
+    const frame = (now) => {
+      this._raf = requestAnimationFrame(frame);
+      const root = this._root;
+      if (!root) return;
+      const $ = (sel) => root.querySelector(sel);
+      const section = $('[data-s=section]');
+      if (!section) return;
+
+      // ── scroll dive ──
+      const vh = window.innerHeight;
+      const total = section.offsetHeight - vh;
+      const p = clamp((window.scrollY - section.offsetTop) / total);
+      const hero = $('[data-s=hero]'); const dark = $('[data-s=dark]'); const fr = $('[data-s=frame]');
+      const hint = $('[data-s=hint]'); const portal = $('[data-s=portal]'); const plabel = $('[data-s=portallabel]');
+      if (hero) {
+        const a = 1 - seg(p, 0, 0.08);
+        hero.style.opacity = String(a);
+        hero.style.transform = 'translateY(' + (-seg(p, 0, 0.08) * 60) + 'px)';
+        hero.style.pointerEvents = a > 0.5 ? 'auto' : 'none';
+      }
+      if (hint) hint.style.opacity = String(1 - seg(p, 0, 0.04));
+      if (dark) dark.style.opacity = String(seg(p, 0.03, 0.17));
+      if (fr) {
+        const enter = seg(p, 0, 0.14); const exit = seg(p, 0.44, 0.56);
+        const scale = 0.58 + enter * 0.42 - exit * 0.34;
+        const rot = 11 * (1 - enter);
+        const yShift = (1 - enter) * 30 - exit * 6;
+        fr.style.transform = 'perspective(1600px) translateY(' + yShift + 'vh) rotateX(' + rot + 'deg) scale(' + scale + ')';
+        fr.style.opacity = String(1 - seg(p, 0.5, 0.56));
+        fr.style.filter = exit > 0 ? 'blur(' + (exit * 3) + 'px)' : 'none';
+      }
+      TUNNEL_CENTERS.forEach((center, i) => {
+        const card = $('[data-s=card' + i + ']'); const cap = $('[data-s=cap' + i + ']');
+        if (!card) return;
+        const d = (p - center) / 0.085;
+        if (d < -1.15 || d > 1.3) { card.style.opacity = '0'; card.style.pointerEvents = 'none'; if (cap) cap.style.opacity = '0'; return; }
+        let scale, op;
+        if (d <= 0) { const a = clamp(d + 1); scale = 0.38 + a * 0.62; op = a; }
+        else { const a = clamp(d); scale = 1 + a * 1.9; op = 1 - a; }
+        card.style.opacity = String(op);
+        card.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+        if (cap) { cap.style.opacity = String(clamp(op * 1.2 - (d > 0 ? d * 1.6 : 0))); cap.style.transform = 'translateY(' + ((1 - op) * 30 - 50) + '%)'; }
+      });
+      if (portal) {
+        const a = seg(p, 0.9, 0.995);
+        portal.style.transform = 'scale(' + a + ')';
+        if (plabel) plabel.style.opacity = String(seg(p, 0.93, 0.985));
+      }
+
+      // ── 22s demo loop ──
+      const t = Math.max(0, (now - this._start) / 1000) % 22;
+      const demoOn = p < 0.62;
+      if (!demoOn) return;
+      const [cx, cy] = cursorAt(t);
+      const cur = $('[data-d=cursor]');
+      if (cur) cur.style.transform = 'translate(' + (cx / 100 * (cur.parentElement.clientWidth || 900)) + 'px, ' + (cy / 100 * (cur.parentElement.clientHeight || 320)) + 'px) scale(' + ([1.55,6.45,11.95,13.35,16.9].some((c) => t > c && t < c + 0.18) ? 0.82 : 1) + ')';
+      const ripple = $('[data-d=ripple]');
+      if (ripple) {
+        const near = [1.55,6.45,8.3,11.95,13.35,15.35,16.9].find((c) => t >= c && t < c + 0.45);
+        if (near != null) { const a = (t - near) / 0.45; ripple.style.opacity = String(1 - a); ripple.style.transform = 'translate(' + (cx / 100 * (ripple.parentElement.clientWidth || 900)) + 'px, ' + (cy / 100 * (ripple.parentElement.clientHeight || 320)) + 'px) scale(' + (0.4 + a * 1.6) + ')'; }
+        else ripple.style.opacity = '0';
+      }
+      const sel = t >= 1.55 && t < 16.9;
+      const hb = $('[data-d=hero]'); const insp = $('[data-d=insp]');
+      if (hb) hb.style.outline = sel ? '2px solid oklch(0.62 0.21 29)' : '2px solid transparent';
+      if (insp) insp.style.opacity = sel ? '1' : '0.55';
+      const chars = t < 1.9 ? (t < 1.55 ? NAMES.length : 0) : t < 5.4 ? Math.min(NAMES.length, Math.floor(((t - 1.9) / 3.5) * NAMES.length)) : NAMES.length;
+      const typed = t < 1.55 ? 'Your names' : NAMES.slice(0, chars) || ' ';
+      const ht = $('[data-d=herotitle]'); const inm = $('[data-d=inspname]'); const caret = $('[data-d=caret]');
+      if (ht && ht.textContent !== typed) ht.textContent = typed;
+      if (inm && inm.textContent !== typed) inm.textContent = typed;
+      if (caret) caret.style.opacity = t > 1.55 && t < 5.6 && Math.floor(t * 2.6) % 2 === 0 ? '1' : '0';
+      const gal = $('[data-d=gallery]');
+      if (gal) {
+        const a = t < 6.45 ? 0 : Math.min(1, (t - 6.45) / 0.4);
+        gal.style.opacity = String(a);
+        gal.style.transform = 'translateY(' + (14 * (1 - a)) + 'px)';
+        gal.style.maxHeight = a > 0 ? '60px' : '0px';
+        gal.style.marginTop = a > 0 ? '6px' : '0px';
+      }
+      const libg = $('[data-d=libgallery]');
+      if (libg) libg.style.background = t >= 6.3 && t < 7 ? 'rgba(222,71,38,0.10)' : 'transparent';
+      const cd = $('[data-d=countdown]');
+      if (cd) {
+        if (t >= 8.3 && t < 10.6) { const a = ease(Math.min(1, (t - 8.3) / 2.3)); cd.style.transform = 'translateY(' + (a * 66) + 'px) rotate(1.6deg) scale(1.02)'; cd.style.boxShadow = '0 14px 30px -12px rgba(30,20,5,.3)'; cd.style.zIndex = '3'; }
+        else if (t >= 10.6 && t < 21) { cd.style.transform = 'translateY(66px)'; cd.style.boxShadow = 'none'; }
+        else { cd.style.transform = 'none'; cd.style.boxShadow = 'none'; }
+      }
+      if (gal && t >= 8.3 && t < 21) { const a = t < 10.6 ? ease(Math.min(1, (t - 8.3) / 2.3)) : 1; gal.style.translate = '0 ' + (-a * 66) + 'px'; }
+      else if (gal) gal.style.translate = '0 0';
+      const gold = t >= 11.95 && t < 21;
+      if (hb) hb.style.background = gold ? 'linear-gradient(150deg, #F3E7C4 0%, #EBD9A4 100%)' : '#F5EFE3';
+      const gs = $('[data-d=gold]');
+      if (gs) gs.style.outline = gold ? '2px solid oklch(0.62 0.21 29)' : '1px solid rgba(30,25,15,.15)';
+      const phone = t >= 13.35 && t < 15.35;
+      const cv = $('[data-d=canvas]');
+      if (cv) { cv.style.width = phone ? '46%' : '100%'; cv.style.margin = phone ? '0 auto' : '0'; }
+      const dp = $('[data-d=devphone]'); const dd = $('[data-d=devdesk]');
+      if (dp) dp.style.background = phone ? '#F4F1E9' : 'transparent';
+      if (dd) dd.style.background = phone ? 'transparent' : '#F4F1E9';
+      const pubEl = $('[data-d=publish]');
+      if (pubEl) {
+        const label = t < 16.9 || t >= 21.5 ? 'Publish' : t < 18 ? 'Publishing…' : 'Live ✓';
+        if (pubEl.textContent !== label) pubEl.textContent = label;
+        pubEl.style.background = label === 'Live ✓' ? '#1B9E5F' : 'oklch(0.62 0.21 29)';
+      }
+      const toast = $('[data-d=toast]');
+      if (toast) { const on = t >= 18 && t < 20.6; toast.style.opacity = on ? '1' : '0'; toast.style.transform = on ? 'translateY(0)' : 'translateY(12px)'; }
+      const url = $('[data-d=url]');
+      if (url) {
+        const live = t >= 18 && t < 21.5;
+        const label = live ? 'aanya-and-dev.simvites.co.uk · live ●' : 'aanya-and-dev.simvites.co.uk · editing';
+        if (url.textContent !== label) url.textContent = label;
+        url.style.color = live ? '#1B9E5F' : '#928D81';
+      }
+      const veil = $('[data-d=veil]');
+      if (veil) veil.style.opacity = t >= 21 ? String(t - 21) : '0';
+      const bar = $('[data-d=bar]');
+      if (bar) bar.style.width = ((t / 22) * 100) + '%';
+      const chap = $('[data-d=chapter]');
+      if (chap) { const ch = [...CHAPTERS].reverse().find((c) => t / 22 >= c[0]); if (ch && chap.textContent !== ch[1]) chap.textContent = ch[1]; }
+      const clock = $('[data-d=clock]');
+      if (clock) { const s = Math.floor(t); const label = '0:' + String(s).padStart(2, '0'); if (clock.textContent !== label) clock.textContent = label; }
+    };
+    this._raf = requestAnimationFrame(frame);
+  }
+
+  componentWillUnmount() { cancelAnimationFrame(this._raf); }
+
+  renderVals() {
+    const screen = this.state.screen;
+    const seg = (on) => ({ bg: on ? '#EDEBE6' : 'transparent', ink: on ? '#101010' : '#8C897F' });
+    const TABS = [
+      { k: 'landing', label: '/' }, { k: 'login', label: '/login' },
+      { k: 'onboarding', label: '/onboarding' }, { k: 'preview', label: '/preview' },
+    ];
+    const ROUTE = {
+      landing: '/ — deep-zoom scroll landing (scroll to dive; 22s live demo loop)',
+      login: '/login — split screen: the tool · the artifact',
+      onboarding: '/onboarding — three moves',
+      preview: '/preview — all 18 templates, real type + geometry',
+    };
+
+    // 18 templates with real style tokens from the registry
+    const G = [
+      ['Golden Hour','Ceremonial','oklch(0.985 0.008 85)','oklch(0.26 0.03 40)','oklch(0.42 0.16 28)','oklch(0.53 0.105 70)','oklch(0.72 0.11 75)',"'Cormorant Garamond',serif","'Jost',sans-serif",'none','999px','line','center'],
+      ['Ivory Atelier','Gallery-calm','#F6F1E9','#211D18','#211D18','#97753F','#B08D57',"'Fraunces',serif","'Inter',sans-serif",'none','12px','double','center'],
+      ['Midnight Baraat','Night party','#0F1B32','#EFE6D2','#D4AF6A','#D4AF6A','rgba(212,175,106,0.45)',"'Cormorant Garamond',serif","'Instrument Sans',sans-serif",'uppercase','12px','diamond','center'],
+      ['Garden Mehndi','Daytime outdoor','#F7F5EC','#2E5339','#2E5339','#4E7A57','#A9BC8F',"'Marcellus',serif","'Instrument Sans',sans-serif",'none','12px','line','center'],
+      ['Cloud Gallery','Photography-led','#FFFFFF','#111110','#111110','#8C8C88','#C9C9C4',"'Instrument Serif',serif","'Instrument Sans',sans-serif",'uppercase','3px','none','left'],
+      ['Rose & Ash','Romance','#F6E7E4','#3E2228','#6E2231','#6E2231','#C4808E',"'Playfair Display',serif","'Instrument Sans',sans-serif",'none','999px','diamond','center'],
+      ['Rajwada','Jewel-box maximalist','#7A1024','#F8EAD8','#E8A33D','#E8A33D','rgba(232,163,61,0.5)',"'DM Serif Display',serif","'Instrument Sans',sans-serif",'uppercase','3px','double','center'],
+      ['Salt & Sky','Destination','#F2EDE3','#3E4E5C','#3E4E5C','#5B7485','#9FB0BC',"'Italiana',serif","'Instrument Sans',sans-serif",'uppercase','3px','line','center'],
+      ['Deco Champagne','Art deco','#16130F','#F4ECDD','#E2C892','#E2C892','rgba(226,200,146,0.45)',"'Libre Bodoni',serif","'Instrument Sans',sans-serif",'uppercase','3px','double','center'],
+      ['Terracotta Sun','Boho','#F4E9DC','#4C2B1B','#C4623A','#A6512F','#D99B7C',"'Spectral',serif","'Instrument Sans',sans-serif",'none','12px','diamond','left'],
+      ['Ink & Jasmine','Quiet letter','#FBFBF9','#20211F','#4E7A57','#41684A','#A3BEA6',"'Instrument Serif',serif","'Instrument Sans',sans-serif",'none','3px','line','left'],
+      ['Velvet Sangeet','Afterparty','#2E1836','#F2E4EE','#C97E4E','#D89263','rgba(201,126,78,0.5)',"'Playfair Display',serif","'Instrument Sans',sans-serif",'none','999px','diamond','center'],
+      ['Peacock Court','Jewel-box regal','#0D3B3E','#F2EBD8','#D9A62E','#D9A62E','rgba(217,166,46,0.5)',"'Cinzel',serif","'Instrument Sans',sans-serif",'uppercase','999px','double','center'],
+      ['Saffron Disco','Sangeet party','#2B1030','#FFE4F1','#FF4FA0','#FF7AB8','rgba(255,79,160,0.5)',"'DM Serif Display',serif","'Instrument Sans',sans-serif",'uppercase','999px','diamond','center'],
+      ['Lotus Milk','Soft minimal','#FDFBFA','#3C3335','#D98A9E','#B76B80','#E9BFC9',"'Prata',serif","'Instrument Sans',sans-serif",'none','12px','none','center'],
+      ['Monsoon Ink','Moody letterpress','#E9EAEC','#252A3A','#3D4560','#4A5478','#9BA3B8',"'Lora',serif","'Instrument Sans',sans-serif",'none','3px','line','left'],
+      ['Henna Noir','After dark','#111010','#F1E4D4','#C46A3B','#D67E4E','rgba(196,106,59,0.5)',"'Libre Bodoni',serif","'Instrument Sans',sans-serif",'uppercase','3px','diamond','center'],
+      ['Marigold Morning','Daytime joy','#FFFDF6','#4C3A12','#E8A020','#B97D14','#EFC878',"'Great Vibes',cursive","'Instrument Sans',sans-serif",'none','999px','line','center'],
+    ];
+    const gallery = G.map(([name, mood, bg, ink, accent, accentInk, line, displayFont, bodyFont, tcase, btnRadius, divider, align]) => ({
+      name, mood, bg, ink, accent, accentInk, line, displayFont, bodyFont,
+      case: tcase, btnRadius, align,
+      cardBorder: line.startsWith('rgba') ? line : line + '66',
+      tracking: tcase === 'uppercase' ? '0.05em' : '-0.01em',
+      btnTracking: tcase === 'uppercase' ? '0.08em' : '0',
+      btnInk: (name === 'Ivory Atelier' || name === 'Cloud Gallery' || name === 'Salt & Sky' || name === 'Garden Mehndi' || name === 'Monsoon Ink' || name === 'Ink & Jasmine') ? '#fff' : (bg.startsWith('#0') || bg.startsWith('#1') || bg.startsWith('#2') || bg.startsWith('#7A10') ? '#1A1512' : '#fff'),
+      divJustify: align === 'left' ? 'flex-start' : 'center',
+      divLine: divider === 'line', divDiamond: divider === 'diamond', divDouble: divider === 'double',
+    }));
+
+    const mode = this.state.lmode;
+    return {
+      rootRef: (el) => { this._root = el; },
+      routeLabel: ROUTE[screen],
+      tabs: TABS.map((t) => ({ label: t.label, pick: () => this.setState({ screen: t.k }), ...seg(screen === t.k) })),
+      isLanding: screen === 'landing', isLogin: screen === 'login',
+      isOnboarding: screen === 'onboarding', isPreview: screen === 'preview',
+
+      lmode: mode,
+      toggleLmode: () => this.setState({ lmode: mode === 'dark' ? 'light' : 'dark' }),
+      lmodeIcon: mode === 'dark'
+        ? ['M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8', 'M12 2v2', 'M12 20v2', 'M4.93 4.93l1.41 1.41', 'M17.66 17.66l1.41 1.41', 'M2 12h2', 'M20 12h2', 'M6.34 17.66l-1.41 1.41', 'M19.07 4.93l-1.41 1.41']
+        : ['M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'],
+      navLinks: ['Product', 'Templates', 'RSVP', 'FAQ', 'Pricing'],
+
+      tunnel: [
+        { cardKey: 'card0', capKey: 'cap0', dim: 'DIMENSION 01', caption: 'The matrix that runs the whole wedding', title: 'Guests · invite matrix', action: 'Send invites', capSide: 'left:7%;', isMatrix: true,
+          rows: [
+            { name: 'Priya Shah', child: false, dots: [1,1,1,1].map((d) => ({ bg: d ? 'oklch(0.62 0.21 29)' : 'transparent', border: d ? 'none' : '1px solid rgba(255,255,255,0.25)' })) },
+            { name: 'Raj Shah', child: false, dots: [1,1,1,0].map((d) => ({ bg: d ? 'oklch(0.62 0.21 29)' : 'transparent', border: d ? 'none' : '1px solid rgba(255,255,255,0.25)' })) },
+            { name: 'Aarav Shah', child: true, dots: [0,1,1,0].map((d) => ({ bg: d ? 'oklch(0.62 0.21 29)' : 'transparent', border: d ? 'none' : '1px solid rgba(255,255,255,0.25)' })) },
+            { name: 'Meera Patel', child: false, dots: [1,0,1,1].map((d) => ({ bg: d ? 'oklch(0.62 0.21 29)' : 'transparent', border: d ? 'none' : '1px solid rgba(255,255,255,0.25)' })) },
+          ] },
+        { cardKey: 'card1', capKey: 'cap1', dim: 'DIMENSION 02', caption: 'Answers land while you watch', title: 'RSVPs · landing live', action: '', capSide: 'right:7%; text-align:right;', isRsvp: true },
+        { cardKey: 'card2', capKey: 'cap2', dim: 'DIMENSION 03', caption: 'Invites with no accounts, ever', title: 'Invitations · personal links', action: 'WhatsApp', capSide: 'left:7%;', isInvite: true },
+        { cardKey: 'card3', capKey: 'cap3', dim: 'DIMENSION 04', caption: 'Planning that talks to itself', title: 'Planning · budget, vendors, seating', action: '', capSide: 'right:7%; text-align:right;', isPlanning: true },
+      ],
+      qrCells: Array.from({ length: 16 }).map((_, i) => (i % 3 === 0 || i === 5 || i === 10) ? '#000' : '#fff'),
+
+      tplFigures: [
+        { name: 'Editorial Gold', sub: 'Ivory · gold · deep maroon', label: 'COUPLE PHOTO', bg: '#F5EFE3', ink: '#211D18', accent: '#C9A227', kicker: '19 · 09 · 2026 — JAIPUR' },
+        { name: 'Editorial Luxury', sub: 'Cream · ink · antique brass', label: 'VENUE PHOTO', bg: '#F6F1E9', ink: '#211D18', accent: '#B08D57', kicker: 'FOUR EVENTS · ONE WEEKEND' },
+      ],
+      eventChips: [ { name: 'Mehndi', color: '#3E7C4F' }, { name: 'Sangeet', color: '#6D3FA9' }, { name: 'Ceremony', color: '#C9A227' }, { name: 'Reception', color: '#7A1F1F' } ],
+      uspRows: [
+        { name: 'Priya', dots: [1,1,1].map((d) => ({ bg: d ? 'oklch(0.62 0.21 29)' : 'transparent', border: d ? 'none' : '1px solid #DBDAD6' })) },
+        { name: 'Aarav', dots: [0,1,1].map((d) => ({ bg: d ? 'oklch(0.62 0.21 29)' : 'transparent', border: d ? 'none' : '1px solid #DBDAD6' })) },
+      ],
+      features: [
+        { icon: '🕌', title: 'Multi-event website', body: '18 templates, 10 looks per section, your fonts and colours — published as a keepsake your guests treasure.' },
+        { icon: '✉️', title: 'Personal invitations', body: 'Every household gets its own private link — by email, WhatsApp or a QR on the printed card.' },
+        { icon: '✓', title: 'Per-event RSVP', body: 'Custom questions, meal choices, deadlines and capacity — answered per person, per event.' },
+        { icon: '🪑', title: 'Seating planner', body: 'Upload your floor plan, drag tables into place, seat every name. Guests see their table on their invite.' },
+        { icon: '💷', title: 'Budget & payments', body: 'Vendor payment schedules linked to your budget, with reminders before every due date.' },
+        { icon: '🤖', title: 'AI planning help', body: 'Paste any messy guest list and it becomes households. Ask the assistant anything about your own wedding.' },
+      ],
+      faqs: [
+        { q: 'Do my guests need an app or an account?', a: 'No. Guests tap their personal link and RSVP in the browser — no downloads, no passwords, no accounts. It works on any phone.' },
+        { q: 'Can different guests see different events?', a: 'Yes — that is the whole point. You invite each guest to exactly the right events, and their website only shows those. Grandma never sees the afterparty.' },
+        { q: 'How do payments work?', a: 'Everything is free while you build. One payment unlocks publishing and sending invitations — no subscription, and your site stays live for 18 months after the wedding.' },
+        { q: 'Can I change the design after publishing?', a: 'Any time. Edit, restyle or add events, then publish again — guests always see the latest version, and your RSVPs are never lost.' },
+        { q: 'What if my guest list is a messy spreadsheet?', a: 'Paste it in. The importer (with AI help) groups families into households, splits "Raj & Priya Shah" into two guests, and previews everything before it saves.' },
+        { q: 'Do you support Indian wedding events?', a: 'It is built for them: mehndi, haldi, sangeet, baraat, nikah, pheras, walima, receptions — any number of events, each with its own colour, capacity and guest list.' },
+        { q: 'Can family help me manage it?', a: 'Yes — invite collaborators from Settings. They sign in with their own email and can help with guests, RSVPs and planning.' },
+        { q: 'What happens to RSVP answers?', a: 'They roll up live per event — attending, declined, pending, meals and dietary notes — and export as one clean CSV your caterer will love.' },
+      ],
+      pricingPoints: [
+        { t: 'Everything unlocked while you build', d: 'Website, guests, matrix, planning. Free until send day.' },
+        { t: 'One payment, no subscription', d: 'Pay when you publish and send invites. That is it.' },
+        { t: 'Live 18 months after the wedding', d: 'Photos, thank yous and the memory stay up.' },
+      ],
+      footerCols: [
+        { group: 'Product', links: ['The editor', 'Invitations & RSVP', 'Templates', 'Pricing'] },
+        { group: 'Company', links: ['Early access', 'Talk to the founder', 'Changelog'] },
+        { group: 'Legal', links: ['Privacy', 'Terms', 'Contact'] },
+      ],
+
+      loginForm: this.state.loginState === 'form', loginLinkSent: this.state.loginState === 'sent',
+      lfBg: seg(this.state.loginState === 'form').bg, lfInk: seg(this.state.loginState === 'form').ink,
+      lsBg: seg(this.state.loginState === 'sent').bg, lsInk: seg(this.state.loginState === 'sent').ink,
+      setLoginForm: () => this.setState({ loginState: 'form' }),
+      setLinkSent: () => this.setState({ loginState: 'sent' }),
+      linkTab: this.state.loginTab === 'link', pwTab: this.state.loginTab === 'pw',
+      pickLinkTab: () => this.setState({ loginTab: 'link' }),
+      pickPwTab: () => this.setState({ loginTab: 'pw' }),
+      tabLinkBg: this.state.loginTab === 'link' ? 'var(--surface)' : 'transparent',
+      tabLinkInk: this.state.loginTab === 'link' ? 'var(--ink)' : 'var(--ink-3)',
+      tabLinkShadow: this.state.loginTab === 'link' ? 'var(--shadow)' : 'none',
+      tabPwBg: this.state.loginTab === 'pw' ? 'var(--surface)' : 'transparent',
+      tabPwInk: this.state.loginTab === 'pw' ? 'var(--ink)' : 'var(--ink-3)',
+      tabPwShadow: this.state.loginTab === 'pw' ? 'var(--shadow)' : 'none',
+      loginCta: this.state.loginTab === 'link' ? 'Send sign-in link' : 'Sign in',
+      maybeSendLink: () => { if (this.state.loginTab === 'link') this.setState({ loginState: 'sent' }); },
+      inviteEvents: [
+        { c: '#3E7C4F', n: 'Mehndi', d: 'Thu 17 Sep · At home' },
+        { c: '#6D3FA9', n: 'Sangeet', d: 'Fri 18 Sep · The Grand Hall' },
+        { c: '#C9A227', n: 'Ceremony', d: 'Sat 19 Sep · Merrydale Manor' },
+        { c: '#7A1F1F', n: 'Reception', d: 'Sat 19 Sep · Merrydale Manor' },
+      ],
+
+      onbTemplates: [
+        { name: 'Golden Hour', desc: 'Cream, gold and deep red with a classic serif — warm, ceremonial, celebratory. The original.', swatches: ['#F5EFE3', '#C9A227', '#7A1F1F'], active: true },
+        { name: 'Ivory Atelier', desc: 'Warm ivory and ink with brass hairlines — quiet, modern, gallery-calm.', swatches: ['#F6F1E9', '#211D18', '#B08D57'], active: false },
+        { name: 'Midnight Baraat', desc: 'Celestial navy and candlelit gold — the baraat under the stars.', swatches: ['#0F1B32', '#EFE6D2', '#D4AF6A'], active: false },
+        { name: 'Garden Mehndi', desc: 'Botanical greens on warm parchment — a mehndi under the arch.', swatches: ['#F7F5EC', '#2E5339', '#7FA05F'], active: false },
+      ].map((t) => ({ ...t, border: t.active ? 'var(--accent)' : 'var(--line)', ring: t.active ? '0 0 0 1px var(--accent)' : 'none' })),
+      starterEvents: ['Mehndi', 'Haldi', 'Sangeet', 'Wedding Ceremony', 'Nikah', 'Civil Ceremony', 'Reception', 'Walima', 'Next-day Brunch'].map((name) => {
+        const on = name === 'Wedding Ceremony' || name === 'Reception';
+        return { name, on, border: on ? 'var(--accent)' : 'var(--line)', bg: on ? 'var(--accent-soft)' : 'var(--surface)' };
+      }),
+
+      gallery,
+    };
+  }
+}
+</script>
+</body>
+</html>

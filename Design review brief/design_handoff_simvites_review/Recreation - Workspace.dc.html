@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&amp;family=Instrument+Serif:ital@0;1&amp;family=Geist+Mono:wght@400..700&amp;display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#101010; }
+[data-ws] {
+  --paper:#FAF8F3; --paper-2:#F3EFE6; --surface:#FFFFFF; --surface-2:#F4F1E9;
+  --ink:#1A1916; --ink-2:#6B675E; --ink-3:#928D81; --line:#EAE5DA; --line-2:#DCD5C6;
+  --accent:oklch(0.62 0.21 29); --accent-ink:oklch(0.55 0.19 29);
+  --accent-soft:rgba(222,71,38,0.08); --accent-line:rgba(222,71,38,0.35);
+  --ok:#1B9E5F; --warn:#B87A1E; --bad:#D2402A; --info:#3E63DD;
+  --ok-soft:#E5F5EC; --warn-soft:#FAF0DD; --bad-soft:#FBEAE6; --info-soft:#E8EDFB;
+  --shadow:0 1px 2px rgba(30,25,15,0.05); --shadow-lg:0 40px 90px -20px rgba(20,16,8,0.45);
+}
+[data-ws][data-mode="dark"] {
+  --paper:#0A1220; --paper-2:#0E1830; --surface:#111C33; --surface-2:#1A2742;
+  --ink:#EEF2FA; --ink-2:#A9B4CC; --ink-3:#7683A1; --line:#223252; --line-2:#2C3F63;
+  --accent:oklch(0.68 0.19 30); --accent-ink:oklch(0.74 0.17 30);
+  --accent-soft:rgba(242,109,86,0.14); --accent-line:rgba(242,109,86,0.4);
+  --ok:#3DD68C; --warn:#F0B25A; --bad:#F26D56; --info:#8CA3F0;
+  --ok-soft:rgba(61,214,140,0.15); --warn-soft:rgba(240,178,90,0.15); --bad-soft:rgba(242,109,86,0.16); --info-soft:rgba(110,139,232,0.18);
+  --shadow:0 1px 2px rgba(2,6,16,0.5); --shadow-lg:0 40px 90px -20px rgba(2,6,16,0.7);
+}
+[data-ws] * { scrollbar-width:thin; scrollbar-color:var(--line-2) transparent; }
+[data-ws] *::-webkit-scrollbar { width:8px; height:8px; }
+[data-ws] *::-webkit-scrollbar-track { background:transparent; }
+[data-ws] *::-webkit-scrollbar-thumb { background:var(--line-2); border-radius:99px; border:2px solid transparent; background-clip:content-box; }
+[data-ws] input::placeholder, [data-ws] textarea::placeholder { color:var(--ink-3); opacity:1; }
+a { color:oklch(0.55 0.19 29); } a:hover { color:oklch(0.62 0.21 29); }
+</style>
+</helmet>
+
+<div style="font-family:'Instrument Sans',system-ui,sans-serif;">
+
+  <!-- ── Review scaffolding bar (not part of the product) ── -->
+  <div style="height:44px; background:#101010; color:#EDEBE6; display:flex; align-items:center; gap:14px; padding:0 16px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.06em;">
+    <span style="text-transform:uppercase; color:#8C897F;">Recreation</span>
+    <span style="color:#EDEBE6;">{{ routeLabel }}</span>
+    <span style="flex:1;"></span>
+    <span style="color:#8C897F; text-transform:uppercase;">account</span>
+    <div style="display:flex; gap:2px; background:#1E1E1C; border-radius:6px; padding:2px;">
+      <button onClick="{{ setFounder }}" style="border:none; cursor:pointer; font:inherit; padding:3px 9px; border-radius:4px; background:{{ founderBtnBg }}; color:{{ founderBtnInk }};">founder · populated</button>
+      <button onClick="{{ setNewbie }}" style="border:none; cursor:pointer; font:inherit; padding:3px 9px; border-radius:4px; background:{{ newbieBtnBg }}; color:{{ newbieBtnInk }};">fresh · empty</button>
+    </div>
+    <span style="color:#8C897F; text-transform:uppercase;">theme</span>
+    <div style="display:flex; gap:2px; background:#1E1E1C; border-radius:6px; padding:2px;">
+      <button onClick="{{ setLight }}" style="border:none; cursor:pointer; font:inherit; padding:3px 9px; border-radius:4px; background:{{ lightBtnBg }}; color:{{ lightBtnInk }};">light</button>
+      <button onClick="{{ setDark }}" style="border:none; cursor:pointer; font:inherit; padding:3px 9px; border-radius:4px; background:{{ darkBtnBg }}; color:{{ darkBtnInk }};">dark</button>
+    </div>
+  </div>
+
+  <div data-ws data-mode="{{ mode }}" style="display:flex; height:calc(100vh - 44px); background:var(--paper); color:var(--ink); overflow:hidden;">
+
+    <!-- ═══ Sidebar — 230px, surface, grouped nav ═══ -->
+    <aside style="width:230px; flex-shrink:0; display:flex; flex-direction:column; border-right:1px solid var(--line); background:var(--surface); min-height:0;">
+      <div style="padding:20px 16px 8px;">
+        <a href="#" onClick="{{ goDashboard }}" style="padding:0 4px; font-size:13px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); text-decoration:none;">Simvites</a>
+        <div style="margin-top:12px; display:flex; align-items:center; gap:8px; border-radius:18px; border:1px solid var(--line); background:var(--paper); padding:8px 10px;">
+          <span style="width:6px; height:6px; flex-shrink:0; border-radius:99px; background:{{ statusDotColor }};"></span>
+          <span style="min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:'Instrument Serif',Georgia,serif; font-size:15px; line-height:1; color:var(--ink);">{{ siteTitle }}</span>
+          <span style="font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-3);">{{ statusWord }}</span>
+        </div>
+      </div>
+
+      <nav style="flex:1; overflow-y:auto; padding:0 10px 12px; min-height:0;">
+        <sc-for list="{{ navGroups }}" as="g" hint-placeholder-count="5">
+          <div style="margin-top:{{ g.mt }};">
+            <p style="margin:0 0 6px; padding:0 10px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-3);">{{ g.label }}</p>
+            <sc-for list="{{ g.items }}" as="item" hint-placeholder-count="3">
+              <a href="#" onClick="{{ item.go }}" style="margin-bottom:2px; display:flex; align-items:center; gap:10px; border-radius:18px; padding:7px 10px; font-size:13.5px; text-decoration:none; background:{{ item.bg }}; font-weight:{{ item.weight }}; color:{{ item.color }}; box-shadow:{{ item.shadow }};" style-hover="background:var(--surface-2); color:var(--ink);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ item.iconColor }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><sc-for list="{{ item.paths }}" as="p"><path d="{{ p }}"></path></sc-for></svg>
+                <span style="flex:1;">{{ item.label }}</span>
+                <sc-if value="{{ item.count }}" hint-placeholder-val="{{ false }}">
+                  <span style="border-radius:99px; background:var(--warn-soft); padding:1px 6px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; color:var(--warn);">{{ item.count }}</span>
+                </sc-if>
+              </a>
+            </sc-for>
+          </div>
+        </sc-for>
+      </nav>
+
+      <div style="border-top:1px solid var(--line); padding:12px 10px;">
+        <a href="#" onClick="{{ goSettings }}" style="margin-bottom:2px; display:flex; align-items:center; gap:10px; border-radius:18px; padding:7px 10px; font-size:13.5px; text-decoration:none; background:{{ settingsBg }}; font-weight:{{ settingsWeight }}; color:{{ settingsColor }}; box-shadow:{{ settingsShadow }};" style-hover="background:var(--surface-2); color:var(--ink);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6"></path></svg>
+          <span style="flex:1;">Settings</span>
+        </a>
+        <div style="margin-top:4px; display:flex; align-items:center; justify-content:space-between; padding:4px 10px;">
+          <span style="font-size:12px; color:var(--ink-3);">Appearance</span>
+          <button onClick="{{ toggleMode }}" aria-label="Toggle theme" style="width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:99px; border:1px solid var(--line); background:transparent; color:var(--ink-2); cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><sc-for list="{{ themeIconPaths }}" as="p"><path d="{{ p }}"></path></sc-for></svg>
+          </button>
+        </div>
+        <div style="margin-top:4px; display:flex; align-items:center; gap:8px; border-radius:18px; padding:6px 10px;">
+          <span style="width:24px; height:24px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:99px; background:var(--surface-2); font-size:10px; font-weight:600; text-transform:uppercase; color:var(--ink-2);">{{ emailInitial }}</span>
+          <span style="min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11.5px; color:var(--ink-3);">{{ email }}</span>
+          <button title="Sign out" style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:8px; border:none; background:transparent; color:var(--ink-3); cursor:pointer;" style-hover="background:var(--surface-2); color:var(--ink);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══ Main column ═══ -->
+    <div style="display:flex; min-width:0; flex:1; flex-direction:column; min-height:0;">
+
+      <!-- Header: title · ⌘K · status · bell · Preview · Publish -->
+      <header style="position:relative; z-index:40; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--line); padding:10px 20px; backdrop-filter:blur(10px); background:color-mix(in oklab, var(--surface) 86%, transparent);">
+        <h1 style="margin:0; font-size:14.5px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">{{ pageTitle }}</h1>
+        <button style="margin-left:8px; min-width:200px; display:flex; align-items:center; gap:8px; border-radius:8px; border:1px solid var(--line); background:var(--surface-2); padding:6px 12px; text-align:left; font-size:12.5px; color:var(--ink-3); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--line-2);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16"></path><path d="m21 21-4.3-4.3"></path></svg>
+          <span style="flex:1;">Search…</span>
+          <kbd style="border-radius:4px; border:1px solid var(--line); background:var(--surface); padding:0 4px; font-family:'Geist Mono',monospace; font-size:9.5px; color:var(--ink-3);">⌘K</kbd>
+        </button>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+          <span style="display:flex; align-items:center; gap:6px; font-family:'Geist Mono',monospace; font-size:10px; color:var(--ink-3);">
+            <span style="width:6px; height:6px; border-radius:99px; background:{{ statusDotColor }};"></span>{{ statusHeaderWord }}
+          </span>
+          <div style="position:relative;">
+            <button onClick="{{ toggleNotif }}" aria-label="Notifications" style="position:relative; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--ink-2); cursor:pointer;" style-hover="border-color:var(--line-2); color:var(--ink);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
+              <sc-if value="{{ notifCount }}" hint-placeholder-val="{{ false }}">
+                <span style="position:absolute; right:-4px; top:-4px; height:16px; min-width:16px; display:flex; align-items:center; justify-content:center; border-radius:99px; background:var(--accent); padding:0 4px; font-family:'Geist Mono',monospace; font-size:9px; font-weight:600; color:#fff;">{{ notifCount }}</span>
+              </sc-if>
+            </button>
+            <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ closeNotif }}" style="position:fixed; inset:0; z-index:40;"></div>
+              <div style="position:absolute; right:0; top:44px; z-index:50; width:320px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:6px; box-shadow:var(--shadow-lg);">
+                <p style="margin:0; padding:6px 10px 4px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-3);">Needs your attention</p>
+                <sc-if value="{{ notifEmpty }}" hint-placeholder-val="{{ false }}">
+                  <p style="margin:0; padding:12px 10px; font-size:13px; color:var(--ink-3);">All caught up — nothing needs you right now.</p>
+                </sc-if>
+                <sc-for list="{{ notifications }}" as="n" hint-placeholder-count="3">
+                  <a href="#" style="display:flex; align-items:center; gap:10px; border-radius:18px; padding:8px 10px; font-size:13px; color:var(--ink); text-decoration:none;" style-hover="background:var(--surface-2);">
+                    <span style="width:6px; height:6px; flex-shrink:0; border-radius:99px; background:{{ n.dot }};"></span>
+                    <span style="min-width:0; flex:1;">{{ n.text }}</span>
+                    <span aria-hidden="true" style="color:var(--ink-3);">→</span>
+                  </a>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <a href="#" style="display:flex; align-items:center; gap:6px; border-radius:18px; border:1px solid var(--line); padding:6px 12px; font-size:13px; font-weight:500; color:var(--ink); text-decoration:none;" style-hover="border-color:var(--line-2);">
+            Preview <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
+          </a>
+          <sc-if value="{{ isLocked }}" hint-placeholder-val="{{ false }}">
+            <a href="#" style="border-radius:18px; border:1px solid var(--accent-line); background:var(--accent-soft); padding:6px 12px; font-size:13px; font-weight:500; color:var(--accent-ink); text-decoration:none;">Unlock to publish →</a>
+          </sc-if>
+          <sc-if value="{{ canPublish }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ doPublish }}" style="border:none; border-radius:8px; background:{{ publishBg }}; padding:6px 14px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit; transition:background-color 150ms ease;">{{ publishLabel }}</button>
+          </sc-if>
+        </div>
+      </header>
+
+      <!-- ═══ Screens ═══ -->
+      <main style="flex:1; overflow-y:auto; min-height:0;">
+
+        <!-- ── /dashboard ── -->
+        <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Dashboard" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Command Centre</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">{{ dashHeadline }}</h1>
+            <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">{{ dashDescription }}</p>
+          </div>
+
+          <!-- Getting-started checklist (fresh accounts only) -->
+          <sc-if value="{{ showChecklist }}" hint-placeholder-val="{{ false }}">
+            <section style="margin-bottom:24px; border-radius:12px; border:1px solid var(--accent-line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+              <div style="display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px;">
+                <p style="margin:0; font-size:14px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">Your path to the big send</p>
+                <p style="margin:0; font-family:'Geist Mono',monospace; font-size:11px; color:var(--ink-3);">0 of 5 done</p>
+              </div>
+              <ol style="margin:16px 0 0; padding:0; list-style:none; display:grid; grid-template-columns:repeat(5,1fr); gap:10px;">
+                <sc-for list="{{ checklist }}" as="s" hint-placeholder-count="5">
+                  <li style="border-radius:10px; border:1px solid {{ s.border }}; background:{{ s.bg }}; padding:12px;">
+                    <span style="display:flex; width:20px; height:20px; align-items:center; justify-content:center; border-radius:99px; font-size:10.5px; font-weight:700; background:{{ s.numBg }}; color:{{ s.numInk }}; border:{{ s.numBorder }};">{{ s.num }}</span>
+                    <p style="margin:8px 0 0; font-size:12.5px; font-weight:600; line-height:1.25; color:var(--ink);">{{ s.title }}</p>
+                    <p style="margin:4px 0 0; font-size:11px; line-height:1.375; color:var(--ink-3);">{{ s.body }}</p>
+                    <sc-if value="{{ s.isCurrent }}" hint-placeholder-val="{{ false }}">
+                      <a href="#" style="margin-top:10px; display:inline-block; border-radius:8px; background:var(--accent); padding:6px 12px; font-size:11.5px; font-weight:600; color:#fff; text-decoration:none;">{{ s.cta }} →</a>
+                    </sc-if>
+                  </li>
+                </sc-for>
+              </ol>
+            </section>
+          </sc-if>
+
+          <div style="display:grid; grid-template-columns:1.2fr 2fr; gap:20px;">
+            <!-- Readiness ring -->
+            <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:24px; box-shadow:var(--shadow);">
+              <p style="margin:0; font-size:12px; font-weight:500; color:var(--ink-2);">Readiness</p>
+              <div style="margin-top:16px; display:flex; align-items:center; gap:20px;">
+                <svg width="84" height="84" viewBox="0 0 84 84" style="flex-shrink:0; transform:rotate(-90deg);">
+                  <circle cx="42" cy="42" r="34" fill="none" stroke="var(--surface-2)" stroke-width="8"></circle>
+                  <circle cx="42" cy="42" r="34" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" stroke-dasharray="{{ ringDash }}"></circle>
+                </svg>
+                <div>
+                  <p style="margin:0; font-family:'Geist Mono',monospace; font-size:26px; font-weight:600; letter-spacing:-0.025em; font-variant-numeric:tabular-nums; color:var(--ink);">{{ score }}%</p>
+                  <p style="margin:0; font-size:12.5px; color:var(--ink-3);">ready for the big weekend</p>
+                </div>
+              </div>
+              <sc-if value="{{ hasAttention }}" hint-placeholder-val="{{ true }}">
+                <div style="margin-top:20px; display:flex; flex-direction:column; gap:6px;">
+                  <sc-for list="{{ attention }}" as="a" hint-placeholder-count="3">
+                    <a href="#" style="display:flex; align-items:center; gap:10px; border-radius:18px; border:1px solid var(--line); background:var(--paper); padding:8px 12px; font-size:13px; color:var(--ink); text-decoration:none; transition:background-color 150ms ease, border-color 150ms ease;" style-hover="border-color:var(--line-2); background:var(--surface-2);">
+                      <span style="width:6px; height:6px; flex-shrink:0; border-radius:99px; background:var(--warn);"></span>
+                      <span style="flex:1;">{{ a }}</span>
+                      <span aria-hidden="true" style="color:var(--ink-3);">→</span>
+                    </a>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </section>
+
+            <!-- Stat cards -->
+            <div style="display:grid; align-content:start; grid-template-columns:1fr 1fr; gap:20px;">
+              <sc-for list="{{ stats }}" as="st" hint-placeholder-count="6">
+                <div style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+                  <p style="margin:0; font-size:12px; font-weight:500; color:var(--ink-2);">{{ st.label }}</p>
+                  <p style="margin:8px 0 0; font-family:'Geist Mono',monospace; font-size:22px; font-weight:600; letter-spacing:-0.025em; font-variant-numeric:tabular-nums; color:var(--ink);">{{ st.value }}</p>
+                  <sc-if value="{{ st.hint }}" hint-placeholder-val="{{ true }}">
+                    <p style="margin:6px 0 0; font-size:12.5px; color:var(--ink-3);">{{ st.hint }}</p>
+                  </sc-if>
+                  <sc-if value="{{ st.hasBar }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:14px; height:4px; width:100%; overflow:hidden; border-radius:99px; background:var(--surface-2);">
+                      <div style="height:100%; border-radius:99px; background:var(--accent); width:{{ st.bar }};"></div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <!-- Live activity -->
+          <sc-if value="{{ hasActivity }}" hint-placeholder-val="{{ true }}">
+            <section style="margin-top:24px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:24px; box-shadow:var(--shadow);">
+              <p style="margin:0; font-size:12px; font-weight:500; color:var(--ink-2);">Live activity</p>
+              <div style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{ activity }}" as="it" hint-placeholder-count="6">
+                  <p style="margin:0; display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink-2);">
+                    <span style="width:6px; height:6px; flex-shrink:0; border-radius:99px; background:{{ it.color }};"></span>
+                    <span style="min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink);">{{ it.text }}</span>
+                    <span style="flex-shrink:0; font-family:'Geist Mono',monospace; font-size:10.5px; color:var(--ink-3);">{{ it.at }}</span>
+                  </p>
+                </sc-for>
+              </div>
+            </section>
+          </sc-if>
+        </div>
+        </sc-if>
+
+        <!-- ── /guests ── -->
+        <sc-if value="{{ isGuests }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Guest list" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Guests</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Guest list</h1>
+            <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">Households, named guests, and the invite matrix — who is invited to what drives everything a guest can see and RSVP to.</p>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:32px;">
+            <!-- Toolbar card -->
+            <div style="display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:16px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+              <div style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px;">
+                <label style="display:block;">
+                  <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">New household</span>
+                  <input placeholder="The Shah Family" style="width:208px; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;" style-focus="border-color:var(--accent);">
+                </label>
+                <label style="display:block;">
+                  <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Side (optional)</span>
+                  <input placeholder="Bride" style="width:112px; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;" style-focus="border-color:var(--accent);">
+                </label>
+                <button style="border:none; border-radius:8px; background:var(--accent); padding:10px 20px; font-weight:600; color:#fff; cursor:pointer; font:inherit; font-size:14px; font-weight:600;">Add household</button>
+              </div>
+              <div style="display:flex; align-items:center; gap:16px;">
+                <span style="font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.16em; color:var(--ink-3);">{{ hhCount }} households · {{ guestCount }} guests</span>
+                <button onClick="{{ toggleImport }}" style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 16px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit; transition:border-color 150ms ease;" style-hover="border-color:var(--accent);">{{ importBtnLabel }}</button>
+              </div>
+            </div>
+
+            <!-- Import wizard -->
+            <sc-if value="{{ showImport }}" hint-placeholder-val="{{ false }}">
+              <div style="border-radius:12px; border:1px solid var(--accent-line); background:color-mix(in oklab, var(--accent-soft) 40%, transparent); padding:24px;">
+                <p style="margin:0 0 8px; font-size:12px; font-weight:550; color:var(--ink-2);">Import guests</p>
+                <p style="margin:0 0 12px; font-size:14px; color:var(--ink-2);">Paste from anywhere — a spreadsheet, WhatsApp, your notes. We tidy it into households and guests (AI clean-up when connected; otherwise use <span style="font-family:'Geist Mono',monospace; font-size:12px;">Household, Full name, email</span> per line). Existing guests are skipped, never overwritten.</p>
+                <textarea rows="6" placeholder="Raj &amp; Priya Shah, priya@example.com&#10;The Patels — Anil, Meera and the two kids&#10;Dev Kapoor" style="width:100%; box-sizing:border-box; border-radius:8px; border:1px solid var(--line); background:var(--surface); padding:10px 12px; font-family:'Geist Mono',monospace; font-size:12px; color:var(--ink); outline:none; resize:vertical;" style-focus="border-color:var(--accent);"></textarea>
+                <div style="margin-top:12px; display:flex; flex-wrap:wrap; align-items:center; gap:12px;">
+                  <button style="border-radius:8px; border:1px solid var(--line); background:var(--surface); padding:8px 16px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--accent);">Tidy &amp; preview</button>
+                </div>
+                <p style="margin:8px 0 0; font-size:12px; color:var(--ink-3);">Parsed by columns. Paste "Household, Full name, email" per line, or connect AI for messy lists.</p>
+              </div>
+            </sc-if>
+
+            <!-- Search + side chips + summary -->
+            <sc-if value="{{ hasHouseholds }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:-8px;">
+                <input value="{{ q }}" onChange="{{ onSearch }}" placeholder="Search households, guests, emails…" style="width:256px; border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:8px 14px; font-size:13.5px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);">
+                <sc-for list="{{ sideChips }}" as="chip" hint-placeholder-count="3">
+                  <button onClick="{{ chip.pick }}" style="border-radius:8px; padding:4px 12px; font-size:12.5px; font-weight:500; cursor:pointer; font-family:inherit; transition:border-color 150ms ease; background:{{ chip.bg }}; color:{{ chip.ink }}; border:{{ chip.border }};" style-hover="border-color:var(--line-2);">{{ chip.label }}</button>
+                </sc-for>
+                <span style="margin-left:auto; font-size:12px; color:var(--ink-3);">Showing {{ shownHh }} of {{ hhCount }} households · {{ shownGuests }} guests</span>
+              </div>
+            </sc-if>
+
+            <!-- Empty state -->
+            <sc-if value="{{ guestsEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="border-radius:12px; border:1px dashed var(--line); background:var(--paper-2); padding:40px; text-align:center; color:var(--ink-2); font-size:14px;">
+                No households yet. Add one above, or paste your whole list at once.
+              </div>
+            </sc-if>
+
+            <!-- Household cards -->
+            <sc-for list="{{ households }}" as="h" hint-placeholder-count="2">
+              <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:24px; box-shadow:var(--shadow);">
+                <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+                  <h3 style="margin:0; font-size:14.5px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">{{ h.name }}</h3>
+                  <div style="display:flex; align-items:center; gap:16px;">
+                    <sc-if value="{{ h.side }}" hint-placeholder-val="{{ true }}">
+                      <span style="background:var(--paper-2); padding:4px 10px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">{{ h.side }}</span>
+                    </sc-if>
+                    <button onClick="{{ h.archive }}" style="border:none; background:none; padding:0; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3); cursor:pointer;" style-hover="color:var(--bad);">Archive</button>
+                  </div>
+                </div>
+
+                <div style="margin-top:20px; overflow-x:auto;">
+                  <table style="width:100%; min-width:560px; border-collapse:collapse; font-size:14px;">
+                    <thead>
+                      <tr>
+                        <th style="padding:0 16px 8px 0; text-align:left; font-size:12px; font-weight:500; color:var(--ink-3);">Guest</th>
+                        <sc-for list="{{ h.eventCols }}" as="e">
+                          <th style="padding:0 8px 8px; text-align:center; font-weight:400;">
+                            <button onClick="{{ e.toggleAll }}" title="Click to invite the whole household" style="display:inline-flex; align-items:center; gap:6px; border:none; background:none; border-radius:8px; padding:2px 6px; font-size:12px; font-weight:500; color:var(--ink-2); cursor:pointer; font-family:inherit;" style-hover="background:var(--surface-2); color:var(--ink);">
+                              <span style="width:8px; height:8px; border-radius:99px; background:{{ e.accent }};"></span>{{ e.name }}
+                            </button>
+                          </th>
+                        </sc-for>
+                        <th style="width:32px;"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ h.guests }}" as="g" hint-placeholder-count="3">
+                        <tr style="border-top:1px solid var(--line);">
+                          <td style="padding:10px 16px 10px 0;">
+                            <span style="color:var(--ink);">{{ g.fullName }}</span>
+                            <sc-if value="{{ g.isChild }}" hint-placeholder-val="{{ false }}"><span style="margin-left:8px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; color:var(--ink-3);">child</span></sc-if>
+                            <sc-if value="{{ g.plusOne }}" hint-placeholder-val="{{ false }}"><span style="margin-left:8px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; color:var(--accent-ink);">+1</span></sc-if>
+                            <sc-if value="{{ g.email }}" hint-placeholder-val="{{ false }}"><span style="margin-left:8px; font-size:12px; color:var(--ink-3);">{{ g.email }}</span></sc-if>
+                          </td>
+                          <sc-for list="{{ g.cells }}" as="c">
+                            <td style="padding:10px 8px; text-align:center;">
+                              <button onClick="{{ c.toggle }}" role="checkbox" aria-checked="{{ c.on }}" style="display:inline-flex; width:20px; height:20px; align-items:center; justify-content:center; border-radius:6px; font-size:11px; line-height:1; cursor:pointer; transition:background-color 150ms ease, border-color 150ms ease; background:{{ c.bg }}; color:#fff; border:{{ c.border }}; font-family:inherit;" style-hover="border-color:var(--accent);">{{ c.mark }}</button>
+                            </td>
+                          </sc-for>
+                          <td style="text-align:right;">
+                            <button style="border:none; background:none; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; color:var(--ink-3); cursor:pointer;" style-hover="color:var(--bad);">✕</button>
+                          </td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style="margin-top:16px; display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px; border-top:1px solid var(--line); padding-top:16px;">
+                  <label style="display:block;">
+                    <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Add guest</span>
+                    <input placeholder="Priya Shah" style="width:176px; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;" style-focus="border-color:var(--accent);">
+                  </label>
+                  <label style="display:block;">
+                    <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Email (optional)</span>
+                    <input placeholder="priya@example.com" style="width:208px; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;" style-focus="border-color:var(--accent);">
+                  </label>
+                  <label style="display:flex; align-items:center; gap:6px; padding-bottom:8px; font-size:12px; color:var(--ink-2);"><input type="checkbox" style="accent-color:var(--accent);"> Child</label>
+                  <label style="display:flex; align-items:center; gap:6px; padding-bottom:8px; font-size:12px; color:var(--ink-2);"><input type="checkbox" style="accent-color:var(--accent);"> +1 allowed</label>
+                  <button style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 16px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit; transition:border-color 150ms ease;" style-hover="border-color:var(--accent);">Add</button>
+                </div>
+              </section>
+            </sc-for>
+
+            <sc-if value="{{ hasMoreHouseholds }}" hint-placeholder-val="{{ false }}">
+              <div style="border-radius:12px; border:1px dashed var(--line-2); padding:18px; text-align:center; font-family:'Geist Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-3);">+ 51 more household cards continue below — pattern identical</div>
+            </sc-if>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ── /rsvps ── -->
+        <sc-if value="{{ isRsvps }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="RSVPs" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:16px;">
+            <div style="margin-bottom:28px;">
+              <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">RSVPs</p>
+              <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Who's coming</h1>
+              <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">{{ rsvpSummary }}</p>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:12px;">
+              <button style="border:none; border-radius:8px; background:var(--accent); padding:8px 16px; font-size:14px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit;">Remind pending households</button>
+              <a href="#" style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 16px; font-size:14px; color:var(--ink); text-decoration:none; transition:border-color 150ms ease;" style-hover="border-color:var(--accent);">Export RSVPs (CSV)</a>
+              <a href="#" style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 16px; font-size:14px; color:var(--ink); text-decoration:none; transition:border-color 150ms ease;" style-hover="border-color:var(--accent);">Export guests (CSV)</a>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+            <sc-for list="{{ rsvpEvents }}" as="e" hint-placeholder-count="4">
+              <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:24px; box-shadow:var(--shadow);">
+                <div style="display:flex; align-items:baseline; justify-content:space-between;">
+                  <h2 style="margin:0; font-size:15px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">{{ e.name }}</h2>
+                  <span style="font-family:'Geist Mono',monospace; font-size:10px; color:var(--ink-3);">{{ e.when }}</span>
+                </div>
+                <div style="margin-top:16px;">
+                  <div style="display:flex; height:8px; width:100%; overflow:hidden; border-radius:99px; background:var(--surface-2);">
+                    <div style="height:100%; background:var(--ok); width:{{ e.wAtt }};"></div>
+                    <div style="height:100%; background:var(--bad); width:{{ e.wDec }};"></div>
+                    <div style="height:100%; background:var(--warn); width:{{ e.wPen }};"></div>
+                  </div>
+                  <div style="margin-top:10px; display:flex; flex-wrap:wrap; align-items:center; gap:16px; font-size:12px;">
+                    <span style="display:flex; align-items:center; gap:6px; color:var(--ink-2);"><span style="width:8px; height:8px; border-radius:99px; background:var(--ok);"></span>Attending <span style="font-family:'Geist Mono',monospace; font-weight:600; color:var(--ink);">{{ e.att }}</span></span>
+                    <span style="display:flex; align-items:center; gap:6px; color:var(--ink-2);"><span style="width:8px; height:8px; border-radius:99px; background:var(--bad);"></span>Declined <span style="font-family:'Geist Mono',monospace; font-weight:600; color:var(--ink);">{{ e.dec }}</span></span>
+                    <span style="display:flex; align-items:center; gap:6px; color:var(--ink-2);"><span style="width:8px; height:8px; border-radius:99px; background:var(--warn);"></span>Pending <span style="font-family:'Geist Mono',monospace; font-weight:600; color:var(--ink);">{{ e.pen }}</span></span>
+                    <sc-if value="{{ e.cap }}" hint-placeholder-val="{{ false }}">
+                      <span style="margin-left:auto; font-family:'Geist Mono',monospace; font-size:10.5px; color:var(--ink-3);">{{ e.cap }}</span>
+                    </sc-if>
+                  </div>
+                </div>
+                <sc-if value="{{ e.chase }}" hint-placeholder-val="{{ true }}">
+                  <p style="margin:16px 0 0; font-size:12px; color:var(--ink-3);"><span style="font-size:12px; font-weight:550; color:var(--ink-2);">Chase:</span> {{ e.chase }}</p>
+                </sc-if>
+              </section>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ hasAnswers }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-top:40px;">
+              <h2 style="margin:0 0 20px; font-size:18px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">Answers</h2>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                <sc-for list="{{ rollups }}" as="r" hint-placeholder-count="2">
+                  <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:24px; box-shadow:var(--shadow);">
+                    <p style="margin:0 0 12px; font-size:12px; font-weight:550; color:var(--ink-2);">{{ r.label }}</p>
+                    <sc-for list="{{ r.counts }}" as="c">
+                      <div style="display:flex; align-items:baseline; justify-content:space-between; border-bottom:1px solid var(--line); padding:6px 0; font-size:14px;">
+                        <span style="color:var(--ink);">{{ c.k }}</span>
+                        <span style="font-family:'Geist Mono',monospace; font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--ink);">{{ c.n }}</span>
+                      </div>
+                    </sc-for>
+                  </section>
+                </sc-for>
+                <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:24px; box-shadow:var(--shadow);">
+                  <p style="margin:0 0 12px; font-size:12px; font-weight:550; color:var(--ink-2);">Song requests</p>
+                  <sc-for list="{{ songs }}" as="s" hint-placeholder-count="3">
+                    <p style="margin:0; border-bottom:1px solid var(--line); padding:6px 0; font-size:14px; color:var(--ink-2);"><span style="color:var(--ink);">{{ s.guest }}:</span> {{ s.value }}</p>
+                  </sc-for>
+                </section>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+        </sc-if>
+
+        <!-- ── /events ── -->
+        <sc-if value="{{ isEvents }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Events" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Events</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Your celebrations</h1>
+            <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">Each event is the spine the whole product reuses — the website schedule, the invite matrix, vendors, budget and tasks all hang off these.</p>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+            <label style="display:block;">
+              <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Event name</span>
+              <input placeholder="Sangeet" style="width:208px; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;" style-focus="border-color:var(--accent);">
+            </label>
+            <label style="display:block;">
+              <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Starts (optional)</span>
+              <input type="datetime-local" style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;" style-focus="border-color:var(--accent);">
+            </label>
+            <button style="border:none; border-radius:8px; background:var(--accent); padding:10px 20px; font:inherit; font-size:14px; font-weight:600; color:#fff; cursor:pointer;">Add event</button>
+          </div>
+          <ul style="margin:32px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:12px;">
+            <sc-if value="{{ eventsEmpty }}" hint-placeholder-val="{{ false }}">
+              <li style="border-radius:12px; border:1px dashed var(--line); background:var(--paper-2); padding:32px; text-align:center; color:var(--ink-2); font-size:14px;">No events yet. Add your first one above.</li>
+            </sc-if>
+            <sc-for list="{{ eventRows }}" as="e" hint-placeholder-count="4">
+              <li>
+                <a href="#" style="display:flex; align-items:center; justify-content:space-between; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow); text-decoration:none; transition:transform 150ms ease;" style-hover="transform:translateY(-2px);">
+                  <div>
+                    <p style="margin:0; font-size:15px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">{{ e.name }}</p>
+                    <p style="margin:4px 0 0; font-size:14px; color:var(--ink-2);">{{ e.meta }}</p>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; text-align:right;">
+                    <span style="background:var(--paper-2); padding:4px 10px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">{{ e.vis }}</span>
+                    <sc-if value="{{ e.cap }}" hint-placeholder-val="{{ false }}">
+                      <span style="background:var(--paper-2); padding:4px 10px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">{{ e.cap }}</span>
+                    </sc-if>
+                  </div>
+                </a>
+              </li>
+            </sc-for>
+          </ul>
+        </div>
+        </sc-if>
+
+        <!-- ── /invitations ── -->
+        <sc-if value="{{ isInvitations }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Invitations" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Invitations</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Personal links</h1>
+            <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">Each household gets a private link. Only the link's hash is ever stored — copy it when it appears, or email it directly.</p>
+          </div>
+          <sc-if value="{{ invitesEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="border-radius:12px; border:1px dashed var(--line); background:var(--paper-2); padding:40px; text-align:center; color:var(--ink-2); font-size:14px;">Add households and guests first — then generate their links here.</div>
+          </sc-if>
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <sc-for list="{{ inviteRows }}" as="r" hint-placeholder-count="3">
+              <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+                <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
+                  <div>
+                    <p style="margin:0; font-size:14.5px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">{{ r.name }}</p>
+                    <p style="margin:2px 0 0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">{{ r.meta }}<sc-if value="{{ r.opened }}" hint-placeholder-val="{{ false }}"><span style="color:var(--accent-ink);"> · opened {{ r.opened }}</span></sc-if></p>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <button style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 16px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit; transition:border-color 150ms ease;" style-hover="border-color:var(--accent);">Generate link</button>
+                    <button style="border:none; border-radius:8px; background:var(--accent); padding:8px 16px; font-size:14px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit; opacity:{{ r.emailOpacity }};">Email invite</button>
+                    <sc-if value="{{ r.hasLinks }}" hint-placeholder-val="{{ false }}">
+                      <button style="border:none; background:none; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3); cursor:pointer;" style-hover="color:var(--bad);">Revoke</button>
+                    </sc-if>
+                  </div>
+                </div>
+                <sc-if value="{{ r.showLink }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:12px; display:flex; align-items:center; gap:8px;">
+                    <input readOnly value="{{ r.link }}" style="width:100%; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 12px; font-family:'Geist Mono',monospace; font-size:12px; color:var(--ink); outline:none;">
+                    <button style="flex-shrink:0; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 12px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--accent);">Copy</button>
+                    <a href="#" style="flex-shrink:0; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 12px; font-size:14px; color:var(--ink); text-decoration:none;" style-hover="border-color:var(--accent);">WhatsApp</a>
+                    <button style="flex-shrink:0; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 12px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--accent);">QR</button>
+                  </div>
+                  <div style="margin-top:12px; display:flex; align-items:center; gap:16px;">
+                    <span style="display:grid; grid-template-columns:repeat(6,1fr); gap:1px; width:112px; height:112px; border-radius:8px; border:1px solid var(--line); background:#fff; padding:6px; box-sizing:border-box;">
+                      <sc-for list="{{ qrCells }}" as="q"><span style="background:{{ q }};"></span></sc-for>
+                    </span>
+                    <div style="font-size:14px; color:var(--ink-2);">
+                      <p style="margin:0;">Print this on the paper invitation — scanning opens their personal RSVP.</p>
+                      <a href="#" style="margin-top:4px; display:inline-block; color:var(--accent-ink); text-decoration:underline; text-underline-offset:4px;">Download PNG</a>
+                    </div>
+                  </div>
+                </sc-if>
+              </section>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ── /payments ── -->
+        <sc-if value="{{ isPayments }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Payments" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Payments</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Payment schedule</h1>
+            <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">Every vendor instalment in one place, so you always know who to pay and when. Marking one paid updates its budget line automatically.</p>
+          </div>
+          <div style="margin-bottom:24px; display:flex; justify-content:flex-end;">
+            <button style="display:flex; align-items:center; gap:6px; border:none; border-radius:8px; background:var(--accent); padding:8px 14px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit;">＋ Schedule a payment</button>
+          </div>
+          <sc-if value="{{ paymentsEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="border-radius:12px; border:1px dashed var(--line); background:var(--paper-2); padding:40px; text-align:center; color:var(--ink-2); font-size:14px;">No payments scheduled yet. Add your vendor deposits and balances so nothing sneaks up on you.</div>
+          </sc-if>
+          <sc-for list="{{ paymentMonths }}" as="m" hint-placeholder-count="2">
+            <section style="margin-bottom:28px;">
+              <div style="margin-bottom:10px; display:flex; align-items:baseline; justify-content:space-between;">
+                <p style="margin:0; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-3);">{{ m.label }}</p>
+                <p style="margin:0; font-family:'Geist Mono',monospace; font-size:11px; color:var(--ink-3);">{{ m.total }}</p>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <sc-for list="{{ m.rows }}" as="r">
+                  <div style="display:flex; align-items:center; gap:12px; border-radius:12px; border:1px solid {{ r.border }}; background:var(--surface); padding:14px; box-shadow:var(--shadow);">
+                    <button onClick="{{ r.togglePaid }}" style="display:flex; width:24px; height:24px; flex-shrink:0; align-items:center; justify-content:center; border-radius:99px; border:1.5px solid {{ r.checkBorder }}; background:{{ r.checkBg }}; color:{{ r.checkInk }}; cursor:pointer; font-size:12px;" style-hover="border-color:var(--ok);">✓</button>
+                    <div style="min-width:0; flex:1;">
+                      <p style="margin:0; font-size:13.5px; font-weight:500; color:{{ r.titleInk }}; text-decoration:{{ r.strike }};">{{ r.label }}<span style="font-weight:400; color:var(--ink-3);"> · {{ r.vendor }}</span></p>
+                      <p style="margin:2px 0 0; display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--ink-3);">
+                        <span style="color:{{ r.dueInk }}; font-weight:{{ r.dueWeight }};">{{ r.due }}</span>
+                        <sc-if value="{{ r.linked }}" hint-placeholder-val="{{ true }}"><span style="border-radius:4px; background:var(--surface-2); padding:1px 6px; font-family:'Geist Mono',monospace; font-size:9px; color:var(--ink-3);">linked to budget</span></sc-if>
+                      </p>
+                    </div>
+                    <span style="font-family:'Geist Mono',monospace; font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; color:{{ r.amtInk }};">{{ r.amount }}</span>
+                    <button style="display:flex; width:28px; height:28px; flex-shrink:0; align-items:center; justify-content:center; border:none; background:none; border-radius:8px; color:var(--ink-3); cursor:pointer;" style-hover="background:var(--bad-soft); color:var(--bad);">✕</button>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
+          </sc-for>
+          <sc-if value="{{ hasPaid }}" hint-placeholder-val="{{ false }}">
+            <section style="margin-top:16px;">
+              <p style="margin:0 0 10px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-3);">Paid · 2</p>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <sc-for list="{{ paidRows }}" as="r">
+                  <div style="display:flex; align-items:center; gap:12px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:14px; box-shadow:var(--shadow);">
+                    <span style="display:flex; width:24px; height:24px; flex-shrink:0; align-items:center; justify-content:center; border-radius:99px; border:1.5px solid var(--ok); background:var(--ok); color:#fff; font-size:12px;">✓</span>
+                    <div style="min-width:0; flex:1;">
+                      <p style="margin:0; font-size:13.5px; font-weight:500; color:var(--ink-3); text-decoration:line-through;">{{ r.label }}<span style="font-weight:400;"> · {{ r.vendor }}</span></p>
+                      <p style="margin:2px 0 0; font-size:11.5px; color:var(--ok);">{{ r.due }}</p>
+                    </div>
+                    <span style="font-family:'Geist Mono',monospace; font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--ink-3);">{{ r.amount }}</span>
+                    <button style="display:flex; width:28px; height:28px; flex-shrink:0; align-items:center; justify-content:center; border:none; background:none; border-radius:8px; color:var(--ink-3); cursor:pointer;" style-hover="background:var(--bad-soft); color:var(--bad);">✕</button>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
+          </sc-if>
+        </div>
+        </sc-if>
+
+        <!-- ── /tasks ── -->
+        <sc-if value="{{ isTasks }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Tasks" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Tasks</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">What needs doing</h1>
+            <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">{{ tasksDesc }}</p>
+          </div>
+          <sc-if value="{{ hasTasks }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-bottom:24px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+              <div style="display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px;">
+                <p style="margin:0; font-size:13.5px; font-weight:600; color:var(--ink);">{{ tasksDone }} of {{ tasksTotal }} done <span style="font-family:'Geist Mono',monospace; font-size:12px; font-weight:400; color:var(--ink-3);">· {{ tasksPct }}%</span></p>
+                <span style="border-radius:99px; background:{{ tasksChipBg }}; padding:2px 10px; font-size:11.5px; font-weight:500; color:{{ tasksChipInk }};">{{ tasksChip }}</span>
+              </div>
+              <div style="margin-top:12px; height:8px; width:100%; overflow:hidden; border-radius:99px; background:var(--surface-2);">
+                <div style="height:100%; border-radius:99px; background:var(--accent); width:{{ tasksPctW }}; transition:width 500ms;"></div>
+              </div>
+            </div>
+          </sc-if>
+          <div style="display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:16px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+            <div style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px;">
+              <label style="display:block;">
+                <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">New task</span>
+                <input placeholder="Chase caterer for tasting date" style="width:256px; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;" style-focus="border-color:var(--accent);">
+              </label>
+              <label style="display:block;">
+                <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Event</span>
+                <select style="max-width:160px; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;"><option>—</option><option>Sangeet</option><option>Ceremony</option></select>
+              </label>
+              <label style="display:block;">
+                <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Due</span>
+                <input type="date" style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:9px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;">
+              </label>
+              <button style="border:none; border-radius:8px; background:var(--accent); padding:10px 20px; font:inherit; font-size:14px; font-weight:600; color:#fff; cursor:pointer;">Add</button>
+            </div>
+            <button style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 16px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit; transition:border-color 150ms ease;" style-hover="border-color:var(--accent);">Add starter checklist</button>
+          </div>
+          <sc-if value="{{ tasksEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:32px; border-radius:12px; border:1px dashed var(--line); background:var(--paper-2); padding:40px; text-align:center; color:var(--ink-2); font-size:14px;">Nothing yet — add a task or load the starter checklist.</div>
+          </sc-if>
+          <sc-for list="{{ taskGroups }}" as="tg" hint-placeholder-count="2">
+            <section style="margin-top:32px;">
+              <p style="margin:0 0 12px; font-size:12px; font-weight:550; color:var(--ink-2);">{{ tg.title }}</p>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <sc-for list="{{ tg.rows }}" as="t">
+                  <div style="display:flex; align-items:center; gap:12px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:14px; box-shadow:var(--shadow);">
+                    <input type="checkbox" checked="{{ t.done }}" onChange="{{ t.toggle }}" style="width:20px; height:20px; flex-shrink:0; accent-color:var(--accent); margin:0;">
+                    <div style="min-width:0; flex:1;">
+                      <p style="margin:0; font-size:14px; color:{{ t.ink }}; text-decoration:{{ t.strike }};">{{ t.title }}</p>
+                      <sc-if value="{{ t.linked }}" hint-placeholder-val="{{ false }}"><p style="margin:0; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">{{ t.linked }}</p></sc-if>
+                    </div>
+                    <sc-if value="{{ t.high }}" hint-placeholder-val="{{ false }}"><span style="background:var(--bad-soft); padding:2px 8px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--bad);">high</span></sc-if>
+                    <sc-if value="{{ t.due }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:{{ t.dueInk }};">{{ t.due }}</span></sc-if>
+                    <button style="display:flex; width:28px; height:28px; flex-shrink:0; align-items:center; justify-content:center; border:none; background:none; border-radius:8px; color:var(--ink-3); cursor:pointer;" style-hover="background:var(--bad-soft); color:var(--bad);">✕</button>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
+          </sc-for>
+        </div>
+        </sc-if>
+
+        <!-- ── /budget ── -->
+        <sc-if value="{{ isBudget }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Budget" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:16px;">
+            <div style="margin-bottom:28px;">
+              <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Budget</p>
+              <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Where the money goes</h1>
+              <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">Every line can link to an event and a vendor — enter once, reuse everywhere.</p>
+            </div>
+            <a href="#" style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 16px; font-size:14px; color:var(--ink); text-decoration:none; transition:border-color 150ms ease;" style-hover="border-color:var(--accent);">Export (CSV)</a>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px;">
+            <sc-for list="{{ budgetStats }}" as="b" hint-placeholder-count="4">
+              <div style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+                <p style="margin:0; font-size:12px; font-weight:500; color:var(--ink-2);">{{ b.label }}</p>
+                <p style="margin:8px 0 0; font-family:'Geist Mono',monospace; font-size:22px; font-weight:600; letter-spacing:-0.025em; font-variant-numeric:tabular-nums; color:var(--ink);">{{ b.value }}</p>
+                <sc-if value="{{ b.hint }}" hint-placeholder-val="{{ false }}"><p style="margin:6px 0 0; font-size:12.5px; color:var(--ink-3);">{{ b.hint }}</p></sc-if>
+                <sc-if value="{{ b.hasBar }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:14px; height:4px; width:100%; overflow:hidden; border-radius:99px; background:var(--surface-2);"><div style="height:100%; border-radius:99px; background:var(--accent); width:{{ b.bar }};"></div></div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:32px; display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+            <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">New line</span><input placeholder="Mandap &amp; florals" style="width:208px; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;" style-focus="border-color:var(--accent);"></label>
+            <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Category</span><select style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;"><option>Decor</option><option>Venue</option><option>Catering</option></select></label>
+            <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Estimated £</span><input placeholder="2500.00" style="width:112px; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;" style-focus="border-color:var(--accent);"></label>
+            <button style="border:none; border-radius:8px; background:var(--accent); padding:10px 20px; font:inherit; font-size:14px; font-weight:600; color:#fff; cursor:pointer;">Add</button>
+          </div>
+          <sc-if value="{{ budgetEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:32px; border-radius:12px; border:1px dashed var(--line); background:var(--paper-2); padding:40px; text-align:center; color:var(--ink-2); font-size:14px;">No budget lines yet.</div>
+          </sc-if>
+          <sc-for list="{{ budgetCats }}" as="bc" hint-placeholder-count="3">
+            <section style="margin-top:32px;">
+              <p style="margin:0 0 12px; font-size:12px; font-weight:550; color:var(--ink-2);">{{ bc.name }}</p>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{ bc.rows }}" as="r">
+                  <div style="border-radius:12px; border:1px solid var(--line); background:var(--surface); box-shadow:var(--shadow);">
+                    <button style="display:flex; width:100%; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:16px; text-align:left; border:none; background:none; cursor:pointer; font-family:inherit; border-radius:8px;">
+                      <div style="min-width:0;">
+                        <p style="margin:0; font-size:14px; font-weight:500; color:var(--ink);">{{ r.label }}</p>
+                        <p style="margin:2px 0 0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">{{ r.linked }}</p>
+                      </div>
+                      <div style="display:flex; align-items:center; gap:16px;">
+                        <span style="font-size:14px; color:var(--ink-2);">{{ r.paidDue }}</span>
+                        <span style="font-family:'Geist Mono',monospace; font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--ink);">{{ r.total }}</span>
+                        <span style="background:var(--paper-2); padding:4px 10px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">{{ r.status }}</span>
+                      </div>
+                    </button>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
+          </sc-for>
+        </div>
+        </sc-if>
+
+        <!-- ── /vendors ── -->
+        <sc-if value="{{ isVendors }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Vendors" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Vendors</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Suppliers</h1>
+            <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">{{ vendorsDesc }}</p>
+          </div>
+          <div style="margin-bottom:24px; display:flex; align-items:center; gap:24px; border-bottom:1px solid var(--line);">
+            <button onClick="{{ pickPipeline }}" style="display:flex; align-items:center; gap:8px; border:none; background:none; border-bottom:2px solid {{ tabPipeBorder }}; padding:0 4px 10px; font-size:13.5px; font-weight:500; color:{{ tabPipeInk }}; cursor:pointer; font-family:inherit; border-radius:0;">My pipeline</button>
+            <button onClick="{{ pickRecommended }}" style="display:flex; align-items:center; gap:8px; border:none; background:none; border-bottom:2px solid {{ tabRecBorder }}; padding:0 4px 10px; font-size:13.5px; font-weight:500; color:{{ tabRecInk }}; cursor:pointer; font-family:inherit; border-radius:0;">Recommended <span style="border-radius:99px; background:{{ tabRecBadgeBg }}; padding:1px 6px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; color:{{ tabRecBadgeInk }};">8</span></button>
+          </div>
+
+          <sc-if value="{{ showPipeline }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+              <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Vendor name</span><input placeholder="Saffron &amp; Sage Catering" style="width:224px; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;" style-focus="border-color:var(--accent);"></label>
+              <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Category</span><select style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;"><option>Catering</option><option>Decor</option><option>Photography</option></select></label>
+              <button style="border:none; border-radius:8px; background:var(--accent); padding:10px 20px; font:inherit; font-size:14px; font-weight:600; color:#fff; cursor:pointer;">Add vendor</button>
+            </div>
+            <sc-if value="{{ vendorsEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:24px; border-radius:12px; border:1px dashed var(--line); background:var(--paper-2); padding:40px; text-align:center; color:var(--ink-2); font-size:14px;">No vendors yet — add your own above, or browse our recommendations.</div>
+            </sc-if>
+            <sc-for list="{{ vendorStages }}" as="vs" hint-placeholder-count="2">
+              <section style="margin-top:32px;">
+                <p style="margin:0 0 12px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-3);">{{ vs.label }}</p>
+                <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;">
+                  <sc-for list="{{ vs.rows }}" as="v">
+                    <li>
+                      <a href="#" style="display:flex; align-items:center; justify-content:space-between; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:16px; box-shadow:var(--shadow); text-decoration:none; transition:border-color 150ms ease;" style-hover="border-color:var(--line-2);">
+                        <div>
+                          <p style="margin:0; font-size:14px; font-weight:500; color:var(--ink);">{{ v.name }}</p>
+                          <p style="margin:2px 0 0; font-size:12px; color:var(--ink-3);">{{ v.category }}</p>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                          <sc-if value="{{ v.amount }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Geist Mono',monospace; font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--ink);">{{ v.amount }}</span></sc-if>
+                          <span style="border-radius:99px; padding:4px 10px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.08em; background:{{ v.toneBg }}; color:{{ v.toneInk }};">{{ v.status }}</span>
+                        </div>
+                      </a>
+                    </li>
+                  </sc-for>
+                </ul>
+              </section>
+            </sc-for>
+          </sc-if>
+
+          <sc-if value="{{ showRecommended }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-bottom:16px; display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+              <sc-for list="{{ recCats }}" as="rc">
+                <button style="border-radius:8px; padding:4px 12px; font-size:12.5px; font-weight:500; cursor:pointer; font-family:inherit; background:{{ rc.bg }}; color:{{ rc.ink }}; border:{{ rc.border }};">{{ rc.label }}</button>
+              </sc-for>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <sc-for list="{{ recVendors }}" as="v" hint-placeholder-count="4">
+                <article style="display:flex; flex-direction:column; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+                  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+                    <div style="min-width:0;">
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="border-radius:99px; background:var(--surface-2); padding:2px 8px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-3);">{{ v.category }}</span>
+                        <sc-if value="{{ v.featured }}" hint-placeholder-val="{{ false }}"><span style="border-radius:99px; padding:2px 8px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; background:var(--accent-soft); color:var(--accent-ink);">Editor's pick</span></sc-if>
+                      </div>
+                      <h3 style="margin:8px 0 0; font-size:15px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">{{ v.name }}</h3>
+                      <p style="margin:0; font-size:12.5px; color:var(--ink-2);">{{ v.tagline }}</p>
+                    </div>
+                    <span style="display:flex; flex-shrink:0; align-items:center; gap:4px; border-radius:8px; background:var(--surface-2); padding:4px 6px; font-family:'Geist Mono',monospace; font-size:11px; font-weight:600; color:var(--ink);">★ {{ v.rating }}</span>
+                  </div>
+                  <p style="margin:10px 0 0; font-size:13px; line-height:1.6; color:var(--ink-2);">{{ v.blurb }}</p>
+                  <sc-if value="{{ v.discount }}" hint-placeholder-val="{{ false }}">
+                    <p style="margin:10px 0 0; display:flex; flex-wrap:wrap; align-items:center; gap:8px; border-radius:18px; border:1px solid var(--accent-line); background:var(--accent-soft); padding:8px 12px; font-size:12.5px; font-weight:500; color:var(--accent-ink);">🎁 {{ v.discount }}
+                      <button style="border-radius:4px; border:1px solid var(--accent-line); background:var(--surface); padding:2px 8px; font-family:'Geist Mono',monospace; font-size:11px; letter-spacing:0.02em; color:var(--accent-ink); cursor:pointer;" style-hover="border-color:var(--accent);">{{ v.promo }} ⧉</button>
+                    </p>
+                  </sc-if>
+                  <p style="margin:10px 0 0; display:flex; flex-wrap:wrap; gap:4px 12px; font-size:11.5px; color:var(--ink-3);"><span>{{ v.location }}</span><span style="font-family:'Geist Mono',monospace;">{{ v.band }}</span></p>
+                  <sc-if value="{{ v.mention }}" hint-placeholder-val="{{ true }}">
+                    <p style="margin:10px 0 0; border-left:2px solid var(--line-2); padding-left:10px; font-size:12.5px; font-style:italic; color:var(--ink-2);">"{{ v.mention }}" <span style="font-style:normal; color:var(--ink-3);">— {{ v.author }}</span></p>
+                  </sc-if>
+                  <div style="margin-top:auto; padding-top:14px;">
+                    <button style="display:inline-flex; align-items:center; gap:6px; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 14px; font-size:13px; font-weight:500; color:var(--ink); cursor:pointer; font-family:inherit; transition:border-color 150ms ease;" style-hover="border-color:var(--accent);">＋ Add to my vendors</button>
+                  </div>
+                </article>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        </sc-if>
+
+        <!-- ── /reports ── -->
+        <sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Reports" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Reports</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">The numbers, live</h1>
+            <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">Today's picture at a glance — then one-click CSVs to open in Excel or hand straight to a vendor.</p>
+          </div>
+          <div style="margin-bottom:32px; display:grid; grid-template-columns:repeat(4,1fr); gap:16px;">
+            <sc-for list="{{ reportStats }}" as="s" hint-placeholder-count="4">
+              <div style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+                <p style="margin:0; font-size:12px; font-weight:500; color:var(--ink-2);">{{ s.label }}</p>
+                <p style="margin:8px 0 0; font-family:'Geist Mono',monospace; font-size:22px; font-weight:600; letter-spacing:-0.025em; font-variant-numeric:tabular-nums; color:var(--ink);">{{ s.value }}</p>
+                <sc-if value="{{ s.hint }}" hint-placeholder-val="{{ false }}"><p style="margin:6px 0 0; font-size:12.5px; color:var(--ink-3);">{{ s.hint }}</p></sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+            <sc-for list="{{ reportCards }}" as="r" hint-placeholder-count="6">
+              <a href="#" style="display:block; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:24px; box-shadow:var(--shadow); text-decoration:none; transition:border-color 150ms ease;" style-hover="border-color:var(--accent-line);">
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><sc-for list="{{ r.icon }}" as="p"><path d="{{ p }}"></path></sc-for></svg>
+                  <span style="border-radius:99px; background:var(--surface-2); padding:2px 8px; font-family:'Geist Mono',monospace; font-size:10px; color:var(--ink-3);">{{ r.rows }} rows</span>
+                </div>
+                <p style="margin:12px 0 0; font-size:15px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">{{ r.title }}</p>
+                <p style="margin:6px 0 0; font-size:14px; color:var(--ink-2);">{{ r.body }}</p>
+                <p style="margin:16px 0 0; font-size:12.5px; font-weight:500; color:var(--accent-ink);">Download CSV →</p>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ── /files ── -->
+        <sc-if value="{{ isFiles }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Files" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Files</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Contracts &amp; documents</h1>
+            <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">Stored privately; downloads use short-lived signed links. Link each file to its event or vendor.</p>
+          </div>
+          <sc-if value="{{ filesEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-bottom:24px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:24px; box-shadow:var(--shadow);">
+              <p style="margin:0; font-size:14px; font-weight:600; color:var(--ink);">One safe home for the paperwork</p>
+              <p style="margin:4px 0 0; font-size:13px; color:var(--ink-3);">Upload below, link each file to its vendor or event, and it's findable from their pages too. Couples usually keep:</p>
+              <div style="margin-top:16px; display:grid; grid-template-columns:repeat(4,1fr); gap:12px;">
+                <sc-for list="{{ fileTeach }}" as="f">
+                  <div style="border-radius:10px; border:1px solid var(--line); background:var(--paper); padding:14px;">
+                    <p style="margin:0; font-size:18px;">{{ f.icon }}</p>
+                    <p style="margin:4px 0 0; font-size:12.5px; font-weight:600; color:var(--ink);">{{ f.title }}</p>
+                    <p style="margin:0; font-size:11.5px; line-height:1.375; color:var(--ink-3);">{{ f.body }}</p>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <div style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+            <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">File (max 20 MB)</span><button style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:8px 12px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit;">Choose file</button><span style="margin-left:8px; font-size:14px; color:var(--ink-2);">No file chosen</span></label>
+            <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Kind</span><select style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;"><option>contract</option><option>quote</option><option>floorplan</option></select></label>
+            <button style="border:none; border-radius:8px; background:var(--accent); padding:10px 20px; font:inherit; font-size:14px; font-weight:600; color:#fff; cursor:pointer;">Upload</button>
+          </div>
+          <div style="margin-top:32px; display:flex; flex-direction:column; gap:8px;">
+            <sc-for list="{{ fileRows }}" as="f" hint-placeholder-count="3">
+              <div style="display:flex; align-items:center; gap:12px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:14px; box-shadow:var(--shadow);">
+                <span style="background:var(--paper-2); padding:4px 10px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">{{ f.kind }}</span>
+                <div style="min-width:0; flex:1;">
+                  <p style="margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; color:var(--ink);">{{ f.name }}</p>
+                  <p style="margin:0; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">{{ f.linked }}</p>
+                </div>
+                <a href="#" style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:6px 12px; font-size:14px; color:var(--ink); text-decoration:none; transition:border-color 150ms ease;" style-hover="border-color:var(--accent);">Download</a>
+                <button style="display:flex; width:28px; height:28px; flex-shrink:0; align-items:center; justify-content:center; border:none; background:none; border-radius:8px; color:var(--ink-3); cursor:pointer;" style-hover="background:var(--bad-soft); color:var(--bad);">✕</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ── /seating ── -->
+        <sc-if value="{{ isSeating }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Seating" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:16px;">
+            <div style="margin-bottom:28px;">
+              <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Seating</p>
+              <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Plan the room</h1>
+              <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">Upload your floor plan or start blank, add tables, then drag them into place and seat each guest. Guests see their table on their personal RSVP page.</p>
+            </div>
+            <button style="border:none; border-radius:8px; background:var(--accent); padding:8px 16px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit;">Send seating to guests</button>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 300px; gap:24px;">
+            <div>
+              <div style="margin-bottom:12px; display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+                <select style="border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:6px 12px; font-size:13px; color:var(--ink); outline:none; font-family:inherit;"><option>All events</option><option>Sangeet</option><option>Ceremony</option><option>Reception</option></select>
+                <button style="display:flex; align-items:center; gap:6px; border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:6px 10px; font-size:12.5px; font-weight:500; color:var(--ink); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--line-2);">⬆ Upload floor plan</button>
+                <span style="margin-left:auto; font-size:12px; color:var(--ink-3);">Drag tables to arrange the room</span>
+              </div>
+              <div style="position:relative; aspect-ratio:4/3; width:100%; overflow:hidden; border-radius:12px; border:1px solid var(--line); background:var(--paper-2);">
+                <div aria-hidden="true" style="pointer-events:none; position:absolute; inset:0; opacity:0.5; background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size:32px 32px;"></div>
+                <sc-for list="{{ seatTables }}" as="t" hint-placeholder-count="5">
+                  <div style="position:absolute; left:{{ t.x }}; top:{{ t.y }}; transform:translate(-50%,-50%); cursor:grab; user-select:none;">
+                    <div style="display:flex; height:64px; width:64px; flex-direction:column; align-items:center; justify-content:center; border:2px solid {{ t.border }}; border-radius:{{ t.radius }}; text-align:center; background:var(--surface); box-shadow:var(--shadow);">
+                      <span style="max-width:56px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 4px; font-size:10px; font-weight:600; color:var(--ink);">{{ t.name }}</span>
+                      <span style="font-family:'Geist Mono',monospace; font-size:10px; color:{{ t.countInk }};">{{ t.count }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ seatingEmpty }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--ink-3);">Add a table to start arranging the room.</div>
+                </sc-if>
+              </div>
+              <div style="margin-top:12px; display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px;">
+                <input placeholder="Table 1 / Top table" style="width:176px; border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:8px 12px; font-size:13px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);">
+                <input type="number" value="10" style="width:80px; border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:8px 12px; font-size:13px; color:var(--ink); outline:none; font-family:inherit;">
+                <button style="display:flex; align-items:center; gap:6px; border:none; border-radius:8px; background:var(--accent); padding:8px 14px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit;">＋ Add table</button>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:20px;">
+              <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px;">
+                  <div>
+                    <p style="margin:0; font-size:14.5px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">Top table</p>
+                    <p style="margin:0; font-size:12px; color:var(--ink-3);">6/8 seated</p>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:4px;">
+                    <button title="Round table" style="display:flex; width:28px; height:28px; align-items:center; justify-content:center; border:none; border-radius:8px; background:var(--accent-soft); color:var(--accent-ink); cursor:pointer;">●</button>
+                    <button title="Long table" style="display:flex; width:28px; height:28px; align-items:center; justify-content:center; border:none; border-radius:8px; background:none; color:var(--ink-3); cursor:pointer;" style-hover="background:var(--surface-2);">■</button>
+                    <button title="Delete table" style="display:flex; width:28px; height:28px; align-items:center; justify-content:center; border:none; border-radius:8px; background:none; color:var(--ink-3); cursor:pointer;" style-hover="background:var(--bad-soft); color:var(--bad);">✕</button>
+                  </div>
+                </div>
+                <div style="margin-top:12px; display:flex; flex-direction:column; gap:6px;">
+                  <sc-for list="{{ seatedGuests }}" as="g">
+                    <div style="display:flex; align-items:center; justify-content:space-between; border-radius:8px; border:1px solid var(--line); background:var(--paper); padding:6px 10px; font-size:13px;">
+                      <span style="color:var(--ink);">{{ g }}</span>
+                      <button style="border:none; background:none; color:var(--ink-3); cursor:pointer; padding:0;" style-hover="color:var(--bad);">✕</button>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+              <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+                <p style="margin:0 0 10px; font-size:13px; font-weight:600; color:var(--ink);">Unseated · {{ unseatedCount }}</p>
+                <div style="max-height:320px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
+                  <sc-for list="{{ unseatedGuests }}" as="g" hint-placeholder-count="4">
+                    <div style="display:flex; align-items:center; justify-content:space-between; border-radius:8px; border:1px solid var(--line); background:var(--paper); padding:6px 10px; font-size:13px;">
+                      <span style="min-width:0;"><span style="color:var(--ink);">{{ g.name }}</span> <span style="color:var(--ink-3);">· {{ g.household }}</span></span>
+                      <button style="flex-shrink:0; border-radius:8px; border:1px solid var(--line); background:none; padding:2px 8px; font-size:11.5px; font-weight:500; color:var(--accent-ink); cursor:pointer; font-family:inherit;">Seat →</button>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ── /messages ── -->
+        <sc-if value="{{ isMessages }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Messages" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Messages</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Talk to your guests</h1>
+            <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">One thread per household by SMS or WhatsApp — send reminders and see replies in the same place, no group chats.</p>
+          </div>
+          <sc-if value="{{ messagesEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="border-radius:12px; border:1px dashed var(--line); background:var(--paper-2); padding:40px; text-align:center; color:var(--ink-2); font-size:14px;">📞<br>Add phone numbers to your guests and their households will appear here as message threads.</div>
+          </sc-if>
+          <sc-if value="{{ hasThreads }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-bottom:16px; border-radius:18px; border:1px solid color-mix(in oklab, var(--warn) 40%, transparent); background:var(--warn-soft); padding:10px 16px; font-size:13px; color:var(--ink);">Messaging isn't connected yet — add your Twilio keys to send and receive. You can still write and save threads here.</div>
+            <div style="display:grid; grid-template-columns:280px 1fr; gap:16px;">
+              <div style="max-height:64vh; overflow-y:auto; display:flex; flex-direction:column; gap:4px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:8px; box-shadow:var(--shadow);">
+                <sc-for list="{{ threads }}" as="t" hint-placeholder-count="3">
+                  <button style="display:flex; width:100%; align-items:center; gap:10px; border:none; border-radius:18px; background:{{ t.bg }}; padding:10px 12px; text-align:left; cursor:pointer; font-family:inherit;" style-hover="background:var(--surface-2);">
+                    <span style="display:flex; width:32px; height:32px; flex-shrink:0; align-items:center; justify-content:center; border-radius:99px; background:var(--accent-soft); font-size:11px; font-weight:600; color:var(--accent-ink);">{{ t.initial }}</span>
+                    <span style="min-width:0; flex:1;">
+                      <span style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13.5px; font-weight:500; color:var(--ink);">{{ t.name }}</span>
+                      <span style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11.5px; color:var(--ink-3);">{{ t.preview }}</span>
+                    </span>
+                    <span style="flex-shrink:0; font-family:'Geist Mono',monospace; font-size:9.5px; color:var(--ink-3);">{{ t.when }}</span>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="display:flex; min-height:420px; flex-direction:column; border-radius:12px; border:1px solid var(--line); background:var(--surface); box-shadow:var(--shadow);">
+                <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); padding:12px 16px;">
+                  <p style="margin:0; font-size:14px; font-weight:600; color:var(--ink);">The Shah Family</p>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:10px; padding:16px; overflow-y:auto;">
+                  <sc-for list="{{ chatMsgs }}" as="m" hint-placeholder-count="3">
+                    <div style="display:flex; justify-content:{{ m.align }};">
+                      <div style="max-width:70%; border-radius:16px; padding:10px 14px; font-size:13.5px; line-height:1.6; background:{{ m.bg }}; color:{{ m.ink }}; border:{{ m.border }};">{{ m.body }}<span style="display:block; margin-top:4px; font-family:'Geist Mono',monospace; font-size:9px; color:{{ m.metaInk }};">{{ m.meta }}</span></div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display:flex; gap:8px; border-top:1px solid var(--line); padding:12px 16px;">
+                  <input placeholder="Write a message…" style="flex:1; border-radius:18px; border:1px solid var(--line); background:var(--paper); padding:8px 14px; font-size:13.5px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);">
+                  <button style="border:none; border-radius:8px; background:var(--accent); padding:8px 16px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit;">Send</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+        </sc-if>
+
+        <!-- ── /assistant ── -->
+        <sc-if value="{{ isAssistant }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Assistant" style="max-width:880px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Assistant</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Ask about your wedding</h1>
+            <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">Your planning assistant knows your guests, RSVPs, budget, vendors, tasks and payments. Ask it anything, or have it draft a message.</p>
+          </div>
+          <div style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:32px; text-align:center; box-shadow:var(--shadow);">
+            <span style="margin:0 auto 12px; display:flex; width:44px; height:44px; align-items:center; justify-content:center; border-radius:12px; background:var(--accent-soft); color:var(--accent);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path></svg>
+            </span>
+            <p style="margin:0; font-size:15px; font-weight:600; color:var(--ink);">The assistant isn't connected yet</p>
+            <p style="margin:6px auto 0; max-width:448px; font-size:13.5px; color:var(--ink-2);">Add an <span style="font-family:'Geist Mono',monospace; font-size:12px;">ANTHROPIC_API_KEY</span> to switch on the planning assistant. Once connected, it answers from your live wedding data and drafts messages for you.</p>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ── /settings ── -->
+        <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Settings" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Settings</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Your site</h1>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+            <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:28px; box-shadow:var(--shadow);">
+              <p style="margin:0 0 16px; font-size:12px; font-weight:550; color:var(--ink-2);">Site</p>
+              <label style="display:block; margin-bottom:14px;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Site name</span><input value="{{ siteTitle }}" style="width:100%; box-sizing:border-box; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;"></label>
+              <label style="display:block; margin-bottom:14px;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Default RSVP deadline</span><input type="date" style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 12px; color:var(--ink); outline:none; font:inherit; font-size:14px;"></label>
+              <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Template · 18 looks</span>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; max-height:200px; overflow-y:auto; padding-right:4px;">
+                <sc-for list="{{ settingsTemplates }}" as="t" hint-placeholder-count="6">
+                  <label style="display:flex; align-items:center; gap:8px; border-radius:10px; border:1px solid {{ t.border }}; background:{{ t.bg }}; padding:8px 10px; cursor:pointer;">
+                    <input type="radio" name="tpl" checked="{{ t.active }}" style="accent-color:var(--accent); margin:0;">
+                    <span style="flex:1; font-size:12.5px; color:var(--ink);">{{ t.name }}</span>
+                    <span style="display:flex; gap:3px;"><sc-for list="{{ t.swatches }}" as="c"><span style="width:12px; height:12px; border-radius:99px; border:1px solid var(--line); background:{{ c }};"></span></sc-for></span>
+                  </label>
+                </sc-for>
+              </div>
+              <p style="margin:20px 0 0; border-top:1px solid var(--line); padding-top:16px; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.16em; color:var(--ink-3);">Address: {{ slugLine }} · Status: {{ statusWord }}</p>
+            </section>
+
+            <sc-if value="{{ isLocked }}" hint-placeholder-val="{{ false }}">
+              <section style="border-radius:12px; border:1px solid var(--accent-line); background:color-mix(in oklab, var(--accent-soft) 40%, transparent); padding:28px; box-shadow:var(--shadow);">
+                <p style="margin:0 0 16px; font-size:12px; font-weight:550; color:var(--ink-2);">Billing</p>
+                <p style="margin:0; font-size:18px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">Unlock your command centre</p>
+                <p style="margin:12px 0 0; font-size:14px; line-height:1.6; color:var(--ink-2);">Build everything free — events, guests, budget, the whole site. One payment of <span style="font-family:'Instrument Serif',Georgia,serif; color:var(--ink);">£149.00</span> unlocks publishing your website and sending invitations. No subscription, yours for the whole wedding.</p>
+                <ul style="margin:16px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; font-size:14px; color:var(--ink-2);">
+                  <li>✓ Publish to your own address</li>
+                  <li>✓ Send personalised invitation emails</li>
+                  <li>✓ Everything else stays free forever</li>
+                </ul>
+                <button style="margin-top:24px; border:none; border-radius:8px; background:var(--accent); padding:12px 28px; font:inherit; font-size:14px; font-weight:600; color:#fff; cursor:pointer;">Unlock for £149.00</button>
+              </section>
+            </sc-if>
+            <sc-if value="{{ canPublish }}" hint-placeholder-val="{{ true }}">
+              <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:28px; box-shadow:var(--shadow);">
+                <p style="margin:0 0 16px; font-size:12px; font-weight:550; color:var(--ink-2);">Billing</p>
+                <p style="margin:0; font-size:18px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">Unlocked ✓</p>
+                <p style="margin:12px 0 0; font-size:14px; color:var(--ink-2);">Publishing and invite sending are live for this site. One payment, the whole wedding — no subscription.</p>
+              </section>
+            </sc-if>
+
+            <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:28px; box-shadow:var(--shadow);">
+              <p style="margin:0 0 8px; font-size:12px; font-weight:550; color:var(--ink-2);">Version history</p>
+              <p style="margin:0 0 16px; font-size:14px; color:var(--ink-2);">Every publish is kept forever. Restore any version into your draft, then publish again when you're happy — your live site never changes until you do.</p>
+              <sc-if value="{{ canPublish }}" hint-placeholder-val="{{ true }}">
+                <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px;">
+                  <sc-for list="{{ versions }}" as="v" hint-placeholder-count="3">
+                    <li style="display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--line); padding-bottom:8px; font-size:14px;">
+                      <span style="color:var(--ink);">{{ v.when }}<sc-if value="{{ v.live }}" hint-placeholder-val="{{ false }}"><span style="margin-left:8px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--accent-ink);">live</span></sc-if></span>
+                      <sc-if value="{{ v.restore }}" hint-placeholder-val="{{ true }}"><button style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:6px 12px; font-size:12px; color:var(--ink); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--accent);">Restore to draft</button></sc-if>
+                    </li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+              <sc-if value="{{ isLocked }}" hint-placeholder-val="{{ false }}">
+                <p style="margin:0; font-size:14px; color:var(--ink-3);">No published versions yet.</p>
+              </sc-if>
+            </section>
+
+            <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:28px; box-shadow:var(--shadow);">
+              <p style="margin:0 0 8px; font-size:12px; font-weight:550; color:var(--ink-2);">Collaborators</p>
+              <p style="margin:0 0 16px; font-size:14px; color:var(--ink-2);">Weddings are planned together. Add your partner, a parent or your planner — they get full access to plan, and sign in with a magic link (no password to share).</p>
+              <div style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px;">
+                <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Their email</span><input placeholder="partner@example.com" style="width:256px; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:12px 14px; color:var(--ink); outline:none; font:inherit; font-size:14px;" style-focus="border-color:var(--accent);"></label>
+                <button style="border:none; border-radius:8px; background:var(--accent); padding:12px 20px; font:inherit; font-size:14px; font-weight:600; color:#fff; cursor:pointer;">Add collaborator</button>
+              </div>
+            </section>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ── /save-the-date ── -->
+        <sc-if value="{{ isStd }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Save the Date" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="margin-bottom:28px;">
+            <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:var(--ink-3);">Save the Date</p>
+            <h1 style="margin:0; font-size:22px; font-weight:600; letter-spacing:-0.025em; color:var(--ink); line-height:1.15;">Announce the weekend</h1>
+            <p style="margin:6px 0 0; max-width:672px; font-size:13.5px; color:var(--ink-2);">A shareable pre-invitation. Pick which celebrations to tease, choose a look, and send it by WhatsApp, email, QR or print. The formal invitations come later.</p>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 400px; gap:32px;">
+            <div style="display:flex; flex-direction:column; gap:20px;">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:500; color:var(--ink-2);">Headline</span><input value="Save the Date" style="width:100%; box-sizing:border-box; border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:8px 12px; font-size:13.5px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);"></label>
+                <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:500; color:var(--ink-2);">Names</span><input value="{{ stdNames }}" style="width:100%; box-sizing:border-box; border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:8px 12px; font-size:13.5px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);"></label>
+                <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:500; color:var(--ink-2);">Date (your words)</span><input placeholder="September 2026" value="{{ stdDate }}" style="width:100%; box-sizing:border-box; border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:8px 12px; font-size:13.5px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);"></label>
+                <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:500; color:var(--ink-2);">Location</span><input placeholder="Jaipur, India" value="{{ stdLocation }}" style="width:100%; box-sizing:border-box; border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:8px 12px; font-size:13.5px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);"></label>
+              </div>
+              <label style="display:block;"><span style="display:block; margin-bottom:6px; font-size:12px; font-weight:500; color:var(--ink-2);">Message</span><textarea rows="2" style="width:100%; box-sizing:border-box; border-radius:18px; border:1px solid var(--line); background:var(--surface); padding:8px 12px; font-size:13.5px; color:var(--ink); outline:none; resize:vertical; font-family:inherit;">We can't wait to celebrate with you. Formal invitations to follow.</textarea></label>
+              <div>
+                <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:500; color:var(--ink-2);">Look</span>
+                <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                  <sc-for list="{{ stdPalettes }}" as="p">
+                    <button style="border-radius:8px; padding:4px 12px; font-size:12.5px; font-weight:500; cursor:pointer; font-family:inherit; background:{{ p.bg }}; color:{{ p.ink }}; border:{{ p.border }};" style-hover="border-color:var(--line-2);">{{ p.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div>
+                <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:500; color:var(--ink-2);">Which celebrations to tease? (combine any)</span>
+                <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                  <sc-for list="{{ stdEvents }}" as="e">
+                    <button style="border-radius:8px; padding:4px 12px; font-size:12.5px; font-weight:500; cursor:pointer; font-family:inherit; background:{{ e.bg }}; color:{{ e.ink }}; border:{{ e.border }};">{{ e.name }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:10px; border-top:1px solid var(--line); padding-top:20px;">
+                <button style="border:none; border-radius:8px; background:var(--accent); padding:10px 20px; font:inherit; font-size:14px; font-weight:600; color:#fff; cursor:pointer;">Save</button>
+                <button style="border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:10px 16px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--accent);">{{ stdPublishLabel }}</button>
+              </div>
+            </div>
+            <div>
+              <div style="position:sticky; top:16px; border-radius:12px; border:1px dashed var(--line-2); background:var(--paper-2); aspect-ratio:4/5; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; text-align:center; padding:24px; box-sizing:border-box;">
+                <p style="margin:0; font-family:'Geist Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">StdCard live preview</p>
+                <p style="margin:0; font-family:'Instrument Serif',Georgia,serif; font-size:26px; color:var(--ink);">{{ stdNames }}</p>
+                <p style="margin:0; font-size:12px; color:var(--ink-2);">Recreated exactly in the guest-facing batch<br>(shares the public /std/[token] card component)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ── other modules: queued ── -->
+        <sc-if value="{{ isQueued }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Queued module" style="max-width:1240px; margin:0 auto; padding:28px 24px;">
+          <div style="border-radius:12px; border:1px dashed var(--line-2); background:var(--paper-2); padding:56px 40px; text-align:center;">
+            <p style="margin:0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">Recreation queued</p>
+            <p style="margin:10px 0 0; font-size:14px; color:var(--ink-2);">{{ pageTitle }} is in the next recreation batch — the shell around it is already faithful.</p>
+          </div>
+        </div>
+        </sc-if>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:90; display:flex; align-items:center; gap:14px; border-radius:12px; border:1px solid var(--line, #EAE5DA); background:#1A1916; color:#FAF8F3; padding:10px 16px; font-size:13px; box-shadow:0 12px 32px -12px rgba(0,0,0,0.4); font-family:'Instrument Sans',system-ui,sans-serif;">
+      <span>{{ toast }}</span>
+      <button onClick="{{ undoToast }}" style="border:none; background:none; color:#F2A48E; font-weight:600; font-size:13px; cursor:pointer; font-family:inherit;">Undo</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 900}, &quot;mode&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;'light' | 'dark'&quot;, &quot;section&quot;: &quot;State&quot;}, &quot;account&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;founder&quot;, &quot;newbie&quot;], &quot;default&quot;: &quot;founder&quot;, &quot;tsType&quot;: &quot;'founder' | 'newbie'&quot;, &quot;section&quot;: &quot;State&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'dashboard', mode: null, account: null,
+    notifOpen: false, q: '', side: 'all', showImport: false,
+    invites: null, publish: 'idle', toast: null,
+  };
+
+  base() {
+    const mode = this.state.mode ?? this.props.mode ?? 'light';
+    const account = this.state.account ?? this.props.account ?? 'founder';
+    return { mode, account };
+  }
+
+  events(account) {
+    if (account === 'newbie') return [
+      { id: 'cer', name: 'Wedding Ceremony', accent: 'var(--accent)', when: 'TBC' },
+      { id: 'rec', name: 'Reception', accent: 'var(--accent)', when: 'TBC' },
+    ];
+    return [
+      { id: 'meh', name: 'Mehndi', accent: '#3E7C4F', when: 'Thu 17 Sep · 14:00' },
+      { id: 'san', name: 'Sangeet', accent: '#6D3FA9', when: 'Fri 18 Sep · 19:00' },
+      { id: 'cer', name: 'Ceremony', accent: '#C9A227', when: 'Sat 19 Sep · 11:00' },
+      { id: 'rec', name: 'Reception', accent: '#7A1F1F', when: 'Sat 19 Sep · 18:30' },
+    ];
+  }
+
+  defaultInvites() {
+    return {
+      'priya': ['meh','san','cer','rec'], 'raj': ['meh','san','cer'], 'aarav': ['san','cer'],
+      'anil': ['san','cer','rec'], 'meera': ['meh','san','cer','rec'], 'dev': ['san','cer','rec'],
+    };
+  }
+
+  componentDidMount() {
+    this._t = null;
+  }
+
+  renderVals() {
+    const { mode, account } = this.base();
+    const founder = account === 'founder';
+    const screen = this.state.screen;
+    const set = (patch) => () => this.setState(patch);
+
+    // ── Icons (lucide paths) ──
+    const IC = {
+      house: ['m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M9 22V12h6v10'],
+      globe: ['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20', 'M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20', 'M2 12h20'],
+      calendar: ['M8 2v4', 'M16 2v4', 'M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M3 10h18', 'M8 14h.01', 'M12 14h.01', 'M16 14h.01', 'M8 18h.01', 'M12 18h.01', 'M16 18h.01'],
+      mailOpen: ['M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6', 'm22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10'],
+      users: ['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2', 'M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8', 'M22 21v-2a4 4 0 0 0-3-3.87', 'M16 3.13a4 4 0 0 1 0 7.75'],
+      mail: ['M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z', 'm22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7'],
+      messages: ['M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z', 'M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1'],
+      mailCheck: ['M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8', 'm22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7', 'm16 19 2 2 4-4'],
+      armchair: ['M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3', 'M21 11a2 2 0 0 0-2 2v2H5v-2a2 2 0 1 0-4 0v3a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2Z', 'M5 18v2', 'M19 18v2'],
+      wallet: ['M21 12V7H5a2 2 0 0 1 0-4h14v4', 'M3 5v14a2 2 0 0 0 2 2h16v-5', 'M18 12a2 2 0 0 0 0 4h4v-4Z'],
+      calClock: ['M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5', 'M16 2v4', 'M8 2v4', 'M3 10h5', 'M16 10a6 6 0 1 0 0 12 6 6 0 0 0 0-12', 'M16 14v2l1.5 1.5'],
+      store: ['m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7', 'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8', 'M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4', 'M2 7h20', 'M22 7v3a2 2 0 0 1-4 0', 'M18 7v3a2 2 0 0 1-4 0', 'M14 7v3a2 2 0 0 1-4 0', 'M10 7v3a2 2 0 0 1-4 0', 'M6 7v3a2 2 0 0 1-4 0'],
+      listChecks: ['m3 17 2 2 4-4', 'm3 7 2 2 4-4', 'M13 6h8', 'M13 12h8', 'M13 18h8'],
+      folder: ['M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'],
+      sparkles: ['M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z', 'M20 3v4', 'M22 5h-4'],
+      chart: ['M3 3v16a2 2 0 0 0 2 2h16', 'M13 17V9', 'M18 17V5', 'M8 17v-3'],
+    };
+
+    const NAV = [
+      { label: 'Overview', items: [ { key: 'dashboard', label: 'Home', icon: IC.house } ] },
+      { label: 'Website', items: [
+        { key: 'website', label: 'Site editor', icon: IC.globe },
+        { key: 'events', label: 'Events', icon: IC.calendar },
+        { key: 'std', label: 'Save the Date', icon: IC.mailOpen } ] },
+      { label: 'Guests', items: [
+        { key: 'guests', label: 'Guest list', icon: IC.users },
+        { key: 'invitations', label: 'Invitations', icon: IC.mail, count: founder ? 0 : 0 },
+        { key: 'messages', label: 'Messages', icon: IC.messages },
+        { key: 'rsvps', label: 'RSVPs', icon: IC.mailCheck },
+        { key: 'seating', label: 'Seating', icon: IC.armchair } ] },
+      { label: 'Planning', items: [
+        { key: 'budget', label: 'Budget', icon: IC.wallet },
+        { key: 'payments', label: 'Payments', icon: IC.calClock, count: founder ? 2 : 0 },
+        { key: 'vendors', label: 'Vendors', icon: IC.store },
+        { key: 'tasks', label: 'Tasks', icon: IC.listChecks },
+        { key: 'files', label: 'Files', icon: IC.folder } ] },
+      { label: 'Insights', items: [
+        { key: 'assistant', label: 'Assistant', icon: IC.sparkles },
+        { key: 'reports', label: 'Reports', icon: IC.chart } ] },
+    ];
+
+    const TITLES = {
+      dashboard: 'Home', website: 'Site editor', events: 'Events', std: 'Save the Date',
+      guests: 'Guest list', invitations: 'Invitations', messages: 'Messages', rsvps: 'RSVPs',
+      seating: 'Seating', budget: 'Budget', payments: 'Payments', vendors: 'Vendors',
+      tasks: 'Tasks', files: 'Files', assistant: 'Assistant', reports: 'Reports', settings: 'Settings',
+    };
+
+    const navGroups = NAV.map((g, gi) => ({
+      label: g.label, mt: gi === 0 ? '8px' : '16px',
+      items: g.items.map((it) => {
+        const active = screen === it.key;
+        return {
+          label: it.label, paths: it.icon, count: it.count || 0,
+          go: (ev) => { if (ev && ev.preventDefault) ev.preventDefault(); this.setState({ screen: it.key, notifOpen: false }); },
+          bg: active ? 'var(--surface-2)' : 'transparent',
+          weight: active ? 600 : 500,
+          color: active ? 'var(--ink)' : 'var(--ink-2)',
+          iconColor: active ? 'var(--ink)' : 'var(--ink-3)',
+          shadow: active ? 'inset 2px 0 0 var(--accent)' : 'none',
+        };
+      }),
+    }));
+
+    // ── Notifications ──
+    const notifications = founder ? [
+      { dot: 'var(--ok)', text: '6 new RSVP answers in the last two days' },
+      { dot: 'var(--warn)', text: '2 vendor payments due within 14 days' },
+      { dot: 'var(--bad)', text: '2 tasks overdue' },
+    ] : [];
+
+    // ── Dashboard data ──
+    const score = founder ? 91 : 8;
+    const checklist = founder ? [] : [
+      { title: 'Choose your look', body: 'Pick a vibe — one tap styles fonts, colours and motion together.', cta: 'Open the editor', isCurrent: true },
+      { title: 'Make the events yours', body: 'Give every celebration its venue, date and time.', cta: 'Edit events', isCurrent: false },
+      { title: 'Build your guest list', body: 'Add households, or paste any spreadsheet and let the importer tidy it.', cta: 'Add guests', isCurrent: false },
+      { title: 'Publish your website', body: 'Nothing goes live until you say so — preview as much as you like.', cta: 'Publish', isCurrent: false },
+      { title: 'Send the invitations', body: 'Every household gets its own private link — email, WhatsApp or QR.', cta: 'Send invites', isCurrent: false },
+    ].map((s, i) => ({
+      ...s, num: String(i + 1),
+      border: s.isCurrent ? 'var(--accent)' : 'var(--line)',
+      bg: s.isCurrent ? 'var(--accent-soft)' : 'var(--paper)',
+      numBg: s.isCurrent ? 'var(--accent)' : 'transparent',
+      numInk: s.isCurrent ? '#fff' : 'var(--ink-3)',
+      numBorder: s.isCurrent ? 'none' : '1px solid var(--line-2)',
+    }));
+
+    const stats = founder ? [
+      { label: 'Events', value: '4', hint: 'celebrations planned', hasBar: false },
+      { label: 'Guests', value: '112', hint: '98 invited to at least one event', hasBar: false },
+      { label: 'Households responded', value: '38/54', hint: '', hasBar: true, bar: '70.4%' },
+      { label: 'Attending', value: '89', hint: 'guest-event confirmations', hasBar: false },
+      { label: 'Vendors booked', value: '6', hint: '', hasBar: false },
+      { label: 'Open tasks', value: '7', hint: '2 overdue', hasBar: false },
+    ] : [
+      { label: 'Events', value: '2', hint: 'celebrations planned', hasBar: false },
+      { label: 'Guests', value: '0', hint: '0 invited to at least one event', hasBar: false },
+      { label: 'Households responded', value: '0/0', hint: '', hasBar: true, bar: '0%' },
+      { label: 'Attending', value: '0', hint: 'guest-event confirmations', hasBar: false },
+      { label: 'Vendors booked', value: '0', hint: '', hasBar: false },
+      { label: 'Open tasks', value: '0', hint: 'none overdue', hasBar: false },
+    ];
+
+    const attention = founder
+      ? ['2 vendor payments due within 14 days', '2 tasks overdue']
+      : ['Give every event its venue, date and time', 'Add your first households', 'Publish your website', 'Send the invitations'];
+
+    const activity = founder ? [
+      { color: 'var(--ok)', text: 'Priya Shah said yes to Sangeet', at: '4m ago' },
+      { color: 'var(--ok)', text: 'Meera Patel said yes to Ceremony', at: '28m ago' },
+      { color: 'var(--bad)', text: 'Anil Patel declined Mehndi', at: '1h ago' },
+      { color: 'var(--accent)', text: 'Site published', at: '3h ago' },
+      { color: 'var(--ok)', text: 'Dev Kapoor said yes to Reception', at: '6h ago' },
+      { color: 'var(--warn)', text: 'Aisha Khan answered for Sangeet', at: '1d ago' },
+    ] : [];
+
+    // ── Guests data ──
+    const evs = this.events(account);
+    const invites = this.state.invites ?? this.defaultInvites();
+    const HH = founder ? [
+      { id: 'shah', name: 'The Shah Family', side: 'Bride', guests: [
+        { id: 'priya', fullName: 'Priya Shah', email: 'priya@shah.co', isChild: false, plusOne: true },
+        { id: 'raj', fullName: 'Raj Shah', email: '', isChild: false, plusOne: false },
+        { id: 'aarav', fullName: 'Aarav Shah', email: '', isChild: true, plusOne: false } ] },
+      { id: 'patel', name: 'The Patel Family', side: 'Groom', guests: [
+        { id: 'anil', fullName: 'Anil Patel', email: '', isChild: false, plusOne: false },
+        { id: 'meera', fullName: 'Meera Patel', email: 'meera@patel.uk', isChild: false, plusOne: false } ] },
+      { id: 'kapoor', name: 'Kapoor Household', side: 'Bride', guests: [
+        { id: 'dev', fullName: 'Dev Kapoor', email: 'dev.k@gmail.com', isChild: false, plusOne: true } ] },
+    ] : [];
+
+    const needle = this.state.q.trim().toLowerCase();
+    const sideF = this.state.side;
+    const shown = HH.filter((h) => {
+      if (sideF !== 'all' && h.side !== sideF) return false;
+      if (!needle) return true;
+      return h.name.toLowerCase().includes(needle) ||
+        h.guests.some((g) => g.fullName.toLowerCase().includes(needle) || g.email.toLowerCase().includes(needle));
+    });
+
+    const households = shown.map((h) => ({
+      name: h.name, side: h.side,
+      archive: () => this.showToast(h.name + ' archived'),
+      eventCols: evs.map((e) => ({
+        name: e.name, accent: e.accent,
+        toggleAll: () => {
+          const next = { ...(this.state.invites ?? this.defaultInvites()) };
+          const allIn = h.guests.every((g) => (next[g.id] || []).includes(e.id));
+          h.guests.forEach((g) => {
+            const cur = new Set(next[g.id] || []);
+            if (allIn) cur.delete(e.id); else cur.add(e.id);
+            next[g.id] = [...cur];
+          });
+          this.setState({ invites: next });
+          this.showToast(allIn ? h.name + ' uninvited' : h.name + ' invited');
+        },
+      })),
+      guests: h.guests.map((g) => ({
+        ...g,
+        cells: evs.map((e) => {
+          const on = (invites[g.id] || []).includes(e.id);
+          return {
+            on, mark: on ? '✓' : '',
+            bg: on ? 'var(--accent)' : 'transparent',
+            border: on ? 'none' : '1.5px solid var(--line-2)',
+            toggle: () => {
+              const next = { ...(this.state.invites ?? this.defaultInvites()) };
+              const cur = new Set(next[g.id] || []);
+              if (cur.has(e.id)) cur.delete(e.id); else cur.add(e.id);
+              next[g.id] = [...cur];
+              this.setState({ invites: next });
+            },
+          };
+        }),
+      })),
+    }));
+
+    const sides = ['all', 'Bride', 'Groom'];
+    const sideChips = founder ? sides.map((s) => {
+      const on = sideF === s;
+      return {
+        label: s === 'all' ? 'All' : s,
+        pick: () => this.setState({ side: on && s !== 'all' ? 'all' : s }),
+        bg: on ? 'var(--ink)' : 'transparent',
+        ink: on ? 'var(--paper)' : 'var(--ink-2)',
+        border: on ? '1px solid var(--ink)' : '1px solid var(--line)',
+      };
+    }) : [];
+
+    const shownGuestCount = shown.reduce((n, h) => n + h.guests.length, 0);
+
+    // ── RSVPs data ──
+    const rsvpEvents = founder ? [
+      { name: 'Mehndi', when: 'Thu 17 Sep · 14:00', att: 41, dec: 9, pen: 8, cap: '' , chase: 'Nisha Patel, Rohan Shah, Aisha Khan, Vikram Mehta, Sara Ali, Kiran Rao +2 more' },
+      { name: 'Sangeet', when: 'Fri 18 Sep · 19:00', att: 74, dec: 12, pen: 10, cap: '74/120 seats', chase: 'Rohan Shah, Aisha Khan, Tara Singh, Vikram Mehta, Zain Qureshi, Neha Joshi +4 more' },
+      { name: 'Ceremony', when: 'Sat 19 Sep · 11:00', att: 89, dec: 13, pen: 10, cap: '89/120 seats', chase: 'Nisha Patel, Tara Singh, Zain Qureshi, Kiran Rao, Neha Joshi, Imran Sheikh +4 more' },
+      { name: 'Reception', when: 'Sat 19 Sep · 18:30', att: 82, dec: 12, pen: 10, cap: '82/110 seats', chase: 'Aisha Khan, Vikram Mehta, Sara Ali, Imran Sheikh, Tara Singh, Rohan Shah +4 more' },
+    ].map((e) => {
+      const total = Math.max(1, e.att + e.dec + e.pen);
+      return { ...e, wAtt: (e.att / total * 100).toFixed(1) + '%', wDec: (e.dec / total * 100).toFixed(1) + '%', wPen: (e.pen / total * 100).toFixed(1) + '%' };
+    }) : [
+      { name: 'Wedding Ceremony', when: 'TBC', att: 0, dec: 0, pen: 0, cap: '', chase: '', wAtt: '0%', wDec: '0%', wPen: '0%' },
+      { name: 'Reception', when: 'TBC', att: 0, dec: 0, pen: 0, cap: '', chase: '', wAtt: '0%', wDec: '0%', wPen: '0%' },
+    ];
+
+    const rollups = founder ? [
+      { label: 'Meal choice', counts: [ { k: 'Vegetarian', n: 46 }, { k: 'Chicken', n: 31 }, { k: 'Halal', n: 12 }, { k: 'Kids meal', n: 8 } ] },
+      { label: 'Nut allergy', counts: [ { k: 'No', n: 79 }, { k: 'Yes', n: 3 } ] },
+    ] : [];
+    const songs = founder ? [
+      { guest: 'Priya Shah', value: '"Kala Chashma" — for the sangeet floor' },
+      { guest: 'Dev Kapoor', value: '"Chaiyya Chaiyya"' },
+      { guest: 'Meera Patel', value: 'Anything ABBA, please' },
+    ] : [];
+
+    // ── Publish button ──
+    const pub = this.state.publish;
+    const publishLabel = pub === 'publishing' ? 'Publishing…' : pub === 'live' ? 'Live ✓' : 'Publish';
+    const publishBg = pub === 'live' ? 'var(--ok)' : 'var(--accent)';
+
+    // ── Events ──
+    const eventRows = founder ? [
+      { name: 'Mehndi', meta: 'Thu 17 Sep · 14:00 · The Courtyard', vis: 'Invite only', cap: 'cap 60' },
+      { name: 'Sangeet', meta: 'Fri 18 Sep · 19:00 · The Grand Hall', vis: 'Invite only', cap: 'cap 120' },
+      { name: 'Ceremony', meta: 'Sat 19 Sep · 11:00 · Merrydale Manor', vis: 'Public', cap: 'cap 120' },
+      { name: 'Reception', meta: 'Sat 19 Sep · 18:30 · Merrydale Manor', vis: 'Public', cap: 'cap 110' },
+    ] : [
+      { name: 'Wedding Ceremony', meta: 'Date TBC', vis: 'Invite only', cap: '' },
+      { name: 'Reception', meta: 'Date TBC', vis: 'Invite only', cap: '' },
+    ];
+
+    // ── Invitations ──
+    const inviteRows = founder ? [
+      { name: 'The Shah Family', meta: '3 guests · 2 emails · 1 active link · sent 02/07/2026', opened: '05/07/2026', hasLinks: true, showLink: true, link: 'aanya-and-dev.occasio.events/i/9f2c…d41a', emailOpacity: 1 },
+      { name: 'The Patel Family', meta: '2 guests · 1 email · 1 active link · sent 02/07/2026', opened: '', hasLinks: true, showLink: false, link: '', emailOpacity: 1 },
+      { name: 'Kapoor Household', meta: '1 guest · 1 email · 0 active links', opened: '', hasLinks: false, showLink: false, link: '', emailOpacity: 1 },
+    ] : [];
+    const qrCells = Array.from({ length: 36 }).map((_, i) => (i % 3 === 0 || i === 5 || i === 10 || i === 14 || i === 22 || i === 29 || i === 33) ? '#211D18' : '#fff');
+
+    // ── Payments ──
+    const paymentMonths = founder ? [
+      { label: 'July 2026', total: '£3,900.00', rows: [
+        { label: 'Photography balance', vendor: 'Lens & Light', due: 'Overdue · Due Mon 6 Jul', dueInk: 'var(--bad)', dueWeight: 600, amount: '£1,400.00', border: 'color-mix(in oklab, var(--bad) 40%, transparent)', checkBorder: 'var(--line-2)', checkBg: 'transparent', checkInk: 'transparent', titleInk: 'var(--ink)', strike: 'none', amtInk: 'var(--ink)', linked: true, togglePaid: () => this.showToast('Photography balance marked paid') },
+        { label: 'Florist deposit', vendor: 'Petal & Stem', due: 'Due Fri 24 Jul', dueInk: 'var(--warn)', dueWeight: 600, amount: '£2,500.00', border: 'color-mix(in oklab, var(--warn) 40%, transparent)', checkBorder: 'var(--line-2)', checkBg: 'transparent', checkInk: 'transparent', titleInk: 'var(--ink)', strike: 'none', amtInk: 'var(--ink)', linked: true, togglePaid: () => this.showToast('Florist deposit marked paid') },
+      ] },
+      { label: 'August 2026', total: '£6,000.00', rows: [
+        { label: 'Catering balance', vendor: 'Saffron & Sage', due: 'Due Sat 15 Aug', dueInk: 'var(--ink-3)', dueWeight: 400, amount: '£6,000.00', border: 'var(--line)', checkBorder: 'var(--line-2)', checkBg: 'transparent', checkInk: 'transparent', titleInk: 'var(--ink)', strike: 'none', amtInk: 'var(--ink)', linked: true, togglePaid: () => this.showToast('Catering balance marked paid') },
+      ] },
+    ] : [];
+    const paidRows = [
+      { label: 'Venue deposit', vendor: 'Merrydale Manor', due: 'Paid Tue 10 Jun', amount: '£4,000.00' },
+      { label: 'DJ deposit', vendor: 'Dhol & Deck', due: 'Paid Fri 20 Jun', amount: '£500.00' },
+    ];
+
+    // ── Tasks ──
+    const taskGroups = founder ? [
+      { title: 'Open · 5', rows: [
+        { done: false, title: 'Chase caterer for tasting date', linked: 'Sangeet · Saffron & Sage', high: true, due: '12 Jul', dueInk: 'var(--bad)', ink: 'var(--ink)', strike: 'none', toggle: () => this.showToast('Task updated') },
+        { done: false, title: 'Confirm final guest count with venue', linked: 'Ceremony', high: false, due: '20 Jul', dueInk: 'var(--ink-3)', ink: 'var(--ink)', strike: 'none', toggle: () => this.showToast('Task updated') },
+        { done: false, title: 'Send mehndi playlist to DJ', linked: 'Mehndi · Dhol & Deck', high: false, due: '', dueInk: 'var(--ink-3)', ink: 'var(--ink)', strike: 'none', toggle: () => this.showToast('Task updated') },
+        { done: false, title: 'Order welcome bags', linked: '', high: false, due: '02 Aug', dueInk: 'var(--ink-3)', ink: 'var(--ink)', strike: 'none', toggle: () => this.showToast('Task updated') },
+        { done: false, title: 'Finalise seating for top table', linked: 'Reception', high: false, due: '', dueInk: 'var(--ink-3)', ink: 'var(--ink)', strike: 'none', toggle: () => this.showToast('Task updated') },
+      ] },
+      { title: 'Done · 4', rows: [
+        { done: true, title: 'Book photographer', linked: 'Lens & Light', high: false, due: '', dueInk: 'var(--ink-3)', ink: 'var(--ink-3)', strike: 'line-through', toggle: () => this.showToast('Task updated') },
+        { done: true, title: 'Confirm venue', linked: 'Merrydale Manor', high: false, due: '', dueInk: 'var(--ink-3)', ink: 'var(--ink-3)', strike: 'line-through', toggle: () => this.showToast('Task updated') },
+      ] },
+    ] : [];
+
+    // ── Budget ──
+    const budgetStats = founder ? [
+      { label: 'Estimated', value: '£42,000.00', hint: '', hasBar: false },
+      { label: 'Committed', value: '£38,900.00', hint: 'actuals where known', hasBar: false },
+      { label: 'Paid', value: '£16,400.00', hint: '', hasBar: true, bar: '42.2%' },
+      { label: 'Left to pay', value: '£22,500.00', hint: '', hasBar: false },
+    ] : [
+      { label: 'Estimated', value: '£0.00', hint: '', hasBar: false },
+      { label: 'Committed', value: '£0.00', hint: 'actuals where known', hasBar: false },
+      { label: 'Paid', value: '£0.00', hint: '', hasBar: true, bar: '0%' },
+      { label: 'Left to pay', value: '£0.00', hint: '', hasBar: false },
+    ];
+    const budgetCats = founder ? [
+      { name: 'Venue', rows: [ { label: 'Merrydale Manor hire', linked: 'Ceremony · Merrydale Manor', paidDue: '£4,000.00 paid · £8,000.00 due', total: '£12,000.00', status: 'Deposit paid' } ] },
+      { name: 'Catering', rows: [ { label: 'Dinner & canapés', linked: 'Reception · Saffron & Sage', paidDue: '£0.00 paid · £14,000.00 due', total: '£14,000.00', status: 'Estimated' } ] },
+      { name: 'Decor', rows: [ { label: 'Mandap & florals', linked: 'Ceremony · Petal & Stem', paidDue: '£0.00 paid · £5,500.00 due', total: '£5,500.00', status: 'Estimated' } ] },
+    ] : [];
+
+    // ── Vendors ──
+    const vTab = this.state.vendorTab || 'pipeline';
+    const vendorStages = founder ? [
+      { label: 'Booked · 3', rows: [
+        { name: 'Merrydale Manor', category: 'Venue', amount: '£12,000.00', status: 'Booked', toneBg: 'var(--ok-soft)', toneInk: 'var(--ok)' },
+        { name: 'Lens & Light', category: 'Photography', amount: '£2,800.00', status: 'Booked', toneBg: 'var(--ok-soft)', toneInk: 'var(--ok)' },
+        { name: 'Dhol & Deck', category: 'DJ', amount: '£1,500.00', status: 'Booked', toneBg: 'var(--ok-soft)', toneInk: 'var(--ok)' },
+      ] },
+      { label: 'Quote in · 1', rows: [
+        { name: 'Saffron & Sage', category: 'Catering', amount: '£14,000.00', status: 'Quote in', toneBg: 'var(--warn-soft)', toneInk: 'var(--warn)' },
+      ] },
+      { label: 'Contacted · 2', rows: [
+        { name: 'Petal & Stem', category: 'Florals', amount: '', status: 'Contacted', toneBg: 'var(--info-soft)', toneInk: 'var(--info)' },
+        { name: 'Henna by Hema', category: 'Mehndi', amount: '', status: 'Contacted', toneBg: 'var(--info-soft)', toneInk: 'var(--info)' },
+      ] },
+    ] : [];
+    const recCatList = ['all', 'Catering', 'DJ', 'Decor', 'Photography', 'Florals'];
+    const recCats = recCatList.map((c) => {
+      const on = c === 'all';
+      return { label: c === 'all' ? 'All' : c, bg: on ? 'var(--ink)' : 'transparent', ink: on ? 'var(--paper)' : 'var(--ink-2)', border: on ? '1px solid var(--ink)' : '1px solid var(--line)' };
+    });
+    const recVendors = [
+      { category: 'Catering', featured: true, name: 'Saffron & Sage', tagline: 'Modern Indian fine dining', rating: '4.9', blurb: 'Regional menus that go far beyond the usual buffet, with a dedicated allergen kitchen.', discount: '10% off through Simvites', promo: 'SIMVITES10', location: 'London & South East', band: '£££', mention: 'They fed 300 without a single cold plate.', author: 'Anjali, married 2025' },
+      { category: 'DJ', featured: false, name: 'Dhol & Deck', tagline: 'Bilingual DJ + live dhol', rating: '4.8', blurb: 'Reads the room across generations — aunties and the afterparty crowd both stay on the floor.', discount: '', promo: '', location: 'Nationwide', band: '££', mention: 'The dhol entrance gave everyone chills.', author: 'Priya & Sam' },
+      { category: 'Photography', featured: false, name: 'Lens & Light', tagline: 'Documentary wedding film & photo', rating: '5.0', blurb: 'Two shooters, unobtrusive, gorgeous low-light work for sangeet and receptions.', discount: 'Free engagement shoot', promo: 'SIMLENS', location: 'Manchester', band: '£££', mention: '', author: '' },
+      { category: 'Florals', featured: false, name: 'Petal & Stem', tagline: 'Mandap & installation florals', rating: '4.7', blurb: 'Statement mandaps and hanging installations, seasonal British flowers where possible.', discount: '', promo: '', location: 'Midlands', band: '££', mention: 'Our mandap made every photo.', author: 'Meera, married 2024' },
+    ];
+
+    // ── Reports ──
+    const reportStats = founder ? [
+      { label: 'Guests', value: '112', hint: '' },
+      { label: 'Attending', value: '89', hint: '124 responses in' },
+      { label: 'Budget', value: '£38,900.00', hint: '£16,400.00 paid' },
+      { label: 'Open items', value: '5 tasks', hint: '3 payments scheduled' },
+    ] : [
+      { label: 'Guests', value: '0', hint: '' }, { label: 'Attending', value: '0', hint: '0 responses in' },
+      { label: 'Budget', value: '£0.00', hint: '£0.00 paid' }, { label: 'Open items', value: '0 tasks', hint: '0 payments scheduled' },
+    ];
+    const reportCards = [
+      { icon: IC.users, rows: founder ? 112 : 0, title: 'Guest list', body: 'Every household and guest, with emails, children and plus-ones.' },
+      { icon: ['M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8', 'm22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7', 'm16 19 2 2 4-4'], rows: founder ? 124 : 0, title: 'RSVPs by event', body: 'Guest × event × status, with a column for every question — the caterer sheet.' },
+      { icon: IC.wallet, rows: founder ? 12 : 0, title: 'Budget', body: 'Every line with estimate, actual, paid and balance, linked to events and vendors.' },
+      { icon: IC.calClock, rows: founder ? 5 : 0, title: 'Payment schedule', body: 'Every vendor instalment with due date, amount, status and linked budget line.' },
+      { icon: IC.store, rows: founder ? 6 : 0, title: 'Vendors', body: 'The full pipeline with quotes, contracts, contacts and event coverage.' },
+      { icon: IC.listChecks, rows: founder ? 9 : 0, title: 'Tasks', body: 'The whole checklist with status, priority, due dates and links.' },
+    ];
+
+    // ── Files ──
+    const fileTeach = [
+      { icon: '📄', title: 'Vendor contracts', body: 'The signed terms — attached to the vendor.' },
+      { icon: '💷', title: 'Quotes & invoices', body: 'Every figure, next to its budget line.' },
+      { icon: '🗺️', title: 'Venue floor plans', body: 'Feed the seating planner from here.' },
+      { icon: '✨', title: 'Inspiration & briefs', body: 'Mood boards your decorator will love.' },
+    ];
+    const fileRows = founder ? [
+      { kind: 'contract', name: 'Merrydale-Manor-Hire-Agreement.pdf', linked: 'Ceremony · Merrydale Manor' },
+      { kind: 'quote', name: 'Saffron-Sage-Catering-Quote.pdf', linked: 'Reception · Saffron & Sage' },
+      { kind: 'floorplan', name: 'Grand-Hall-Floorplan.png', linked: 'Sangeet' },
+    ] : [];
+
+    // ── Seating ──
+    const seatTables = founder ? [
+      { name: 'Top table', x: '50%', y: '22%', border: 'var(--accent)', radius: '8px', count: '6/8', countInk: 'var(--ink-3)' },
+      { name: 'Table 1', x: '24%', y: '52%', border: 'var(--ok)', radius: '99px', count: '10/10', countInk: 'var(--ok)' },
+      { name: 'Table 2', x: '50%', y: '58%', border: 'var(--line-2)', radius: '99px', count: '7/10', countInk: 'var(--ink-3)' },
+      { name: 'Table 3', x: '76%', y: '52%', border: 'var(--line-2)', radius: '99px', count: '4/10', countInk: 'var(--ink-3)' },
+      { name: 'Kids', x: '80%', y: '82%', border: 'var(--line-2)', radius: '8px', count: '5/6', countInk: 'var(--ink-3)' },
+    ] : [];
+    const seatedGuests = ['Aanya Shah', 'Dev Kapoor', 'Priya Shah', 'Raj Shah', 'Anil Patel', 'Meera Patel'];
+    const unseatedGuests = founder ? [
+      { name: 'Aarav Shah', household: 'The Shah Family' },
+      { name: 'Nisha Patel', household: 'The Patel Family' },
+      { name: 'Rohan Shah', household: 'The Shah Family' },
+      { name: 'Aisha Khan', household: 'Khan Household' },
+    ] : [];
+
+    // ── Messages ──
+    const threads = founder ? [
+      { initial: 'S', name: 'The Shah Family', preview: 'Thank you! See you there', when: '4 Jul', bg: 'var(--surface-2)' },
+      { initial: 'P', name: 'The Patel Family', preview: 'Can we bring the kids?', when: '3 Jul', bg: 'transparent' },
+      { initial: 'K', name: 'Kapoor Household', preview: 'No messages yet', when: '', bg: 'transparent' },
+    ] : [];
+    const chatMsgs = [
+      { align: 'flex-start', body: 'Hi! Just checking — is the sangeet black tie?', meta: 'In · 3 Jul 18:20', bg: 'var(--paper)', ink: 'var(--ink)', border: '1px solid var(--line)', metaInk: 'var(--ink-3)' },
+      { align: 'flex-end', body: 'Not at all — festive Indian or cocktail, whatever you love wearing!', meta: 'Out · 3 Jul 18:45 · saved', bg: 'var(--accent)', ink: '#fff', border: 'none', metaInk: 'rgba(255,255,255,0.7)' },
+      { align: 'flex-start', body: 'Thank you! See you there', meta: 'In · 4 Jul 09:10', bg: 'var(--paper)', ink: 'var(--ink)', border: '1px solid var(--line)', metaInk: 'var(--ink-3)' },
+    ];
+
+    // ── Settings ──
+    const settingsTemplates = [
+      { name: 'Golden Hour', swatches: ['#F5EFE3', '#C9A227', '#7A1F1F'], active: founder },
+      { name: 'Ivory Atelier', swatches: ['#F6F1E9', '#211D18', '#B08D57'], active: false },
+      { name: 'Midnight Baraat', swatches: ['#0F1B32', '#EFE6D2', '#D4AF6A'], active: false },
+      { name: 'Rajwada', swatches: ['#7A1024', '#F8EAD8', '#E8A33D'], active: false },
+      { name: 'Peacock Court', swatches: ['#0D3B3E', '#F2EBD8', '#D9A62E'], active: false },
+      { name: 'Rose & Ash', swatches: ['#F6E7E4', '#6E2231', '#C4808E'], active: !founder },
+    ].map((t) => ({ ...t, border: t.active ? 'var(--accent)' : 'var(--line)', bg: t.active ? 'var(--accent-soft)' : 'var(--surface)' }));
+    const versions = [
+      { when: '5 Jul 2026, 14:32', live: true, restore: false },
+      { when: '2 Jul 2026, 09:15', live: false, restore: true },
+      { when: '28 Jun 2026, 20:40', live: false, restore: true },
+    ];
+
+    // ── Save the Date ──
+    const stdPaletteList = ['Site theme', 'Gold', 'Oxblood', 'Sage', 'Ink', 'Midnight'];
+    const stdPalettes = stdPaletteList.map((p, i) => ({ label: p, bg: i === 0 ? 'var(--ink)' : 'transparent', ink: i === 0 ? 'var(--paper)' : 'var(--ink-2)', border: i === 0 ? '1px solid var(--ink)' : '1px solid var(--line)' }));
+    const stdEventList = founder ? ['Mehndi', 'Sangeet', 'Ceremony', 'Reception'] : ['Wedding Ceremony', 'Reception'];
+    const stdEvents = stdEventList.map((e, i) => ({ name: e, bg: i < 2 && founder ? 'var(--ink)' : 'transparent', ink: i < 2 && founder ? 'var(--paper)' : 'var(--ink-2)', border: i < 2 && founder ? '1px solid var(--ink)' : '1px solid var(--line)' }));
+
+    const KNOWN = ['dashboard', 'guests', 'rsvps', 'events', 'invitations', 'payments', 'tasks', 'budget', 'vendors', 'reports', 'files', 'seating', 'messages', 'assistant', 'settings', 'std'];
+    const seg = (b, ib) => ({ bg: b ? '#EDEBE6' : 'transparent', ink: b ? '#101010' : (ib || '#8C897F') });
+    const fSeg = seg(account === 'founder'); const nSeg = seg(account === 'newbie');
+    const lSeg = seg(mode === 'light'); const dSeg = seg(mode === 'dark');
+
+    return {
+      mode, routeLabel: '/' + (screen === 'dashboard' ? 'dashboard' : screen) + ' · ' + (founder ? 'Aanya & Dev (activated demo)' : 'Zara & Kabir (fresh, locked)'),
+      founderBtnBg: fSeg.bg, founderBtnInk: fSeg.ink, newbieBtnBg: nSeg.bg, newbieBtnInk: nSeg.ink,
+      lightBtnBg: lSeg.bg, lightBtnInk: lSeg.ink, darkBtnBg: dSeg.bg, darkBtnInk: dSeg.ink,
+      setFounder: () => this.setState({ account: 'founder', invites: null }),
+      setNewbie: () => this.setState({ account: 'newbie', invites: null }),
+      setLight: () => this.setState({ mode: 'light' }),
+      setDark: () => this.setState({ mode: 'dark' }),
+      toggleMode: () => this.setState({ mode: mode === 'dark' ? 'light' : 'dark' }),
+      themeIconPaths: mode === 'dark'
+        ? ['M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8', 'M12 2v2', 'M12 20v2', 'M4.93 4.93l1.41 1.41', 'M17.66 17.66l1.41 1.41', 'M2 12h2', 'M20 12h2', 'M6.34 17.66l-1.41 1.41', 'M19.07 4.93l-1.41 1.41']
+        : ['M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'],
+
+      siteTitle: founder ? 'Aanya & Dev' : 'Zara & Kabir',
+      statusWord: founder ? 'live' : 'draft',
+      statusHeaderWord: founder ? 'Live' : 'Draft',
+      statusDotColor: founder ? 'var(--ok)' : 'var(--warn)',
+      email: founder ? 'maharshi.sim@hotmail.com' : 'newbie@occasio.test',
+      emailInitial: founder ? 'M' : 'N',
+      navGroups,
+      goDashboard: (ev) => { if (ev && ev.preventDefault) ev.preventDefault(); this.setState({ screen: 'dashboard' }); },
+      goSettings: (ev) => { if (ev && ev.preventDefault) ev.preventDefault(); this.setState({ screen: 'settings' }); },
+      settingsBg: screen === 'settings' ? 'var(--surface-2)' : 'transparent',
+      settingsWeight: screen === 'settings' ? 600 : 500,
+      settingsColor: screen === 'settings' ? 'var(--ink)' : 'var(--ink-2)',
+      settingsShadow: screen === 'settings' ? 'inset 2px 0 0 var(--accent)' : 'none',
+      pageTitle: TITLES[screen] || 'Home',
+
+      notifCount: notifications.length, notifications, notifEmpty: notifications.length === 0,
+      notifOpen: this.state.notifOpen,
+      toggleNotif: () => this.setState({ notifOpen: !this.state.notifOpen }),
+      closeNotif: () => this.setState({ notifOpen: false }),
+      isLocked: !founder, canPublish: founder,
+      doPublish: () => {
+        if (this.state.publish !== 'idle') return;
+        this.setState({ publish: 'publishing' });
+        setTimeout(() => { this.setState({ publish: 'live' }); this.showToast('Your site is live'); setTimeout(() => this.setState({ publish: 'idle' }), 3000); }, 900);
+      },
+      publishLabel, publishBg,
+
+      isDashboard: screen === 'dashboard',
+      isGuests: screen === 'guests',
+      isRsvps: screen === 'rsvps',
+      isQueued: !KNOWN.includes(screen),
+
+      dashHeadline: founder ? "You're in great shape." : "Let's get you set up.",
+      dashDescription: founder ? '2 things need a quick look.' : '4 things need a quick look.',
+      showChecklist: !founder, checklist,
+      score, ringDash: ((score / 100) * 213.6).toFixed(1) + ' 213.6',
+      hasAttention: attention.length > 0, attention, stats,
+      hasActivity: activity.length > 0, activity,
+
+      hhCount: founder ? 54 : 0, guestCount: founder ? 112 : 0,
+      hasHouseholds: founder, guestsEmpty: !founder,
+      q: this.state.q,
+      onSearch: (ev) => this.setState({ q: ev.target.value }),
+      sideChips, households,
+      shownHh: founder ? (needle || sideF !== 'all' ? shown.length : 54) : 0,
+      shownGuests: founder ? (needle || sideF !== 'all' ? shownGuestCount : 112) : 0,
+      hasMoreHouseholds: founder && !needle && sideF === 'all',
+      showImport: this.state.showImport,
+      toggleImport: () => this.setState({ showImport: !this.state.showImport }),
+      importBtnLabel: this.state.showImport ? 'Close import' : 'Paste import',
+
+      rsvpSummary: founder ? '38 of 54 households have responded.' : '0 of 0 households have responded.',
+      rsvpEvents, hasAnswers: founder, rollups, songs,
+
+      toast: this.state.toast,
+      undoToast: () => this.setState({ toast: null }),
+
+      // module screens
+      isEvents: screen === 'events', eventsEmpty: false, eventRows,
+      isInvitations: screen === 'invitations', invitesEmpty: !founder, inviteRows, qrCells,
+      isPayments: screen === 'payments', paymentsEmpty: !founder, paymentMonths, hasPaid: founder, paidRows,
+      isTasks: screen === 'tasks', tasksEmpty: !founder, hasTasks: founder, taskGroups,
+      tasksDesc: founder ? '5 open tasks. Link tasks to events and vendors so nothing lives in two places.' : '0 open tasks. Link tasks to events and vendors so nothing lives in two places.',
+      tasksDone: 4, tasksTotal: 9, tasksPct: 44, tasksPctW: '44%',
+      tasksChip: founder ? '2 overdue — worth a look' : 'Nothing overdue ✓',
+      tasksChipBg: founder ? 'var(--bad-soft)' : 'var(--ok-soft)',
+      tasksChipInk: founder ? 'var(--bad)' : 'var(--ok)',
+      isBudget: screen === 'budget', budgetEmpty: !founder, budgetStats, budgetCats,
+      isVendors: screen === 'vendors', vendorsEmpty: !founder, vendorStages,
+      vendorsDesc: founder ? '3 booked · £16,300.00 contracted. A booked vendor flows straight into your budget and dashboard.' : '0 booked · £0.00 contracted. A booked vendor flows straight into your budget and dashboard.',
+      showPipeline: vTab === 'pipeline', showRecommended: vTab === 'recommended',
+      pickPipeline: () => this.setState({ vendorTab: 'pipeline' }),
+      pickRecommended: () => this.setState({ vendorTab: 'recommended' }),
+      tabPipeBorder: vTab === 'pipeline' ? 'var(--accent)' : 'transparent',
+      tabPipeInk: vTab === 'pipeline' ? 'var(--ink)' : 'var(--ink-3)',
+      tabRecBorder: vTab === 'recommended' ? 'var(--accent)' : 'transparent',
+      tabRecInk: vTab === 'recommended' ? 'var(--ink)' : 'var(--ink-3)',
+      tabRecBadgeBg: vTab === 'recommended' ? 'var(--accent-soft)' : 'var(--surface-2)',
+      tabRecBadgeInk: vTab === 'recommended' ? 'var(--accent-ink)' : 'var(--ink-3)',
+      recCats, recVendors,
+      isReports: screen === 'reports', reportStats, reportCards,
+      isFiles: screen === 'files', filesEmpty: !founder, fileTeach, fileRows,
+      isSeating: screen === 'seating', seatingEmpty: !founder, seatTables, seatedGuests, unseatedCount: founder ? 4 : 0, unseatedGuests,
+      isMessages: screen === 'messages', messagesEmpty: !founder, hasThreads: founder, threads, chatMsgs,
+      isAssistant: screen === 'assistant',
+      isSettings: screen === 'settings', settingsTemplates, versions,
+      slugLine: founder ? 'aanya-and-dev.occasio.events' : 'zara-and-kabir.occasio.events',
+      isStd: screen === 'std',
+      stdNames: founder ? 'Aanya & Dev' : 'Zara & Kabir',
+      stdDate: founder ? '19 September 2026' : '',
+      stdLocation: founder ? 'Manchester, UK' : '',
+      stdPublishLabel: founder ? 'Unpublish' : 'Publish',
+      stdPalettes, stdEvents,
+    };
+  }
+
+  showToast(msg) {
+    if (this._t) clearTimeout(this._t);
+    this.setState({ toast: msg });
+    this._t = setTimeout(() => this.setState({ toast: null }), 3500);
+  }
+}
+</script>
+</body>
+</html>

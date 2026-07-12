@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&amp;family=Instrument+Serif:ital@0;1&amp;family=Geist+Mono:wght@400..700&amp;family=Cormorant+Garamond:ital,wght@0,400..700;1,400..700&amp;family=Jost:ital,wght@0,300..600;1,300..600&amp;display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#101010; }
+[data-ws] {
+  --paper:#FAF8F3; --paper-2:#F3EFE6; --surface:#FFFFFF; --surface-2:#F4F1E9;
+  --ink:#1A1916; --ink-2:#6B675E; --ink-3:#928D81; --line:#EAE5DA; --line-2:#DCD5C6;
+  --accent:oklch(0.62 0.21 29); --accent-ink:oklch(0.55 0.19 29);
+  --accent-soft:rgba(222,71,38,0.08); --accent-line:rgba(222,71,38,0.35);
+  --ok:#1B9E5F; --warn:#B87A1E; --bad:#D2402A;
+  --ok-soft:#E5F5EC; --warn-soft:#FAF0DD; --bad-soft:#FBEAE6;
+  --shadow:0 1px 2px rgba(30,25,15,0.05); --shadow-lg:0 40px 90px -20px rgba(20,16,8,0.45);
+}
+[data-ws][data-mode="dark"] {
+  --paper:#0A1220; --paper-2:#0E1830; --surface:#111C33; --surface-2:#1A2742;
+  --ink:#EEF2FA; --ink-2:#A9B4CC; --ink-3:#7683A1; --line:#223252; --line-2:#2C3F63;
+  --accent:oklch(0.68 0.19 30); --accent-ink:oklch(0.74 0.17 30);
+  --accent-soft:rgba(242,109,86,0.14); --accent-line:rgba(242,109,86,0.4);
+  --ok:#3DD68C; --warn:#F0B25A; --bad:#F26D56;
+  --ok-soft:rgba(61,214,140,0.15); --warn-soft:rgba(240,178,90,0.15); --bad-soft:rgba(242,109,86,0.16);
+  --shadow:0 1px 2px rgba(2,6,16,0.5); --shadow-lg:0 40px 90px -20px rgba(2,6,16,0.7);
+}
+[data-ws] * { scrollbar-width:thin; scrollbar-color:var(--line-2) transparent; }
+[data-ws] *::-webkit-scrollbar { width:8px; height:8px; }
+[data-ws] *::-webkit-scrollbar-track { background:transparent; }
+[data-ws] *::-webkit-scrollbar-thumb { background:var(--line-2); border-radius:99px; border:2px solid transparent; background-clip:content-box; }
+[data-ws] input::placeholder, [data-ws] textarea::placeholder { color:var(--ink-3); opacity:1; }
+
+/* Golden Hour template vars — scoped to the WYSIWYG canvas ([data-site-root]) */
+[data-site-root] {
+  --paper:oklch(0.985 0.008 85); --paper-2:oklch(0.955 0.018 80);
+  --surface:oklch(0.995 0.005 90); --surface-2:oklch(0.95 0.015 80);
+  --ink:oklch(0.26 0.03 40); --ink-2:oklch(0.44 0.035 48); --ink-3:oklch(0.53 0.105 70);
+  --line:oklch(0.9 0.02 75); --line-2:oklch(0.86 0.02 75);
+  --accent:oklch(0.42 0.16 28); --accent-ink:oklch(0.53 0.105 70);
+  --accent-soft:oklch(0.955 0.026 80); --accent-line:oklch(0.72 0.11 75);
+  --font-display:'Cormorant Garamond', Georgia, serif;
+  --font-sans:'Jost', system-ui, sans-serif;
+  --tpl-btn-radius:999px;
+  font-family:var(--font-sans);
+}
+/* Editor block chrome (from globals.css: .ebc-chip / .ebc-add) */
+.ebc { position:relative; }
+.ebc-chip {
+  position:absolute; top:6px; left:8px; z-index:30; padding:2px 8px; border-radius:6px;
+  background:var(--ink); color:var(--paper); font-family:'Geist Mono',monospace; font-size:9px;
+  font-weight:600; text-transform:uppercase; letter-spacing:0.08em; opacity:0; pointer-events:none;
+  transition:opacity 150ms ease;
+}
+.ebc-add {
+  position:absolute; bottom:-12px; left:50%; transform:translateX(-50%); z-index:30;
+  opacity:0; pointer-events:none; transition:opacity 150ms ease;
+}
+.ebc:hover > .ebc-chip { opacity:1; }
+.ebc:hover > .ebc-add { opacity:1; pointer-events:auto; }
+.ebc:hover { outline:1.5px dashed oklch(0.62 0.21 29 / 0.55); outline-offset:-1.5px; }
+.ebc[data-selected] { outline:2px solid oklch(0.62 0.21 29) !important; outline-offset:-2px; box-shadow:0 0 0 4px oklch(0.62 0.21 29 / 0.12); }
+.editor-vp { transition:max-width 350ms cubic-bezier(0.16,1,0.3,1); margin:0 auto; }
+a { color:oklch(0.55 0.19 29); } a:hover { color:oklch(0.62 0.21 29); }
+</style>
+</helmet>
+
+<div style="font-family:'Instrument Sans',system-ui,sans-serif;">
+
+  <!-- Review scaffolding bar -->
+  <div style="height:44px; background:#101010; color:#EDEBE6; display:flex; align-items:center; gap:14px; padding:0 16px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.06em;">
+    <span style="text-transform:uppercase; color:#8C897F;">Recreation</span>
+    <span>/website — the Puck editor (Aanya &amp; Dev · Golden Hour)</span>
+    <a href="Recreation - Workspace.dc.html" style="color:#EDEBE6; text-decoration:underline; text-underline-offset:3px;">← workspace</a>
+    <span style="flex:1;"></span>
+    <span style="color:#8C897F; text-transform:uppercase;">theme</span>
+    <div style="display:flex; gap:2px; background:#1E1E1C; border-radius:6px; padding:2px;">
+      <button onClick="{{ setLight }}" style="border:none; cursor:pointer; font:inherit; padding:3px 9px; border-radius:4px; background:{{ lightBtnBg }}; color:{{ lightBtnInk }};">light</button>
+      <button onClick="{{ setDark }}" style="border:none; cursor:pointer; font:inherit; padding:3px 9px; border-radius:4px; background:{{ darkBtnBg }}; color:{{ darkBtnInk }};">dark</button>
+    </div>
+  </div>
+
+  <div data-ws data-mode="{{ mode }}" style="display:flex; height:calc(100vh - 44px); background:var(--paper); color:var(--ink); overflow:hidden;">
+
+    <!-- Sidebar (Site editor active) -->
+    <aside style="width:230px; flex-shrink:0; display:flex; flex-direction:column; border-right:1px solid var(--line); background:var(--surface); min-height:0;">
+      <div style="padding:20px 16px 8px;">
+        <span style="padding:0 4px; font-size:13px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">Simvites</span>
+        <div style="margin-top:12px; display:flex; align-items:center; gap:8px; border-radius:18px; border:1px solid var(--line); background:var(--paper); padding:8px 10px;">
+          <span style="width:6px; height:6px; flex-shrink:0; border-radius:99px; background:var(--ok);"></span>
+          <span style="min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:'Instrument Serif',Georgia,serif; font-size:15px; line-height:1; color:var(--ink);">Aanya &amp; Dev</span>
+          <span style="font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-3);">live</span>
+        </div>
+      </div>
+      <nav style="flex:1; overflow-y:auto; padding:0 10px 12px; min-height:0;">
+        <sc-for list="{{ navGroups }}" as="g" hint-placeholder-count="5">
+          <div style="margin-top:{{ g.mt }};">
+            <p style="margin:0 0 6px; padding:0 10px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-3);">{{ g.label }}</p>
+            <sc-for list="{{ g.items }}" as="item" hint-placeholder-count="3">
+              <a href="{{ item.href }}" style="margin-bottom:2px; display:flex; align-items:center; gap:10px; border-radius:18px; padding:7px 10px; font-size:13.5px; text-decoration:none; background:{{ item.bg }}; font-weight:{{ item.weight }}; color:{{ item.color }}; box-shadow:{{ item.shadow }};" style-hover="background:var(--surface-2); color:var(--ink);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ item.iconColor }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><sc-for list="{{ item.paths }}" as="p"><path d="{{ p }}"></path></sc-for></svg>
+                <span style="flex:1;">{{ item.label }}</span>
+              </a>
+            </sc-for>
+          </div>
+        </sc-for>
+      </nav>
+    </aside>
+
+    <div style="display:flex; min-width:0; flex:1; flex-direction:column; min-height:0;">
+      <!-- App header -->
+      <header style="display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--line); padding:10px 20px; backdrop-filter:blur(10px); background:color-mix(in oklab, var(--surface) 86%, transparent);">
+        <h1 style="margin:0; font-size:14.5px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">Site editor</h1>
+        <button style="margin-left:8px; min-width:200px; display:flex; align-items:center; gap:8px; border-radius:8px; border:1px solid var(--line); background:var(--surface-2); padding:6px 12px; text-align:left; font-size:12.5px; color:var(--ink-3); cursor:pointer; font-family:inherit;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16"></path><path d="m21 21-4.3-4.3"></path></svg>
+          <span style="flex:1;">Search…</span>
+          <kbd style="border-radius:4px; border:1px solid var(--line); background:var(--surface); padding:0 4px; font-family:'Geist Mono',monospace; font-size:9.5px; color:var(--ink-3);">⌘K</kbd>
+        </button>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+          <span style="display:flex; align-items:center; gap:6px; font-family:'Geist Mono',monospace; font-size:10px; color:var(--ink-3);"><span style="width:6px; height:6px; border-radius:99px; background:var(--ok);"></span>Live</span>
+          <button aria-label="Notifications" style="position:relative; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--ink-2); cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg></button>
+          <a href="#" style="display:flex; align-items:center; gap:6px; border-radius:18px; border:1px solid var(--line); padding:6px 12px; font-size:13px; font-weight:500; color:var(--ink); text-decoration:none;" style-hover="border-color:var(--line-2);">Preview <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+          <button style="border:none; border-radius:8px; background:var(--accent); padding:6px 14px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit;">Publish</button>
+        </div>
+      </header>
+
+      <!-- ═══ Editor toolbar ═══ -->
+      <div style="position:relative; z-index:45; display:flex; flex-wrap:wrap; align-items:center; column-gap:12px; row-gap:8px; border-bottom:1px solid var(--line); background:var(--surface); padding:8px 16px;">
+        <span style="font-size:14.5px; font-weight:600; letter-spacing:-0.025em; color:var(--ink);">Website</span>
+
+        <!-- Design menu -->
+        <div style="position:relative;">
+          <button onClick="{{ toggleDesign }}" title="Switch templates — your content stays, the whole look changes" style="display:flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:8px; background:var(--paper-2); padding:8px 12px; font-size:13px; font-weight:500; color:var(--ink); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--line-2);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><path d="M3 9h18"></path><path d="M9 21V9"></path></svg>
+            Golden Hour <span style="color:var(--ink-3); font-size:10px;">▾</span>
+          </button>
+          <sc-if value="{{ designOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; left:0; top:48px; z-index:50; max-height:70vh; width:340px; overflow-y:auto; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:12px; box-shadow:var(--shadow-lg);">
+              <p style="margin:0 0 8px; padding:0 4px; font-size:11px; color:var(--ink-3);">One click restyles everything — colours, fonts, buttons. Your text and photos never move.</p>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <sc-for list="{{ templates }}" as="t" hint-placeholder-count="6">
+                  <div style="border-radius:10px; border:1px solid {{ t.border }}; background:{{ t.bg }}; padding:8px; text-align:left;">
+                    <span style="display:flex; height:36px; width:100%; overflow:hidden; border-radius:8px; border:1px solid var(--line);"><sc-for list="{{ t.swatches }}" as="c"><span style="height:100%; flex:1; background:{{ c }};"></span></sc-for></span>
+                    <span style="margin-top:6px; display:block; font-size:12px; font-weight:500; line-height:1.25; color:var(--ink);">{{ t.name }}</span>
+                    <span style="display:block; font-size:10px; color:var(--ink-3);">{{ t.mood }}</span>
+                    <a href="#" style="margin-top:4px; display:inline-block; font-size:10px; color:var(--accent-ink); text-decoration:underline; text-underline-offset:2px;">Full preview ↗</a>
+                  </div>
+                </sc-for>
+              </div>
+              <a href="#" style="margin-top:8px; display:block; padding:0 4px; font-size:11px; color:var(--ink-3); text-decoration:none;" style-hover="color:var(--ink);">Your live site ↗</a>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- Pages menu -->
+        <div style="position:relative;">
+          <button onClick="{{ togglePages }}" title="Add pages, rename them, or hide them from the menu" style="display:flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:8px; background:var(--paper-2); padding:8px 12px; font-size:13px; font-weight:500; color:var(--ink); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--line-2);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg>
+            Home <span style="color:var(--ink-3); font-size:10px;">▾</span>
+          </button>
+          <sc-if value="{{ pagesOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; left:0; top:48px; z-index:50; width:288px; display:flex; flex-direction:column; gap:4px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:12px; box-shadow:var(--shadow-lg);">
+              <sc-for list="{{ pages }}" as="p" hint-placeholder-count="3">
+                <div style="display:flex; align-items:center; gap:6px; border-radius:8px; padding:6px 8px; font-size:14px; background:{{ p.bg }}; color:{{ p.ink }};">
+                  <span style="min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left;">{{ p.title }}<sc-if value="{{ p.home }}" hint-placeholder-val="{{ false }}"><span style="margin-left:6px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-3);">home</span></sc-if><sc-if value="{{ p.hidden }}" hint-placeholder-val="{{ false }}"><span style="margin-left:6px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.05em; color:var(--warn);">hidden</span></sc-if></span>
+                  <sc-if value="{{ p.tools }}" hint-placeholder-val="{{ false }}">
+                    <span style="display:flex; gap:6px; color:var(--ink-3); font-size:12px;">✎ 👁 🗑</span>
+                  </sc-if>
+                </div>
+              </sc-for>
+              <div style="display:flex; gap:6px; border-top:1px solid var(--line); padding-top:8px;">
+                <input placeholder="New page name, e.g. Travel" style="min-width:0; flex:1; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:6px 8px; font-size:12px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);">
+                <button style="border:none; background:var(--accent); padding:6px 12px; font-size:12px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit; border-radius:8px;">Add</button>
+              </div>
+              <p style="margin:0; font-size:10px; color:var(--ink-3);">Pages appear in your site menu. Publish to make changes live.</p>
+            </div>
+          </sc-if>
+        </div>
+
+        <span aria-hidden="true" style="height:20px; width:1px; background:var(--line);"></span>
+
+        <!-- Device toggle -->
+        <div role="group" aria-label="Preview width" style="display:flex; align-items:center; gap:2px; border-radius:18px; border:1px solid var(--line); background:var(--paper-2); padding:2px;">
+          <sc-for list="{{ devices }}" as="d">
+            <button onClick="{{ d.pick }}" title="{{ d.help }}" style="border:none; border-radius:8px; padding:4px 10px; font-size:12px; font-weight:500; cursor:pointer; font-family:inherit; background:{{ d.bg }}; color:{{ d.ink }}; box-shadow:{{ d.shadow }}; transition:background-color 150ms ease;">{{ d.label }}</button>
+          </sc-for>
+        </div>
+
+        <!-- Style panel -->
+        <div style="position:relative;">
+          <button onClick="{{ toggleStyle }}" title="Fonts, colours, glow and hover animation" style="display:flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:8px; background:var(--paper-2); padding:8px 12px; font-size:13px; font-weight:500; color:var(--ink); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--line-2);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"></path><path d="M13.5 6.5h.01"></path><path d="M17.5 10.5h.01"></path><path d="M8.5 7.5h.01"></path><path d="M6.5 12.5h.01"></path></svg>
+            Style
+          </button>
+          <sc-if value="{{ styleOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; right:0; top:48px; z-index:50; max-height:70vh; width:288px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:16px; box-shadow:var(--shadow-lg);">
+              <div>
+                <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Pick a vibe — one tap styles everything</span>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                  <sc-for list="{{ vibes }}" as="v" hint-placeholder-count="4">
+                    <button title="{{ v.blurb }}" style="border-radius:10px; border:1px solid var(--line); background:none; padding:8px; text-align:left; cursor:pointer; font-family:inherit; transition:border-color 150ms ease;" style-hover="border-color:var(--accent);">
+                      <span style="display:flex; height:20px; width:100%; overflow:hidden; border-radius:8px; border:1px solid var(--line);"><sc-for list="{{ v.swatches }}" as="c"><span style="height:100%; flex:1; background:{{ c }};"></span></sc-for></span>
+                      <span style="margin-top:4px; display:block; font-size:11.5px; font-weight:500; line-height:1.25; color:var(--ink);">{{ v.name }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="border-top:1px solid var(--line); padding-top:12px;">
+                <button onClick="{{ toggleFinetune }}" style="display:flex; width:100%; align-items:center; justify-content:space-between; border:none; background:none; padding:0; font-size:12.5px; font-weight:500; color:var(--ink-2); cursor:pointer; font-family:inherit;" style-hover="color:var(--ink);">Fine-tune — fonts, colours, buttons, motion <span style="color:var(--ink-3); transform:rotate({{ finetuneRot }}); transition:transform 150ms;">›</span></button>
+                <sc-if value="{{ finetuneOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:12px; display:flex; flex-direction:column; gap:12px;">
+                    <sc-for list="{{ styleSelects }}" as="s" hint-placeholder-count="4">
+                      <label style="display:block; font-size:12px;">
+                        <span style="display:block; margin-bottom:4px; font-size:12px; font-weight:550; color:var(--ink-2);">{{ s.label }}</span>
+                        <select style="width:100%; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:6px 8px; font-size:12px; color:var(--ink); outline:none; font-family:inherit;"><sc-for list="{{ s.options }}" as="o"><option>{{ o }}</option></sc-for></select>
+                      </label>
+                    </sc-for>
+                    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; border-top:1px solid var(--line); padding-top:12px;">
+                      <sc-for list="{{ colorPicks }}" as="c">
+                        <label style="display:block; text-align:center; font-size:12px;">
+                          <span style="display:block; margin-bottom:4px; font-size:9px; font-weight:550; color:var(--ink-2);">{{ c.label }}</span>
+                          <span style="display:block; height:32px; width:100%; border-radius:8px; border:1px solid var(--line); background:{{ c.value }}; cursor:pointer;"></span>
+                          <input value="{{ c.hex }}" placeholder="#hex" style="margin-top:4px; width:100%; box-sizing:border-box; border-radius:4px; border:1px solid var(--line); background:var(--paper-2); padding:2px 4px; text-align:center; font-family:'Geist Mono',monospace; font-size:9.5px; color:var(--ink); outline:none;" style-focus="border-color:var(--accent);">
+                          <span style="margin-top:2px; display:block; font-size:9px; color:var(--ink-3);">{{ c.note }}</span>
+                        </label>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+              <div style="border-top:1px solid var(--line); padding-top:12px;">
+                <span style="display:block; margin-bottom:6px; font-size:12px; font-weight:550; color:var(--ink-2);">Brand kit — logo / monogram</span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="display:flex; width:40px; height:40px; align-items:center; justify-content:center; border-radius:99px; border:1px solid var(--accent-line); font-family:'Instrument Serif',Georgia,serif; font-size:14px; color:var(--accent-ink);">A·D</span>
+                  <span style="border:1px solid var(--line); background:var(--paper-2); padding:6px 12px; font-size:12px; color:var(--ink); cursor:pointer;">Upload</span>
+                </div>
+                <p style="margin:4px 0 0; font-size:10px; color:var(--ink-3);">Shown at the top of your site and in the page menu guests see.</p>
+              </div>
+              <p style="margin:0; font-size:10px; color:var(--ink-3);">Changes preview instantly. Publish to make them live.</p>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- Upload image (label, keeps its pill? no --radius-pill token → square) -->
+        <span title="Upload a photo, then paste the copied link into any image field" style="border:1px solid var(--line); background:var(--paper-2); padding:8px 14px; font-size:14px; color:var(--ink); cursor:pointer; transition:border-color 150ms ease;" style-hover="border-color:var(--accent);">Upload image</span>
+
+        <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+          <!-- Help sheet -->
+          <div style="position:relative;">
+            <button onClick="{{ toggleHelp }}" aria-label="Editor help" title="How everything works" style="display:flex; width:32px; height:32px; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); font-size:12.5px; font-weight:600; color:var(--ink-2); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--accent); color:var(--accent-ink);">?</button>
+            <sc-if value="{{ helpOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute; right:0; top:44px; z-index:50; max-height:70vh; width:330px; overflow-y:auto; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:16px; box-shadow:var(--shadow-lg);">
+                <p style="margin:0 0 10px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-3);">How the editor works</p>
+                <sc-for list="{{ helpRows }}" as="h" hint-placeholder-count="5">
+                  <div style="border-bottom:1px solid var(--line); padding:8px 0;">
+                    <p style="margin:0; font-size:12.5px; font-weight:600; color:var(--ink);">{{ h.t }}</p>
+                    <p style="margin:0; font-size:11.5px; line-height:1.4; color:var(--ink-3);">{{ h.d }}</p>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <span style="font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.16em; color:var(--ink-3);">Draft saved</span>
+          <a href="#" style="display:flex; align-items:center; gap:4px; border-radius:18px; border:1px solid var(--line); padding:6px 12px; font-size:13px; font-weight:500; color:var(--ink); text-decoration:none;" style-hover="border-color:var(--line-2);">View live <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+          <button onClick="{{ doPublish }}" style="border:none; border-radius:8px; background:{{ publishBg }}; padding:6px 16px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit;">{{ publishLabel }}</button>
+        </div>
+      </div>
+
+      <!-- Coach strip -->
+      <sc-if value="{{ coachVisible }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--line); background:var(--paper-2); padding:6px 16px; font-size:11.5px; color:var(--ink-3);">
+          <span style="flex-shrink:0;">ⓘ</span>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Click any text on the page and type · hover a section for its name + tools · drag blocks in from the left · <span style="font-weight:500; color:var(--ink-2);">✚ Add section</span> for ready-made looks · everything autosaves (<kbd style="border-radius:4px; border:1px solid var(--line); background:var(--surface); padding:0 4px; font-family:'Geist Mono',monospace; font-size:9.5px;">⌘S</kbd> to save now) · the <span style="font-weight:500; color:var(--ink-2);">?</span> button remembers all of this for you</span>
+          <button onClick="{{ dismissCoach }}" aria-label="Dismiss tips" style="margin-left:auto; flex-shrink:0; border:none; background:none; border-radius:4px; padding:0 6px; color:var(--ink-3); cursor:pointer; font-family:inherit;" style-hover="color:var(--ink);">✕</button>
+        </div>
+      </sc-if>
+
+      <!-- ═══ Puck layout: components | canvas | fields ═══ -->
+      <div style="display:flex; min-height:0; flex:1;">
+
+        <!-- Left: block library -->
+        <div style="width:200px; flex-shrink:0; overflow-y:auto; border-right:1px solid var(--line); background:var(--surface);">
+          <div style="padding:14px 16px 18px;">
+            <p style="margin:0 0 10px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-3);">Components</p>
+            <div style="display:flex; flex-direction:column; gap:7px;">
+              <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="10">
+                <div style="border:1px solid var(--line); border-radius:10px; background:var(--paper); padding:9px 11px; font-size:12.5px; font-weight:500; color:var(--ink); cursor:grab; transition:border-color 140ms ease, background 140ms ease;" style-hover="border-color:var(--accent); background:var(--surface);">{{ b }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center: WYSIWYG canvas (headerActions live at Puck's header — recreated in toolbar row) -->
+        <div style="min-width:0; flex:1; overflow-y:auto; background:var(--paper-2); padding:0 0 40px;">
+          <div style="display:flex; justify-content:flex-end; gap:6px; padding:8px 16px;">
+            <button style="border:1px solid var(--line); background:var(--paper-2); padding:6px 12px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:4px; border-radius:8px;" style-hover="border-color:var(--accent);">✦ AI section</button>
+            <div style="position:relative;">
+              <button onClick="{{ togglePresets }}" title="Insert a beautifully pre-styled section" style="border:1px solid var(--line); background:var(--paper-2); padding:6px 12px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit; border-radius:8px;" style-hover="border-color:var(--accent);">✚ Add section</button>
+              <sc-if value="{{ presetsOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute; right:0; top:44px; z-index:50; width:288px; display:flex; flex-direction:column; gap:4px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:8px; box-shadow:var(--shadow-lg);">
+                  <sc-for list="{{ presets }}" as="p" hint-placeholder-count="5">
+                    <button style="display:block; width:100%; border:none; background:none; border-radius:8px; padding:8px 12px; text-align:left; cursor:pointer; font-family:inherit;" style-hover="background:var(--paper-2);">
+                      <span style="display:block; font-size:14px; color:var(--ink);">{{ p.name }}</span>
+                      <span style="display:block; font-size:11px; color:var(--ink-3);">{{ p.desc }}</span>
+                    </button>
+                  </sc-for>
+                  <p style="margin:0; padding:0 12px 4px; font-size:10px; color:var(--ink-3);">Sections land above your footer, ready to edit.</p>
+                </div>
+              </sc-if>
+            </div>
+            <button disabled style="border:1px solid var(--line); background:var(--paper-2); padding:6px 12px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit; opacity:0.35; border-radius:8px;">↺ Undo</button>
+            <button disabled style="border:1px solid var(--line); background:var(--paper-2); padding:6px 12px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit; opacity:0.35; border-radius:8px;">↻ Redo</button>
+          </div>
+
+          <div class="editor-vp" data-site-root style="max-width:{{ canvasWidth }}; background:var(--paper); border-inline:{{ canvasBorder }}; box-shadow:{{ canvasShadow }};">
+
+            <!-- Hero -->
+            <div class="ebc">
+              <span class="ebc-chip">Hero</span>
+              <section style="position:relative; display:flex; min-height:64vh; align-items:center; justify-content:center; overflow:hidden; background:var(--paper-2); padding:96px 24px; text-align:center;">
+                <div style="position:relative; max-width:672px; color:var(--ink);">
+                  <p style="margin:0 0 20px; font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.22em; opacity:0.9;">Together with their families</p>
+                  <h1 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:72px; line-height:1.02; letter-spacing:-0.01em;">Aanya &amp; Dev</h1>
+                  <div style="margin-top:28px; display:flex; align-items:center; justify-content:center; gap:16px; font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.18em; opacity:0.9;">
+                    <span>19 September 2026</span><span style="opacity:0.5;">·</span><span>Manchester, UK</span>
+                  </div>
+                </div>
+              </section>
+              <span class="ebc-add"><button style="border:none; border-radius:8px; background:var(--ink); color:var(--paper); font-size:11px; padding:4px 10px; cursor:pointer; font-family:'Instrument Sans',sans-serif; box-shadow:var(--shadow-lg);">＋ Add below</button></span>
+            </div>
+
+            <!-- Countdown -->
+            <div class="ebc">
+              <span class="ebc-chip">Countdown</span>
+              <section style="border-top:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--paper-2); padding:56px 24px; text-align:center;">
+                <p style="margin:0 0 28px; font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--accent-ink);">The celebrations begin in</p>
+                <div style="margin:0 auto; display:flex; max-width:448px; justify-content:center; gap:40px;">
+                  <sc-for list="{{ countdownCells }}" as="c">
+                    <div>
+                      <p style="margin:0; font-family:var(--font-display); font-size:48px; font-variant-numeric:tabular-nums; color:var(--ink);">{{ c.v }}</p>
+                      <p style="margin:4px 0 0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--ink-3);">{{ c.l }}</p>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+              <span class="ebc-add"><button style="border:none; border-radius:8px; background:var(--ink); color:var(--paper); font-size:11px; padding:4px 10px; cursor:pointer; font-family:'Instrument Sans',sans-serif; box-shadow:var(--shadow-lg);">＋ Add below</button></span>
+            </div>
+
+            <!-- Story (SELECTED) -->
+            <div class="ebc" data-selected>
+              <span class="ebc-chip" style="opacity:1;">Story</span>
+              <div style="position:absolute; top:-16px; right:12px; z-index:31; display:flex; gap:2px; border-radius:9px; background:#1A1916; padding:4px 6px; box-shadow:0 12px 32px -12px rgba(0,0,0,0.35);">
+                <span style="color:#928D81; font-size:12px; padding:2px 6px; cursor:grab;">⠿</span>
+                <span style="color:#FAF8F3; font-size:11px; padding:2px 6px; cursor:pointer;">⧉</span>
+                <span style="color:#FAF8F3; font-size:11px; padding:2px 6px; cursor:pointer;">🗑</span>
+              </div>
+              <section style="margin:0 auto; max-width:672px; padding:64px 24px; text-align:center;">
+                <p style="margin:0 0 12px; font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--accent-ink);">Our Story</p>
+                <h2 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:36px; line-height:1.05; color:var(--ink);">How we got here</h2>
+                <div style="margin-top:24px; display:flex; flex-direction:column; gap:20px;">
+                  <p style="margin:0; font-size:18px; line-height:1.6; color:var(--ink-2);">Two families, two cities, and a love story written across one unforgettable weekend.</p>
+                </div>
+              </section>
+            </div>
+
+            <!-- Families -->
+            <div class="ebc">
+              <span class="ebc-chip">Families</span>
+              <section style="border-top:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--paper-2); padding:64px 24px;">
+                <h2 style="margin:0 0 40px; text-align:center; font-family:var(--font-display); font-weight:400; font-size:36px; color:var(--ink);">With the blessings of</h2>
+                <div style="margin:0 auto; display:grid; max-width:672px; gap:32px; grid-template-columns:1fr 1fr;">
+                  <div style="text-align:center;">
+                    <p style="margin:0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.2em; color:var(--accent-ink);">The Groom</p>
+                    <p style="margin:8px 0 0; font-family:var(--font-display); font-size:30px; color:var(--ink);">Dev</p>
+                    <p style="margin:6px 0 0; font-size:14px; color:var(--ink-2);">Son of Anil &amp; Meera</p>
+                  </div>
+                  <div style="text-align:center;">
+                    <p style="margin:0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.2em; color:var(--accent-ink);">The Bride</p>
+                    <p style="margin:8px 0 0; font-family:var(--font-display); font-size:30px; color:var(--ink);">Aanya</p>
+                    <p style="margin:6px 0 0; font-size:14px; color:var(--ink-2);">Daughter of Raj &amp; Priya</p>
+                  </div>
+                </div>
+              </section>
+              <span class="ebc-add"><button style="border:none; border-radius:8px; background:var(--ink); color:var(--paper); font-size:11px; padding:4px 10px; cursor:pointer; font-family:'Instrument Sans',sans-serif; box-shadow:var(--shadow-lg);">＋ Add below</button></span>
+            </div>
+
+            <!-- Schedule -->
+            <div class="ebc">
+              <span class="ebc-chip">Schedule</span>
+              <section style="margin:0 auto; max-width:768px; padding:80px 24px;">
+                <h2 style="margin:0 0 40px; text-align:center; font-family:var(--font-display); font-weight:400; font-size:36px; color:var(--ink);">The Celebrations</h2>
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                  <sc-for list="{{ scheduleEvents }}" as="e" hint-placeholder-count="4">
+                    <div style="border-radius:12px; border:1px solid var(--line); border-top:3px solid {{ e.accent }}; background:var(--surface); padding:24px; box-shadow:var(--shadow);">
+                      <div style="display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px;">
+                        <h3 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:24px; color:var(--ink);">{{ e.name }}</h3>
+                        <span style="font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.16em; color:var(--accent-ink);">{{ e.when }}</span>
+                      </div>
+                      <p style="margin:8px 0 0; color:var(--ink-2); font-size:16px;">{{ e.venue }}</p>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+              <span class="ebc-add"><button style="border:none; border-radius:8px; background:var(--ink); color:var(--paper); font-size:11px; padding:4px 10px; cursor:pointer; font-family:'Instrument Sans',sans-serif; box-shadow:var(--shadow-lg);">＋ Add below</button></span>
+            </div>
+
+            <!-- RSVP CTA -->
+            <div class="ebc">
+              <span class="ebc-chip">RSVP call-to-action</span>
+              <section style="background:var(--paper-2); padding:80px 24px; text-align:center;">
+                <h2 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:36px; color:var(--ink);">Kindly RSVP</h2>
+                <p style="margin:16px auto 0; max-width:576px; color:var(--ink-2); font-size:16px;">We can't wait to celebrate with you.</p>
+                <a href="#" style="margin-top:32px; display:inline-block; border-radius:var(--tpl-btn-radius); background:var(--accent); padding:12px 32px; font-weight:600; color:#fff; text-decoration:none; font-size:16px;">Open your invitation</a>
+              </section>
+              <span class="ebc-add"><button style="border:none; border-radius:8px; background:var(--ink); color:var(--paper); font-size:11px; padding:4px 10px; cursor:pointer; font-family:'Instrument Sans',sans-serif; box-shadow:var(--shadow-lg);">＋ Add below</button></span>
+            </div>
+
+            <!-- Gifts note -->
+            <div class="ebc">
+              <span class="ebc-chip">Gifts note</span>
+              <section style="padding:64px 24px; text-align:center;">
+                <div style="margin:0 auto; max-width:576px;">
+                  <div style="margin:0 auto 24px; height:1px; width:64px; background:var(--accent-line);"></div>
+                  <h2 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:30px; color:var(--ink);">Your presence is the present</h2>
+                  <p style="margin:16px 0 0; line-height:1.6; color:var(--ink-2); font-size:16px;">Please, no boxed gifts — your blessings mean the world.</p>
+                  <div style="margin:24px auto 0; height:1px; width:64px; background:var(--accent-line);"></div>
+                </div>
+              </section>
+              <span class="ebc-add"><button style="border:none; border-radius:8px; background:var(--ink); color:var(--paper); font-size:11px; padding:4px 10px; cursor:pointer; font-family:'Instrument Sans',sans-serif; box-shadow:var(--shadow-lg);">＋ Add below</button></span>
+            </div>
+
+            <!-- Footer -->
+            <div class="ebc">
+              <span class="ebc-chip">Footer</span>
+              <footer style="border-top:1px solid var(--line); background:var(--paper); padding:56px 24px; text-align:center;">
+                <p style="margin:0; font-family:var(--font-display); font-size:30px; color:var(--ink);">Aanya &amp; Dev</p>
+                <p style="margin:12px 0 0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--ink-3);">Made with Occasio</p>
+              </footer>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: fields panel (Story selected) -->
+        <div style="width:290px; flex-shrink:0; overflow-y:auto; border-left:1px solid var(--line); background:var(--surface);">
+          <div style="padding:14px 16px 18px; border-bottom:1px solid var(--line);">
+            <p style="margin:0 0 10px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-3);">Story</p>
+            <label style="display:block; margin-bottom:10px;">
+              <span style="display:block; margin-bottom:4px; font-size:12px; font-weight:500; color:var(--ink-2);">Kicker</span>
+              <input value="Our Story" style="width:100%; box-sizing:border-box; border-radius:8px; border:1px solid var(--line); background:var(--paper); padding:8px 10px; font-size:13px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);">
+            </label>
+            <label style="display:block; margin-bottom:10px;">
+              <span style="display:block; margin-bottom:4px; font-size:12px; font-weight:500; color:var(--ink-2);">Title</span>
+              <input value="How we got here" style="width:100%; box-sizing:border-box; border-radius:8px; border:1px solid var(--line); background:var(--paper); padding:8px 10px; font-size:13px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);">
+            </label>
+            <span style="display:block; margin-bottom:4px; font-size:12px; font-weight:500; color:var(--ink-2);">Paragraphs</span>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:8px; background:var(--paper); padding:8px 10px; font-size:12.5px; color:var(--ink-2);"><span style="color:var(--ink-3); cursor:grab;">⠿</span> Two families, two cities, and a love st…</div>
+              <button style="border:1px dashed var(--line-2); border-radius:8px; background:none; padding:7px; font-size:12px; color:var(--ink-2); cursor:pointer; font-family:inherit;" style-hover="border-color:var(--accent); color:var(--ink);">+ Add paragraph</button>
+            </div>
+          </div>
+          <div style="padding:14px 16px 18px;">
+            <p style="margin:0 0 10px; font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-3);">Style — look, colour &amp; motion</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <sc-for list="{{ styleFields }}" as="f" hint-placeholder-count="8">
+                <label style="display:block;">
+                  <span style="display:block; margin-bottom:4px; font-size:12px; font-weight:500; color:var(--ink-2);">{{ f.label }}</span>
+                  <select style="width:100%; border-radius:8px; border:1px solid var(--line); background:var(--paper); padding:7px 8px; font-size:12.5px; color:var(--ink); outline:none; font-family:inherit;"><sc-for list="{{ f.options }}" as="o"><option>{{ o }}</option></sc-for></select>
+                </label>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 900}, &quot;mode&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;'light' | 'dark'&quot;, &quot;section&quot;: &quot;State&quot;}}">
+class Component extends DCLogic {
+  state = { mode: null, menu: null, finetune: false, coach: true, device: 'desktop', publish: 'idle' };
+
+  renderVals() {
+    const mode = this.state.mode ?? this.props.mode ?? 'light';
+    const menu = this.state.menu;
+    const toggleMenu = (k) => () => this.setState({ menu: this.state.menu === k ? null : k });
+
+    const IC = {
+      house: ['m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M9 22V12h6v10'],
+      globe: ['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20', 'M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20', 'M2 12h20'],
+      calendar: ['M8 2v4', 'M16 2v4', 'M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M3 10h18'],
+      mailOpen: ['M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6', 'm22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10'],
+      users: ['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2', 'M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8', 'M22 21v-2a4 4 0 0 0-3-3.87', 'M16 3.13a4 4 0 0 1 0 7.75'],
+      mail: ['M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z', 'm22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7'],
+      messages: ['M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z', 'M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1'],
+      mailCheck: ['M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8', 'm22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7', 'm16 19 2 2 4-4'],
+      armchair: ['M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3', 'M21 11a2 2 0 0 0-2 2v2H5v-2a2 2 0 1 0-4 0v3a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2Z', 'M5 18v2', 'M19 18v2'],
+      wallet: ['M21 12V7H5a2 2 0 0 1 0-4h14v4', 'M3 5v14a2 2 0 0 0 2 2h16v-5', 'M18 12a2 2 0 0 0 0 4h4v-4Z'],
+      calClock: ['M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5', 'M16 2v4', 'M8 2v4', 'M3 10h5', 'M16 10a6 6 0 1 0 0 12 6 6 0 0 0 0-12', 'M16 14v2l1.5 1.5'],
+      store: ['m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7', 'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8', 'M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4', 'M2 7h20'],
+      listChecks: ['m3 17 2 2 4-4', 'm3 7 2 2 4-4', 'M13 6h8', 'M13 12h8', 'M13 18h8'],
+      folder: ['M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'],
+      sparkles: ['M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z'],
+      chart: ['M3 3v16a2 2 0 0 0 2 2h16', 'M13 17V9', 'M18 17V5', 'M8 17v-3'],
+    };
+    const NAV = [
+      { label: 'Overview', items: [ { k: 'dashboard', label: 'Home', icon: IC.house, href: 'Recreation - Workspace.dc.html' } ] },
+      { label: 'Website', items: [ { k: 'website', label: 'Site editor', icon: IC.globe, href: '#', active: true }, { k: 'events', label: 'Events', icon: IC.calendar, href: 'Recreation - Workspace.dc.html' }, { k: 'std', label: 'Save the Date', icon: IC.mailOpen, href: 'Recreation - Workspace.dc.html' } ] },
+      { label: 'Guests', items: [ { k: 'guests', label: 'Guest list', icon: IC.users, href: 'Recreation - Workspace.dc.html' }, { k: 'invitations', label: 'Invitations', icon: IC.mail, href: 'Recreation - Workspace.dc.html' }, { k: 'messages', label: 'Messages', icon: IC.messages, href: 'Recreation - Workspace.dc.html' }, { k: 'rsvps', label: 'RSVPs', icon: IC.mailCheck, href: 'Recreation - Workspace.dc.html' }, { k: 'seating', label: 'Seating', icon: IC.armchair, href: 'Recreation - Workspace.dc.html' } ] },
+      { label: 'Planning', items: [ { k: 'budget', label: 'Budget', icon: IC.wallet, href: 'Recreation - Workspace.dc.html' }, { k: 'payments', label: 'Payments', icon: IC.calClock, href: 'Recreation - Workspace.dc.html' }, { k: 'vendors', label: 'Vendors', icon: IC.store, href: 'Recreation - Workspace.dc.html' }, { k: 'tasks', label: 'Tasks', icon: IC.listChecks, href: 'Recreation - Workspace.dc.html' }, { k: 'files', label: 'Files', icon: IC.folder, href: 'Recreation - Workspace.dc.html' } ] },
+      { label: 'Insights', items: [ { k: 'assistant', label: 'Assistant', icon: IC.sparkles, href: 'Recreation - Workspace.dc.html' }, { k: 'reports', label: 'Reports', icon: IC.chart, href: 'Recreation - Workspace.dc.html' } ] },
+    ];
+    const navGroups = NAV.map((g, gi) => ({
+      label: g.label, mt: gi === 0 ? '8px' : '16px',
+      items: g.items.map((it) => ({
+        label: it.label, paths: it.icon, href: it.href,
+        bg: it.active ? 'var(--surface-2)' : 'transparent',
+        weight: it.active ? 600 : 500,
+        color: it.active ? 'var(--ink)' : 'var(--ink-2)',
+        iconColor: it.active ? 'var(--ink)' : 'var(--ink-3)',
+        shadow: it.active ? 'inset 2px 0 0 var(--accent)' : 'none',
+      })),
+    }));
+
+    // 18 templates from the registry
+    const TPLS = [
+      ['Golden Hour', 'Ceremonial', ['#F5EFE3', '#C9A227', '#7A1F1F'], true],
+      ['Ivory Atelier', 'Gallery-calm', ['#F6F1E9', '#211D18', '#B08D57']],
+      ['Midnight Baraat', 'Night party', ['#0F1B32', '#EFE6D2', '#D4AF6A']],
+      ['Garden Mehndi', 'Daytime outdoor', ['#F7F5EC', '#2E5339', '#7FA05F']],
+      ['Cloud Gallery', 'Photography-led', ['#FFFFFF', '#111110', '#8C8C88']],
+      ['Rose & Ash', 'Romance', ['#F6E7E4', '#6E2231', '#C4808E']],
+      ['Rajwada', 'Jewel-box maximalist', ['#7A1024', '#F8EAD8', '#E8A33D']],
+      ['Salt & Sky', 'Destination', ['#F2EDE3', '#3E4E5C', '#5B7485']],
+      ['Deco Champagne', 'Art deco', ['#16130F', '#F4ECDD', '#E2C892']],
+      ['Terracotta Sun', 'Boho', ['#F4E9DC', '#7A3B22', '#C4623A']],
+      ['Ink & Jasmine', 'Quiet letter', ['#FBFBF9', '#20211F', '#4E7A57']],
+      ['Velvet Sangeet', 'Afterparty', ['#2E1836', '#F2E4EE', '#C97E4E']],
+      ['Peacock Court', 'Jewel-box regal', ['#0D3B3E', '#F2EBD8', '#D9A62E']],
+      ['Saffron Disco', 'Sangeet party', ['#2B1030', '#FFD9EC', '#FF4FA0']],
+      ['Lotus Milk', 'Soft minimal', ['#FDFBFA', '#3C3335', '#D98A9E']],
+      ['Monsoon Ink', 'Moody letterpress', ['#E9EAEC', '#252A3A', '#66708C']],
+      ['Henna Noir', 'After dark', ['#111010', '#F1E4D4', '#C46A3B']],
+      ['Marigold Morning', 'Daytime joy', ['#FFFDF6', '#4C3A12', '#E8A020']],
+    ];
+    const templates = TPLS.map(([name, mood, swatches, active]) => ({
+      name, mood, swatches,
+      border: active ? 'var(--accent)' : 'var(--line)',
+      bg: active ? 'var(--accent-soft)' : 'transparent',
+    }));
+
+    const devices = [
+      { key: 'desktop', label: '🖥 Desktop', help: 'Full width, as guests see it on a laptop' },
+      { key: 'tablet', label: '⬛ Tablet', help: 'Preview how the page flows at tablet width' },
+      { key: 'mobile', label: '📱 Phone', help: 'Preview how the page flows at phone width' },
+    ].map((d) => ({
+      ...d, pick: () => this.setState({ device: d.key }),
+      bg: this.state.device === d.key ? 'var(--surface)' : 'transparent',
+      ink: this.state.device === d.key ? 'var(--ink)' : 'var(--ink-3)',
+      shadow: this.state.device === d.key ? 'var(--shadow)' : 'none',
+    }));
+    const widths = { desktop: '100%', tablet: '768px', mobile: '390px' };
+
+    const pub = this.state.publish;
+    return {
+      mode,
+      lightBtnBg: mode === 'light' ? '#EDEBE6' : 'transparent', lightBtnInk: mode === 'light' ? '#101010' : '#8C897F',
+      darkBtnBg: mode === 'dark' ? '#EDEBE6' : 'transparent', darkBtnInk: mode === 'dark' ? '#101010' : '#8C897F',
+      setLight: () => this.setState({ mode: 'light' }), setDark: () => this.setState({ mode: 'dark' }),
+      navGroups, templates, devices,
+
+      designOpen: menu === 'design', toggleDesign: toggleMenu('design'),
+      pagesOpen: menu === 'pages', togglePages: toggleMenu('pages'),
+      styleOpen: menu === 'style', toggleStyle: toggleMenu('style'),
+      helpOpen: menu === 'help', toggleHelp: toggleMenu('help'),
+      presetsOpen: menu === 'presets', togglePresets: toggleMenu('presets'),
+      finetuneOpen: this.state.finetune,
+      toggleFinetune: () => this.setState({ finetune: !this.state.finetune }),
+      finetuneRot: this.state.finetune ? '90deg' : '0deg',
+      coachVisible: this.state.coach,
+      dismissCoach: () => this.setState({ coach: false }),
+
+      pages: [
+        { title: 'Home', home: true, hidden: false, tools: false, bg: 'var(--accent-soft)', ink: 'var(--accent-ink)' },
+        { title: 'Travel', home: false, hidden: false, tools: true, bg: 'transparent', ink: 'var(--ink)' },
+        { title: 'Gallery', home: false, hidden: true, tools: true, bg: 'transparent', ink: 'var(--ink)' },
+      ],
+
+      vibes: [
+        { name: 'Royal Heritage', blurb: 'Classic serif, gold accents, a silk shimmer — the grand affair.', swatches: ['#F5EFE3', '#3A2E20', '#C9A227'] },
+        { name: 'Modern Romance', blurb: 'Romantic serif on soft blush, petals drifting — candlelit and close.', swatches: ['#F9F0ED', '#3E2228', '#B4556E'] },
+        { name: 'Garden Party', blurb: 'Engraved caps, sage and sunlight — daytime celebrations outdoors.', swatches: ['#F1F4EC', '#2E5339', '#6E7A63'] },
+        { name: 'Midnight Glam', blurb: 'Roman caps on deep night, aurora light — the afterparty energy.', swatches: ['#1E1B16', '#F2EDE4', '#C97E4E'] },
+      ],
+      styleSelects: [
+        { label: 'Heading font (16 faces)', options: ['Template default', 'Cormorant Garamond', 'Playfair Display', 'Fraunces', 'Marcellus', 'Cinzel', 'DM Serif', 'Prata', 'Italiana', '…'] },
+        { label: 'Body font (10 faces)', options: ['Template default', 'Jost', 'Inter', 'Lato', 'Poppins', '…'] },
+        { label: 'Background preset', options: ['Template default', 'Pearl', 'Ivory', 'Blush mist', 'Sage mist', 'Midnight'] },
+        { label: 'Accent preset', options: ['Template default', 'Gold', 'Terracotta', 'Oxblood', 'Sage', 'Ink'] },
+        { label: 'Button design', options: ['Template default', 'Pill', 'Rounded', 'Sharp', 'Outline', 'Soft fill', 'Underline'] },
+        { label: 'Menu design', options: ['Glass bar', 'Solid banner', 'Centered monogram', 'Minimal line'] },
+        { label: 'Card glow', options: ['None', 'Soft', 'Strong'] },
+        { label: 'Hover animation', options: ['Lift', 'Grow', 'Tilt', 'Still'] },
+        { label: 'Backdrop effect (live site)', options: ['None', 'Soft mesh', 'Aurora drift', 'Floating petals', 'Silk shimmer'] },
+      ],
+      colorPicks: [
+        { label: 'Accent', value: '#D96A8B', hex: '#D96A8B', note: 'reset' },
+        { label: 'Background', value: '#888888', hex: '', note: 'template' },
+        { label: 'Text', value: '#888888', hex: '', note: 'template' },
+      ],
+      helpRows: [
+        { t: 'Edit any text', d: 'Click it on the page and type. It saves by itself.' },
+        { t: 'Move a section', d: 'Drag it by its edge, or use the arrows in its toolbar.' },
+        { t: 'Add a section', d: 'Drag from the left panel, or ✚ Add section for ready-made looks.' },
+        { t: 'Restyle one section', d: 'Click it, then open "Style — look, colour & motion" on the right: 10 looks, borrowed palettes, animations.' },
+        { t: 'Restyle everything', d: 'The Style button: fonts, your own colours, buttons, menus, backdrops.' },
+        { t: 'Change template', d: 'The template name in the toolbar — switch any time, content stays.' },
+        { t: 'Photos', d: 'Upload image copies a link — paste it into any photo field. Or search free photos inside the field.' },
+        { t: 'Freeform canvas', d: 'A section where you drag words and photos anywhere — it keeps its exact shape on phones.' },
+        { t: 'Undo', d: '↺ in the toolbar, or Ctrl+Z. Publish only goes live when you say so.' },
+      ],
+      presets: [
+        { name: 'Our story, framed', desc: 'A framed, warm retelling with a gentle rise' },
+        { name: 'Countdown band', desc: 'A full-width band that zooms in as guests scroll' },
+        { name: 'Gallery wall', desc: 'A clean, chrome-free photo grid' },
+        { name: 'Questions, answered', desc: 'Starter FAQ with the three everyone asks' },
+        { name: 'Hotel card', desc: 'A framed stay-and-travel card with booking button' },
+      ],
+      blocks: ['Hero', 'Countdown', 'Story', 'Families', 'Schedule', 'Event detail', 'Gallery', 'Hotel & travel', 'RSVP call-to-action', 'Travel & stay', 'FAQ', 'Gifts note', 'Freeform canvas', 'Footer'],
+
+      canvasWidth: widths[this.state.device],
+      canvasBorder: this.state.device === 'desktop' ? 'none' : '1px solid var(--line-2)',
+      canvasShadow: this.state.device === 'desktop' ? 'none' : 'var(--shadow-lg)',
+
+      countdownCells: [ { v: '70', l: 'Days' }, { v: '14', l: 'Hours' }, { v: '32', l: 'Minutes' }, { v: '08', l: 'Seconds' } ],
+      scheduleEvents: [
+        { name: 'Mehndi', accent: '#3E7C4F', when: 'Thu 17 Sep · 14:00', venue: 'The Courtyard · 12 Rosamund St' },
+        { name: 'Sangeet', accent: '#6D3FA9', when: 'Fri 18 Sep · 19:00', venue: 'The Grand Hall · Deansgate' },
+        { name: 'Ceremony', accent: '#C9A227', when: 'Sat 19 Sep · 11:00', venue: 'Merrydale Manor · Cheshire' },
+        { name: 'Reception', accent: '#7A1F1F', when: 'Sat 19 Sep · 18:30', venue: 'Merrydale Manor · Cheshire' },
+      ],
+      styleFields: [
+        { label: 'Look (10 options)', options: ['Timeless', 'Keepsake Frame', 'Silk Band', 'Whisper', 'Royal Flourish', 'Gilded Edge', 'Grand Arch', 'Postcard', 'Editorial Rule', 'Velvet Night'] },
+        { label: "Borrow a template's palette", options: ["This site's template", 'Golden Hour', 'Ivory Atelier', 'Midnight Baraat', '… all 18'] },
+        { label: 'Accent colour', options: ['Site accent', 'Gold', 'Terracotta', 'Oxblood', 'Sage', 'Ink'] },
+        { label: 'Corners', options: ['Site default', 'Sharp', 'Soft', 'Round'] },
+        { label: 'Shading', options: ['Site default', 'None', 'Soft', 'Deep'] },
+        { label: 'Glow', options: ['Site default', 'None', 'Soft glow', 'Strong glow'] },
+        { label: 'Hover animation', options: ['Site default', 'Lift', 'Grow', 'Tilt', 'Still'] },
+        { label: 'Appear animation', options: ['Rise in', 'Fade in', 'Zoom in', 'Slide in', 'None'] },
+      ],
+
+      publishLabel: pub === 'publishing' ? 'Publishing…' : pub === 'live' ? 'Published ✓' : 'Publish',
+      publishBg: pub === 'live' ? 'var(--ok)' : 'var(--accent)',
+      doPublish: () => {
+        if (this.state.publish !== 'idle') return;
+        this.setState({ publish: 'publishing' });
+        setTimeout(() => { this.setState({ publish: 'live' }); setTimeout(() => this.setState({ publish: 'idle' }), 3000); }, 900);
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

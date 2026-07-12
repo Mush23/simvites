@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&amp;family=Instrument+Serif:ital@0;1&amp;family=Geist+Mono:wght@400..700&amp;display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#F3EFE6; font-family:'Instrument Sans',system-ui,sans-serif; color:#1A1916; }
+a { color:oklch(0.55 0.19 29); } a:hover { color:oklch(0.62 0.21 29); }
+</style>
+</helmet>
+
+<div style="max-width:1020px; margin:0 auto; padding:56px 40px 120px;">
+
+  <!-- ═══ Masthead ═══ -->
+  <header style="border-bottom:2px solid #1A1916; padding-bottom:28px;">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+      <p style="margin:0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:#928D81;">Design review · July 2026 · for the founder + implementing dev</p>
+      <p style="margin:0; font-family:'Geist Mono',monospace; font-size:10px; color:#928D81;">source: simvites @ local · recreated from code, not screenshots</p>
+    </div>
+    <h1 style="margin:18px 0 0; font-size:44px; font-weight:650; letter-spacing:-0.03em; line-height:1.05;">Simvites — UX/UI review<br><span style="color:#6B675E;">&amp; redesign proposals</span></h1>
+    <p style="margin:14px 0 0; max-width:640px; font-size:14.5px; line-height:1.6; color:#6B675E;">
+      Every surface in the brief was rebuilt from source into four working recreations, then judged against your five lenses
+      and the design doctrine. Findings below are severity-ranked and cite the file to change.
+    </p>
+  </header>
+
+  <!-- ═══ 01 · The recreations (open these side by side) ═══ -->
+  <section style="margin-top:44px;">
+    <p style="margin:0 0 14px; font-family:'Geist Mono',monospace; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:oklch(0.55 0.19 29);">01 · The evidence — four working recreations</p>
+    <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:14px;">
+      <sc-for list="{{ artifacts }}" as="a" hint-placeholder-count="4">
+        <a href="{{ a.href }}" style="display:block; background:#FFFFFF; border:1px solid #EAE5DA; border-radius:12px; padding:20px; text-decoration:none; color:#1A1916; transition:border-color 150ms ease;" style-hover="border-color:rgba(222,71,38,0.35);">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+            <p style="margin:0; font-size:14.5px; font-weight:600;">{{ a.name }}</p>
+            <span style="font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.08em; padding:3px 8px; border-radius:99px; background:#E5F5EC; color:#1B9E5F;">interactive</span>
+          </div>
+          <p style="margin:8px 0 0; font-size:12.5px; line-height:1.6; color:#6B675E;">{{ a.desc }}</p>
+          <p style="margin:10px 0 0; font-size:12px; font-weight:500; color:oklch(0.55 0.19 29);">Open the recreation →</p>
+        </a>
+      </sc-for>
+    </div>
+    <p style="margin:14px 0 0; font-size:12px; line-height:1.6; color:#928D81;">Not recreated (lower review value or known gaps): /events/[id] hub · /vendors/[id] · /admin · /tour (older FlowPlayer, flagged as known gap) · /auth/reset. Demo data is representative and internally consistent; layouts, tokens and copy are lifted from source.</p>
+  </section>
+
+  <!-- ═══ 02 · Verdict ═══ -->
+  <section style="margin-top:44px;">
+    <p style="margin:0 0 14px; font-family:'Geist Mono',monospace; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:oklch(0.55 0.19 29);">02 · Verdict against the five lenses</p>
+    <div style="background:#FFFFFF; border:1px solid #EAE5DA; border-radius:12px; padding:26px;">
+      <p style="margin:0; font-size:15px; line-height:1.7; max-width:760px;">
+        <b>This reads as a real product.</b> The token system is disciplined, the two voices are genuinely distinct, guarded
+        integrations never error, and the copy is the best thing about the UX — warm, specific, and load-bearing.
+        The gap to "modern SaaS you'd pay for" is not direction; it's <b>execution consistency</b>: a dead utility class
+        silently squares every "pill" in the product, radii disagree between links and buttons, and the money screen's
+        toolbar asks a stressed couple to parse ~14 controls in one row. All fixable in days, not weeks.
+      </p>
+      <div style="margin-top:20px; display:grid; grid-template-columns:repeat(5,1fr); gap:12px;">
+        <sc-for list="{{ lenses }}" as="l" hint-placeholder-count="5">
+          <div style="border:1px solid #EAE5DA; border-radius:10px; padding:14px; background:#FAF8F3;">
+            <p style="margin:0; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.08em; color:#928D81;">Lens {{ l.n }}</p>
+            <p style="margin:6px 0 0; font-size:12.5px; font-weight:600; line-height:1.3;">{{ l.name }}</p>
+            <p style="margin:8px 0 0; font-family:'Geist Mono',monospace; font-size:16px; font-weight:600; color:{{ l.color }};">{{ l.grade }}</p>
+            <p style="margin:6px 0 0; font-size:11px; line-height:1.5; color:#6B675E;">{{ l.note }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 03 · Top issues ═══ -->
+  <section style="margin-top:44px;">
+    <p style="margin:0 0 14px; font-family:'Geist Mono',monospace; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:oklch(0.55 0.19 29);">03 · The list — every finding, ranked</p>
+    <p style="margin:0 0 16px; font-size:13px; color:#6B675E; max-width:700px;">P1 = fix before charging money (visible brokenness or money-path friction). P2 = fix soon (erodes the "SaaS you'd pay for" read). P3 = polish. Each cites the file so the dev can act without archaeology.</p>
+    <sc-for list="{{ findings }}" as="f" hint-placeholder-count="10">
+      <div style="background:#FFFFFF; border:1px solid #EAE5DA; border-radius:12px; padding:20px 22px; margin-bottom:12px;">
+        <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
+          <span style="font-family:'Geist Mono',monospace; font-size:10px; font-weight:700; padding:3px 8px; border-radius:5px; background:{{ f.pBg }}; color:{{ f.pInk }};">{{ f.p }}</span>
+          <p style="margin:0; font-size:14.5px; font-weight:600;">{{ f.title }}</p>
+          <p style="margin:0 0 0 auto; font-family:'Geist Mono',monospace; font-size:10px; color:#928D81;">{{ f.area }}</p>
+        </div>
+        <p style="margin:10px 0 0; font-size:13px; line-height:1.65; color:#3a3833; max-width:820px;">{{ f.body }}</p>
+        <p style="margin:10px 0 0; font-size:12px; line-height:1.6; color:#6B675E;"><b style="color:#1A1916;">Dev note:</b> <span style="font-family:'Geist Mono',monospace; font-size:11px;">{{ f.dev }}</span></p>
+      </div>
+    </sc-for>
+  </section>
+
+  <!-- ═══ 04 · Section-by-section ═══ -->
+  <section style="margin-top:44px;">
+    <p style="margin:0 0 14px; font-family:'Geist Mono',monospace; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:oklch(0.55 0.19 29);">04 · Section notes — what works, what doesn't</p>
+    <sc-for list="{{ sections }}" as="s" hint-placeholder-count="5">
+      <div style="background:#FFFFFF; border:1px solid #EAE5DA; border-radius:12px; padding:22px; margin-bottom:14px;">
+        <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
+          <p style="margin:0; font-family:'Geist Mono',monospace; font-size:10.5px; font-weight:600; color:#928D81;">{{ s.num }}</p>
+          <p style="margin:0; font-size:15px; font-weight:600;">{{ s.title }}</p>
+          <p style="margin:0 0 0 auto; font-family:'Geist Mono',monospace; font-size:10px; color:#928D81;">{{ s.scope }}</p>
+        </div>
+        <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+          <div>
+            <p style="margin:0 0 6px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#1B9E5F;">Keep — it's working</p>
+            <sc-for list="{{ s.good }}" as="g">
+              <p style="margin:0 0 7px; font-size:12.5px; line-height:1.55; color:#3a3833; padding-left:14px; position:relative;"><span style="position:absolute; left:0; color:#1B9E5F;">＋</span>{{ g }}</p>
+            </sc-for>
+          </div>
+          <div>
+            <p style="margin:0 0 6px; font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#D2402A;">Fix — it's costing you</p>
+            <sc-for list="{{ s.bad }}" as="b">
+              <p style="margin:0 0 7px; font-size:12.5px; line-height:1.55; color:#3a3833; padding-left:14px; position:relative;"><span style="position:absolute; left:0; color:#D2402A;">−</span>{{ b }}</p>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </section>
+
+  <!-- ═══ 05 · Doctrine challenges ═══ -->
+  <section style="margin-top:44px;">
+    <p style="margin:0 0 14px; font-family:'Geist Mono',monospace; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:oklch(0.55 0.19 29);">05 · Challenging the doctrine (you said it's open)</p>
+    <sc-for list="{{ doctrine }}" as="d" hint-placeholder-count="4">
+      <div style="background:#FFFFFF; border:1px solid #EAE5DA; border-left:3px solid #1A1916; border-radius:12px; padding:20px 22px; margin-bottom:12px;">
+        <p style="margin:0; font-size:14px; font-weight:600;">{{ d.title }}</p>
+        <p style="margin:8px 0 0; font-size:13px; line-height:1.65; color:#3a3833; max-width:820px;">{{ d.body }}</p>
+        <p style="margin:8px 0 0; font-size:12.5px; color:#6B675E;"><b style="color:#1A1916;">Recommendation:</b> {{ d.rec }}</p>
+      </div>
+    </sc-for>
+  </section>
+
+  <!-- ═══ 06 · What gets redesigned ═══ -->
+  <section style="margin-top:44px;">
+    <p style="margin:0 0 14px; font-family:'Geist Mono',monospace; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:oklch(0.55 0.19 29);">06 · Next — redesign proposals (3 variations each)</p>
+    <div style="background:#FFFFFF; border:1px solid #EAE5DA; border-radius:12px; padding:22px;">
+      <p style="margin:0 0 14px; font-size:13px; line-height:1.6; color:#6B675E; max-width:720px;">Based on the findings, these three screens earn redesigns — they carry the most review weight and the most fixable friction. Each gets 3 variations: one by-the-book (system-true), one restructured (new IA), one doctrine-pushing.</p>
+      <sc-for list="{{ redesignPlan }}" as="r" hint-placeholder-count="3">
+        <div style="display:flex; gap:14px; align-items:baseline; border-top:1px solid #EAE5DA; padding:12px 0;">
+          <span style="font-family:'Geist Mono',monospace; font-size:10.5px; font-weight:600; color:#928D81; flex-shrink:0;">{{ r.n }}</span>
+          <div>
+            <p style="margin:0; font-size:13.5px; font-weight:600;">{{ r.screen }}</p>
+            <p style="margin:4px 0 0; font-size:12.5px; line-height:1.6; color:#6B675E;">{{ r.why }}</p>
+          </div>
+        </div>
+      </sc-for>
+      <p style="margin:14px 0 0; font-size:12.5px; color:#928D81;">→ Delivered: <a href="Redesigns.dc.html" style="font-weight:500;">open the redesigns</a> — R1 editor (1a·1b·1c), R2 guests (2a·2b·2c), R3 RSVP (3a·3b·3c). Reference option ids in chat to iterate.</p>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      artifacts: [
+        { name: 'Workspace — 16 module screens', href: 'Recreation - Workspace.dc.html', desc: 'The couple\u2019s tool with working sidebar nav: dashboard, guests + invite matrix, RSVPs, events, invitations, payments, tasks, budget, vendors (+ curated directory), reports, files, seating, messages, assistant, settings, Save-the-Date. Toggle light/dark and founder/fresh account to see every state the brief asks for.' },
+        { name: 'Editor — the money screen', href: 'Recreation - Editor.dc.html', desc: '/website with the full toolbar (Design menu \u00d7 18 templates, Pages, device toggle, Style panel with vibes + fine-tune fold, help sheet), coach strip, block library, WYSIWYG Golden-Hour canvas with hover chrome + a selected block, and the fields panel.' },
+        { name: 'Guest-facing — the artifact', href: 'Recreation - Guest.dc.html', desc: 'The published demo site (petals backdrop, banner nav, custom pink accent, outline buttons, velvet story, Grand-Arch gifts, freeform sign-off), the RSVP flow at 375px inside a phone (form + confirmation), the personal schedule, and the public Save-the-Date card.' },
+        { name: 'Marketing — the front door', href: 'Recreation - Marketing.dc.html', desc: 'The deep-zoom landing with the real scroll choreography (hero \u2192 navy dive \u2192 module tunnel \u2192 ivory portal) and the 22-second live demo loop, plus /login (both states), /onboarding\u2019s three moves, and the /preview gallery with all 18 templates in their real type + geometry.' },
+      ],
+      lenses: [
+        { n: '1', name: 'Obvious how to do things', grade: 'B−', color: '#B87A1E', note: 'Modules: yes. Editor: the one screen that matters most is the least obvious — toolbar overload + paste-a-link image flow.' },
+        { n: '2', name: 'Welcoming / lowers anxiety', grade: 'A−', color: '#1B9E5F', note: 'Best-in-class copy, checklist, teaching empty states, Undo everywhere. Env-var names leak into couple-facing copy.' },
+        { n: '3', name: 'SaaS you\u2019d pay for', grade: 'B−', color: '#B87A1E', note: 'Token discipline says yes; dead pill class, radius chaos and emoji-vs-icon drift say "almost".' },
+        { n: '4', name: 'Wayfinding', grade: 'B', color: '#B87A1E', note: 'Sidebar + ⌘K + notification links are solid. Modules are islands — cross-links live only on the dashboard.' },
+        { n: '5', name: 'Modes, widths, states', grade: 'B+', color: '#1B9E5F', note: 'Dark mode and empty states are genuinely complete. RSVP at 375px is strong; workspace tables rely on scroll.' },
+      ],
+      findings: [
+        { p: 'P1', pBg: '#FBEAE6', pInk: '#D2402A', area: 'systemic · guest-facing worst', title: 'rounded-pill is a dead class — every "pill" in the product renders square',
+          body: 'The class is used ~27 times across 12 files — one of them a chip inside the published site blocks (blocks.tsx) (guest side badges, event visibility chips, task priority, file kinds, the RSVP locked-status chip, the guest\u2019s "Your table" tag, the editor\u2019s Upload-image button — and the 64px confirmation "circle" on the RSVP thank-you screen), but no --radius-pill token or utility exists anywhere, so Tailwind v4 generates nothing and corners stay square. Guests see it on the money path: the thank-you check renders as a square box. See it live in the Guest recreation\u2019s confirmation state.',
+          dev: 'globals.css @theme: add --radius-pill: 999px (one line), or codemod rounded-pill \u2192 rounded-full. Audit: grep -r "rounded-pill".' },
+        { p: 'P1', pBg: '#FBEAE6', pInk: '#D2402A', area: '/website · lens 1', title: 'The editor toolbar asks a couple to parse ~14 controls before touching their site',
+          body: 'One row holds: Website label, Design menu, Pages menu, divider, 3-way device toggle, Style, Upload image, ?, status pill, View live, Publish — then a SECOND action cluster (AI section, Add section, Undo, Redo) renders from Puck\u2019s header, plus the coach strip. The founder\u2019s own code comments record "not intuitive" feedback and a three-Publish-buttons incident; there are still two Publishes on screen (app header + toolbar). The Upload-image \u2192 "link copied, paste it into a field" flow is a developer\u2019s workaround wearing a button.',
+          dev: 'website-editor.tsx: group toolbar into 3 zones (site \u00b7 canvas \u00b7 ship); collapse Upload into image fields (image-field.tsx already exists); hide the app-header Publish on /website. Redesign 1 covers this.' },
+        { p: 'P1', pBg: '#FBEAE6', pInk: '#D2402A', area: 'systemic · lens 3', title: 'Radius language disagrees with itself (and with the doctrine)',
+          body: 'The @theme sets --radius-lg to 18px, while an un-layered rule forces every <button> to 8px (it deliberately beats utility classes). Result: sidebar links, the header Preview link and notification rows are 18px; the buttons beside them are 8px; chips written as rounded-full buttons (side filters, palette pickers, category chips, assistant suggestions) get flattened to 8px squares while identical-looking span chips stay fully round. The doctrine says "8px controls" — the code says three things at once.',
+          dev: 'Pick the doctrine: set --radius-lg: 8px (nav rows may keep 10\u201312px via --radius-md/card), delete the un-layered button override, and let utilities mean what they say. One-file change, product-wide calm.' },
+        { p: 'P1', pBg: '#FBEAE6', pInk: '#D2402A', area: '/guests · lens 1 at scale', title: 'Guest list leads with data entry, not with finding people',
+          body: 'The hero position is the "New household" creation card; search and side filters render below it and only once households exist. On the scale account (150 households / 359 guests) the primary daily job — find a family, check who\u2019s invited to what — starts with scrolling past creation UI. Archive affordances are 9px mono text buttons (far below 44px targets), and the whole-column invite toggle fires one request per guest.',
+          dev: 'guests/guest-manager.tsx: move search+filters to the top as the primary bar; demote add-household to a button that opens the form; batch setInvitation server-side. Redesign 2 covers this.' },
+        { p: 'P2', pBg: '#FAF0DD', pInk: '#B87A1E', area: '/dashboard', title: 'Checklist step 1 can never complete for couples who like the default look',
+          body: '"Choose your look" only ticks when the theme object changes (font, vibe, colour, template\u2026). A couple happy with Golden Hour as-is keeps a permanent unticked step — the checklist never disappears and readiness reads lower than reality. Quiet, corrosive.',
+          dev: 'dashboard/page.tsx GettingStarted: also mark styled=true once the editor has been opened (or any publish), not only on theme mutation.' },
+        { p: 'P2', pBg: '#FAF0DD', pInk: '#B87A1E', area: 'couple-facing copy', title: 'Developer vocabulary leaks into couple-facing guarded states',
+          body: 'The assistant\u2019s empty state tells a bride to "Add an ANTHROPIC_API_KEY"; the AI-section menu says the same. Every other guarded state (Twilio, Stripe, Resend) speaks human. This one breaks the spell of "zero-code couples" at the exact moment you\u2019re selling magic.',
+          dev: 'assistant-chat.tsx + website/actions aiComposeSection note: swap to "The assistant isn\u2019t switched on yet — it\u2019s coming with early access" (admin/docs keep the env-var).' },
+        { p: 'P2', pBg: '#FAF0DD', pInk: '#B87A1E', area: 'landing · lens 2', title: '"Watch the 60 second take" promises a video that doesn\u2019t exist',
+          body: 'The hero\u2019s secondary CTA links to #product — the same scroll section the user is already in — and the demo it points at is a 22-second loop, not a 60-second take. Curious visitors click, nothing visibly happens (they\u2019re at the top of the section), trust dips.',
+          dev: 'app/page.tsx hero: either rename ("See it build a site \u2193" scrolling to the frame at its enlarged position, p\u22480.2) or ship a real take. Cheapest honest fix: "\u25b6 Watch it build a site — 22s".' },
+        { p: 'P2', pBg: '#FAF0DD', pInk: '#B87A1E', area: 'systemic · lens 3', title: 'Two icon languages: lucide strokes vs emoji',
+          body: 'The tool speaks 16px lucide at 1.7px stroke — except the editor\u2019s device toggle (🖥 ⬛ 📱), the landing feature grid (🕌 ✉️ 🪑 💷 🤖), the files teaching cards (📄 💷 🗺️ ✨) and the vendor perk banner (🎁). Emoji render differently per OS and read consumer-toy next to the hairline SaaS voice.',
+          dev: 'Swap for lucide equivalents (Monitor/Tablet/Smartphone, Gift, FileText\u2026). ~30 minutes; the perk 🎁 arguably stays — it\u2019s the artifact\u2019s warmth in a tool moment. Decide once, write it into the doctrine.' },
+        { p: 'P2', pBg: '#FAF0DD', pInk: '#B87A1E', area: 'workspace · lens 4', title: 'Modules are islands — the connective tissue is dashboard-only',
+          body: 'Payments knows its budget line, vendors know their events, tasks know both — the DATA is linked, but the UI rarely surfaces it: no "3 payments due" whisper on Vendors, no "2 chase-worthy events" on Guests, no back-links from Budget rows to the vendor. The brief\u2019s lens 4 asks "can you always tell what\u2019s next?" — inside a module, you can\u2019t.',
+          dev: 'Cheap pattern: a one-line "related" footer per module card (payments row already shows "linked to budget" — extend the pattern to link OUT). The event hub tabs do this well; copy that.' },
+        { p: 'P2', pBg: '#FAF0DD', pInk: '#B87A1E', area: 'artifact isolation', title: 'The tool\u2019s scrollbars restyle the couple\u2019s public site',
+          body: 'Whisper scrollbars are applied with a bare * selector, so the artifact inherits the tool\u2019s 8px trackless scrollbars. Doctrine says templates are "immune to app dark mode" — same should hold for chrome. Minor, but it\u2019s the doctrine\u2019s own test.',
+          dev: 'globals.css: scope scrollbar rules to :root:not([data-site-root]) * or the app shell wrapper.' },
+        { p: 'P3', pBg: '#F4F1E9', pInk: '#928D81', area: '/preview', title: '"Twelve looks, one wedding" — with eighteen templates below it',
+          body: 'The gallery headline predates the D2 additions. It\u2019s the first number a detail-oriented couple can check, and it\u2019s wrong.',
+          dev: 'preview/page.tsx: "Eighteen looks, one wedding" — or future-proof with "Every look, one wedding".' },
+        { p: 'P3', pBg: '#F4F1E9', pInk: '#928D81', area: 'tokens', title: 'accent-soft/line hardcode an rgb that will drift from the oklch accent',
+          body: 'Light-mode --accent is oklch(0.62 0.21 29) but its soft/line companions are rgba(222,71,38,\u2026) — visually matched today, silently divergent the day the accent shifts.',
+          dev: 'Use color-mix(in oklab, var(--accent) 8%, transparent) for softs, as the site-style engine already does for couple accents.' },
+        { p: 'P3', pBg: '#F4F1E9', pInk: '#928D81', area: '/login', title: 'Password tab shows two "create account" affordances',
+          body: '"New here? Create one" link and the big "Create your wedding site free" button coexist on the same view; the RSVP-flow\u2019s locked chip also shows a raw lowercase status word ("attending") where everything else is styled.',
+          dev: 'login/page.tsx: keep the button, drop the inline link on the password tab. rsvp-flow.tsx: map status \u2192 label ("Going \u2713").' },
+      ],
+      sections: [
+        { num: '\u00a71', title: 'Marketing', scope: '/ \u00b7 /preview \u00b7 /login \u00b7 /onboarding', 
+          good: [
+            'The dive is a genuine differentiator — hero fade, navy field, tunnel cards and ivory portal all read as one intentional piece; the demo loop mirrors the real product\u2019s chrome.',
+            'Nav pill never wraps (flex-nowrap + shrink-0), headline clamp keeps it unclipped, dark toggle carries the full navy treatment.',
+            'Login\u2019s split screen is the pitch in one image: the tool left, the keepsake right.',
+            'Onboarding\u2019s three numbered moves with template previews + starter-event chips is the right size for move-in day.',
+            'The /preview cards ARE genuinely distinct — case, button geometry, divider motif and hero alignment change per template, not just swatches.',
+          ],
+          bad: [
+            '"60 second take" CTA (P2) and "Twelve looks" (P3) — copy drift a detail-checking couple will catch.',
+            'The tunnel is desktop-only theatre: captions hide below lg, and 560vh of scroll on mobile is a long dark tunnel with small cards.',
+            'FAQ + pricing + footer sit BELOW the portal — a visitor who stops scrolling mid-dive never learns the price. Consider a persistent Pricing link scrolling past the stage (the pill has one — good — but the dive steals the scroll).',
+            'Landing legal links are # placeholders (known gap, not re-reported — just tracked).',
+          ] },
+        { num: '\u00a72', title: 'Couple workspace', scope: '18 routes behind sign-in',
+          good: [
+            'The shell is excellent: 230px grouped sidebar with mono group labels, glassy header, ⌘K, notification bell with tone dots and real links.',
+            'Readiness ring + attention links + tiered headline copy make the dashboard feel alive, not vanity-stats.',
+            'Payments\u2019 month grouping with overdue-red / due-soon-amber borders, and mark-paid syncing the budget line, is exactly the "planning that talks to itself" promise.',
+            'Vendors\u2019 Recommended tab (mentions, price bands, tap-to-copy promo codes, one-click adopt) is a revenue surface disguised as help — keep investing here.',
+            'Empty states teach (files\u2019 four what-belongs-here cards), never scold; toasts always offer Undo.',
+          ],
+          bad: [
+            'Guests: creation-first layout + sub-target archive buttons + N-requests column toggle (P1) — the one screen that must survive 150 households.',
+            'Checklist step-1 dead-end (P2).',
+            'Stat cards mix "guests invited" and "guest-event confirmations" without defining them — Attending 89 vs Guests 112 begs a tooltip.',
+            'Tables (guests, RSVPs answers) have no sticky headers; on the scale account the event columns lose their labels two households in.',
+            'Cross-module links are one-directional (P2 wayfinding).',
+          ] },
+        { num: '\u00a73', title: 'Guest-facing', scope: '/s/[slug] \u00b7 rsvp \u00b7 schedule \u00b7 /std',
+          good: [
+            'The RSVP flow is the strongest screen in the product: per-person-per-event segmented choices at 44px+, capacity and deadline honoured in the UI, sticky submit, instant confirmation with PDF + calendar + WhatsApp.',
+            'Theming the RSVP path in the site\u2019s own template vars means guests never feel they left the couple\u2019s website — a detail most competitors miss.',
+            'Per-block looks (velvet, arch, postcard\u2026) + backdrops give couples real range without free-form chaos; the ten looks re-skin under every template because they\u2019re token-driven.',
+            'The personal schedule page (household\u2019s events, running order, seats, calendar links) is a quiet killer feature.',
+          ],
+          bad: [
+            'The dead pill class hits hardest here: square "circle" on the thank-you screen, square table tag, square locked chip (P1).',
+            'Locked chip prints the raw status word lowercase (P3).',
+            'Validation errors collapse into one truncated line in the sticky bar — on a phone, "Please answer: Priya: Meal choice \u00b7 \u2026" is cut exactly where it gets useful.',
+            'The freeform block is shape-locked on mobile (good call) but its text scales with vw — long script lines can crowd the edges at 375px.',
+          ] },
+        { num: '\u00a74', title: 'Platform admin', scope: '/admin \u00b7 /admin/directory',
+          good: [ 'Price editor writing live to checkout and per-site comp/revoke controls are the right founder tools for this stage.', 'Curated-directory CRUD with discounts/promo codes feeds the best couple-facing surface (Recommended vendors).' ],
+          bad: [ 'Not recreated this pass (founder-only, lowest review leverage). Two notes from source: admin uses the same PageHeader voice as the couple tool — fine for now, but a visual "you are in admin" tint would prevent mistakes; and password-reset per site belongs behind a confirm.' ] },
+        { num: '\u00a75', title: 'Cross-cutting systems', scope: 'tokens \u00b7 overlays \u00b7 theming \u00b7 guarded states',
+          good: [
+            'The token architecture is the product\u2019s best engineering-design decision: semantic vars + [data-site-root] isolation means 18 templates, 10 block looks, vibes and custom colours all compose instead of colliding.',
+            'Dark navy mode is complete — softs at 14\u201318% alpha, real shadows, no forgotten surfaces.',
+            'Overlay system (toasts with Undo, confirm/prompt dialogs) fully replaces native alerts.',
+            'Every guarded integration shows a friendly state; nothing errors.',
+          ],
+          bad: [
+            'The un-layered button-radius override is the root cause of the radius chaos (P1) — a global footgun that will keep biting.',
+            'Scrollbar styling leaks into the artifact (P2).',
+            'Micro-mono labels run 9\u20139.5px in several places (archive buttons, chips) — below comfortable legibility and below tap-target guidance when interactive.',
+            'accent-soft rgb drift (P3).',
+          ] },
+      ],
+      doctrine: [
+        { title: 'Coral is doing two jobs: primary action AND danger-adjacent', body: 'The accent oklch(0.62 0.21 29) and the error red (#D2402A / #F26D56 dark) live ~1 hue-step apart. Publish (coral) next to an overdue badge (red) reads as two intensities of the same alarm. In a product whose whole promise is "lower the couple\u2019s anxiety", the primary colour shouldn\u2019t share a family with the panic colour.', rec: 'Keep coral, but move --bad toward crimson/rose (hue ~15\u201320) or deepen it, and reserve pure coral strictly for actions. Test: a colour-blind founder should never confuse Publish with Overdue.' },
+        { title: '"Two voices" is right — but the tool should quote the artifact more often', body: 'The site switcher (serif couple name) and the unlock price (font-display) are the two places the tool borrows the artifact\u2019s serif, and they\u2019re both the warmest moments in the chrome. This is a pattern, not an accident: the tool speaks sans, and QUOTES the wedding in serif.', rec: 'Formalize "artifact quotations": couple/site names, event names in guest-facing previews, and money moments may use font-display. Everything else stays sans. Write it in the doctrine so it survives the next sprint.' },
+        { title: 'Micro-mono is a beautiful voice that\u2019s being whispered too quietly', body: 'Geist Mono uppercase at 9\u20139.5px is the product\u2019s signature — but at that size with 0.14em tracking it fails comfortably-readable for the over-45 parents who co-plan these weddings, and it\u2019s used for ACTIONS (Archive, Revoke) where the doctrine already declared mono-for-actions dead.', rec: 'Floor mono labels at 10px non-interactive; interactive text never below 12px/44px target. Archive/Revoke become quiet icon-buttons with tooltips or 12px sentence-case text buttons.' },
+        { title: 'The 8px-controls rule should win — by deleting its own enforcement hack', body: 'The doctrine\u2019s "8px controls, no hover jiggle" is enforced by an un-layered CSS override that fights the utility system, which is exactly why the product now has 18px links beside 8px buttons and accidentally-square chips. The rule is right; the mechanism guarantees drift.', rec: 'Enforce in tokens, not overrides: set the radius scale to the doctrine (sm 6 / md 8 / lg 8\u201310 / card 12 / pill 999) and delete the global button rule. Utilities then can\u2019t lie.' },
+      ],
+      redesignDone: true,
+      redesignPlan: [
+        { n: 'R1', screen: 'The editor toolbar + panels (/website)', why: 'Highest-stakes screen \u00d7 lowest lens-1 score. Three takes: (a) zoned toolbar within today\u2019s components, (b) left-rail "Design / Pages / Blocks" consolidation with a clean canvas, (c) doctrine-pushing "the artifact is the interface" — chrome recedes to a single floating dock.' },
+        { n: 'R2', screen: 'Guest list at scale (/guests)', why: 'The 150-household test. Three takes: (a) search-first reorder of today\u2019s pieces, (b) a real table with sticky headers + household drawer, (c) a per-event lens that treats the invite matrix as the hero object.' },
+        { n: 'R3', screen: 'RSVP confirmation + validation (guest money path)', why: 'Small screen, outsized emotional weight, currently wearing the square-pill bug. Three takes: (a) fixed-tokens polish, (b) a celebratory keepsake confirmation in the couple\u2019s template, (c) inline per-question validation replacing the truncated sticky-bar error.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

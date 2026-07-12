@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&amp;family=Geist+Mono:wght@400..700&amp;family=Cormorant+Garamond:ital,wght@0,400..700;1,400..700&amp;family=Jost:ital,wght@0,300..600;1,300..600&amp;family=Great+Vibes&amp;display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#101010; }
+/* Demo site theme: Golden Hour template + couple's custom pink accent (per brief §3) */
+[data-site-root] {
+  --paper:oklch(0.985 0.008 85); --paper-2:oklch(0.955 0.018 80);
+  --surface:oklch(0.995 0.005 90); --surface-2:oklch(0.95 0.015 80);
+  --ink:oklch(0.26 0.03 40); --ink-2:oklch(0.44 0.035 48); --ink-3:oklch(0.53 0.105 70);
+  --line:oklch(0.9 0.02 75); --line-2:oklch(0.86 0.02 75);
+  --accent:#D96A8B;
+  --accent-ink:color-mix(in oklab, #D96A8B 82%, oklch(0.26 0.03 40));
+  --accent-line:color-mix(in oklab, #D96A8B 45%, oklch(0.985 0.008 85));
+  --accent-soft:color-mix(in oklab, #D96A8B 12%, oklch(0.985 0.008 85));
+  --warn:#B87A1E; --bad:#D2402A;
+  --shadow:0 1px 2px rgba(30,25,15,0.05);
+  --shadow-lg:0 24px 60px -18px rgba(33,29,24,0.25);
+  --font-display:'Cormorant Garamond', Georgia, serif;
+  --font-sans:'Jost', system-ui, sans-serif;
+  --tpl-btn-radius:999px;
+  font-family:var(--font-sans);
+}
+[data-site-root] * { scrollbar-width:thin; scrollbar-color:var(--line-2) transparent; }
+@keyframes bd-petals { from { transform:translate3d(0,0,0); } to { transform:translate3d(0,50%,0); } }
+@keyframes kenburns { from { transform:scale(1); } to { transform:scale(1.08); } }
+a { color:#B14A6C; } a:hover { color:#D96A8B; }
+</style>
+</helmet>
+
+<div style="font-family:'Instrument Sans',system-ui,sans-serif;">
+
+  <!-- Review scaffolding bar -->
+  <div style="position:sticky; top:0; z-index:99; height:44px; background:#101010; color:#EDEBE6; display:flex; align-items:center; gap:14px; padding:0 16px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.06em;">
+    <span style="text-transform:uppercase; color:#8C897F;">Recreation</span>
+    <span>{{ routeLabel }}</span>
+    <a href="Recreation - Workspace.dc.html" style="color:#EDEBE6; text-decoration:underline; text-underline-offset:3px;">← workspace</a>
+    <span style="flex:1;"></span>
+    <div style="display:flex; gap:2px; background:#1E1E1C; border-radius:6px; padding:2px;">
+      <sc-for list="{{ tabs }}" as="t">
+        <button onClick="{{ t.pick }}" style="border:none; cursor:pointer; font:inherit; padding:3px 9px; border-radius:4px; background:{{ t.bg }}; color:{{ t.ink }};">{{ t.label }}</button>
+      </sc-for>
+    </div>
+    <sc-if value="{{ isRsvp }}" hint-placeholder-val="{{ false }}">
+      <span style="color:#8C897F; text-transform:uppercase;">state</span>
+      <div style="display:flex; gap:2px; background:#1E1E1C; border-radius:6px; padding:2px;">
+        <button onClick="{{ setForm }}" style="border:none; cursor:pointer; font:inherit; padding:3px 9px; border-radius:4px; background:{{ formBtnBg }}; color:{{ formBtnInk }};">form</button>
+        <button onClick="{{ setDone }}" style="border:none; cursor:pointer; font:inherit; padding:3px 9px; border-radius:4px; background:{{ doneBtnBg }}; color:{{ doneBtnInk }};">confirmation</button>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- ═══ /s/aanya-and-dev — published demo site ═══ -->
+  <sc-if value="{{ isSite }}" hint-placeholder-val="{{ true }}">
+  <div data-site-root data-screen-label="Public site" style="position:relative; background:var(--paper); color:var(--ink); overflow:hidden;">
+
+    <!-- petals backdrop (couple-chosen, template-tinted) -->
+    <div aria-hidden="true" style="position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;"
+      style-before="content:''; position:absolute; left:0; right:0; top:-100%; height:200%; background-image:radial-gradient(5px 7px at 12% 10%, var(--accent-line), transparent 60%), radial-gradient(4px 6px at 34% 42%, color-mix(in oklab, var(--accent) 40%, transparent), transparent 60%), radial-gradient(6px 8px at 58% 22%, var(--accent-line), transparent 60%), radial-gradient(4px 5px at 76% 55%, color-mix(in oklab, var(--accent) 34%, transparent), transparent 60%), radial-gradient(5px 7px at 90% 32%, var(--accent-line), transparent 60%), radial-gradient(4px 6px at 22% 78%, color-mix(in oklab, var(--accent) 30%, transparent), transparent 60%); background-size:100% 50%; opacity:0.5; animation:bd-petals 38s linear infinite;"
+      style-after="content:''; position:absolute; left:0; right:0; top:-100%; height:200%; background-image:radial-gradient(5px 7px at 12% 10%, var(--accent-line), transparent 60%), radial-gradient(4px 6px at 34% 42%, color-mix(in oklab, var(--accent) 40%, transparent), transparent 60%), radial-gradient(6px 8px at 58% 22%, var(--accent-line), transparent 60%); background-size:100% 50%; opacity:0.3; transform:scale(1.4); animation:bd-petals 55s linear infinite; animation-delay:-18s;"></div>
+
+    <div style="position:relative; z-index:1;">
+      <!-- banner nav -->
+      <header style="position:sticky; top:44px; z-index:40; display:flex; align-items:center; justify-content:space-between; gap:24px; padding:12px 24px; background:var(--surface); border-bottom:2px solid var(--accent-line);">
+        <span style="display:flex; width:36px; height:36px; align-items:center; justify-content:center; border-radius:99px; border:1px solid var(--accent-line); font-family:var(--font-display); font-size:14px; color:var(--accent-ink);">A·D</span>
+        <nav style="display:flex; flex-wrap:wrap; align-items:center; gap:20px;">
+          <a href="#" style="font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--accent-ink); text-decoration:none;">Home</a>
+          <a href="#" style="font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--ink-3); text-decoration:none;">Travel</a>
+        </nav>
+      </header>
+
+      <!-- Hero (photo slot + balanced overlay) -->
+      <section style="position:relative; display:flex; min-height:72vh; align-items:center; justify-content:center; overflow:hidden; background:var(--paper-2); padding:96px 24px; text-align:center;">
+        <div style="position:absolute; inset:0;">
+          <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="hero-photo" shape="rect" placeholder="Couple photo" hint-size="100%,100%" style="position:absolute; inset:0; width:100%; height:100%;"></x-import>
+        </div>
+        <div style="position:absolute; inset:0; background:rgba(0,0,0,0.45); pointer-events:none;"></div>
+        <div style="position:relative; max-width:672px; color:#fff; pointer-events:none; transform:translateY(96px);">
+          <p style="margin:0 0 20px; font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.22em; opacity:0.9;">Together with their families</p>
+          <h1 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:72px; line-height:1.02;">Aanya &amp; Dev</h1>
+          <div style="margin-top:28px; display:flex; align-items:center; justify-content:center; gap:16px; font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.18em; opacity:0.9;">
+            <span>19 September 2026</span><span style="opacity:0.5;">·</span><span>Manchester, UK</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Countdown -->
+      <section style="border-top:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--paper-2); padding:56px 24px; text-align:center;">
+        <p style="margin:0 0 28px; font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--accent-ink);">The celebrations begin in</p>
+        <div style="margin:0 auto; display:flex; max-width:448px; justify-content:center; gap:40px;">
+          <sc-for list="{{ countdownCells }}" as="c">
+            <div>
+              <p style="margin:0; font-family:var(--font-display); font-size:48px; font-variant-numeric:tabular-nums; color:var(--ink);">{{ c.v }}</p>
+              <p style="margin:4px 0 0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--ink-3);">{{ c.l }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- Story — Velvet Night look -->
+      <div style="background:color-mix(in oklab, var(--accent) 12%, #14110c); color:#f5f0e6; padding:20px 0;">
+        <section style="margin:0 auto; max-width:672px; padding:64px 24px; text-align:center;">
+          <p style="margin:0 0 12px; font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--accent-line);">Our Story</p>
+          <h2 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:36px; line-height:1.05; color:#f5f0e6;">How we got here</h2>
+          <div style="margin-top:24px; display:flex; flex-direction:column; gap:20px;">
+            <p style="margin:0; font-size:18px; line-height:1.6; color:#cfc6b4;">It started with a shared table and a stolen samosa. Neither of us remembers who laughed first.</p>
+            <p style="margin:0; font-size:18px; line-height:1.6; color:#cfc6b4;">A few years, two cities and a thousand chai runs later, we are throwing the party we always talked about.</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- Schedule -->
+      <section style="margin:0 auto; max-width:768px; padding:80px 24px;">
+        <h2 style="margin:0 0 40px; text-align:center; font-family:var(--font-display); font-weight:400; font-size:36px; color:var(--ink);">The Celebrations</h2>
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <sc-for list="{{ scheduleEvents }}" as="e" hint-placeholder-count="4">
+            <div style="border-radius:12px; border:1px solid var(--line); border-top:3px solid {{ e.accent }}; background:var(--surface); padding:24px; box-shadow:var(--shadow); transition:transform 300ms cubic-bezier(0.16,1,0.3,1), box-shadow 300ms;" style-hover="transform:translateY(-4px);">
+              <div style="display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px;">
+                <h3 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:24px; color:var(--ink);">{{ e.name }}</h3>
+                <span style="font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.16em; color:var(--accent-ink);">{{ e.when }}</span>
+              </div>
+              <p style="margin:8px 0 0; color:var(--ink-2); font-size:16px;">{{ e.venue }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- RSVP CTA — outline button treatment (couple's choice) -->
+      <section style="background:var(--paper-2); padding:80px 24px; text-align:center;">
+        <h2 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:36px; color:var(--ink);">Kindly RSVP</h2>
+        <p style="margin:16px auto 0; max-width:576px; color:var(--ink-2); font-size:16px;">We can't wait to celebrate with you.</p>
+        <a href="#" onClick="{{ goRsvp }}" style="margin-top:32px; display:inline-block; border-radius:var(--tpl-btn-radius); background:transparent; border:1.5px solid var(--accent); padding:12px 32px; font-weight:600; color:var(--accent); text-decoration:none; font-size:16px;">Open your invitation</a>
+      </section>
+
+      <!-- Gifts — Grand Arch look -->
+      <div style="margin:32px auto 20px; max-width:min(928px, calc(100% - 32px)); border:1px solid var(--accent-line); border-radius:clamp(56px,16vw,192px) clamp(56px,16vw,192px) 12px 12px; background:var(--accent-soft); overflow:hidden; padding-top:24px;">
+        <section style="padding:64px 24px; text-align:center;">
+          <div style="margin:0 auto; max-width:576px;">
+            <div style="margin:0 auto 24px; height:1px; width:64px; background:var(--accent-line);"></div>
+            <h2 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:30px; color:var(--ink);">Your presence is the present</h2>
+            <p style="margin:16px 0 0; line-height:1.6; color:var(--ink-2); font-size:16px;">Please, no boxed gifts — your blessings mean the world.</p>
+            <div style="margin:24px auto 0; height:1px; width:64px; background:var(--accent-line);"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Freeform sign-off canvas -->
+      <div style="margin:0 auto; max-width:928px; padding:24px 24px 64px;">
+        <div style="position:relative; aspect-ratio:16/9; background:var(--paper); overflow:hidden;">
+          <span style="position:absolute; left:50%; top:38%; transform:translate(-50%,-50%) rotate(-4deg); font-family:'Great Vibes',cursive; font-size:clamp(28px,4.5vw,56px); color:var(--accent-ink); max-width:86%; width:max-content; text-align:center; line-height:1.2;">See you at the big weekend</span>
+          <span style="position:absolute; left:50%; top:66%; transform:translate(-50%,-50%); font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.22em; color:var(--ink-3);">With love · Aanya &amp; Dev</span>
+          <span style="position:absolute; left:14%; top:76%; transform:rotate(6deg); font-family:var(--font-display); font-style:italic; font-size:20px; color:var(--ink-2);">xx</span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer style="border-top:1px solid var(--line); background:var(--paper); padding:56px 24px; text-align:center;">
+        <p style="margin:0; font-family:var(--font-display); font-size:30px; color:var(--ink);">Aanya &amp; Dev</p>
+        <p style="margin:12px 0 0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--ink-3);">Made with Occasio</p>
+      </footer>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ═══ RSVP flow at 375px (in the site's template vars) ═══ -->
+  <sc-if value="{{ isRsvp }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Guest RSVP flow" style="display:flex; justify-content:center; padding:40px 20px 64px; background:#101010;">
+    <div style="width:400px; max-width:100%;">
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="400px,820px">
+        <div data-site-root style="height:100%; overflow:hidden; background:var(--paper); color:var(--ink); position:relative;">
+
+          <sc-if value="{{ rsvpForm }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute; inset:0; overflow-y:auto;">
+            <main style="padding:72px 20px 130px;">
+              <p style="margin:0 0 12px; text-align:center; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--ink-3);">Aanya &amp; Dev</p>
+              <h1 style="margin:0; text-align:center; font-family:var(--font-display); font-weight:400; font-size:36px; line-height:1.05;">Welcome, The Shah Family</h1>
+              <p style="margin:16px 0 0; text-align:center; color:var(--ink-2); font-size:15px;">Tell us who's coming to each celebration.</p>
+
+              <div style="margin-top:40px; display:flex; flex-direction:column; gap:32px;">
+                <sc-for list="{{ rsvpGuests }}" as="g" hint-placeholder-count="2">
+                  <section style="border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; box-shadow:var(--shadow);">
+                    <h2 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:24px;">{{ g.name }}<sc-if value="{{ g.child }}" hint-placeholder-val="{{ false }}"><span style="margin-left:8px; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; color:var(--ink-3);">child</span></sc-if></h2>
+                    <sc-if value="{{ g.table }}" hint-placeholder-val="{{ false }}">
+                      <p style="margin:4px 0 0; display:inline-block; background:var(--accent-soft); padding:4px 12px; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.16em; color:var(--accent-ink);">Your table: {{ g.table }}</p>
+                    </sc-if>
+                    <div style="margin-top:16px; display:flex; flex-direction:column; gap:16px;">
+                      <sc-for list="{{ g.events }}" as="e">
+                        <div>
+                          <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
+                            <div style="min-width:0;">
+                              <p style="margin:0; font-weight:500; font-size:15px;">{{ e.name }}</p>
+                              <p style="margin:0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">{{ e.meta }}</p>
+                            </div>
+                            <sc-if value="{{ e.locked }}" hint-placeholder-val="{{ false }}">
+                              <span style="background:var(--paper-2); padding:6px 12px; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3);">{{ e.lockedLabel }}</span>
+                            </sc-if>
+                            <sc-if value="{{ e.open }}" hint-placeholder-val="{{ true }}">
+                              <div role="group" style="display:flex; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:4px;">
+                                <button onClick="{{ e.sayYes }}" style="min-height:44px; border:none; border-radius:6px; padding:0 16px; font-size:14px; font-weight:500; cursor:pointer; font-family:inherit; background:{{ e.yesBg }}; color:{{ e.yesInk }}; opacity:{{ e.yesOpacity }};">Joyfully yes</button>
+                                <button onClick="{{ e.sayNo }}" style="min-height:44px; border:none; border-radius:6px; padding:0 16px; font-size:14px; font-weight:500; cursor:pointer; font-family:inherit; background:{{ e.noBg }}; color:{{ e.noInk }};">Regretfully no</button>
+                              </div>
+                            </sc-if>
+                          </div>
+                          <sc-if value="{{ e.capNote }}" hint-placeholder-val="{{ false }}">
+                            <p style="margin:4px 0 0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--warn);">This event is at capacity</p>
+                          </sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+
+                    <sc-if value="{{ g.showQuestions }}" hint-placeholder-val="{{ false }}">
+                      <div style="margin-top:20px; border-top:1px solid var(--line); padding-top:16px;">
+                        <p style="margin:0 0 12px; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--ink-3);">Sangeet</p>
+                        <div style="margin-bottom:16px;">
+                          <span style="display:block; margin-bottom:6px; font-size:14px; font-weight:500;">Meal choice<span style="margin-left:4px; color:var(--accent-ink);">*</span></span>
+                          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                            <sc-for list="{{ g.meals }}" as="m">
+                              <button onClick="{{ m.pick }}" style="min-height:44px; border-radius:8px; padding:0 16px; font-size:14px; font-weight:500; cursor:pointer; font-family:inherit; background:{{ m.bg }}; color:{{ m.ink }}; border:{{ m.border }}; transition:border-color 150ms ease;">{{ m.label }}</button>
+                            </sc-for>
+                          </div>
+                        </div>
+                      </div>
+                      <div style="margin-top:20px; border-top:1px solid var(--line); padding-top:16px;">
+                        <p style="margin:0 0 12px; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--ink-3);">A few details</p>
+                        <div style="margin-bottom:16px;">
+                          <span style="display:block; margin-bottom:6px; font-size:14px; font-weight:500;">Any allergies we should know about?<span style="margin-left:4px; color:var(--accent-ink);">*</span></span>
+                          <div style="display:flex; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:4px;">
+                            <button style="min-height:44px; flex:1; border:none; border-radius:6px; font-size:14px; font-weight:500; cursor:pointer; font-family:inherit; background:transparent; color:var(--ink-2);">Yes</button>
+                            <button style="min-height:44px; flex:1; border:none; border-radius:6px; font-size:14px; font-weight:500; cursor:pointer; font-family:inherit; background:var(--accent); color:#fff;">No</button>
+                          </div>
+                        </div>
+                        <label style="display:block; margin-bottom:16px;">
+                          <span style="display:block; margin-bottom:6px; font-size:14px; font-weight:500;">Song request <span style="font-size:12px; font-weight:400; color:var(--ink-3);">one that gets you dancing</span></span>
+                          <input value="Kala Chashma" style="min-height:44px; width:100%; box-sizing:border-box; border-radius:8px; border:1px solid var(--line); background:var(--paper-2); padding:0 14px; font-size:15px; color:var(--ink); outline:none; font-family:inherit;" style-focus="border-color:var(--accent);">
+                        </label>
+                      </div>
+                    </sc-if>
+                  </section>
+                </sc-for>
+              </div>
+            </main>
+            </div>
+
+            <!-- Sticky submit -->
+            <div style="position:absolute; left:0; right:0; bottom:0; border-top:1px solid var(--line); background:color-mix(in oklab, var(--paper) 95%, transparent); backdrop-filter:blur(6px); padding:16px 20px 28px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+                <p style="margin:0; min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; color:var(--ink-3);">You can change your answers any time before the deadline.</p>
+                <button onClick="{{ setDone }}" style="min-height:48px; flex-shrink:0; border:none; border-radius:8px; background:var(--accent); padding:0 32px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit; font-size:15px;">Send RSVP</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ rsvpDone }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; min-height:100%; align-items:center; justify-content:center; padding:40px 24px; text-align:center; box-sizing:border-box;">
+              <div style="max-width:400px;">
+                <div style="margin:0 auto 28px; display:flex; width:64px; height:64px; align-items:center; justify-content:center; border:2px solid var(--accent); color:var(--accent);">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                </div>
+                <p style="margin:0 0 12px; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--ink-3);">Aanya &amp; Dev</p>
+                <h1 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:36px;">Thank you.</h1>
+                <p style="margin:16px 0 0; line-height:1.6; color:var(--ink-2); font-size:15px;">Your responses for The Shah Family are saved. You can return through your invitation link any time before the deadline to change them.</p>
+                <button style="margin-top:32px; border:none; border-radius:8px; background:var(--accent); padding:12px 28px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit; font-size:15px;">Download confirmation (PDF)</button>
+                <div style="margin-top:32px; border-top:1px solid var(--line); padding-top:24px; text-align:left;">
+                  <p style="margin:0 0 12px; text-align:center; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--ink-3);">Add to your calendar</p>
+                  <sc-for list="{{ calRows }}" as="c">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--line); padding:10px 0; font-size:14px;">
+                      <span style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ c }}</span>
+                      <span style="display:flex; flex-shrink:0; gap:12px;"><a href="#" style="color:var(--accent-ink); text-decoration:underline; text-underline-offset:4px;">Google</a><a href="#" style="color:var(--accent-ink); text-decoration:underline; text-underline-offset:4px;">Apple / .ics</a></span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </x-import>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ═══ /s/[slug]/schedule — guest's personal schedule ═══ -->
+  <sc-if value="{{ isSchedule }}" hint-placeholder-val="{{ false }}">
+  <div data-site-root data-screen-label="Guest schedule" style="min-height:calc(100vh - 44px); background:var(--paper); color:var(--ink);">
+    <main style="margin:0 auto; max-width:672px; padding:56px 24px;">
+      <p style="margin:0; text-align:center; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--ink-3);">Aanya &amp; Dev</p>
+      <h1 style="margin:12px 0 0; text-align:center; font-family:var(--font-display); font-weight:400; font-size:36px;">Your schedule</h1>
+      <p style="margin:12px 0 0; text-align:center; color:var(--ink-2);">The Shah Family — everything you're invited to, in one place.</p>
+
+      <div style="margin:24px auto 0; max-width:448px; border-radius:12px; border:1px solid var(--line); background:var(--surface); padding:20px; text-align:center; box-shadow:var(--shadow);">
+        <p style="margin:0; font-family:'Geist Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.18em; color:var(--ink-3);">Your seats</p>
+        <div style="margin-top:8px; display:flex; flex-direction:column; gap:4px;">
+          <p style="margin:0; font-size:14px; color:var(--ink-2);"><span style="color:var(--ink);">Priya Shah</span> — Table 1</p>
+          <p style="margin:0; font-size:14px; color:var(--ink-2);"><span style="color:var(--ink);">Aarav Shah</span> — Kids table</p>
+        </div>
+      </div>
+
+      <div style="margin-top:40px; display:flex; flex-direction:column; gap:24px;">
+        <sc-for list="{{ schedCards }}" as="e" hint-placeholder-count="3">
+          <section style="border-radius:12px; border:1px solid var(--line); border-top:3px solid {{ e.accent }}; background:var(--surface); padding:24px; box-shadow:var(--shadow);">
+            <div style="display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px;">
+              <h2 style="margin:0; font-family:var(--font-display); font-weight:400; font-size:24px;">{{ e.name }}</h2>
+              <span style="font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--accent-ink);">{{ e.when }}</span>
+            </div>
+            <p style="margin:6px 0 0; color:var(--ink-2);">{{ e.venue }}</p>
+            <sc-if value="{{ e.dress }}" hint-placeholder-val="{{ false }}"><p style="margin:4px 0 0; font-size:14px; color:var(--ink-3);">Dress code: {{ e.dress }}</p></sc-if>
+            <sc-if value="{{ e.hasItin }}" hint-placeholder-val="{{ false }}">
+              <dl style="margin:16px 0 0; border-top:1px solid var(--line); padding-top:16px; display:flex; flex-direction:column; gap:8px;">
+                <sc-for list="{{ e.itin }}" as="it">
+                  <div style="display:flex; gap:12px;">
+                    <dt style="width:80px; flex-shrink:0; font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.1em; line-height:20px; color:var(--accent-ink); margin:0;">{{ it.time }}</dt>
+                    <dd style="margin:0; font-size:14px; color:var(--ink-2);"><span style="color:var(--ink);">{{ it.title }}</span><sc-if value="{{ it.note }}" hint-placeholder-val="{{ false }}"><span style="color:var(--ink-3);"> — {{ it.note }}</span></sc-if></dd>
+                  </div>
+                </sc-for>
+              </dl>
+            </sc-if>
+            <div style="margin-top:16px; border-top:1px solid var(--line); padding-top:12px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px;">
+              <p style="margin:0; font-size:13px; color:var(--ink-2);"><span style="color:var(--ink);">Going:</span> {{ e.going }}<sc-if value="{{ e.awaiting }}" hint-placeholder-val="{{ false }}"><span style="color:var(--ink-3);"> · Awaiting: {{ e.awaiting }}</span></sc-if></p>
+              <span style="display:flex; gap:12px; font-size:13px;"><a href="#" style="color:var(--accent-ink); text-decoration:underline; text-underline-offset:4px;">Google</a><a href="#" style="color:var(--accent-ink); text-decoration:underline; text-underline-offset:4px;">Apple / .ics</a></span>
+            </div>
+          </section>
+        </sc-for>
+      </div>
+    </main>
+  </div>
+  </sc-if>
+
+  <!-- ═══ /std/[token] — public Save-the-Date card ═══ -->
+  <sc-if value="{{ isStd }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Save the Date card" style="min-height:calc(100vh - 44px); display:flex; align-items:center; justify-content:center; background:oklch(0.955 0.018 80); padding:48px 24px;">
+    <div style="width:min(440px, 92vw);">
+      <div style="position:relative; margin:0 auto; overflow:hidden; aspect-ratio:5/7; background:#F5EFE3; color:#211D18; border:1px solid #C9A22733; border-radius:4px; font-family:'Cormorant Garamond',Georgia,serif;">
+        <div style="height:46%; width:100%;">
+          <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="std-photo" shape="rect" placeholder="Couple photo" hint-size="100%,100%" style="width:100%; height:100%;"></x-import>
+        </div>
+        <div style="display:flex; height:54%; flex-direction:column; align-items:center; justify-content:center; padding:32px; text-align:center; box-sizing:border-box;">
+          <p style="margin:0; font-family:'Jost',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.28em; color:#C9A227;">Save the Date</p>
+          <div style="margin:12px 0; height:1px; width:48px; background:#C9A227;"></div>
+          <h1 style="margin:0; font-weight:400; font-size:clamp(30px,7vw,44px); line-height:1.02; color:#211D18;">Aanya &amp; Dev</h1>
+          <p style="margin:16px 0 0; font-size:15px; letter-spacing:0.025em; color:#C9A227;">19 September 2026</p>
+          <p style="margin:4px 0 0; font-size:13px; color:#6E635A; font-family:'Jost',sans-serif;">Manchester, UK</p>
+          <div style="margin-top:20px; display:flex; flex-direction:column; gap:6px;">
+            <p style="margin:0; display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; color:#6E635A; font-family:'Jost',sans-serif;"><span style="width:6px; height:6px; border-radius:99px; background:#C9A227;"></span><span style="color:#211D18;">Ceremony</span><span>· Sat 19 Sep</span></p>
+            <p style="margin:0; display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; color:#6E635A; font-family:'Jost',sans-serif;"><span style="width:6px; height:6px; border-radius:99px; background:#7A1F1F;"></span><span style="color:#211D18;">Reception</span><span>· Sat 19 Sep</span></p>
+          </div>
+          <p style="margin:24px 0 0; font-family:'Jost',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.2em; color:#6E635A;">Formal invitation to follow</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 900}}">
+class Component extends DCLogic {
+  state = { screen: 'site', rsvpState: 'form', meal: 'Vegetarian', choices: { 'p-san': 'attending', 'p-cer': 'attending', 'p-rec': 'pending', 'a-san': 'pending', 'a-cer': 'declined' } };
+
+  renderVals() {
+    const screen = this.state.screen;
+    const rsvpState = this.state.rsvpState;
+    const seg = (on) => ({ bg: on ? '#EDEBE6' : 'transparent', ink: on ? '#101010' : '#8C897F' });
+
+    const TABS = [
+      { k: 'site', label: '/s/aanya-and-dev' },
+      { k: 'rsvp', label: 'RSVP · 375px' },
+      { k: 'schedule', label: 'schedule' },
+      { k: 'std', label: '/std/[token]' },
+    ];
+    const tabs = TABS.map((t) => ({
+      label: t.label,
+      pick: () => this.setState({ screen: t.k }),
+      ...seg(screen === t.k),
+    }));
+
+    const ROUTE = {
+      site: '/s/aanya-and-dev — published site (Golden Hour · petals · banner nav · pink accent · outline buttons)',
+      rsvp: '/s/aanya-and-dev/rsvp — the money path, themed in the site\u2019s template vars',
+      schedule: '/s/aanya-and-dev/schedule — guest\u2019s personal schedule',
+      std: '/std/sTAeytnmVxXR — public Save-the-Date card',
+    };
+
+    const choice = (key) => this.state.choices[key] || 'pending';
+    const setChoice = (key, s) => () => {
+      const cur = { ...this.state.choices };
+      cur[key] = cur[key] === s ? 'pending' : s;
+      this.setState({ choices: cur });
+    };
+    const evRow = (key, name, meta, opts) => {
+      const st = choice(key);
+      const o = opts || {};
+      return {
+        name, meta,
+        locked: !!o.locked, lockedLabel: o.lockedLabel || 'Closed',
+        open: !o.locked,
+        sayYes: o.capFull ? () => {} : setChoice(key, 'attending'),
+        sayNo: setChoice(key, 'declined'),
+        yesBg: st === 'attending' ? 'var(--accent)' : 'transparent',
+        yesInk: st === 'attending' ? '#fff' : 'var(--ink-2)',
+        yesOpacity: o.capFull && st !== 'attending' ? 0.4 : 1,
+        noBg: st === 'declined' ? 'var(--ink)' : 'transparent',
+        noInk: st === 'declined' ? 'var(--paper)' : 'var(--ink-2)',
+        capNote: !!o.capFull && st !== 'attending',
+      };
+    };
+
+    const priyaAttending = ['p-san', 'p-cer', 'p-rec'].some((k) => choice(k) === 'attending');
+    const meals = ['Vegetarian', 'Chicken', 'Halal', 'Kids meal'].map((m) => ({
+      label: m,
+      pick: () => this.setState({ meal: m }),
+      bg: this.state.meal === m ? 'var(--accent)' : 'var(--paper-2)',
+      ink: this.state.meal === m ? '#fff' : 'var(--ink-2)',
+      border: this.state.meal === m ? '1px solid var(--accent)' : '1px solid var(--line)',
+    }));
+
+    return {
+      routeLabel: ROUTE[screen],
+      tabs,
+      isSite: screen === 'site', isRsvp: screen === 'rsvp',
+      isSchedule: screen === 'schedule', isStd: screen === 'std',
+
+      formBtnBg: seg(rsvpState === 'form').bg, formBtnInk: seg(rsvpState === 'form').ink,
+      doneBtnBg: seg(rsvpState === 'done').bg, doneBtnInk: seg(rsvpState === 'done').ink,
+      setForm: () => this.setState({ rsvpState: 'form' }),
+      setDone: (ev) => { if (ev && ev.preventDefault) ev.preventDefault(); this.setState({ rsvpState: 'done' }); },
+      rsvpForm: rsvpState === 'form', rsvpDone: rsvpState === 'done',
+      goRsvp: (ev) => { if (ev && ev.preventDefault) ev.preventDefault(); this.setState({ screen: 'rsvp', rsvpState: 'form' }); },
+
+      countdownCells: [ { v: '70', l: 'Days' }, { v: '14', l: 'Hours' }, { v: '32', l: 'Minutes' }, { v: '08', l: 'Seconds' } ],
+      scheduleEvents: [
+        { name: 'Mehndi', accent: '#3E7C4F', when: 'Thu 17 Sep · 14:00', venue: 'The Courtyard · 12 Rosamund St' },
+        { name: 'Sangeet', accent: '#6D3FA9', when: 'Fri 18 Sep · 19:00', venue: 'The Grand Hall · Deansgate' },
+        { name: 'Ceremony', accent: '#C9A227', when: 'Sat 19 Sep · 11:00', venue: 'Merrydale Manor · Cheshire' },
+        { name: 'Reception', accent: '#7A1F1F', when: 'Sat 19 Sep · 18:30', venue: 'Merrydale Manor · Cheshire' },
+      ],
+
+      rsvpGuests: [
+        {
+          name: 'Priya Shah', child: false, table: 'Table 1',
+          events: [
+            evRow('p-meh', 'Mehndi', 'Thu 17 Sep · 14:00 · The Courtyard', { locked: true, lockedLabel: 'attending' }),
+            evRow('p-san', 'Sangeet', 'Fri 18 Sep · 19:00 · The Grand Hall'),
+            evRow('p-cer', 'Ceremony', 'Sat 19 Sep · 11:00 · Merrydale Manor'),
+            evRow('p-rec', 'Reception', 'Sat 19 Sep · 18:30 · Merrydale Manor'),
+          ],
+          showQuestions: priyaAttending, meals,
+        },
+        {
+          name: 'Aarav Shah', child: true, table: 'Kids table',
+          events: [
+            evRow('a-san', 'Sangeet', 'Fri 18 Sep · 19:00 · The Grand Hall', { capFull: true }),
+            evRow('a-cer', 'Ceremony', 'Sat 19 Sep · 11:00 · Merrydale Manor'),
+          ],
+          showQuestions: false, meals: [],
+        },
+      ],
+      calRows: ['Sangeet', 'Ceremony'],
+
+      schedCards: [
+        { name: 'Mehndi', accent: '#3E7C4F', when: 'Thu 17 Sep · 14:00', venue: 'The Courtyard · 12 Rosamund St', dress: 'Bright colours, comfy shoes', hasItin: true, itin: [ { time: '14:00', title: 'Henna begins', note: 'artists on both floors' }, { time: '16:30', title: 'Chai & chaat', note: '' }, { time: '19:00', title: 'Family dinner', note: 'home-cooked' } ], going: 'Priya', awaiting: 'Aarav' },
+        { name: 'Sangeet', accent: '#6D3FA9', when: 'Fri 18 Sep · 19:00', venue: 'The Grand Hall · Deansgate', dress: 'Festive — sequins welcome', hasItin: true, itin: [ { time: '19:00', title: 'Doors & drinks', note: '' }, { time: '20:00', title: 'Performances', note: 'both families' }, { time: '22:00', title: 'Open floor', note: 'DJ till late' } ], going: 'Priya', awaiting: 'Aarav' },
+        { name: 'Ceremony', accent: '#C9A227', when: 'Sat 19 Sep · 11:00', venue: 'Merrydale Manor · Cheshire', dress: 'Formal Indian or morning suits', hasItin: true, itin: [ { time: '10:30', title: 'Baraat arrives', note: '' }, { time: '11:00', title: 'Pheras', note: '' }, { time: '13:00', title: 'Lunch', note: '' } ], going: 'Priya', awaiting: '' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
