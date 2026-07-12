@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { requirePlatformAdmin } from '@/lib/platform-admin'
 import { createAdminClient } from '@/lib/supabase/server'
+import { fetchAll } from '@/lib/supabase/fetch-all'
 import { PageHeader, StatCard } from '@/components/app/ui'
 import { ResetButton } from './reset-button'
 import { PriceEditor } from './price-editor'
@@ -21,26 +22,29 @@ export default async function PlatformAdminPage() {
 
   const db = createAdminClient()
   const [
-    { data: sites }, { data: profiles }, { count: orgs }, { count: responses },
+    { data: sites }, { data: profiles }, { count: orgs },
     { data: events }, { data: guests }, { data: payments }, { data: messages },
-    { data: stds }, { data: memberships },
+    { data: stds }, { data: memberships }, responseRows,
   ] = await Promise.all([
     db.from('sites').select('id, org_id, title, slug, status, is_unlocked, expires_at, archived_at, created_at').order('created_at', { ascending: false }),
     db.from('profiles').select('id, email, created_at').order('created_at', { ascending: false }).limit(200),
     db.from('organisations').select('id', { count: 'exact', head: true }),
-    db.from('responses').select('id', { count: 'exact', head: true }),
     db.from('events').select('site_id').is('archived_at', null),
     db.from('guests').select('site_id').is('archived_at', null),
     db.from('vendor_payments').select('site_id').is('archived_at', null),
     db.from('messages').select('site_id'),
     db.from('save_the_dates').select('site_id, published'),
-    db.from('memberships').select('org_id, role, profiles(email)').eq('role', 'owner'),
+    db.from('memberships').select('org_id, role, profiles(id, email)').eq('role', 'owner'),
+    // Per-site RSVP totals + last activity for the register (4b) — paged
+    // past the 1000-row cap so the counts stay honest at scale.
+    fetchAll<{ site_id: string; responded_at: string | null }>(() =>
+      db.from('responses').select('site_id, responded_at')),
   ])
 
   const fmt = (v: string | null) => (v ? new Date(v).toLocaleDateString('en-GB') : '—')
   interface SiteRow { id: string; org_id: string; title: string; slug: string; status: string; is_unlocked: boolean; expires_at: string | null; archived_at: string | null; created_at: string }
   interface ProfileRow { id: string; email: string; created_at: string }
-  interface MembershipRow { org_id: string; profiles: { email: string | null } | { email: string | null }[] | null }
+  interface MembershipRow { org_id: string; profiles: { id: string; email: string | null } | { id: string; email: string | null }[] | null }
   const siteRows = (sites ?? []) as SiteRow[]
   const profileRows = (profiles ?? []) as ProfileRow[]
 
@@ -51,10 +55,21 @@ export default async function PlatformAdminPage() {
   const stdBy = new Map<string, boolean>()
   for (const s of (stds ?? []) as { site_id: string; published: boolean }[]) if (s.published) stdBy.set(s.site_id, true)
 
+  const responses = responseRows.length
+  const rsvpsBy = countBy(responseRows)
+  const lastRsvpBy = new Map<string, string>()
+  for (const r of responseRows) {
+    if (!r.responded_at) continue
+    const prev = lastRsvpBy.get(r.site_id)
+    if (!prev || r.responded_at > prev) lastRsvpBy.set(r.site_id, r.responded_at)
+  }
+
   const ownerByOrg = new Map<string, string>()
+  const ownerIdByOrg = new Map<string, string>()
   for (const m of (memberships ?? []) as MembershipRow[]) {
     const p = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
     if (p?.email && !ownerByOrg.has(m.org_id)) ownerByOrg.set(m.org_id, p.email)
+    if (p?.id && !ownerIdByOrg.has(m.org_id)) ownerIdByOrg.set(m.org_id, p.id)
   }
 
   const paidSites = siteRows.filter((s) => s.is_unlocked).length
@@ -74,7 +89,7 @@ export default async function PlatformAdminPage() {
         <StatCard label="Users" value={profileRows.length} />
         <StatCard label="Unlocked" value={paidSites} />
         <StatCard label="Revenue" value={formatPence(revenue)} hint={`at ${formatPence(price.amount)} / unlock`} />
-        <StatCard label="RSVPs" value={responses ?? 0} />
+        <StatCard label="RSVPs" value={responses} />
       </div>
 
       {/* E4/E5: platform levers — the founder's own controls */}
@@ -98,6 +113,7 @@ export default async function PlatformAdminPage() {
         isUnlocked: s.is_unlocked,
         archived: Boolean(s.archived_at),
         ownerEmail: ownerByOrg.get(s.org_id) ?? null,
+        ownerId: ownerIdByOrg.get(s.org_id) ?? null,
         joined: fmt(s.created_at),
         expires: fmt(s.expires_at),
         counts: {
@@ -106,6 +122,8 @@ export default async function PlatformAdminPage() {
           payments: paymentsBy.get(s.id) ?? 0,
           messages: messagesBy.get(s.id) ?? 0,
         },
+        rsvps: rsvpsBy.get(s.id) ?? 0,
+        lastRsvp: lastRsvpBy.get(s.id) ?? null,
         stdLive: Boolean(stdBy.get(s.id)),
       }))} />
 
