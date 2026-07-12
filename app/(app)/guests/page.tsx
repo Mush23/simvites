@@ -34,6 +34,11 @@ export default async function GuestsPage() {
   // Per-household event caps ("up to N guests") — ported from the original.
   const { data: allocations } = await supabase.from('event_allocations')
     .select('household_id, event_id, max_guests').eq('site_id', siteId)
+  // Which households have OPENED their invite link — the chase list splits
+  // "opened, gone quiet" (hot) from "never opened" (original-site port).
+  const { data: opens } = await supabase.from('activity_log')
+    .select('entity_id, created_at').eq('site_id', siteId)
+    .eq('verb', 'invite_opened').order('created_at', { ascending: false })
 
   // Group once (O(n)) instead of nested filters (O(households·guests·invites)).
   const guestsByHousehold = new Map<string, typeof guests>()
@@ -69,6 +74,7 @@ export default async function GuestsPage() {
         allocations={(allocations ?? []).map((a) => ({
           householdId: a.household_id, eventId: a.event_id, maxGuests: a.max_guests,
         }))}
+        openedHouseholdIds={[...new Set((opens ?? []).map((o) => o.entity_id as string).filter(Boolean))]}
         households={households.map((h) => ({
           id: h.id,
           name: h.name,

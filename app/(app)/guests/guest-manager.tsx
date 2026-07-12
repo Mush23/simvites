@@ -28,13 +28,17 @@ export interface LensAnswer { guestId: string; questionId: string; value: unknow
 /** Per-household event cap — "up to N guests" (original-site port). */
 export interface AllocationRow { householdId: string; eventId: string; maxGuests: number }
 
-export function GuestManager({ events, households, responses = [], questions = [], answers = [], allocations = [] }: {
+export function GuestManager({
+  events, households, responses = [], questions = [], answers = [], allocations = [], openedHouseholdIds = [],
+}: {
   events: MatrixEvent[]
   households: MatrixHousehold[]
   responses?: RsvpStatusRow[]
   questions?: LensQuestion[]
   answers?: LensAnswer[]
   allocations?: AllocationRow[]
+  /** Households that have opened their invite link at least once. */
+  openedHouseholdIds?: string[]
 }) {
   const router = useRouter()
   const [, startTransition] = useTransition()
@@ -191,7 +195,8 @@ export function GuestManager({ events, households, responses = [], questions = [
 
       {shown.length > 0 && lensEvent && (
         <EventLens event={lensEvent} households={shown} sides={sides}
-          responses={responses} questions={questions} answers={answers} onChanged={refresh} />
+          responses={responses} questions={questions} answers={answers}
+          openedHouseholdIds={openedHouseholdIds} onChanged={refresh} />
       )}
 
       {openHousehold && !lensEvent && (
@@ -212,13 +217,14 @@ export function GuestManager({ events, households, responses = [], questions = [
  * invitation for THIS event (pill = invited, ✓/✗ = answered); RSVP answers
  * and the chase list live beside the list, so the daily "check + chase"
  * loop happens here. */
-function EventLens({ event, households, sides, responses, questions, answers, onChanged }: {
+function EventLens({ event, households, sides, responses, questions, answers, openedHouseholdIds, onChanged }: {
   event: MatrixEvent
   households: MatrixHousehold[]
   sides: string[]
   responses: RsvpStatusRow[]
   questions: LensQuestion[]
   answers: LensAnswer[]
+  openedHouseholdIds: string[]
   onChanged: () => void
 }) {
   const [sideMenu, setSideMenu] = useState(false)
@@ -380,19 +386,41 @@ function EventLens({ event, households, sides, responses, questions, answers, on
               ))}
             </div>
           )}
-          {awaiting > 0 && (
-            <div className="rounded-card border border-line bg-surface px-4 py-3.5 shadow-card">
-              <p className="mb-1.5 text-[11px] font-medium text-ink-2">Worth a chase · {awaiting}</p>
+          {awaiting > 0 && (() => {
+            // The single most actionable chase signal (original-site port):
+            // they SAW the invitation and went quiet vs never opened it.
+            const opened = new Set(openedHouseholdIds)
+            const householdOf = new Map(households.flatMap((h) => h.guests.map((g) => [g.id, h.id] as const)))
+            const hot = awaitingGuests.filter((g) => opened.has(householdOf.get(g.id) ?? ''))
+            const cold = awaitingGuests.filter((g) => !opened.has(householdOf.get(g.id) ?? ''))
+            const names = (list: MatrixGuest[]) => (
               <p className="text-[12.5px] leading-relaxed text-ink-2">
-                {awaitingGuests.slice(0, 5).map((g) => g.fullName).join(' · ')}
-                {awaiting > 5 && <span className="text-ink-3"> +{awaiting - 5} more</span>}
+                {list.slice(0, 5).map((g) => g.fullName).join(' · ')}
+                {list.length > 5 && <span className="text-ink-3"> +{list.length - 5} more</span>}
               </p>
-              <Link href="/invitations"
-                className="mt-2.5 block w-full rounded-md border border-accent-line bg-accent-soft px-3 py-1.5 text-center text-[12px] font-semibold text-accent-ink transition-colors hover:border-accent">
-                Chase them from Invitations →
-              </Link>
-            </div>
-          )}
+            )
+            return (
+              <div className="rounded-card border border-line bg-surface px-4 py-3.5 shadow-card">
+                <p className="mb-1.5 text-[11px] font-medium text-ink-2">Worth a chase · {awaiting}</p>
+                {hot.length > 0 && (
+                  <div className="mb-2">
+                    <p className="microlabel mb-0.5 text-warn">Opened, gone quiet · {hot.length}</p>
+                    {names(hot)}
+                  </div>
+                )}
+                {cold.length > 0 && (
+                  <div>
+                    <p className="microlabel mb-0.5">Never opened · {cold.length}</p>
+                    {names(cold)}
+                  </div>
+                )}
+                <Link href="/invitations"
+                  className="mt-2.5 block w-full rounded-md border border-accent-line bg-accent-soft px-3 py-1.5 text-center text-[12px] font-semibold text-accent-ink transition-colors hover:border-accent">
+                  Chase them from Invitations →
+                </Link>
+              </div>
+            )
+          })()}
         </div>
       </div>
     </div>
