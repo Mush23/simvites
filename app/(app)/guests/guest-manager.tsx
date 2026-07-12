@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   addGuest, addHousehold, archiveGuest, archiveHousehold, importGuests, setInvitation,
@@ -8,9 +9,9 @@ import {
 } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
 import { restoreArchived, restoreHousehold } from '@/app/(app)/actions'
-import { Archive, Search, X } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 
-export interface MatrixEvent { id: string; name: string; accent?: string | null }
+export interface MatrixEvent { id: string; name: string; accent?: string | null; capacity?: number | null }
 export interface MatrixGuest {
   id: string; fullName: string; email: string | null
   isChild: boolean; plusOneAllowed: boolean; invitedEventIds: string[]
@@ -24,6 +25,9 @@ export function GuestManager({ events, households }: { events: MatrixEvent[]; ho
   const [error, setError] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
   const [showAdd, setShowAdd] = useState(households.length === 0)
+  // 2b: guest-level work happens in the drawer; the register stays calm.
+  const [openId, setOpenId] = useState<string | null>(null)
+  const openHousehold = households.find((h) => h.id === openId) ?? null
 
   async function onAddHousehold(fd: FormData) {
     setError(null)
@@ -133,17 +137,111 @@ export function GuestManager({ events, households }: { events: MatrixEvent[]; ho
         </div>
       )}
 
-      {shown.map((h) => (
-        <HouseholdCard key={h.id} household={h} events={events} onChanged={refresh} />
-      ))}
+      {shown.length > 0 && (
+        <Register households={shown} events={events} openId={openId} onOpen={setOpenId} />
+      )}
+
+      {openHousehold && (
+        <HouseholdDrawer
+          key={openHousehold.id}
+          household={openHousehold}
+          events={events}
+          onClose={() => setOpenId(null)}
+          onChanged={refresh}
+        />
+      )}
     </div>
   )
 }
 
-function HouseholdCard({ household, events, onChanged }: {
-  household: MatrixHousehold; events: MatrixEvent[]; onChanged: () => void
+/** 2b: the register — one scannable row per household, per-event coverage
+ * as pills ("2/3" = two of three guests invited), sticky header, totals
+ * footer. Clicking a row opens the household drawer. */
+function Register({ households, events, openId, onOpen }: {
+  households: MatrixHousehold[]
+  events: MatrixEvent[]
+  openId: string | null
+  onOpen: (id: string) => void
+}) {
+  const cols = { gridTemplateColumns: `minmax(180px,2fr) 64px 56px repeat(${events.length}, minmax(88px,1fr))` }
+  const invitedTo = (h: MatrixHousehold, eventId: string) =>
+    h.guests.filter((g) => g.invitedEventIds.includes(eventId)).length
+  const totals = events.map((e) =>
+    households.reduce((n, h) => n + invitedTo(h, e.id), 0))
+
+  return (
+    <div className="overflow-x-auto rounded-card border border-line bg-surface shadow-card">
+      <div className="max-h-[65vh] min-w-[720px] overflow-y-auto">
+        {/* Sticky header: event dot + name + capacity */}
+        <div style={cols} className="sticky top-0 z-10 grid items-center gap-x-3 border-b border-line bg-surface px-4 py-2.5 shadow-card">
+          <span className="text-[11px] font-medium text-ink-3">Household</span>
+          <span className="text-[11px] font-medium text-ink-3">Side</span>
+          <span className="text-[11px] font-medium text-ink-3">Guests</span>
+          {events.map((e) => (
+            <span key={e.id} className="flex items-center justify-center gap-1.5 text-center text-[11px] font-medium text-ink-2">
+              <span className="h-[7px] w-[7px] shrink-0 rounded-full" style={{ background: e.accent ?? 'var(--accent)' }} />
+              <span className="truncate">{e.name}</span>
+              {e.capacity != null && <span className="font-mono text-[8.5px] text-ink-3">cap {e.capacity}</span>}
+            </span>
+          ))}
+        </div>
+
+        {households.map((h) => (
+          <button key={h.id} type="button" onClick={() => onOpen(h.id)} style={cols}
+            aria-expanded={openId === h.id}
+            className={`grid w-full items-center gap-x-3 rounded-none border-t border-line px-4 py-2.5 text-left transition-colors first-of-type:border-t-0 hover:bg-paper-2 ${
+              openId === h.id ? 'bg-surface-2 shadow-[inset_2px_0_0_var(--accent)]' : ''}`}>
+            <span className="truncate text-[13px] font-medium text-ink">{h.name}</span>
+            <span className="truncate font-mono text-[10px] uppercase tracking-[0.08em] text-ink-3">{h.side ?? ''}</span>
+            <span className="font-mono text-[11px] text-ink-2 nums">{h.guests.length}</span>
+            {events.map((e) => <CoveragePill key={e.id} invited={invitedTo(h, e.id)} total={h.guests.length} />)}
+          </button>
+        ))}
+
+        {/* Totals footer */}
+        <div style={cols} className="grid items-center gap-x-3 border-t border-line-2 bg-paper-2 px-4 py-2">
+          <span className="microlabel col-span-3">Invited totals</span>
+          {totals.map((n, i) => (
+            <span key={events[i].id} className="text-center font-mono text-[10.5px] text-ink-2 nums">{n}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CoveragePill({ invited, total }: { invited: number; total: number }) {
+  if (total === 0) return <span className="text-center font-mono text-[10px] text-ink-3">—</span>
+  const t = `${invited}/${total}`
+  if (invited === 0) return <span className="text-center font-mono text-[10px] text-ink-3 nums">{t}</span>
+  return (
+    <span className="text-center">
+      <span className={`inline-block min-w-[34px] rounded-pill px-2 py-0.5 font-mono text-[10px] nums ${
+        invited === total
+          ? 'bg-accent-soft text-accent-ink'
+          : 'border border-line-2 text-ink-2'}`}>
+        {t}
+      </span>
+    </span>
+  )
+}
+
+/** 2b: the household drawer — guest-level work in one calm panel: batch
+ * event toggles, per-guest event pills (≥30px targets), add guest, and a
+ * quiet archive at the bottom (never fat-fingered from the list). */
+function HouseholdDrawer({ household, events, onClose, onChanged }: {
+  household: MatrixHousehold
+  events: MatrixEvent[]
+  onClose: () => void
+  onChanged: () => void
 }) {
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
 
   async function onAddGuest(fd: FormData) {
     setError(null)
@@ -151,108 +249,122 @@ function HouseholdCard({ household, events, onChanged }: {
     if (res?.error) setError(res.error); else onChanged()
   }
 
-  /** Column-header click: toggle the whole household for an event — one
-   * batched server action, not N sequential calls (2a). */
-  async function toggleColumn(eventId: string, invite: boolean) {
+  /** Whole-household toggle per event — one batched server action. */
+  async function toggleAll(eventId: string, invite: boolean) {
     const res = await setHouseholdInvitations(household.id, eventId, invite)
     if (res?.error) notify('Could not update the household — try again')
     else notify(invite ? `${household.name} invited` : `${household.name} uninvited`)
     onChanged()
   }
 
+  const emails = household.guests.filter((g) => g.email).length
+
   return (
-    <section className="rounded-card border border-line bg-surface p-6 shadow-card">
-      <div className="flex items-baseline justify-between gap-3">
-        <h3 className="text-[14.5px] font-semibold tracking-tight text-ink">{household.name}</h3>
-        <div className="flex items-center gap-4">
-          {household.side && (
-            <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
-              {household.side}
-            </span>
-          )}
-          <button type="button" title={`Archive ${household.name}`} aria-label={`Archive ${household.name}`}
-            onClick={async () => {
-              if (!(await askConfirm({ title: `Archive ${household.name}?`, body: 'The household and its guests move out of your lists. Nothing is deleted.' }))) return
-              await archiveHousehold(household.id)
-              notify(`${household.name} archived`, {
-                actionLabel: 'Undo',
-                onAction: () => { restoreHousehold(household.id).then(onChanged) },
-              })
-              onChanged()
-            }}
-            className="-my-3 flex h-11 w-11 items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-bad-soft hover:text-bad">
-            <Archive size={15} strokeWidth={1.7} />
-          </button>
-        </div>
-      </div>
-
-      {/* Invite matrix: rows = guests, columns = events */}
-      <div className="mt-5 overflow-x-auto">
-        <table className="w-full min-w-[560px] border-collapse text-sm">
-          <thead>
-            <tr>
-              <th className="pb-2 pr-4 text-left text-[12px] font-medium text-ink-3">Guest</th>
-              {events.map((e) => {
-                const allIn = household.guests.length > 0 &&
-                  household.guests.every((g) => g.invitedEventIds.includes(e.id))
-                return (
-                  <th key={e.id} className="pb-2 px-2 text-center font-normal">
-                    <button type="button"
-                      title={`Click to ${allIn ? 'uninvite' : 'invite'} the whole household ${allIn ? 'from' : 'to'} ${e.name}`}
-                      onClick={() => toggleColumn(e.id, !allIn)}
-                      className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[12px] font-medium text-ink-2 hover:bg-surface-2 hover:text-ink">
-                      <span className="h-2 w-2 rounded-full" style={{ background: e.accent ?? 'var(--accent)' }} />
-                      {e.name}
-                    </button>
-                  </th>
-                )
-              })}
-              <th className="w-8" />
-            </tr>
-          </thead>
-          <tbody>
-            {household.guests.length === 0 && (
-              <tr><td colSpan={events.length + 2} className="py-3 text-ink-3">No guests yet.</td></tr>
-            )}
-            {household.guests.map((g) => (
-              <GuestRow key={`${g.id}:${g.invitedEventIds.join('.')}`} guest={g} events={events} onChanged={onChanged} />
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Add guest */}
-      <form action={onAddGuest} className="mt-4 flex flex-wrap items-end gap-3 border-t border-line pt-4">
-        <label className="block">
-          <span className="eyebrow mb-1.5 block">Add guest</span>
-          <input name="full_name" required placeholder="Priya Shah"
-            className="w-44 rounded-md border border-line bg-paper-2 px-3 py-2 text-ink outline-none focus:border-accent" />
-        </label>
-        <label className="block">
-          <span className="eyebrow mb-1.5 block">Email (optional)</span>
-          <input name="email" type="email" placeholder="priya@example.com"
-            className="w-52 rounded-md border border-line bg-paper-2 px-3 py-2 text-ink outline-none focus:border-accent" />
-        </label>
-        <label className="flex items-center gap-1.5 pb-2 text-xs text-ink-2">
-          <input type="checkbox" name="is_child" /> Child
-        </label>
-        <label className="flex items-center gap-1.5 pb-2 text-xs text-ink-2">
-          <input type="checkbox" name="plus_one_allowed" /> +1 allowed
-        </label>
-        <button type="submit"
-          className="rounded-md border border-line bg-paper-2 px-4 py-2 text-sm transition-colors hover:border-accent">
-          Add
+    <aside aria-label={`${household.name} details`}
+      className="fixed inset-y-0 right-0 z-50 flex w-[360px] max-w-[calc(100vw-24px)] flex-col border-l border-line bg-surface shadow-lift">
+      <div className="flex items-center gap-2 border-b border-line px-4 py-3">
+        <p className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-tight text-ink">{household.name}</p>
+        {household.side && (
+          <span className="rounded-pill bg-paper-2 px-2 py-0.5 font-mono text-[8.5px] uppercase tracking-[0.08em] text-ink-3">
+            {household.side}
+          </span>
+        )}
+        <button type="button" onClick={onClose} aria-label="Close household details"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-3 hover:bg-paper-2 hover:text-ink">
+          <X size={15} strokeWidth={1.7} />
         </button>
-      </form>
-      {error && <p className="mt-2 text-sm text-bad">{error}</p>}
-    </section>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3.5">
+        <p className="text-[11.5px] text-ink-3">
+          {household.guests.length} guest{household.guests.length === 1 ? '' : 's'} · {emails} email{emails === 1 ? '' : 's'}
+        </p>
+
+        {/* Batch toggles: invite the whole household per event, one request */}
+        {events.length > 0 && household.guests.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {events.map((e) => {
+              const invited = household.guests.filter((g) => g.invitedEventIds.includes(e.id)).length
+              const all = invited === household.guests.length
+              return (
+                <button key={e.id} type="button" onClick={() => toggleAll(e.id, !all)}
+                  title={all ? `Uninvite everyone from ${e.name}` : `Invite the whole household to ${e.name} — one click`}
+                  className={`flex min-h-[30px] items-center gap-1.5 rounded-pill px-2.5 text-[11.5px] font-medium transition-colors ${
+                    all ? 'bg-accent-soft text-accent-ink'
+                    : invited > 0 ? 'border border-line-2 text-ink-2 hover:border-accent'
+                    : 'border border-line text-ink-3 hover:border-accent'}`}>
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: e.accent ?? 'var(--accent)' }} />
+                  {e.name} <span className="font-mono text-[9px] nums">{invited}/{household.guests.length}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        <div className="mt-4 flex flex-col gap-2.5">
+          {household.guests.length === 0 && (
+            <p className="rounded-card border border-dashed border-line bg-paper-2 p-4 text-center text-[12.5px] text-ink-3">
+              No guests yet — add the first one below.
+            </p>
+          )}
+          {household.guests.map((g) => (
+            <GuestCard key={`${g.id}:${g.invitedEventIds.join('.')}`} guest={g} events={events} onChanged={onChanged} />
+          ))}
+        </div>
+
+        {/* Add guest */}
+        <form action={onAddGuest} className="mt-4 space-y-2.5 border-t border-line pt-4">
+          <p className="eyebrow">Add guest to this household</p>
+          <input name="full_name" required placeholder="Priya Shah"
+            className="w-full rounded-md border border-line bg-paper-2 px-3 py-2 text-[13px] text-ink outline-none focus:border-accent" />
+          <input name="email" type="email" placeholder="priya@example.com (optional)"
+            className="w-full rounded-md border border-line bg-paper-2 px-3 py-2 text-[13px] text-ink outline-none focus:border-accent" />
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-1.5 text-xs text-ink-2">
+              <input type="checkbox" name="is_child" /> Child
+            </label>
+            <label className="flex items-center gap-1.5 text-xs text-ink-2">
+              <input type="checkbox" name="plus_one_allowed" /> +1 allowed
+            </label>
+            <button type="submit"
+              className="ml-auto rounded-md border border-line bg-paper-2 px-4 py-2 text-[12.5px] font-medium transition-colors hover:border-accent">
+              Add
+            </button>
+          </div>
+          {error && <p className="text-[12.5px] text-bad">{error}</p>}
+        </form>
+      </div>
+
+      <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-3">
+        <Link href="/invitations" className="text-[12px] font-medium text-accent-ink hover:underline">
+          Invitation link →
+        </Link>
+        <button type="button"
+          onClick={async () => {
+            if (!(await askConfirm({ title: `Archive ${household.name}?`, body: 'The household and its guests move out of your lists. Nothing is deleted.' }))) return
+            await archiveHousehold(household.id)
+            notify(`${household.name} archived`, {
+              actionLabel: 'Undo',
+              onAction: () => { restoreHousehold(household.id).then(onChanged) },
+            })
+            onClose()
+            onChanged()
+          }}
+          className="rounded-md text-[12px] text-ink-3 underline underline-offset-[3px] hover:text-bad">
+          Archive household
+        </button>
+      </div>
+    </aside>
   )
 }
 
-function GuestRow({ guest, events, onChanged }: {
-  guest: MatrixGuest; events: MatrixEvent[]; onChanged: () => void
+/** One guest inside the drawer: identity + per-event pill toggles. */
+function GuestCard({ guest, events, onChanged }: {
+  guest: MatrixGuest
+  events: MatrixEvent[]
+  onChanged: () => void
 }) {
-  // Optimistic cell state, reconciled by router.refresh() after the server confirms.
+  // Optimistic pill state, reconciled by router.refresh() after the server confirms.
   const [invited, setInvited] = useState<Set<string>>(() => new Set(guest.invitedEventIds))
   const initial = useMemo(() => new Set(guest.invitedEventIds), [guest.invitedEventIds])
 
@@ -267,33 +379,20 @@ function GuestRow({ guest, events, onChanged }: {
   }
 
   return (
-    <tr className="border-t border-line">
-      <td className="py-2.5 pr-4">
-        <span className="text-ink">{guest.fullName}</span>
-        {guest.isChild && <span className="ml-2 font-mono text-[9px] uppercase text-ink-3">child</span>}
-        {guest.plusOneAllowed && <span className="ml-2 font-mono text-[9px] uppercase text-accent-ink">+1</span>}
-        {guest.email && <span className="ml-2 text-xs text-ink-3">{guest.email}</span>}
-      </td>
-      {events.map((e) => {
-        const on = invited.has(e.id)
-        return (
-          <td key={e.id} className="px-2 py-2.5 text-center">
-            <button
-              type="button"
-              role="checkbox"
-              aria-checked={on}
-              aria-label={`${guest.fullName} invited to ${e.name}`}
-              onClick={() => toggle(e.id)}
-              className={`inline-flex h-5 w-5 items-center justify-center !rounded-[6px] text-[11px] leading-none transition-colors ${
-                on ? 'bg-accent text-white' : 'border-[1.5px] border-line-2 bg-transparent hover:border-accent'
-              }`}
-            >
-              {on ? '✓' : ''}
-            </button>
-          </td>
-        )
-      })}
-      <td className="text-right">
+    <div className="rounded-card border border-line bg-paper p-3">
+      <div className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-medium text-ink">
+            {guest.fullName}
+            {guest.isChild && (
+              <span className="ml-1.5 rounded-pill bg-surface-2 px-1.5 py-px font-mono text-[8.5px] uppercase text-ink-3">child</span>
+            )}
+            {guest.plusOneAllowed && (
+              <span className="ml-1.5 rounded-pill bg-accent-soft px-1.5 py-px font-mono text-[8.5px] uppercase text-accent-ink">+1</span>
+            )}
+          </p>
+          {guest.email && <p className="mt-0.5 truncate text-[11px] text-ink-3">{guest.email}</p>}
+        </div>
         <button type="button" title={`Archive ${guest.fullName}`} aria-label={`Archive ${guest.fullName}`}
           onClick={async () => {
             if (!(await askConfirm({ title: `Archive ${guest.fullName}?`, body: 'They leave the guest list and event invitations. Nothing is deleted.' }))) return
@@ -304,11 +403,30 @@ function GuestRow({ guest, events, onChanged }: {
             })
             onChanged()
           }}
-          className="-my-2.5 inline-flex h-11 w-11 items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-bad-soft hover:text-bad">
-          <X size={15} strokeWidth={1.7} />
+          className="-m-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-bad-soft hover:text-bad">
+          <X size={13} strokeWidth={1.7} />
         </button>
-      </td>
-    </tr>
+      </div>
+      {events.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {events.map((e) => {
+            const on = invited.has(e.id)
+            return (
+              <button key={e.id} type="button" onClick={() => toggle(e.id)}
+                role="checkbox" aria-checked={on}
+                aria-label={`${guest.fullName} invited to ${e.name}`}
+                className={`flex min-h-[30px] items-center gap-1.5 rounded-pill px-2.5 text-[11.5px] font-medium transition-colors ${
+                  on ? 'bg-accent-soft text-accent-ink'
+                  : 'border border-line text-ink-3 hover:border-accent'}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${on ? '' : 'opacity-40'}`}
+                  style={{ background: e.accent ?? 'var(--accent)' }} />
+                {e.name}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }
 

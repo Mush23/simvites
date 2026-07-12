@@ -15,7 +15,7 @@ export default async function GuestsPage() {
   // matrix stays correct on large guest lists (a truncated fetch would silently
   // drop guests/invitations past row 1000).
   const [{ data: events }, households, guests, invitations] = await Promise.all([
-    supabase.from('events').select('id, name, accent, sort_order').eq('site_id', siteId)
+    supabase.from('events').select('id, name, accent, capacity, sort_order').eq('site_id', siteId)
       .is('archived_at', null).order('sort_order').order('starts_at'),
     fetchAll<{ id: string; name: string; side: string | null }>(() =>
       supabase.from('households').select('id, name, side').eq('site_id', siteId).is('archived_at', null).order('created_at')),
@@ -47,7 +47,7 @@ export default async function GuestsPage() {
         description="Households, named guests, and the invite matrix — who is invited to what drives everything a guest can see and RSVP to."
       />
       <GuestManager
-        events={(events ?? []).map((e) => ({ id: e.id, name: e.name, accent: e.accent }))}
+        events={(events ?? []).map((e) => ({ id: e.id, name: e.name, accent: e.accent, capacity: e.capacity }))}
         households={households.map((h) => ({
           id: h.id,
           name: h.name,
