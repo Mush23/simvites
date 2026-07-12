@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { generateHouseholdLink, revokeLinks, sendInvitation } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
+import type { InviteEvent } from '@/lib/invite-pdf'
 
 export interface HouseholdInviteRow {
   id: string
@@ -13,9 +14,20 @@ export interface HouseholdInviteRow {
   activeLinks: number
   lastSentAt: string | null
   lastOpenedAt: string | null
+  /** This household's invited events — printed on their invitation PDF. */
+  events: InviteEvent[]
 }
 
-export function InvitationsClient({ rows }: { rows: HouseholdInviteRow[] }) {
+/** Site-level details every invitation PDF shares. */
+export interface InviteBrand {
+  siteTitle: string
+  initials: string
+  deadlineText: string | null
+}
+
+export function InvitationsClient({ rows, siteTitle, initials, deadlineText }: {
+  rows: HouseholdInviteRow[]
+} & InviteBrand) {
   const router = useRouter()
   const [, startTransition] = useTransition()
   const refresh = () => startTransition(() => router.refresh())
@@ -31,13 +43,17 @@ export function InvitationsClient({ rows }: { rows: HouseholdInviteRow[] }) {
   return (
     <div className="space-y-4">
       {rows.map((r) => (
-        <HouseholdRow key={r.id} row={r} onChanged={refresh} />
+        <HouseholdRow key={r.id} row={r} brand={{ siteTitle, initials, deadlineText }} onChanged={refresh} />
       ))}
     </div>
   )
 }
 
-function HouseholdRow({ row, onChanged }: { row: HouseholdInviteRow; onChanged: () => void }) {
+function HouseholdRow({ row, brand, onChanged }: {
+  row: HouseholdInviteRow
+  brand: InviteBrand
+  onChanged: () => void
+}) {
   const [link, setLink] = useState<string | null>(null)
   const [note, setNote] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -48,6 +64,20 @@ function HouseholdRow({ row, onChanged }: { row: HouseholdInviteRow; onChanged: 
     if (!link) return
     const QRCode = (await import('qrcode')).default
     setQr(await QRCode.toDataURL(link, { margin: 1, width: 480, color: { dark: '#211D18', light: '#FFFFFF' } }))
+  }
+
+  /** The printable invitation — their events, their link, one A4 keepsake. */
+  async function onPdf() {
+    if (!link) return
+    const { downloadInvitePdf } = await import('@/lib/invite-pdf')
+    await downloadInvitePdf({
+      siteTitle: brand.siteTitle,
+      initials: brand.initials,
+      householdName: row.name,
+      events: row.events,
+      inviteUrl: link,
+      deadlineText: brand.deadlineText,
+    })
   }
 
   async function onGenerate() {
@@ -141,6 +171,13 @@ function HouseholdRow({ row, onChanged }: { row: HouseholdInviteRow; onChanged: 
           <button type="button" onClick={onQr} title="Show a QR code for printed invitations"
             className="rounded-md shrink-0 border border-line bg-paper-2 px-3 py-2 text-sm hover:border-accent">
             QR
+          </button>
+          <button type="button" onClick={onPdf} disabled={row.events.length === 0}
+            title={row.events.length === 0
+              ? 'Invite this household to at least one event first'
+              : 'Download a printable A4 invitation — their events, their QR'}
+            className="rounded-md shrink-0 border border-line bg-paper-2 px-3 py-2 text-sm hover:border-accent disabled:opacity-40">
+            PDF invite
           </button>
         </div>
       )}

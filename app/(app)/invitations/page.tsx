@@ -3,6 +3,7 @@ import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { emailConfigured } from '@/lib/email'
+import { formatEventDateTime } from '@/lib/utils'
 import { InvitationsClient, type HouseholdInviteRow } from './invitations-client'
 
 export const metadata = { title: 'Invitations · Occasio' }
@@ -12,23 +13,48 @@ export default async function InvitationsPage() {
   const supabase = await createClient()
 
   const siteId = site!.siteId
-  const [households, guests, tokens, { data: sends }] =
+  const [households, guests, tokens, { data: sends }, { data: events }, invitations, { data: siteRow }] =
     await Promise.all([
       fetchAll<{ id: string; name: string }>(() =>
         supabase.from('households').select('id, name').eq('site_id', siteId).is('archived_at', null).order('created_at')),
-      fetchAll<{ household_id: string; email: string | null }>(() =>
-        supabase.from('guests').select('household_id, email').eq('site_id', siteId).is('archived_at', null)),
+      fetchAll<{ id: string; household_id: string; email: string | null }>(() =>
+        supabase.from('guests').select('id, household_id, email').eq('site_id', siteId).is('archived_at', null)),
       fetchAll<{ household_id: string; revoked: boolean }>(() =>
         supabase.from('guest_access_tokens').select('household_id, revoked').eq('site_id', siteId)),
       supabase.from('activity_log').select('entity_id, created_at').eq('site_id', siteId)
         .eq('verb', 'sent_invites').order('created_at', { ascending: false }),
+      // The printable invitation shows this household's events + the deadline.
+      supabase.from('events').select('id, name, starts_at, venue_name, address, dress_code, accent, sort_order')
+        .eq('site_id', siteId).is('archived_at', null).order('sort_order').order('starts_at'),
+      fetchAll<{ guest_id: string; event_id: string }>(() =>
+        supabase.from('invitations').select('guest_id, event_id').eq('site_id', siteId)),
+      supabase.from('sites').select('title, theme, rsvp_deadline_default').eq('id', siteId).maybeSingle(),
     ])
   const { data: opens } = await supabase.from('activity_log')
     .select('entity_id, created_at').eq('site_id', site!.siteId)
     .eq('verb', 'invite_opened').order('created_at', { ascending: false })
 
+  const householdByGuest = new Map((guests ?? []).map((g) => [g.id, g.household_id]))
+  const eventIdsByHousehold = new Map<string, Set<string>>()
+  for (const i of invitations) {
+    const hh = householdByGuest.get(i.guest_id)
+    if (!hh) continue
+    const set = eventIdsByHousehold.get(hh) ?? new Set()
+    set.add(i.event_id)
+    eventIdsByHousehold.set(hh, set)
+  }
+
+  const theme = (siteRow?.theme ?? {}) as { initials?: string }
+  const siteTitle = siteRow?.title ?? site!.title
+  const initials = theme.initials?.trim() ||
+    siteTitle.split(/\s*(?:&|\+|\band\b)\s*/i).map((s: string) => s.trim()[0]).filter(Boolean).slice(0, 2).join('·').toUpperCase()
+  const deadlineText = siteRow?.rsvp_deadline_default
+    ? new Date(siteRow.rsvp_deadline_default).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null
+
   const rows: HouseholdInviteRow[] = (households ?? []).map((h) => {
     const hhGuests = (guests ?? []).filter((g) => g.household_id === h.id)
+    const invited = eventIdsByHousehold.get(h.id) ?? new Set()
     return {
       id: h.id,
       name: h.name,
@@ -37,6 +63,14 @@ export default async function InvitationsPage() {
       activeLinks: (tokens ?? []).filter((t) => t.household_id === h.id && !t.revoked).length,
       lastSentAt: (sends ?? []).find((s) => s.entity_id === h.id)?.created_at ?? null,
       lastOpenedAt: (opens ?? []).find((o) => o.entity_id === h.id)?.created_at ?? null,
+      events: (events ?? []).filter((e) => invited.has(e.id)).map((e) => ({
+        name: e.name,
+        dateText: formatEventDateTime(e.starts_at) ?? 'Date to follow',
+        venue: e.venue_name,
+        address: e.address,
+        dressCode: e.dress_code,
+        accent: e.accent,
+      })),
     }
   })
 
@@ -53,7 +87,7 @@ export default async function InvitationsPage() {
           by WhatsApp or message. Add <span className="font-mono text-xs">RESEND_API_KEY</span> to enable sending.
         </p>
       )}
-      <InvitationsClient rows={rows} />
+      <InvitationsClient rows={rows} siteTitle={siteTitle} initials={initials} deadlineText={deadlineText} />
     </div>
   )
 }
