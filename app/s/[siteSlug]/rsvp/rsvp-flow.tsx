@@ -43,6 +43,10 @@ export function RsvpFlow({ ctx, brand }: {
   const anyAttending = (guestId: string) =>
     Object.entries(choices).some(([k, v]) => k.startsWith(`${guestId}:`) && v === 'attending')
 
+  /** Household "yes" count for one event — checked against its allocation. */
+  const attendingCount = (eventId: string) =>
+    ctx.guests.filter((g) => choices[`${g.guestId}:${eventId}`] === 'attending').length
+
   const visibleQuestions = (guestId: string, scope: 'global' | string): QuestionView[] =>
     ctx.questions.filter((q) => {
       if (scope === 'global' ? q.eventId !== null : q.eventId !== scope) return false
@@ -321,6 +325,11 @@ export function RsvpFlow({ ctx, brand }: {
                     event={e}
                     status={choices[`${g.guestId}:${e.eventId}`]}
                     error={errors[`${g.guestId}:${e.eventId}`]}
+                    limit={ctx.eventLimits[e.eventId]}
+                    limitReached={
+                      ctx.eventLimits[e.eventId] !== undefined &&
+                      attendingCount(e.eventId) >= ctx.eventLimits[e.eventId]
+                    }
                     onChange={(s) => setChoices((c) => ({ ...c, [`${g.guestId}:${e.eventId}`]: s }))}
                   />
                 ))}
@@ -402,13 +411,19 @@ function CalendarRow({ name, startsAt, venue }: { name: string; startsAt: string
   )
 }
 
-function EventChoiceRow({ event, status, error, onChange }: {
+function EventChoiceRow({ event, status, error, limit, limitReached, onChange }: {
   event: GuestEventView
   status: Status
   error?: string
+  /** Household allocation for this event, if the hosts set one. */
+  limit?: number
+  /** True when the household has used its whole allocation for this event. */
+  limitReached?: boolean
   onChange: (s: Status) => void
 }) {
   const locked = event.deadlinePassed
+  // The cap only blocks NEW yeses — anyone already attending can still change.
+  const allocationFull = Boolean(limitReached) && status !== 'attending'
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -417,6 +432,7 @@ function EventChoiceRow({ event, status, error, onChange }: {
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
             {formatEventDateTime(event.startsAt) ?? 'Date TBC'}
             {event.venueName ? ` · ${event.venueName}` : ''}
+            {limit !== undefined ? ` · up to ${limit} of you` : ''}
           </p>
         </div>
         {locked ? (
@@ -427,7 +443,7 @@ function EventChoiceRow({ event, status, error, onChange }: {
           <div className="flex rounded-md border border-line bg-paper-2 p-1" role="group" aria-label={`${event.name} response`}>
             {(['attending', 'declined'] as const).map((s) => {
               const active = status === s
-              const disabled = s === 'attending' && event.capacityFull && !active
+              const disabled = s === 'attending' && (event.capacityFull || allocationFull) && !active
               return (
                 <button key={s} type="button" disabled={disabled}
                   onClick={() => onChange(active ? 'pending' : s)}
@@ -446,6 +462,11 @@ function EventChoiceRow({ event, status, error, onChange }: {
       </div>
       {event.capacityFull && status !== 'attending' && !locked && (
         <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-warn">This event is at capacity</p>
+      )}
+      {!event.capacityFull && allocationFull && !locked && (
+        <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-warn">
+          Your household’s {limit} spot{limit === 1 ? '' : 's'} for this event {limit === 1 ? 'is' : 'are'} taken — untick someone to swap
+        </p>
       )}
       {error && <p className="mt-1 text-sm text-bad">{error}</p>}
     </div>

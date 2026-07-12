@@ -47,6 +47,8 @@ export interface GuestRsvpContext {
   questions: QuestionView[]
   /** guestId → questionId → value */
   answers: Record<string, Record<string, unknown>>
+  /** Household allocation per event — "up to N of you" (original-site port). */
+  eventLimits: Record<string, number>
   allDeadlinesPassed: boolean
 }
 
@@ -103,6 +105,14 @@ export async function getGuestRsvpContext(siteSlug: string): Promise<GuestRsvpCo
             .then((r: { data: unknown }): ARow[] => (r.data ?? []) as ARow[])
         : Promise.resolve([] as ARow[]),
     ])
+
+  // Household allocation caps per event (absent = uncapped).
+  const { data: allocRows } = await db.from('event_allocations')
+    .select('event_id, max_guests').eq('household_id', household.id)
+  const eventLimits: Record<string, number> = {}
+  for (const a of (allocRows ?? []) as { event_id: string; max_guests: number }[]) {
+    eventLimits[a.event_id] = a.max_guests
+  }
 
   // Seating: table name per guest (if the hosts have seated them).
   const { data: seatRows } = await db
@@ -191,6 +201,7 @@ export async function getGuestRsvpContext(siteSlug: string): Promise<GuestRsvpCo
     guests: guestViews,
     questions: questionViews,
     answers: answerMap,
+    eventLimits,
     allDeadlinesPassed: allEvents.length > 0 && allEvents.every((e) => e.deadlinePassed),
   }
 }

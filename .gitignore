@@ -41,3 +41,6 @@ supabase/apply-to-dev.generated.sql
 
 .vercel
 .env*
+
+# reference copy of the original wedding site (separate project)
+/maharshi-simran-wedding

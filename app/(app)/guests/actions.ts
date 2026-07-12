@@ -138,6 +138,29 @@ export async function inviteSideToEvent(side: string | null, eventId: string) {
   return { ok: true, invited: ids.length }
 }
 
+/** Port from the original wedding site: per-household, per-event "up to N
+ * guests" caps. null clears the cap (unlimited — named invites only). */
+export async function setEventAllocation(householdId: string, eventId: string, maxGuests: number | null) {
+  const site = await getPrimarySite()
+  if (!site) return { error: 'No site.' }
+  const supabase = await createClient()
+
+  if (maxGuests === null) {
+    const { error } = await supabase.from('event_allocations')
+      .delete().eq('household_id', householdId).eq('event_id', eventId).eq('site_id', site.siteId)
+    if (error) return { error: error.message }
+  } else {
+    if (!Number.isInteger(maxGuests) || maxGuests < 1) return { error: 'The cap must be a whole number of at least 1.' }
+    const { error } = await supabase.from('event_allocations').upsert(
+      { site_id: site.siteId, household_id: householdId, event_id: eventId, max_guests: maxGuests },
+      { onConflict: 'household_id,event_id' },
+    )
+    if (error) return { error: error.message }
+  }
+  revalidatePath('/guests')
+  return { ok: true }
+}
+
 export interface ImportRow {
   household: string
   fullName: string

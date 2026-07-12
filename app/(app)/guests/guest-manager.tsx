@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   addGuest, addHousehold, archiveGuest, archiveHousehold, importGuests, inviteSideToEvent,
-  setInvitation, setHouseholdInvitations, type ImportRow,
+  setEventAllocation, setInvitation, setHouseholdInvitations, type ImportRow,
 } from './actions'
 import { askConfirm, notify } from '@/components/ui/overlays'
 import { restoreArchived, restoreHousehold } from '@/app/(app)/actions'
@@ -25,13 +25,16 @@ export interface MatrixHousehold { id: string; name: string; side: string | null
 export interface RsvpStatusRow { guestId: string; eventId: string; status: string }
 export interface LensQuestion { id: string; eventId: string | null; label: string; type: string; options: string[] }
 export interface LensAnswer { guestId: string; questionId: string; value: unknown }
+/** Per-household event cap — "up to N guests" (original-site port). */
+export interface AllocationRow { householdId: string; eventId: string; maxGuests: number }
 
-export function GuestManager({ events, households, responses = [], questions = [], answers = [] }: {
+export function GuestManager({ events, households, responses = [], questions = [], answers = [], allocations = [] }: {
   events: MatrixEvent[]
   households: MatrixHousehold[]
   responses?: RsvpStatusRow[]
   questions?: LensQuestion[]
   answers?: LensAnswer[]
+  allocations?: AllocationRow[]
 }) {
   const router = useRouter()
   const [, startTransition] = useTransition()
@@ -196,6 +199,7 @@ export function GuestManager({ events, households, responses = [], questions = [
           key={openHousehold.id}
           household={openHousehold}
           events={events}
+          allocations={allocations.filter((a) => a.householdId === openHousehold.id)}
           onClose={() => setOpenId(null)}
           onChanged={refresh}
         />
@@ -508,9 +512,10 @@ function CoveragePill({ invited, total }: { invited: number; total: number }) {
 /** 2b: the household drawer — guest-level work in one calm panel: batch
  * event toggles, per-guest event pills (≥30px targets), add guest, and a
  * quiet archive at the bottom (never fat-fingered from the list). */
-function HouseholdDrawer({ household, events, onClose, onChanged }: {
+function HouseholdDrawer({ household, events, allocations, onClose, onChanged }: {
   household: MatrixHousehold
   events: MatrixEvent[]
+  allocations: AllocationRow[]
   onClose: () => void
   onChanged: () => void
 }) {
@@ -612,6 +617,24 @@ function HouseholdDrawer({ household, events, onClose, onChanged }: {
           </div>
           {error && <p className="text-[12.5px] text-bad">{error}</p>}
         </form>
+
+        {/* Allocations — "up to N guests" per event; how big families get
+            planned (day events open, evening capped). Blank = no cap. */}
+        {events.length > 0 && household.guests.length > 0 && (
+          <div className="mt-4 border-t border-line pt-4">
+            <p className="eyebrow">Allocation — up to N guests per event</p>
+            <p className="mt-1 text-[11px] text-ink-3">
+              Caps how many from this household can say yes. Leave blank for no cap.
+            </p>
+            <div className="mt-2 space-y-1.5">
+              {events.map((e) => (
+                <AllocationField key={e.id} household={household} event={e}
+                  current={allocations.find((a) => a.eventId === e.id)?.maxGuests ?? null}
+                  onChanged={onChanged} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-3">
@@ -634,6 +657,47 @@ function HouseholdDrawer({ household, events, onClose, onChanged }: {
         </button>
       </div>
     </aside>
+  )
+}
+
+/** One event's allocation cap — commits on blur / Enter, clears on blank. */
+function AllocationField({ household, event, current, onChanged }: {
+  household: MatrixHousehold
+  event: MatrixEvent
+  current: number | null
+  onChanged: () => void
+}) {
+  const [busy, setBusy] = useState(false)
+
+  async function commit(raw: string) {
+    const trimmed = raw.trim()
+    const next = trimmed === '' ? null : Number(trimmed)
+    if (next === current || (next !== null && (!Number.isInteger(next) || next < 1))) return
+    setBusy(true)
+    const res = await setEventAllocation(household.id, event.id, next)
+    setBusy(false)
+    if (res?.error) notify(res.error, { tone: 'warn' })
+    else {
+      notify(next === null
+        ? `${event.name}: cap removed for ${household.name}`
+        : `${event.name}: up to ${next} from ${household.name}`)
+      onChanged()
+    }
+  }
+
+  return (
+    <label className="flex items-center gap-2">
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: event.accent ?? 'var(--accent)' }} />
+      <span className="min-w-0 flex-1 truncate text-[12px] text-ink-2">{event.name}</span>
+      <span className="flex items-center gap-1">
+        <span className="font-mono text-[8.5px] uppercase text-ink-3">up to</span>
+        <input type="number" min={1} inputMode="numeric" defaultValue={current ?? ''} key={current ?? 'unset'}
+          placeholder="—" disabled={busy}
+          onBlur={(e) => commit(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
+          className="w-14 rounded-md border border-line bg-paper-2 px-2 py-1 text-center font-mono text-[11.5px] text-ink outline-none focus:border-accent disabled:opacity-50" />
+      </span>
+    </label>
   )
 }
 

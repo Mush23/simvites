@@ -73,6 +73,37 @@ export async function submitGuestRsvp(submissions: GuestSubmission[]): Promise<S
   const eventErrors: Record<string, string> = {}
   let anySuccess = false
 
+  // Household allocation backstop ("up to N of you" — original-site port).
+  // The form enforces this too; here the final "yes" count per capped event
+  // is checked across this submission plus the household's existing answers,
+  // and over-cap yeses are rejected before they reach the RPC.
+  const { data: allocRows } = await db.from('event_allocations')
+    .select('event_id, max_guests').eq('household_id', session.householdId)
+  const overCap = new Set<string>()
+  for (const a of (allocRows ?? []) as { event_id: string; max_guests: number }[]) {
+    const submittedFor = new Set(
+      submissions.filter((s) => s.choices.some((c) => c.eventId === a.event_id)).map((s) => s.guestId),
+    )
+    const { count: standing } = await db.from('responses')
+      .select('id', { count: 'exact', head: true })
+      .eq('event_id', a.event_id).eq('status', 'attending')
+      .in('guest_id', [...allowed].filter((id) => !submittedFor.has(id)))
+    const submittedYes = submissions.filter((s) =>
+      s.choices.some((c) => c.eventId === a.event_id && c.status === 'attending')).length
+    if ((standing ?? 0) + submittedYes > a.max_guests) overCap.add(a.event_id)
+  }
+  if (overCap.size) {
+    for (const s of submissions) {
+      s.choices = s.choices.filter((c) => {
+        if (c.status === 'attending' && overCap.has(c.eventId)) {
+          eventErrors[`${s.guestId}:${c.eventId}`] = 'Your household’s allocation for this event is full.'
+          return false
+        }
+        return true
+      })
+    }
+  }
+
   for (const s of submissions) {
     for (const choice of s.choices) {
       const answersForEvent = Object.entries(s.answers)

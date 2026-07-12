@@ -31,6 +31,9 @@ export default async function GuestsPage() {
     fetchAll<{ guest_id: string; question_id: string; value: unknown }>(() =>
       supabase.from('rsvp_answers').select('guest_id, question_id, value').eq('site_id', siteId)),
   ])
+  // Per-household event caps ("up to N guests") — ported from the original.
+  const { data: allocations } = await supabase.from('event_allocations')
+    .select('household_id, event_id, max_guests').eq('site_id', siteId)
 
   // Group once (O(n)) instead of nested filters (O(households·guests·invites)).
   const guestsByHousehold = new Map<string, typeof guests>()
@@ -63,6 +66,9 @@ export default async function GuestsPage() {
           id: q.id, eventId: q.event_id, label: q.label, type: q.type, options: (q.options ?? []) as string[],
         }))}
         answers={answers.map((a) => ({ guestId: a.guest_id, questionId: a.question_id, value: a.value }))}
+        allocations={(allocations ?? []).map((a) => ({
+          householdId: a.household_id, eventId: a.event_id, maxGuests: a.max_guests,
+        }))}
         households={households.map((h) => ({
           id: h.id,
           name: h.name,
