@@ -4,6 +4,7 @@ import { getPrimarySite } from '@/lib/workspace'
 import { createClient } from '@/lib/supabase/server'
 import { Sidebar, type SidebarSite } from '@/components/app/sidebar'
 import { AppHeader } from '@/components/app/app-header'
+import { ChromeGate } from '@/components/app/chrome-gate'
 import { CommandMenu } from '@/components/app/command-menu'
 import { OverlayProvider } from '@/components/ui/overlays'
 
@@ -52,9 +53,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <OverlayProvider>
       <div className="flex min-h-screen bg-paper text-ink">
-        <Sidebar site={sidebarSite} />
+        {/* 1c: /website is chrome-free — the artifact is the interface */}
+        <ChromeGate><Sidebar site={sidebarSite} /></ChromeGate>
         <div className="flex min-w-0 flex-1 flex-col">
-          <AppHeader site={sidebarSite} notifications={notifications} />
+          <ChromeGate><AppHeader site={sidebarSite} notifications={notifications} /></ChromeGate>
           <main className="flex-1">{children}</main>
         </div>
       </div>

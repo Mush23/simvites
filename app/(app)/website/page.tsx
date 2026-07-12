@@ -62,6 +62,7 @@ export default async function WebsitePage({
       <WebsiteEditor
         key={page.id}
         siteId={site!.siteId}
+        siteTitle={site!.title}
         pageId={page.id}
         pages={pages.map((p): EditorPage => ({ id: p.id, title: p.title, slug: p.slug, is_home: p.is_home, hidden: p.hidden }))}
         slug={site!.slug}

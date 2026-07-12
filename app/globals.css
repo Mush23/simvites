@@ -648,3 +648,36 @@
   border-radius: 9px;
   box-shadow: var(--shadow-lg, 0 12px 32px -12px rgba(0, 0, 0, 0.35));
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   1c — the artifact IS the interface. Chrome recedes: no side nav, no
+   docked left rail; the fields panel becomes a floating inspector that
+   exists only while a block is selected. Everything else lives in the
+   dock (see WebsiteEditor).
+   ═══════════════════════════════════════════════════════════════════════ */
+.puck-dock [class*='_PuckLayout-nav'],
+.puck-dock [class*='_Sidebar--left'],
+.puck-dock [class*='_Sidebar-resizeHandle'] {
+  display: none;
+}
+.puck-dock [class*='_PuckLayout-inner'] {
+  --puck-user-left-side-bar-width: 0px;
+  --puck-user-right-side-bar-width: 0px;
+  --puck-side-nav-width: 0px;
+}
+/* Fields float beside the artifact — editing at the point of touch. */
+.puck-dock [class*='_Sidebar--right'] {
+  position: fixed;
+  top: 60px;
+  right: 12px;
+  bottom: 80px;
+  z-index: 45;
+  width: 268px;
+  height: auto;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card, 12px);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+.puck-dock [class*='_Sidebar--right']:has(.pf-closed) { display: none; }
