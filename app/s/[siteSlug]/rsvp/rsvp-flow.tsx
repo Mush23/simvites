@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import type { GuestRsvpContext, GuestEventView, QuestionView } from '@/lib/guest-rsvp'
+import { CircleAlert } from 'lucide-react'
+import type { GuestRsvpContext, GuestEventView, GuestView, QuestionView } from '@/lib/guest-rsvp'
 import { formatEventDateTime } from '@/lib/utils'
 import { submitGuestRsvp, type GuestSubmission } from './actions'
 
@@ -9,6 +10,15 @@ import { submitGuestRsvp, type GuestSubmission } from './actions'
 // progress, instant confirmation (audit UI/UX standards).
 
 type Status = 'pending' | 'attending' | 'declined'
+
+/** 3c: a required question someone skipped — the error lives AT the
+ * question; the sticky bar only counts and jumps. */
+interface MissingAnswer {
+  guestId: string
+  questionId: string
+  anchor: string
+  message: string
+}
 
 export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
   // choice state: guestId:eventId → status
@@ -22,6 +32,8 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
   const [phase, setPhase] = useState<'form' | 'submitting' | 'done'>('form')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [topError, setTopError] = useState<string | null>(null)
+  // 3c: gaps only start showing once Send has been tapped with gaps open.
+  const [showGaps, setShowGaps] = useState(false)
 
   const anyAttending = (guestId: string) =>
     Object.entries(choices).some(([k, v]) => k.startsWith(`${guestId}:`) && v === 'attending')
@@ -35,10 +47,11 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
       return (answers[guestId]?.[dep.id] ?? null) === q.showIf.equals
     })
 
-  const unanswered = useMemo(() => {
-    const missing: string[] = []
+  const missing = useMemo<MissingAnswer[]>(() => {
+    const out: MissingAnswer[] = []
     for (const g of ctx.guests) {
       if (!anyAttending(g.guestId)) continue
+      const first = g.fullName.split(' ')[0]
       for (const q of ctx.questions) {
         if (!q.required || q.showIf) continue
         const scoped = q.eventId === null
@@ -47,18 +60,36 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
         if (!scoped) continue
         const v = answers[g.guestId]?.[q.id]
         if (v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0)) {
-          missing.push(`${g.fullName}: ${q.label}`)
+          out.push({
+            guestId: g.guestId,
+            questionId: q.id,
+            anchor: `q-${g.guestId}-${q.id}`,
+            message: q.type === 'meal_choice'
+              ? `Choose a meal for ${first} — the caterer needs it`
+              : q.type === 'text'
+                ? `A quick word for ${first} — your hosts need this one`
+                : `Answer this for ${first} — your hosts need it`,
+          })
         }
       }
     }
-    return missing
+    return out
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [choices, answers, ctx])
+  const missingByKey = useMemo(
+    () => new Map(missing.map((m) => [`${m.guestId}:${m.questionId}`, m])),
+    [missing])
+
+  const jumpToFirstGap = () => {
+    document.getElementById(missing[0]?.anchor ?? '')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
 
   async function onSubmit() {
     setTopError(null)
-    if (unanswered.length) {
-      setTopError(`Please answer: ${unanswered.slice(0, 3).join(' · ')}${unanswered.length > 3 ? '…' : ''}`)
+    // Send never scolds: with gaps open, it lights them up and scrolls there.
+    if (missing.length) {
+      setShowGaps(true)
+      jumpToFirstGap()
       return
     }
     const submissions: GuestSubmission[] = ctx.guests.map((g) => ({
@@ -141,6 +172,26 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
     )
   }
 
+  // 3c: the question wears its own gap — ring, soft fill, and a reason in
+  // plain words. Rendered via a helper (not an inline component) so text
+  // inputs keep focus across re-renders.
+  const renderQuestion = (g: GuestView, q: QuestionView) => {
+    const gap = showGaps ? missingByKey.get(`${g.guestId}:${q.id}`) : undefined
+    return (
+      <div key={q.id} id={`q-${g.guestId}-${q.id}`}
+        className={`scroll-mt-24 ${gap ? 'mb-4 rounded-card border-[1.5px] border-accent bg-accent-soft p-3 [&>*:first-child]:mb-0' : ''}`}>
+        <QuestionField q={q}
+          value={answers[g.guestId]?.[q.id]}
+          onChange={(v) => setAnswers((a) => ({ ...a, [g.guestId]: { ...(a[g.guestId] ?? {}), [q.id]: v } }))} />
+        {gap && (
+          <p className="mt-2 flex items-center gap-1.5 text-[12px] font-medium text-accent-ink">
+            <CircleAlert size={13} strokeWidth={2} className="shrink-0" /> {gap.message}
+          </p>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-paper pb-28 text-ink">
       <main className="mx-auto max-w-xl px-5 pt-14">
@@ -191,11 +242,7 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
                 return (
                   <div key={e.eventId} className="mt-5 border-t border-line pt-4">
                     <p className="eyebrow mb-3">{e.name}</p>
-                    {qs.map((q) => (
-                      <QuestionField key={q.id} q={q}
-                        value={answers[g.guestId]?.[q.id]}
-                        onChange={(v) => setAnswers((a) => ({ ...a, [g.guestId]: { ...(a[g.guestId] ?? {}), [q.id]: v } }))} />
-                    ))}
+                    {qs.map((q) => renderQuestion(g, q))}
                   </div>
                 )
               })}
@@ -204,11 +251,7 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
               {anyAttending(g.guestId) && visibleQuestions(g.guestId, 'global').length > 0 && (
                 <div className="mt-5 border-t border-line pt-4">
                   <p className="eyebrow mb-3">A few details</p>
-                  {visibleQuestions(g.guestId, 'global').map((q) => (
-                    <QuestionField key={q.id} q={q}
-                      value={answers[g.guestId]?.[q.id]}
-                      onChange={(v) => setAnswers((a) => ({ ...a, [g.guestId]: { ...(a[g.guestId] ?? {}), [q.id]: v } }))} />
-                  ))}
+                  {visibleQuestions(g.guestId, 'global').map((q) => renderQuestion(g, q))}
                 </div>
               )}
             </section>
@@ -216,13 +259,23 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
         </div>
       </main>
 
-      {/* Sticky submit bar — thumb-reachable on mobile */}
+      {/* Sticky bar: counts and jumps — never truncates, never scolds (3c) */}
       {!ctx.allDeadlinesPassed && (
         <div className="fixed inset-x-0 bottom-0 border-t border-line bg-paper/95 px-5 py-4 backdrop-blur">
           <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
-            <p className="min-w-0 flex-1 truncate text-sm text-ink-3">
-              {topError ? <span className="text-bad">{topError}</span> : 'You can change your answers any time before the deadline.'}
-            </p>
+            {showGaps && missing.length > 0 ? (
+              <button type="button" onClick={jumpToFirstGap}
+                className="flex min-w-0 flex-1 items-center gap-2 text-left text-[12.5px] font-semibold text-accent-ink">
+                <span className="flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-pill bg-accent px-1 font-mono text-[10px] font-bold text-white nums">
+                  {missing.length}
+                </span>
+                {missing.length === 1 ? 'answer needed' : 'answers needed'} ↑
+              </button>
+            ) : (
+              <p className="min-w-0 flex-1 text-sm text-ink-3">
+                {topError ? <span className="text-bad">{topError}</span> : 'You can change your answers any time before the deadline.'}
+              </p>
+            )}
             <button
               type="button"
               onClick={onSubmit}
