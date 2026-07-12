@@ -542,6 +542,15 @@
    THAT was why panels stopped short and the whole page scrolled. */
 .puck-shell div.Puck { height: 100%; }
 .puck-shell [class*='_PuckLayout'] { height: 100%; }
+/* Same bug one level down: Puck's JS writes an INLINE height on the canvas
+   scroll root measured from the shell, not its frame — nested scrollbars,
+   and anything pinned to the canvas bottom (UndoDock) lands below the
+   fold. !important is required to beat the inline style; the max-height
+   keeps this rule from being minifier-merged into the group above. */
+.puck-shell [class*='_PuckCanvas-root'] {
+  height: 100% !important;
+  max-height: 100%;
+}
 .puck-shell [class*='_Sidebar_'],
 .puck-shell [class*='_SidebarSection_'] {
   background: var(--surface);

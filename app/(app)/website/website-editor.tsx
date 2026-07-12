@@ -1,7 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Puck, createUsePuck, useGetPuck, type Overrides } from '@puckeditor/core'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { Puck, blocksPlugin, createUsePuck, useGetPuck, type Overrides, type Plugin } from '@puckeditor/core'
 import '@puckeditor/core/puck.css'
 import { siteConfig, type SiteData } from '@/lib/puck/config'
 import type { SiteEvent } from '@/components/site/blocks'
@@ -12,7 +12,7 @@ import {
 } from './actions'
 import { SECTION_PRESETS } from '@/lib/puck/presets'
 import { askConfirm, askPrompt, notify } from '@/components/ui/overlays'
-import { Pencil, Trash2, Eye, EyeOff, FileText, ChevronDown, Palette, ExternalLink, Info, LayoutTemplate, Monitor, Tablet, Smartphone, Undo2, Redo2 } from 'lucide-react'
+import { Pencil, Trash2, Eye, EyeOff, FileText, ExternalLink, Info, LayoutTemplate, Monitor, Palette, Tablet, Smartphone, Undo2, Redo2 } from 'lucide-react'
 import { BACKGROUNDS, ACCENTS, GLOWS, HOVERS, BACKDROPS, BUTTONS, NAVS, VIBES, type SiteStyle } from '@/lib/site-style'
 import { DISPLAY_FACES, BODY_FACES } from '@/lib/template-fonts'
 import { listTemplates } from '@/lib/templates/registry'
@@ -25,14 +25,30 @@ export interface EditorPage {
   hidden: boolean
 }
 
-/** Multi-page management (Sprint D): switch, add, rename, hide, delete. */
-function PagesMenu({ pages, currentId }: { pages: EditorPage[]; currentId: string }) {
+/** 1b: everything that changes the site lives in ONE rail with three tabs
+ * (Design · Pages · Blocks). The rail panels are Puck sidebar plugins with
+ * stable identities, so per-page data reaches them through context. */
+interface EditorMeta {
+  pages: EditorPage[]
+  pageId: string
+  slug: string
+  templateName: string
+  currentStyle: SiteStyle
+}
+const EditorMetaCtx = createContext<EditorMeta | null>(null)
+function useEditorMeta(): EditorMeta {
+  const ctx = useContext(EditorMetaCtx)
+  if (!ctx) throw new Error('EditorMetaCtx missing')
+  return ctx
+}
+
+/** Pages tab: switch, add, rename, hide, delete (Sprint D, re-homed). */
+function PagesPanel() {
+  const { pages, pageId } = useEditorMeta()
   const router = useRouter()
-  const [open, setOpen] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
-  const current = pages.find((p) => p.id === currentId)
 
   async function add() {
     if (!newTitle.trim() || busy) return
@@ -44,121 +60,52 @@ function PagesMenu({ pages, currentId }: { pages: EditorPage[]; currentId: strin
   }
 
   return (
-    <div className="relative">
-      <button type="button" id="pages-menu" onClick={() => setOpen((o) => !o)}
-        title="Add pages, rename them, or hide them from the menu"
-        className="rounded-md flex items-center gap-1.5 border border-line bg-paper-2 px-3 py-2 text-[13px] font-medium text-ink hover:border-line-2">
-        <FileText size={14} strokeWidth={1.7} className="text-ink-3" /> {current?.title ?? 'Pages'} <ChevronDown size={12} strokeWidth={1.7} className="text-ink-3" />
-      </button>
-      {open && (
-        <div className="absolute left-0 top-12 z-50 w-72 space-y-1 rounded-card border border-line bg-surface p-3 shadow-lift">
-          {pages.map((p) => (
-            <div key={p.id} className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm ${
-              p.id === currentId ? 'bg-accent-soft text-accent-ink' : 'text-ink hover:bg-paper-2'}`}>
-              <button type="button" className="rounded-md min-w-0 flex-1 truncate text-left"
-                onClick={() => { setOpen(false); router.push(`/website?page=${p.id}`); router.refresh() }}>
-                {p.title}{p.is_home && <span className="ml-1.5 font-mono text-[9px] uppercase tracking-wider text-ink-3">home</span>}
-                {p.hidden && <span className="ml-1.5 font-mono text-[9px] uppercase tracking-wider text-warn">hidden</span>}
+    <div className="space-y-1 p-3">
+      <p className="microlabel mb-2">Your pages</p>
+      {pages.map((p) => (
+        <div key={p.id} className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm ${
+          p.id === pageId ? 'bg-accent-soft text-accent-ink' : 'text-ink hover:bg-paper-2'}`}>
+          <button type="button" className="rounded-md min-w-0 flex-1 truncate text-left"
+            onClick={() => { router.push(`/website?page=${p.id}`); router.refresh() }}>
+            {p.title}{p.is_home && <span className="ml-1.5 font-mono text-[9px] uppercase tracking-wider text-ink-3">home</span>}
+            {p.hidden && <span className="ml-1.5 font-mono text-[9px] uppercase tracking-wider text-warn">hidden</span>}
+          </button>
+          {!p.is_home && (
+            <>
+              <button type="button" title="Rename this page" className="rounded-md text-xs text-ink-3 hover:text-ink"
+                onClick={async () => {
+                  const t = await askPrompt({ title: 'Rename page', placeholder: 'Page name', initial: p.title, confirmLabel: 'Rename' })
+                  if (t) { await renamePage(p.id, t); router.refresh() }
+                }}><Pencil size={13} strokeWidth={1.7} /></button>
+              <button type="button" title={p.hidden ? 'Show in the site menu' : 'Hide from the site menu'}
+                className="rounded-md text-xs text-ink-3 hover:text-ink"
+                onClick={async () => { await setPageHidden(p.id, !p.hidden); router.refresh() }}>
+                {p.hidden ? <EyeOff size={13} strokeWidth={1.7} /> : <Eye size={13} strokeWidth={1.7} />}
               </button>
-              {!p.is_home && (
-                <>
-                  <button type="button" title="Rename this page" className="rounded-md text-xs text-ink-3 hover:text-ink"
-                    onClick={async () => {
-                      const t = await askPrompt({ title: 'Rename page', placeholder: 'Page name', initial: p.title, confirmLabel: 'Rename' })
-                      if (t) { await renamePage(p.id, t); router.refresh() }
-                    }}><Pencil size={13} strokeWidth={1.7} /></button>
-                  <button type="button" title={p.hidden ? 'Show in the site menu' : 'Hide from the site menu'}
-                    className="rounded-md text-xs text-ink-3 hover:text-ink"
-                    onClick={async () => { await setPageHidden(p.id, !p.hidden); router.refresh() }}>
-                    {p.hidden ? <EyeOff size={13} strokeWidth={1.7} /> : <Eye size={13} strokeWidth={1.7} />}
-                  </button>
-                  <button type="button" title="Delete this page" className="rounded-md text-xs text-ink-3 hover:text-bad"
-                    onClick={async () => {
-                      if (!(await askConfirm({ title: `Delete "${p.title}"?`, body: 'The page and its sections are removed permanently.', confirmLabel: 'Delete page' }))) return
-                      await deletePage(p.id)
-                      notify('Page deleted')
-                      if (p.id === currentId) router.push('/website')
-                      router.refresh()
-                    }}><Trash2 size={13} strokeWidth={1.7} /></button>
-                </>
-              )}
-            </div>
-          ))}
-          <div className="flex gap-1.5 border-t border-line pt-2">
-            <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
-              placeholder="New page name, e.g. Travel"
-              className="min-w-0 flex-1 rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent" />
-            <button type="button" onClick={add} disabled={busy}
-              className="rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
-              {busy ? '…' : 'Add'}
-            </button>
-          </div>
-          {err && <p className="text-xs text-bad">{err}</p>}
-          <p className="text-[10px] text-ink-3">Pages appear in your site menu. Publish to make changes live.</p>
+              <button type="button" title="Delete this page" className="rounded-md text-xs text-ink-3 hover:text-bad"
+                onClick={async () => {
+                  if (!(await askConfirm({ title: `Delete "${p.title}"?`, body: 'The page and its sections are removed permanently.', confirmLabel: 'Delete page' }))) return
+                  await deletePage(p.id)
+                  notify('Page deleted')
+                  if (p.id === pageId) router.push('/website')
+                  router.refresh()
+                }}><Trash2 size={13} strokeWidth={1.7} /></button>
+            </>
+          )}
         </div>
-      )}
-    </div>
-  )
-}
-
-/** The customisation panel stakeholders asked for: fonts, colours, glow, motion. */
-/** E2: Design menu — every template as a swatch card, switch in one click,
- * with live preview links. Answers "how do I even see the other designs?". */
-function DesignMenu({ current, templateName, slug }: { current: SiteStyle; templateName: string; slug: string }) {
-  const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const [busy, setBusy] = useState<string | null>(null)
-  const activeKey = current.template ?? 'editorial-gold'
-
-  async function pick(key: string) {
-    if (key === activeKey || busy) return
-    setBusy(key)
-    await updateSiteStyle({ template: key })
-    setBusy(null)
-    notify('Template switched — your words and photos stay put')
-    router.refresh()
-  }
-
-  return (
-    <div className="relative">
-      <button type="button" onClick={() => setOpen((o) => !o)}
-        title="Switch templates — your content stays, the whole look changes"
-        className="rounded-md flex items-center gap-1.5 border border-line bg-paper-2 px-3 py-2 text-[13px] font-medium text-ink hover:border-line-2">
-        <LayoutTemplate size={14} strokeWidth={1.7} className="text-ink-3" />
-        {templateName} <ChevronDown size={12} strokeWidth={1.7} className="text-ink-3" />
-      </button>
-      {open && (
-        <div className="absolute left-0 top-12 z-50 max-h-[70vh] w-[340px] overflow-y-auto rounded-card border border-line bg-surface p-3 shadow-lift">
-          <p className="mb-2 px-1 text-[11px] text-ink-3">
-            One click restyles everything — colours, fonts, buttons. Your text and photos never move.
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {listTemplates().map((t) => (
-              <div key={t.key}
-                className={`rounded-[10px] border p-2 text-left transition-colors ${
-                  t.key === activeKey ? 'border-accent bg-accent-soft' : 'border-line hover:border-line-2'
-                }`}>
-                <button type="button" onClick={() => pick(t.key)} className="rounded-md block w-full text-left">
-                  <span className="flex h-9 w-full overflow-hidden rounded-md border border-line">
-                    {t.swatches.map((c) => <span key={c} className="h-full flex-1" style={{ background: c }} />)}
-                  </span>
-                  <span className="mt-1.5 block text-[12px] font-medium leading-tight text-ink">
-                    {busy === t.key ? 'Switching…' : t.name}
-                  </span>
-                  <span className="block text-[10px] text-ink-3">{t.mood}</span>
-                </button>
-                <a href={`/preview/${t.key}`} target="_blank" rel="noreferrer"
-                  className="mt-1 inline-block text-[10px] text-accent-ink underline underline-offset-2">
-                  Full preview ↗
-                </a>
-              </div>
-            ))}
-          </div>
-          <a href={`/s/${slug}`} target="_blank" rel="noreferrer"
-            className="mt-2 block px-1 text-[11px] text-ink-3 hover:text-ink">Your live site ↗</a>
-        </div>
-      )}
+      ))}
+      <div className="flex gap-1.5 border-t border-line pt-2">
+        <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
+          placeholder="New page name, e.g. Travel"
+          className="min-w-0 flex-1 rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent" />
+        <button type="button" onClick={add} disabled={busy}
+          className="rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
+          {busy ? '…' : 'Add'}
+        </button>
+      </div>
+      {err && <p className="text-xs text-bad">{err}</p>}
+      <p className="text-[10px] text-ink-3">Pages appear in your site menu. Publish to make changes live.</p>
     </div>
   )
 }
@@ -172,8 +119,9 @@ function CoachStrip() {
     <div className="flex items-center gap-2 border-b border-line bg-paper-2 px-4 py-1.5 text-[11.5px] text-ink-3">
       <Info size={12} strokeWidth={1.7} className="shrink-0" />
       <span className="truncate">
-        Click any text on the page and type · hover a section for its name + tools · drag blocks in from the left ·{' '}
-        <span className="font-medium text-ink-2">✚ Add section</span> (top right of the page) for ready-made looks · everything autosaves
+        Click any text on the page and type · hover a section for its name + tools ·{' '}
+        <span className="font-medium text-ink-2">Blocks</span> tab: drag blocks in, pick ready-made sections, or let ✦ AI draft one ·{' '}
+        <span className="font-medium text-ink-2">Design</span> tab restyles everything · everything autosaves
         (<kbd className="rounded border border-line bg-surface px-1 font-mono text-[9.5px]">⌘S</kbd> to save now) ·
         the <span className="font-medium text-ink-2">?</span> button remembers all of this for you
       </span>
@@ -190,13 +138,14 @@ function HelpMenu() {
   const ROWS: [string, string][] = [
     ['Edit any text', 'Click it on the page and type. It saves by itself.'],
     ['Move a section', 'Drag it by its edge, or use the arrows in its toolbar.'],
-    ['Add a section', 'Drag from the left panel, or ✚ Add section at the top right of the page for ready-made looks.'],
+    ['Add a section', 'The Blocks tab on the left: drag a block in, pick a ready-made section, or let ✦ AI draft one.'],
     ['Restyle one section', 'Click it, then open “Style — look, colour & motion” on the right: 10 looks, borrowed palettes, animations.'],
-    ['Restyle everything', 'The Style button: fonts, your own colours, buttons, menus, backdrops.'],
-    ['Change template', 'The template name in the toolbar — switch any time, content stays.'],
+    ['Restyle everything', 'The Design tab on the left: template, vibes, fonts, your own colours, buttons, menus, backdrops.'],
+    ['Change template', 'Design tab → Template. Switch any time — your content stays.'],
+    ['Pages', 'The Pages tab: add, rename, hide from the menu, or delete.'],
     ['Photos', 'Drop or upload a photo right inside any photo field — or search free photos there.'],
     ['Freeform canvas', 'A section where you drag words and photos anywhere — it keeps its exact shape on phones.'],
-    ['Undo', '↺ at the top right of the page, or Ctrl+Z. Publish only goes live when you say so.'],
+    ['Undo', '↺ at the bottom left of the page, or Ctrl+Z. Publish only goes live when you say so.'],
   ]
   return (
     <div className="relative">
@@ -260,10 +209,23 @@ function ColorPick({ k, label, value, onSet }: {
   )
 }
 
-function StylePanel({ current }: { current: SiteStyle }) {
+/** Design tab: template, vibes, fine-tune and brand kit — the old Design +
+ * Style popovers, finally with room to breathe (1b). */
+function DesignPanel() {
+  const { currentStyle: current, templateName, slug } = useEditorMeta()
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [busy, setBusy] = useState<string | null>(null)
   const [vibing, setVibing] = useState<string | null>(null)
+  const activeKey = current.template ?? 'editorial-gold'
+
+  async function pick(key: string) {
+    if (key === activeKey || busy) return
+    setBusy(key)
+    await updateSiteStyle({ template: key })
+    setBusy(null)
+    notify('Template switched — your words and photos stay put')
+    router.refresh()
+  }
   async function set(key: string, value: string) {
     await updateSiteStyle({ [key]: value })
     router.refresh()
@@ -289,157 +251,172 @@ function StylePanel({ current }: { current: SiteStyle }) {
       </select>
     </label>
   )
+
   return (
-    <div className="relative">
-      <button type="button" onClick={() => setOpen((o) => !o)}
-        title="Fonts, colours, glow and hover animation"
-        className="rounded-md flex items-center gap-1.5 border border-line bg-paper-2 px-3 py-2 text-[13px] font-medium text-ink hover:border-line-2">
-        <Palette size={14} strokeWidth={1.7} className="text-ink-3" /> Style
-      </button>
-      {open && (
-        <div className="absolute right-0 top-12 z-50 max-h-[70vh] w-72 space-y-3 overflow-y-auto rounded-card border border-line bg-surface p-4 shadow-lift">
-          {/* V1: vibes first — one tap sets the whole mood, no design degree needed */}
-          <div>
-            <span className="eyebrow mb-1.5 block">Pick a vibe — one tap styles everything</span>
-            <div className="grid grid-cols-2 gap-2">
-              {VIBES.map((v) => (
-                <button key={v.key} type="button" onClick={() => applyVibe(v.key)} title={v.blurb}
-                  className="!rounded-[10px] border border-line p-2 text-left transition-colors hover:border-accent">
-                  <span className="flex h-5 w-full overflow-hidden rounded-md border border-line">
-                    {v.swatches.map((c) => <span key={c} className="h-full flex-1" style={{ background: c }} />)}
-                  </span>
-                  <span className="mt-1 block text-[11.5px] font-medium leading-tight text-ink">
-                    {vibing === v.key ? 'Applying…' : v.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Everything granular lives under the fold — power without overwhelm */}
-          <details className="group border-t border-line pt-3">
-            <summary className="flex cursor-pointer list-none items-center justify-between text-[12.5px] font-medium text-ink-2 hover:text-ink [&::-webkit-details-marker]:hidden">
-              Fine-tune — fonts, colours, buttons, motion
-              <span className="text-ink-3 transition-transform group-open:rotate-90">›</span>
-            </summary>
-            <div className="mt-3 space-y-3">
-              <Sel k="displayFont" label={`Heading font (${Object.keys(DISPLAY_FACES).length} faces)`} options={{ '': { label: 'Template default' }, ...DISPLAY_FACES }} />
-              <Sel k="bodyFont" label={`Body font (${Object.keys(BODY_FACES).length} faces)`} options={{ '': { label: 'Template default' }, ...BODY_FACES }} />
-              <Sel k="background" label="Background preset" options={BACKGROUNDS} />
-              <Sel k="accent" label="Accent preset" options={ACCENTS} />
-
-              {/* D3: colour pickers — any colour, fanned into the full token family */}
-              <div className="grid grid-cols-3 gap-2 border-t border-line pt-3">
-                <ColorPick k="customAccent" label="Accent" value={current.customAccent} onSet={set} />
-                <ColorPick k="customPaper" label="Background" value={current.customPaper} onSet={set} />
-                <ColorPick k="customInk" label="Text" value={current.customInk} onSet={set} />
-              </div>
-
-              <Sel k="buttonStyle" label="Button design" options={BUTTONS} />
-              <Sel k="nav" label="Menu design" options={NAVS} />
-              <Sel k="glow" label="Card glow" options={GLOWS} />
-              <Sel k="hover" label="Hover animation" options={HOVERS} />
-              <Sel k="backdrop" label="Backdrop effect (live site)" options={BACKDROPS} />
-            </div>
-          </details>
-
-          {/* Brand kit (Sprint D): monogram + initials shown in the site menu */}
-          <div className="border-t border-line pt-3">
-            <span className="eyebrow mb-1.5 block">Brand kit — logo / monogram</span>
-            <div className="flex items-center gap-2">
-              {current.monogram ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={current.monogram} alt="Monogram" className="h-10 w-10 rounded-full border border-line object-cover" />
-              ) : (
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-accent-line font-display text-sm text-accent-ink">
-                  {current.initials || 'A·D'}
+    <div className="space-y-4 p-3">
+      {/* Template — switch in one click; content never moves */}
+      <details className="group">
+        <summary className="flex cursor-pointer list-none items-center justify-between rounded-md border border-line bg-paper px-2.5 py-2 text-[12.5px] font-medium text-ink hover:border-line-2 [&::-webkit-details-marker]:hidden">
+          <span className="flex items-center gap-1.5">
+            <LayoutTemplate size={13} strokeWidth={1.7} className="text-ink-3" /> {templateName}
+          </span>
+          <span className="text-ink-3 transition-transform group-open:rotate-90">›</span>
+        </summary>
+        <p className="mt-2 px-0.5 text-[11px] text-ink-3">
+          One click restyles everything — colours, fonts, buttons. Your text and photos never move.
+        </p>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          {listTemplates().map((t) => (
+            <div key={t.key}
+              className={`rounded-[10px] border p-2 text-left transition-colors ${
+                t.key === activeKey ? 'border-accent bg-accent-soft' : 'border-line hover:border-line-2'
+              }`}>
+              <button type="button" onClick={() => pick(t.key)} className="rounded-md block w-full text-left">
+                <span className="flex h-9 w-full overflow-hidden rounded-md border border-line">
+                  {t.swatches.map((c) => <span key={c} className="h-full flex-1" style={{ background: c }} />)}
                 </span>
-              )}
-              <label className="cursor-pointer rounded-md border border-line bg-paper-2 px-3 py-1.5 text-xs text-ink hover:border-accent">
-                {current.monogram ? 'Replace' : 'Upload'}
-                <input type="file" accept="image/*" className="hidden"
-                  onChange={async (e) => {
-                    const f = e.target.files?.[0]
-                    if (!f) return
-                    const fd = new FormData(); fd.set('file', f)
-                    const res = await uploadSiteImage(fd)
-                    if (res.url) await set('monogram', res.url)
-                    e.target.value = ''
-                  }} />
-              </label>
-              {current.monogram && (
-                <button type="button" onClick={() => set('monogram', '')}
-                  className="rounded-md border border-line px-3 py-1.5 text-xs text-ink-3 hover:text-ink">
-                  Remove
-                </button>
-              )}
+                <span className="mt-1.5 block text-[12px] font-medium leading-tight text-ink">
+                  {busy === t.key ? 'Switching…' : t.name}
+                </span>
+                <span className="block text-[10px] text-ink-3">{t.mood}</span>
+              </button>
+              <a href={`/preview/${t.key}`} target="_blank" rel="noreferrer"
+                className="mt-1 inline-block text-[10px] text-accent-ink underline underline-offset-2">
+                Full preview ↗
+              </a>
             </div>
-            <label className="mt-2 block text-xs">
-              <span className="eyebrow mb-1 block">Initials (shown if no monogram)</span>
-              <input defaultValue={current.initials ?? ''} placeholder="A & D" maxLength={12}
-                onBlur={(e) => { if (e.target.value !== (current.initials ?? '')) set('initials', e.target.value) }}
-                className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent" />
-            </label>
-            <p className="mt-1 text-[10px] text-ink-3">Shown at the top of your site and in the page menu guests see.</p>
+          ))}
+        </div>
+        <a href={`/s/${slug}`} target="_blank" rel="noreferrer"
+          className="mt-2 block px-0.5 text-[11px] text-ink-3 hover:text-ink">Your live site ↗</a>
+      </details>
+
+      {/* V1: vibes first — one tap sets the whole mood, no design degree needed */}
+      <div className="border-t border-line pt-3">
+        <span className="eyebrow mb-1.5 block">Pick a vibe — one tap styles everything</span>
+        <div className="grid grid-cols-2 gap-2">
+          {VIBES.map((v) => (
+            <button key={v.key} type="button" onClick={() => applyVibe(v.key)} title={v.blurb}
+              className="!rounded-[10px] border border-line p-2 text-left transition-colors hover:border-accent">
+              <span className="flex h-5 w-full overflow-hidden rounded-md border border-line">
+                {v.swatches.map((c) => <span key={c} className="h-full flex-1" style={{ background: c }} />)}
+              </span>
+              <span className="mt-1 block text-[11.5px] font-medium leading-tight text-ink">
+                {vibing === v.key ? 'Applying…' : v.name}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Everything granular lives under the fold — power without overwhelm */}
+      <details className="group border-t border-line pt-3">
+        <summary className="flex cursor-pointer list-none items-center justify-between text-[12.5px] font-medium text-ink-2 hover:text-ink [&::-webkit-details-marker]:hidden">
+          Fine-tune — fonts, colours, buttons, motion
+          <span className="text-ink-3 transition-transform group-open:rotate-90">›</span>
+        </summary>
+        <div className="mt-3 space-y-3">
+          <Sel k="displayFont" label={`Heading font (${Object.keys(DISPLAY_FACES).length} faces)`} options={{ '': { label: 'Template default' }, ...DISPLAY_FACES }} />
+          <Sel k="bodyFont" label={`Body font (${Object.keys(BODY_FACES).length} faces)`} options={{ '': { label: 'Template default' }, ...BODY_FACES }} />
+          <Sel k="background" label="Background preset" options={BACKGROUNDS} />
+          <Sel k="accent" label="Accent preset" options={ACCENTS} />
+
+          {/* D3: colour pickers — any colour, fanned into the full token family */}
+          <div className="grid grid-cols-3 gap-2 border-t border-line pt-3">
+            <ColorPick k="customAccent" label="Accent" value={current.customAccent} onSet={set} />
+            <ColorPick k="customPaper" label="Background" value={current.customPaper} onSet={set} />
+            <ColorPick k="customInk" label="Text" value={current.customInk} onSet={set} />
           </div>
 
-          <p className="text-[10px] text-ink-3">Changes preview instantly. Publish to make them live.</p>
+          <Sel k="buttonStyle" label="Button design" options={BUTTONS} />
+          <Sel k="nav" label="Menu design" options={NAVS} />
+          <Sel k="glow" label="Card glow" options={GLOWS} />
+          <Sel k="hover" label="Hover animation" options={HOVERS} />
+          <Sel k="backdrop" label="Backdrop effect (live site)" options={BACKDROPS} />
         </div>
-      )}
+      </details>
+
+      {/* Brand kit (Sprint D): monogram + initials shown in the site menu */}
+      <div className="border-t border-line pt-3">
+        <span className="eyebrow mb-1.5 block">Brand kit — logo / monogram</span>
+        <div className="flex items-center gap-2">
+          {current.monogram ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={current.monogram} alt="Monogram" className="h-10 w-10 rounded-full border border-line object-cover" />
+          ) : (
+            <span className="flex h-10 w-10 items-center justify-center rounded-full border border-accent-line font-display text-sm text-accent-ink">
+              {current.initials || 'A·D'}
+            </span>
+          )}
+          <label className="cursor-pointer rounded-md border border-line bg-paper-2 px-3 py-1.5 text-xs text-ink hover:border-accent">
+            {current.monogram ? 'Replace' : 'Upload'}
+            <input type="file" accept="image/*" className="hidden"
+              onChange={async (e) => {
+                const f = e.target.files?.[0]
+                if (!f) return
+                const fd = new FormData(); fd.set('file', f)
+                const res = await uploadSiteImage(fd)
+                if (res.url) await set('monogram', res.url)
+                e.target.value = ''
+              }} />
+          </label>
+          {current.monogram && (
+            <button type="button" onClick={() => set('monogram', '')}
+              className="rounded-md border border-line px-3 py-1.5 text-xs text-ink-3 hover:text-ink">
+              Remove
+            </button>
+          )}
+        </div>
+        <label className="mt-2 block text-xs">
+          <span className="eyebrow mb-1 block">Initials (shown if no monogram)</span>
+          <input defaultValue={current.initials ?? ''} placeholder="A & D" maxLength={12}
+            onBlur={(e) => { if (e.target.value !== (current.initials ?? '')) set('initials', e.target.value) }}
+            className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent" />
+        </label>
+        <p className="mt-1 text-[10px] text-ink-3">Shown at the top of your site and in the page menu guests see.</p>
+      </div>
+
+      <p className="text-[10px] text-ink-3">Changes preview instantly. Publish to make them live.</p>
     </div>
   )
 }
 
 const usePuckSel = createUsePuck()
 
-/** Section presets (Sprint D): one click inserts a pre-designed section. */
-function PresetsMenu() {
+/** Insert a piece of content just above the footer, with history. */
+function useInsertSection() {
   const getPuck = useGetPuck()
-  const [open, setOpen] = useState(false)
-
-  function insert(presetKey: string) {
-    const preset = SECTION_PRESETS.find((p) => p.key === presetKey)
-    if (!preset) return
+  return (type: string, props: object) => {
     const { appState, dispatch } = getPuck()
     const content = [...appState.data.content]
-    const item = {
-      type: preset.type,
-      props: { ...preset.props, id: `${preset.type}-${crypto.randomUUID()}` },
-    } as (typeof content)[number]
-    // Keep the footer last — new sections slot in just above it.
+    const item = { type, props: { ...props, id: `${type}-${crypto.randomUUID()}` } } as (typeof content)[number]
     const at = content.length > 0 && content[content.length - 1].type === 'SiteFooterBlock'
       ? content.length - 1 : content.length
     content.splice(at, 0, item)
     dispatch({ type: 'setData', data: { ...appState.data, content }, recordHistory: true })
-    setOpen(false)
   }
+}
 
+/** Ready-made sections (Sprint D) — now part of the one insert surface. */
+function PresetsList() {
+  const insert = useInsertSection()
   return (
-    <div className="relative">
-      <button type="button" id="presets-menu" onClick={() => setOpen((o) => !o)}
-        title="Insert a beautifully pre-styled section"
-        className="rounded-md px-2.5 py-1.5 text-[12.5px] font-medium text-ink hover:bg-paper-2">
-        ✚ Add section
-      </button>
-      {open && (
-        <div className="absolute right-0 top-11 z-50 w-72 space-y-1 rounded-card border border-line bg-surface p-2 shadow-lift">
-          {SECTION_PRESETS.map((p) => (
-            <button key={p.key} type="button" onClick={() => insert(p.key)}
-              className="block w-full rounded-md px-3 py-2 text-left hover:bg-paper-2">
-              <span className="block text-sm text-ink">{p.name}</span>
-              <span className="block text-[11px] text-ink-3">{p.desc}</span>
-            </button>
-          ))}
-          <p className="px-3 pb-1 text-[10px] text-ink-3">Sections land above your footer, ready to edit.</p>
-        </div>
-      )}
+    <div className="flex flex-col gap-1.5">
+      {SECTION_PRESETS.map((p) => (
+        <button key={p.key} type="button"
+          onClick={() => { insert(p.type, p.props); notify(`${p.name} added above your footer`) }}
+          className="rounded-md border border-line bg-paper px-2.5 py-2 text-left transition-colors hover:border-accent">
+          <span className="block text-[12px] font-medium text-ink">{p.name}</span>
+          <span className="block text-[10.5px] text-ink-3">{p.desc}</span>
+        </button>
+      ))}
     </div>
   )
 }
 
 /** AI section composer — describe a section, get it written and inserted. */
-function AiSectionMenu() {
-  const getPuck = useGetPuck()
+function AiDraft() {
+  const insert = useInsertSection()
   const [open, setOpen] = useState(false)
   const [prompt, setPrompt] = useState('')
   const [busy, setBusy] = useState(false)
@@ -456,44 +433,53 @@ function AiSectionMenu() {
     // Merge onto the block's defaults (styleOpts etc.), insert above the footer.
     const { siteConfig: cfg } = await import('@/lib/puck/config')
     const defaults = (cfg.components[res.type as keyof typeof cfg.components] as { defaultProps?: Record<string, unknown> })?.defaultProps ?? {}
-    const { appState, dispatch } = getPuck()
-    const content = [...appState.data.content]
-    const item = {
-      type: res.type,
-      props: { ...defaults, ...res.props, id: `${res.type}-${crypto.randomUUID()}` },
-    } as (typeof content)[number]
-    const at = content.length > 0 && content[content.length - 1].type === 'SiteFooterBlock'
-      ? content.length - 1 : content.length
-    content.splice(at, 0, item)
-    dispatch({ type: 'setData', data: { ...appState.data, content }, recordHistory: true })
+    insert(res.type, { ...defaults, ...res.props })
     setOpen(false); setPrompt('')
     notify('Section written and added — read it over and tweak anything')
   }
 
-  return (
-    <div className="relative">
-      <button type="button" id="ai-section" onClick={() => setOpen((o) => !o)}
+  if (!open) {
+    return (
+      <button type="button" id="ai-section" onClick={() => setOpen(true)}
         title="Describe a section and AI writes it for you"
-        className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[12.5px] font-medium text-ink hover:bg-paper-2">
-        ✦ AI
+        className="mt-1.5 flex w-full items-center gap-1.5 rounded-md border border-dashed border-line-2 px-2.5 py-2 text-left text-[12px] font-medium text-accent-ink transition-colors hover:border-accent">
+        ✦ Describe a section — AI drafts it
       </button>
-      {open && (
-        <div className="absolute right-0 top-11 z-50 w-80 rounded-card border border-line bg-surface p-3 shadow-lift">
-          <p className="mb-2 text-[12px] font-medium text-ink-2">What should this section say?</p>
-          <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3}
-            placeholder={'e.g. "Our story — we met at university in London, bonded over bad coffee, got engaged in Santorini last summer"'}
-            className="w-full rounded-lg border border-line bg-paper px-2.5 py-2 text-[12.5px] text-ink outline-none focus:border-accent" />
-          <div className="mt-2 flex items-center gap-2">
-            <button type="button" onClick={compose} disabled={busy || !prompt.trim()}
-              className="rounded-md bg-accent px-3 py-1.5 text-[12.5px] font-semibold text-white disabled:opacity-50">
-              {busy ? 'Writing…' : 'Write it'}
-            </button>
-            <button type="button" onClick={() => setOpen(false)}
-              className="rounded-md border border-line px-3 py-1.5 text-[12.5px] font-medium text-ink">Cancel</button>
-          </div>
-          {note && <p className="mt-2 text-[11.5px] text-ink-3">{note}</p>}
-        </div>
-      )}
+    )
+  }
+  return (
+    <div className="mt-1.5 rounded-md border border-line bg-paper p-2.5">
+      <p className="mb-1.5 text-[11.5px] font-medium text-ink-2">What should this section say?</p>
+      <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3}
+        placeholder={'e.g. "Our story — we met at university in London, bonded over bad coffee, got engaged in Santorini last summer"'}
+        className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-[12px] text-ink outline-none focus:border-accent" />
+      <div className="mt-1.5 flex items-center gap-1.5">
+        <button type="button" onClick={compose} disabled={busy || !prompt.trim()}
+          className="rounded-md bg-accent px-2.5 py-1.5 text-[11.5px] font-semibold text-white disabled:opacity-50">
+          {busy ? 'Writing…' : 'Write it'}
+        </button>
+        <button type="button" onClick={() => setOpen(false)}
+          className="rounded-md border border-line px-2.5 py-1.5 text-[11.5px] font-medium text-ink">Cancel</button>
+      </div>
+      {note && <p className="mt-1.5 text-[11px] text-ink-3">{note}</p>}
+    </div>
+  )
+}
+
+/** Blocks tab: stock draggable blocks + ready-made sections + the AI draft
+ * — one mental model for "add something" (1b). */
+const stockBlocks = blocksPlugin()
+function BlocksPanel() {
+  const Stock = stockBlocks.render
+  return (
+    <div>
+      {Stock && <Stock />}
+      <div className="px-3 pb-4">
+        <p className="microlabel mb-1.5">Ready-made sections</p>
+        <PresetsList />
+        <AiDraft />
+        <p className="mt-2 text-[10px] text-ink-3">Sections land above your footer, ready to edit.</p>
+      </div>
     </div>
   )
 }
@@ -512,25 +498,17 @@ function HistoryButtons() {
   )
 }
 
-/** 1a: one floating action group, top right of the canvas — insertion and
- * history live where sections appear, not in chrome. Sticky inside the
- * canvas scroll, zero-height so it overlays the page. */
-function CanvasActions() {
+/** 1b: history docks bottom-left of the canvas — quiet, always in reach. */
+function UndoDock() {
   return (
-    <div className="pointer-events-none sticky top-2.5 z-40 flex h-0 justify-end pr-3">
-      <div className="pointer-events-auto flex items-center gap-0.5 rounded-lg border border-line bg-surface p-1 shadow-card">
-        <PresetsMenu />
-        <AiSectionMenu />
-        <span aria-hidden className="mx-0.5 h-5 w-px bg-line" />
+    <div className="pointer-events-none sticky bottom-3 z-40 flex h-0 justify-start pl-3">
+      <div className="pointer-events-auto -translate-y-full rounded-lg border border-line bg-surface p-1 shadow-card">
         <HistoryButtons />
       </div>
     </div>
   )
 }
 
-// Stable identities (Puck re-mounts its UI if overrides change). The preview
-// width is driven by a CSS variable set on the wrapper, so the device toggle
-// never touches this object.
 /** Friendly empty-canvas state for brand-new pages (advanced-editor feel). */
 function EmptyCanvasHint() {
   const count = usePuckSel((s) => s.appState.data.content.length)
@@ -540,27 +518,37 @@ function EmptyCanvasHint() {
       <LayoutTemplate size={22} strokeWidth={1.5} className="text-ink-3" />
       <p className="text-[13.5px] font-medium text-ink">This page is blank — let’s fix that.</p>
       <p className="max-w-[340px] text-[12.5px] text-ink-3">
-        Drag a block in from the left panel, or use <span className="font-medium text-ink-2">✚ Add section</span> in
-        the toolbar for a beautifully pre-styled start.
+        Open the <span className="font-medium text-ink-2">Blocks</span> tab on the left: drag a block in,
+        or pick a ready-made section for a beautifully pre-styled start.
       </p>
     </div>
   )
 }
 
+// Stable identities (Puck re-mounts its UI if overrides/plugins change).
+// The preview width is driven by a CSS variable set on the wrapper, so the
+// device toggle never touches these objects.
 const puckOverrides: Partial<Overrides> = {
-  // Note: Puck's own header (its Publish + mini undo icons) is dropped
-  // entirely — three Publish buttons on one screen confused everyone. Ours
+  // Puck's own header (its Publish + mini undo icons) stays dropped — ours
   // in the toolbar carries the status/lock states and is the single source.
-  // Section insertion + history float over the canvas (CanvasActions).
   header: () => <></>,
   preview: ({ children }) => (
     <div className="editor-vp" style={{ maxWidth: 'var(--editor-vw, 100%)', margin: '0 auto' }}>
-      <CanvasActions />
       <EmptyCanvasHint />
       {children}
+      <UndoDock />
     </div>
   ),
 }
+
+/** The one rail (1b): Design · Pages · Blocks. `outline` is re-purposed so
+ * the rail stays three tabs; fields stay docked right and swap with
+ * selection — the migration is layout-only. */
+const editorPlugins: Plugin[] = [
+  { name: 'design', label: 'Design', icon: <Palette size={16} strokeWidth={1.7} />, render: DesignPanel },
+  { name: 'outline', label: 'Pages', icon: <FileText size={16} strokeWidth={1.7} />, render: PagesPanel },
+  { ...stockBlocks, name: 'blocks', label: 'Blocks', render: BlocksPanel },
+]
 
 const DEVICES = [
   { key: 'desktop', label: 'Desktop', icon: Monitor, width: '100%', help: 'Full width, as guests see it on a laptop' },
@@ -584,6 +572,10 @@ export function WebsiteEditor({
   const [device, setDevice] = useState<DeviceKey>('desktop')
   const latest = useRef<SiteData>(data)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const meta = useMemo<EditorMeta>(
+    () => ({ pages, pageId, slug, templateName, currentStyle }),
+    [pages, pageId, slug, templateName, currentStyle])
 
   const onChange = useCallback((next: SiteData) => {
     latest.current = next
@@ -619,18 +611,16 @@ export function WebsiteEditor({
     return () => window.removeEventListener('keydown', onKey)
   }, [pageId])
 
+  const currentPageTitle = pages.find((p) => p.id === pageId)?.title ?? 'Home'
+
   return (
     <div className="puck-shell flex h-[calc(100vh-57px)] flex-col">
-      {/* Toolbar — ONE row, three named zones: Site / View / Ship (1a) */}
-      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2 border-b border-line bg-surface px-4 py-2">
-        <span className="microlabel" aria-hidden>Site</span>
-        <DesignMenu current={currentStyle} templateName={templateName} slug={slug} />
-        <PagesMenu pages={pages} currentId={pageId} />
-        <StylePanel current={currentStyle} />
-
-        <span aria-hidden className="mx-1 hidden h-5 w-px bg-line md:block" />
-
-        <span className="microlabel" aria-hidden>View</span>
+      {/* Toolbar (1b): its only job is page, width and shipping — everything
+          that changes the site lives in the left rail. */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface px-4 py-2">
+        <span className="text-[13.5px] font-semibold tracking-tight text-ink">
+          Website <span className="font-normal text-ink-3">/ {currentPageTitle}</span>
+        </span>
         <div className="flex items-center gap-0.5 rounded-pill border border-line bg-paper-2 p-0.5" role="group" aria-label="Preview width">
           {DEVICES.map((d) => (
             <button key={d.key} type="button" title={d.help} aria-label={d.label}
@@ -670,15 +660,18 @@ export function WebsiteEditor({
       <div className="min-h-0 flex-1" data-site-root data-device={device}
         {...styleProps}
         style={{ ...styleProps.style, '--editor-vw': DEVICES.find((d) => d.key === device)!.width } as React.CSSProperties}>
-        <Puck
-          config={siteConfig}
-          data={data}
-          metadata={{ events }}
-          onChange={onChange}
-          onPublish={publish}
-          iframe={{ enabled: false }}
-          overrides={puckOverrides}
-        />
+        <EditorMetaCtx.Provider value={meta}>
+          <Puck
+            config={siteConfig}
+            data={data}
+            metadata={{ events }}
+            onChange={onChange}
+            onPublish={publish}
+            iframe={{ enabled: false }}
+            overrides={puckOverrides}
+            plugins={editorPlugins}
+          />
+        </EditorMetaCtx.Provider>
       </div>
     </div>
   )
