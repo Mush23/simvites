@@ -69,7 +69,7 @@ export function SitesRegister({ rows }: { rows: RegisterRow[] }) {
       active ? 'bg-ink text-paper' : 'border border-line text-ink-2 hover:border-line-2'}`
 
   return (
-    <section className="mt-9">
+    <section id="sites" className="mt-9 scroll-mt-4">
       <div className="mb-3 flex flex-wrap items-center gap-2.5">
         <h2 className="text-lg font-semibold tracking-tight text-ink">Sites</h2>
         <span className="font-mono text-[10.5px] text-ink-3 nums">
