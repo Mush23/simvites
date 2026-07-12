@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CircleAlert } from 'lucide-react'
 import type { GuestRsvpContext, GuestEventView, GuestView, QuestionView } from '@/lib/guest-rsvp'
 import { formatEventDateTime } from '@/lib/utils'
+import { BRAND_NAME } from '@/lib/brand'
 import { submitGuestRsvp, type GuestSubmission } from './actions'
 
 // The money path. Mobile-first: big tap targets, minimal typing, clear
@@ -20,7 +21,11 @@ interface MissingAnswer {
   message: string
 }
 
-export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
+export function RsvpFlow({ ctx, brand }: {
+  ctx: GuestRsvpContext
+  /** Brand kit from the site theme — the keepsake wears the couple's monogram. */
+  brand?: { initials?: string; monogram?: string }
+}) {
   // choice state: guestId:eventId → status
   const [choices, setChoices] = useState<Record<string, Status>>(() => {
     const m: Record<string, Status> = {}
@@ -121,10 +126,36 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
   }
 
   if (phase === 'done') {
-    const attendingEvents = ctx.guests
+    // 3b: the keepsake — the confirmation borrows the invitation's own
+    // geometry (monogram, hairlines, serif, sharp corners) so saying yes
+    // feels like receiving stationery, not submitting a form.
+    const eventRows = ctx.guests
       .flatMap((g) => g.events)
       .filter((e, i, arr) => arr.findIndex((x) => x.eventId === e.eventId) === i)
-      .filter((e) => ctx.guests.some((g) => choices[`${g.guestId}:${e.eventId}`] === 'attending') && e.startsAt)
+      .map((e) => {
+        const invitedGuests = ctx.guests.filter((g) => g.events.some((x) => x.eventId === e.eventId))
+        const going = invitedGuests.filter((g) => choices[`${g.guestId}:${e.eventId}`] === 'attending').length
+        const answered = invitedGuests.some((g) => choices[`${g.guestId}:${e.eventId}`] !== 'pending')
+        return { ...e, going, invitedCount: invitedGuests.length, answered }
+      })
+      .filter((e) => e.answered)
+    const anyoneComing = eventRows.some((e) => e.going > 0)
+    const attendingEvents = eventRows.filter((e) => e.going > 0 && e.startsAt)
+
+    // The family's whole weekend in two quiet lines: meals, then tables.
+    const mealQs = ctx.questions.filter((q) => q.type === 'meal_choice')
+    const mealLine = ctx.guests
+      .map((g) => {
+        const v = mealQs.map((q) => answers[g.guestId]?.[q.id]).find((x) => typeof x === 'string' && x)
+        return v ? `${g.fullName.split(' ')[0]} — ${v}` : null
+      })
+      .filter(Boolean)
+      .join(' · ')
+    const tableLine = [...new Set(ctx.guests.map((g) => g.tableName).filter(Boolean))].join(' · ')
+
+    const initials = brand?.initials?.trim() ||
+      ctx.siteTitle.split(/\s*(?:&|\+|\band\b)\s*/i).map((s) => s.trim()[0]).filter(Boolean).slice(0, 2).join('·').toUpperCase()
+    const savedOn = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 
     const onPdf = async () => {
       const { downloadRsvpPdf } = await import('@/lib/rsvp-pdf')
@@ -141,27 +172,87 @@ export function RsvpFlow({ ctx }: { ctx: GuestRsvpContext }) {
       })
     }
 
+    const onWhatsApp = () => {
+      const siteUrl = window.location.href.split('/rsvp')[0]
+      const text = encodeURIComponent(
+        anyoneComing
+          ? `We're in! Our RSVP for ${ctx.siteTitle} is sent 🎉 ${siteUrl}`
+          : `Our RSVP for ${ctx.siteTitle} is sent. ${siteUrl}`,
+      )
+      window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener')
+    }
+
     return (
-      <div className="flex min-h-screen items-center justify-center bg-paper px-6 text-center text-ink">
-        <div className="max-w-md">
-          <div className="mx-auto mb-7 flex h-16 w-16 items-center justify-center rounded-pill border-2 border-accent text-accent">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+      <div className="flex min-h-screen items-center justify-center bg-paper-2 px-5 py-10 text-ink">
+        <div className="w-full max-w-[400px]">
+          <div className="border border-accent-line bg-paper px-6 py-8 text-center shadow-lift">
+            {brand?.monogram ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={brand.monogram} alt=""
+                className="mx-auto h-[46px] w-[46px] rounded-full border border-accent-line object-cover" />
+            ) : (
+              <span className="mx-auto flex h-[46px] w-[46px] items-center justify-center rounded-full border border-accent-line font-display text-[15px] text-accent-ink">
+                {initials}
+              </span>
+            )}
+            <div aria-hidden className="mx-auto mt-3.5 h-px w-14 bg-accent-line" />
+            <h1 className="mt-3.5 font-display text-[27px] leading-[1.15]">
+              {anyoneComing
+                ? <>With joy —<br />{ctx.householdName} are coming.</>
+                : <>Thank you —<br />you&rsquo;ll be missed.</>}
+            </h1>
+            <p className="mt-2.5 font-mono text-[9px] uppercase tracking-[0.2em] text-ink-3">Saved · {savedOn}</p>
+
+            {eventRows.length > 0 && (
+              <div className="mt-4 flex flex-col text-left">
+                {eventRows.map((e) => (
+                  <div key={e.eventId} className="flex items-center gap-2.5 border-t border-line px-0.5 py-2.5">
+                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: e.accent ?? 'var(--accent)' }} />
+                    <span className="min-w-0">
+                      <span className="block truncate font-display text-[16px] leading-tight text-ink">{e.name}</span>
+                      <span className="block font-mono text-[9px] uppercase tracking-[0.12em] text-ink-3">
+                        {formatEventDateTime(e.startsAt) ?? 'Date TBC'}
+                      </span>
+                    </span>
+                    <span className={`ml-auto shrink-0 rounded-pill px-2.5 py-1 text-[11px] font-medium ${
+                      e.going > 0 ? 'bg-accent-soft text-accent-ink' : 'border border-line-2 text-ink-2'}`}>
+                      {e.going === 0 ? 'Can’t make it'
+                        : e.going === e.invitedCount ? 'Going ✓'
+                        : `${e.going} of ${e.invitedCount} going`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {(mealLine || tableLine) && (
+              <p className="mt-3.5 text-[12px] leading-relaxed text-ink-2">
+                {mealLine}{mealLine && tableLine ? <br /> : null}{tableLine}
+              </p>
+            )}
+
+            <div aria-hidden className="mx-auto mt-4 h-px w-14 bg-accent-line" />
+            <button type="button" onClick={onPdf}
+              className="mt-4 w-full rounded-pill border-[1.5px] border-accent-line bg-transparent py-3 text-[12.5px] font-medium uppercase tracking-[0.04em] text-ink transition-colors hover:border-accent">
+              Save your keepsake (PDF)
+            </button>
+            <p className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 text-[12px]">
+              {attendingEvents.length > 0 && (
+                <a href="#keepsake-calendar" className="text-accent-ink hover:underline">Calendar</a>
+              )}
+              <button type="button" onClick={onWhatsApp}
+                className="rounded-md text-accent-ink hover:underline">Share on WhatsApp</button>
+              <button type="button" onClick={() => setPhase('form')}
+                className="rounded-md text-accent-ink hover:underline">Change answers</button>
+            </p>
           </div>
-          <p className="eyebrow mb-3">{ctx.siteTitle}</p>
-          <h1 className="font-display text-4xl">Thank you.</h1>
-          <p className="mt-4 leading-relaxed text-ink-2">
-            Your responses for {ctx.householdName} are saved. You can return through your
-            invitation link any time before the deadline to change them.
+          <p className="mt-3 text-center font-mono text-[8.5px] uppercase tracking-[0.18em] text-ink-3">
+            Made with {BRAND_NAME}
           </p>
 
-          <button type="button" onClick={onPdf}
-            className="mt-8 rounded-md bg-accent px-7 py-3 font-semibold text-white transition-transform hover:-translate-y-px">
-            Download confirmation (PDF)
-          </button>
-
           {attendingEvents.length > 0 && (
-            <div className="mt-8 border-t border-line pt-6 text-left">
-              <p className="eyebrow mb-3 text-center">Add to your calendar</p>
+            <div id="keepsake-calendar" className="mt-6 scroll-mt-6">
+              <p className="eyebrow mb-2 text-center">Add to your calendar</p>
               {attendingEvents.map((e) => (
                 <CalendarRow key={e.eventId} name={e.name} startsAt={e.startsAt!} venue={e.venueName} />
               ))}

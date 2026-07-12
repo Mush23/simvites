@@ -28,6 +28,9 @@ export default async function GuestRsvpPage({
   const { data: siteRow } = await db.from('sites')
     .select('theme').eq('slug', siteSlug.toLowerCase()).maybeSingle()
   const styleProps = siteStyleProps(siteRow?.theme)
+  // Brand kit for the keepsake confirmation (3b): monogram or initials.
+  const theme = (siteRow?.theme ?? {}) as { initials?: string; monogram?: string }
+  const brand = { initials: theme.initials, monogram: theme.monogram }
   const themed = (children: React.ReactNode) => (
     <div data-site-root {...styleProps}>{children}</div>
   )
@@ -52,7 +55,7 @@ export default async function GuestRsvpPage({
 
   return themed(
     <>
-      <RsvpFlow ctx={ctx} />
+      <RsvpFlow ctx={ctx} brand={brand} />
       <p className="bg-paper pb-10 text-center">
         <a href="/schedule" className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-ink underline underline-offset-4">
           View your personal schedule →

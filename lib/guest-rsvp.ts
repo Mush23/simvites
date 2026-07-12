@@ -13,6 +13,8 @@ export interface GuestEventView {
   name: string
   startsAt: string | null
   venueName: string | null
+  /** Event accent colour — powers the keepsake dots (3b). */
+  accent: string | null
   deadlinePassed: boolean
   capacityFull: boolean
   status: 'pending' | 'attending' | 'declined'
@@ -72,7 +74,7 @@ export async function getGuestRsvpContext(siteSlug: string): Promise<GuestRsvpCo
 
   interface GuestRow { id: string; full_name: string; is_child: boolean }
   interface InviteRow { guest_id: string; event_id: string }
-  interface EventRow { id: string; name: string; starts_at: string | null; venue_name: string | null; capacity: number | null; rsvp_deadline: string | null; sort_order: number }
+  interface EventRow { id: string; name: string; starts_at: string | null; venue_name: string | null; accent: string | null; capacity: number | null; rsvp_deadline: string | null; sort_order: number }
   interface RespRow { guest_id: string; event_id: string; status: string }
   interface QRow { id: string; key: string; label: string; help_text: string | null; type: QuestionView['type']; options: unknown; required: boolean; show_if: unknown; event_id: string | null; sort_order: number }
   interface ARow { guest_id: string; question_id: string; value: unknown }
@@ -90,7 +92,7 @@ export async function getGuestRsvpContext(siteSlug: string): Promise<GuestRsvpCo
         ? db.from('invitations').select('guest_id, event_id').eq('site_id', site.id).in('guest_id', householdGuestIds)
             .then((r: { data: unknown }): InviteRow[] => (r.data ?? []) as InviteRow[])
         : Promise.resolve([] as InviteRow[]),
-      db.from('events').select('id, name, starts_at, venue_name, capacity, rsvp_deadline, sort_order')
+      db.from('events').select('id, name, starts_at, venue_name, accent, capacity, rsvp_deadline, sort_order')
         .eq('site_id', site.id).is('archived_at', null),
       fetchAll<{ guest_id: string; event_id: string; status: string }>(() =>
         db.from('responses').select('guest_id, event_id, status').eq('site_id', site.id)),
@@ -152,6 +154,7 @@ export async function getGuestRsvpContext(siteSlug: string): Promise<GuestRsvpCo
           name: e.name,
           startsAt: e.starts_at,
           venueName: e.venue_name,
+          accent: e.accent,
           deadlinePassed: !!deadline && new Date(deadline).getTime() < now,
           capacityFull:
             e.capacity != null && (attendingCount.get(e.id) ?? 0) >= e.capacity && !iAmAttending,
