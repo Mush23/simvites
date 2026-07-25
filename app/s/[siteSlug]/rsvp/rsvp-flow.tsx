@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CircleAlert } from 'lucide-react'
 import type { GuestRsvpContext, GuestEventView, GuestView, QuestionView } from '@/lib/guest-rsvp'
-import { formatEventDateTime } from '@/lib/utils'
+import { deriveInitials, formatEventDateTime } from '@/lib/utils'
 import { BRAND_NAME } from '@/lib/brand'
 import { submitGuestRsvp, type GuestSubmission } from './actions'
 
@@ -39,8 +39,10 @@ export function RsvpFlow({ ctx, brand }: {
   const [topError, setTopError] = useState<string | null>(null)
   // 3c: gaps only start showing once Send has been tapped with gaps open.
   const [showGaps, setShowGaps] = useState(false)
-  // A message for the couple — optional, household-level (original-site port).
-  const [note, setNote] = useState('')
+  // A message for the couple — optional, household-level (original-site
+  // port). Prefilled with the saved note so an edit keeps it; clearing the
+  // field clears the stored note deliberately.
+  const [note, setNote] = useState(ctx.message ?? '')
 
   const anyAttending = (guestId: string) =>
     Object.entries(choices).some(([k, v]) => k.startsWith(`${guestId}:`) && v === 'attending')
@@ -159,8 +161,7 @@ export function RsvpFlow({ ctx, brand }: {
       .join(' · ')
     const tableLine = [...new Set(ctx.guests.map((g) => g.tableName).filter(Boolean))].join(' · ')
 
-    const initials = brand?.initials?.trim() ||
-      ctx.siteTitle.split(/\s*(?:&|\+|\band\b)\s*/i).map((s) => s.trim()[0]).filter(Boolean).slice(0, 2).join('·').toUpperCase()
+    const initials = deriveInitials(ctx.siteTitle, brand?.initials)
     const savedOn = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 
     const onPdf = async () => {

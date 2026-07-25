@@ -44,9 +44,10 @@ export function NeedsYou({ items }: { items: NeedsYouItem[] }) {
                     destructive: false,
                   }))) return
                   setBusy(true)
-                  await adminExtendExpiry(n.siteId, 18)
+                  const res = await adminExtendExpiry(n.siteId, 18)
                   setBusy(false)
-                  notify(`${n.title} extended 18 months`)
+                  if (res?.error) notify(res.error, { tone: 'warn' })
+                  else notify(`${n.title} extended 18 months`)
                 }}
                 className="shrink-0 rounded-md border border-line px-2.5 py-1 text-[11px] font-medium text-ink hover:border-line-2 disabled:opacity-50">
                 +18 months…
@@ -71,8 +72,9 @@ export function DangerZone({ sites }: { sites: { id: string; title: string; slug
   async function archive() {
     if (!armed || !site || busy) return
     setBusy(true)
-    await adminArchiveSite(site.id, true)
+    const res = await adminArchiveSite(site.id, true)
     setBusy(false)
+    if (res?.error) { notify(res.error, { tone: 'warn' }); return }
     notify(`${site.title} archived — restore it from the register any time`)
     setSiteId(''); setTyped('')
   }

@@ -12,8 +12,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const now = new Date().toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
   return (
-    <OverlayProvider>
-      <div className="admin-ops min-h-screen bg-paper text-ink">
+    /* OverlayProvider sits INSIDE the ops scope so confirm dialogs and
+       toasts wear the graphite theme too — an ivory wedding-toned dialog
+       over the ops console would be exactly the confusion 4c prevents. */
+    <div className="admin-ops min-h-screen bg-paper text-ink">
+      <OverlayProvider>
         {admin && (
           <div className="flex items-center gap-3 border-b border-line bg-paper px-4 py-2.5">
             <span className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent">
@@ -30,7 +33,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </div>
         )}
         {children}
-      </div>
-    </OverlayProvider>
+      </OverlayProvider>
+    </div>
   )
 }

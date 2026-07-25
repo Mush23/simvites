@@ -12,29 +12,38 @@ async function gate() {
 }
 
 /** Comp / discount: flip a site's unlock without payment (100% discount). */
-export async function adminToggleUnlock(siteId: string, unlock: boolean) {
+export async function adminToggleUnlock(siteId: string, unlock: boolean): Promise<{ error?: string }> {
   const db = await gate()
-  await db.from('sites').update({ is_unlocked: unlock }).eq('id', siteId)
+  const { error } = await db.from('sites').update({ is_unlocked: unlock }).eq('id', siteId)
+  if (error) return { error: error.message }
+  // Best-effort audit trail — the unlock itself already succeeded.
   await db.from('activity_log').insert({
     site_id: siteId, verb: unlock ? 'admin_comped_unlock' : 'admin_revoked_unlock',
     entity_type: 'site', entity_id: siteId,
   })
   revalidatePath('/admin')
+  return {}
 }
 
 /** Archive / restore a site (lifecycle end: public page goes offline, data kept). */
-export async function adminArchiveSite(siteId: string, archive: boolean) {
+export async function adminArchiveSite(siteId: string, archive: boolean): Promise<{ error?: string }> {
   const db = await gate()
-  await db.from('sites').update({ archived_at: archive ? new Date().toISOString() : null }).eq('id', siteId)
+  const { error } = await db.from('sites')
+    .update({ archived_at: archive ? new Date().toISOString() : null }).eq('id', siteId)
+  if (error) return { error: error.message }
   revalidatePath('/admin')
+  return {}
 }
 
 /** Extend / set a site's hosting expiry by N months from now. */
-export async function adminExtendExpiry(siteId: string, months: number) {
+export async function adminExtendExpiry(siteId: string, months: number): Promise<{ error?: string }> {
   const db = await gate()
   const d = new Date(); d.setMonth(d.getMonth() + months)
-  await db.from('sites').update({ expires_at: d.toISOString(), archived_at: null }).eq('id', siteId)
+  const { error } = await db.from('sites')
+    .update({ expires_at: d.toISOString(), archived_at: null }).eq('id', siteId)
+  if (error) return { error: error.message }
   revalidatePath('/admin')
+  return {}
 }
 
 /** Reset a user's password — returns a one-time temp password to hand over. */

@@ -116,11 +116,14 @@ export async function inviteSideToEvent(side: string | null, eventId: string) {
   if (!site) return { error: 'No site.' }
   const supabase = await createClient()
 
-  let hh = supabase.from('households').select('id').eq('site_id', site.siteId).is('archived_at', null)
-  if (side !== null) hh = hh.eq('side', side)
-  const { data: households, error: hErr } = await hh
+  // Match sides after trimming — the UI's chips are derived from trimmed
+  // values, and imported/legacy rows may carry stray whitespace.
+  const { data: households, error: hErr } = await supabase.from('households')
+    .select('id, side').eq('site_id', site.siteId).is('archived_at', null)
   if (hErr) return { error: hErr.message }
-  const hhIds = (households ?? []).map((h) => h.id)
+  const hhIds = (households ?? [])
+    .filter((h) => side === null || (h.side ?? '').trim() === side)
+    .map((h) => h.id)
   if (!hhIds.length) return { ok: true, invited: 0 }
 
   const { data: guests, error: gErr } = await supabase

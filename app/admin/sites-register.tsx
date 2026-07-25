@@ -150,9 +150,14 @@ function SiteMenu({ site, onClose }: { site: RegisterRow; onClose: () => void })
   const [busy, setBusy] = useState(false)
   const [tempPassword, setTempPassword] = useState<string | null>(null)
 
-  async function run(fn: () => Promise<unknown>, done: string) {
+  async function run(fn: () => Promise<{ error?: string }>, done: string) {
     setBusy(true)
-    try { await fn(); notify(done) } finally { setBusy(false); onClose() }
+    try {
+      const res = await fn()
+      // The truth, not just the intent: failed mutations toast as failures.
+      if (res?.error) notify(res.error, { tone: 'warn' })
+      else notify(done)
+    } finally { setBusy(false); onClose() }
   }
 
   const item = 'block w-full rounded-md px-2.5 py-2 text-left text-[12.5px] text-ink hover:bg-paper-2 disabled:opacity-50'

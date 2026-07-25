@@ -49,6 +49,8 @@ export interface GuestRsvpContext {
   answers: Record<string, Record<string, unknown>>
   /** Household allocation per event — "up to N of you" (original-site port). */
   eventLimits: Record<string, number>
+  /** The household's saved note for the couple, prefilled so edits keep it. */
+  message: string | null
   allDeadlinesPassed: boolean
 }
 
@@ -105,6 +107,14 @@ export async function getGuestRsvpContext(siteSlug: string): Promise<GuestRsvpCo
             .then((r: { data: unknown }): ARow[] => (r.data ?? []) as ARow[])
         : Promise.resolve([] as ARow[]),
     ])
+
+  // The household's latest saved note for the couple — prefilled into the
+  // form so an edit re-submits it instead of wiping it.
+  const { data: msgRow } = householdGuestIds.length
+    ? await db.from('responses').select('message, responded_at')
+        .in('guest_id', householdGuestIds).not('message', 'is', null)
+        .order('responded_at', { ascending: false }).limit(1).maybeSingle()
+    : { data: null }
 
   // Household allocation caps per event (absent = uncapped).
   const { data: allocRows } = await db.from('event_allocations')
@@ -202,6 +212,7 @@ export async function getGuestRsvpContext(siteSlug: string): Promise<GuestRsvpCo
     questions: questionViews,
     answers: answerMap,
     eventLimits,
+    message: (msgRow as { message: string | null } | null)?.message ?? null,
     allDeadlinesPassed: allEvents.length > 0 && allEvents.every((e) => e.deadlinePassed),
   }
 }

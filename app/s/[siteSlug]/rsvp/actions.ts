@@ -24,6 +24,7 @@ export interface SubmitResult {
 
 const FRIENDLY: [RegExp, string][] = [
   [/event full/, 'This event has just reached capacity.'],
+  [/allocation full/, 'Your household’s allocation for this event is full.'],
   [/deadline passed/, 'The RSVP deadline for this event has passed.'],
   [/not invited/, 'You are not invited to this event.'],
   [/missing required answers/, 'Please answer the required questions.'],
@@ -78,36 +79,9 @@ export async function submitGuestRsvp(
   const eventErrors: Record<string, string> = {}
   let anySuccess = false
 
-  // Household allocation backstop ("up to N of you" — original-site port).
-  // The form enforces this too; here the final "yes" count per capped event
-  // is checked across this submission plus the household's existing answers,
-  // and over-cap yeses are rejected before they reach the RPC.
-  const { data: allocRows } = await db.from('event_allocations')
-    .select('event_id, max_guests').eq('household_id', session.householdId)
-  const overCap = new Set<string>()
-  for (const a of (allocRows ?? []) as { event_id: string; max_guests: number }[]) {
-    const submittedFor = new Set(
-      submissions.filter((s) => s.choices.some((c) => c.eventId === a.event_id)).map((s) => s.guestId),
-    )
-    const { count: standing } = await db.from('responses')
-      .select('id', { count: 'exact', head: true })
-      .eq('event_id', a.event_id).eq('status', 'attending')
-      .in('guest_id', [...allowed].filter((id) => !submittedFor.has(id)))
-    const submittedYes = submissions.filter((s) =>
-      s.choices.some((c) => c.eventId === a.event_id && c.status === 'attending')).length
-    if ((standing ?? 0) + submittedYes > a.max_guests) overCap.add(a.event_id)
-  }
-  if (overCap.size) {
-    for (const s of submissions) {
-      s.choices = s.choices.filter((c) => {
-        if (c.status === 'attending' && overCap.has(c.eventId)) {
-          eventErrors[`${s.guestId}:${c.eventId}`] = 'Your household’s allocation for this event is full.'
-          return false
-        }
-        return true
-      })
-    }
-  }
+  // Household allocations ("up to N of you") are enforced inside
+  // submit_response, under the same event row lock as capacity — race-free,
+  // and surfaced per event through the FRIENDLY mapping above.
 
   for (const s of submissions) {
     for (const choice of s.choices) {
@@ -122,7 +96,9 @@ export async function submitGuestRsvp(
         p_guest: s.guestId,
         p_event: choice.eventId,
         p_status: choice.status,
-        p_message: message?.trim().slice(0, 1000) || null,
+        // Contract with the RPC: null preserves the stored note, '' clears
+        // it, text replaces it — an edit never silently wipes the message.
+        p_message: message === undefined ? null : message.trim().slice(0, 1000),
         p_custom: {},
         p_answers: answersForEvent,
       })
