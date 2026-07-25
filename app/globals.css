@@ -660,6 +660,12 @@
 .puck-dock [class*='_Sidebar-resizeHandle'] {
   display: none;
 }
+/* Clear the floating chips: at scroll 0 the artifact (and a selected top
+   block's action bar) starts below the return/View-live band instead of
+   underneath it. */
+.puck-dock [class*='_PuckCanvas-root'] {
+  padding-top: 48px;
+}
 .puck-dock [class*='_PuckLayout-inner'] {
   --puck-user-left-side-bar-width: 0px;
   --puck-user-right-side-bar-width: 0px;

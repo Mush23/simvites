@@ -3,7 +3,7 @@ import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { emailConfigured } from '@/lib/email'
-import { formatEventDateTime } from '@/lib/utils'
+import { deriveInitials, formatEventDateTime } from '@/lib/utils'
 import { InvitationsClient, type HouseholdInviteRow } from './invitations-client'
 
 export const metadata = { title: 'Invitations · Occasio' }
@@ -46,8 +46,7 @@ export default async function InvitationsPage() {
 
   const theme = (siteRow?.theme ?? {}) as { initials?: string }
   const siteTitle = siteRow?.title ?? site!.title
-  const initials = theme.initials?.trim() ||
-    siteTitle.split(/\s*(?:&|\+|\band\b)\s*/i).map((s: string) => s.trim()[0]).filter(Boolean).slice(0, 2).join('·').toUpperCase()
+  const initials = deriveInitials(siteTitle, theme.initials)
   const deadlineText = siteRow?.rsvp_deadline_default
     ? new Date(siteRow.rsvp_deadline_default).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
     : null

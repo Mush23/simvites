@@ -97,19 +97,34 @@ export async function downloadInvitePdf(opts: {
   doc.line(CX + inner, y - 2, CX + inner + 11, y - 2)
   const headerEnd = y + 4.5
 
-  // ── Measure event blocks so they distribute evenly, never crowding ──
-  const blocks = opts.events.map((e) => {
-    doc.setFont('times', 'normal')
-    doc.setFontSize(9.5)
-    const venueLine = [e.venue, e.address].filter(Boolean).join('  ·  ')
-    const venueAddr = venueLine ? (doc.splitTextToSize(venueLine, CW) as string[]) : []
-    const h = 12 + venueAddr.length * 4.4 + (e.dressCode ? 4 : 0)
-    return { e, venueAddr, h }
-  })
-  const totalBlocks = blocks.reduce((s, b) => s + b.h, 0)
+  // ── Measure event blocks so they distribute evenly, never crowding.
+  //    A crowded page (6+ events, long addresses) switches to compact
+  //    metrics rather than overrunning the footer script and QR. ──
+  const NORMAL = { name: 14, meta: 8.5, venue: 9.5, lineH: 4, pad: 12, dress: 4 }
+  const COMPACT = { name: 11.5, meta: 7.5, venue: 8.5, lineH: 3.4, pad: 9.2, dress: 3.4 }
+  const footerTop = 196
+  const regionH = footerTop - headerEnd
+
+  const measure = (m: typeof NORMAL) =>
+    opts.events.map((e) => {
+      doc.setFont('times', 'normal')
+      doc.setFontSize(m.venue)
+      const venueLine = [e.venue, e.address].filter(Boolean).join('  ·  ')
+      const venueAddr = venueLine ? (doc.splitTextToSize(venueLine, CW) as string[]) : []
+      const h = m.pad + venueAddr.length * (m.lineH + 0.4) + (e.dressCode ? m.dress : 0)
+      return { e, venueAddr, h }
+    })
+
+  let metrics = NORMAL
+  let blocks = measure(NORMAL)
+  let totalBlocks = blocks.reduce((s, b) => s + b.h, 0)
+  if (totalBlocks + (blocks.length + 1) * 2.5 > regionH) {
+    metrics = COMPACT
+    blocks = measure(COMPACT)
+    totalBlocks = blocks.reduce((s, b) => s + b.h, 0)
+  }
 
   // ── Footer: script line · QR · deadline ──
-  const footerTop = 196
   doc.setFont('times', 'italic')
   doc.setFontSize(15)
   doc.setTextColor(...BRASS)
@@ -135,32 +150,31 @@ export async function downloadInvitePdf(opts: {
   }
 
   // ── Events: even gaps between header and footer ──
-  const regionH = footerTop - headerEnd
   let gap = (regionH - totalBlocks) / (blocks.length + 1)
-  if (gap < 2.5) gap = 2.5
+  if (gap < 2) gap = 2
   let top = headerEnd + gap
   for (const b of blocks) {
     const accent = hexToRgb(b.e.accent)
-    let ty = top + 4.6
+    let ty = top + metrics.pad * 0.38
     doc.setFont('times', 'bold')
-    doc.setFontSize(14)
+    doc.setFontSize(metrics.name)
     doc.setTextColor(...INK)
     centered(b.e.name, ty)
-    ty += 4.4
+    ty += metrics.lineH + 0.4
     doc.setFont('helvetica', 'normal')
-    doc.setFontSize(8.5)
+    doc.setFontSize(metrics.meta)
     doc.setTextColor(accent[0], accent[1], accent[2])
     centered(b.e.dateText, ty)
-    ty += 4.2
+    ty += metrics.lineH + 0.2
     doc.setFont('times', 'normal')
-    doc.setFontSize(9.5)
+    doc.setFontSize(metrics.venue)
     doc.setTextColor(...DEEP)
     const vTop = ty
     let vMaxW = 0
     b.venueAddr.forEach((ln) => {
       vMaxW = Math.max(vMaxW, doc.getTextWidth(ln))
       centered(ln, ty)
-      ty += 4
+      ty += metrics.lineH
     })
     if (b.venueAddr.length) {
       const q = encodeURIComponent([b.e.venue, b.e.address].filter(Boolean).join(' '))
@@ -168,10 +182,10 @@ export async function downloadInvitePdf(opts: {
     }
     if (b.e.dressCode) {
       doc.setFont('helvetica', 'italic')
-      doc.setFontSize(7.5)
+      doc.setFontSize(metrics.meta - 1)
       doc.setTextColor(...BRASS)
       centered(`Dress · ${b.e.dressCode}`, ty)
-      ty += 4
+      ty += metrics.dress
     }
     top += b.h + gap
   }

@@ -22,3 +22,20 @@ export function formatEventDateTime(iso?: string | null): string | undefined {
   }).format(d).replace(',', ' ·')
 }
 
+
+/**
+ * The couple's monogram initials — the brand-kit override when set, else
+ * derived from the site title ("Aanya & Dev" → "A·D"). One home for the
+ * rule so the site menu, keepsake and invitation PDF always agree.
+ */
+export function deriveInitials(title: string, override?: string | null): string {
+  const set = override?.trim()
+  if (set) return set
+  return title
+    .split(/\s*(?:&|\+|\band\b)\s*/i)
+    .map((s) => s.trim()[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('·')
+    .toUpperCase()
+}
