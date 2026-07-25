@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import { requirePlatformAdmin } from '@/lib/platform-admin'
 import { createAdminClient } from '@/lib/supabase/server'
-import { fetchAll } from '@/lib/supabase/fetch-all'
 import { PageHeader, StatCard } from '@/components/app/ui'
 import { ResetButton } from './reset-button'
 import { PriceEditor } from './price-editor'
@@ -25,7 +24,7 @@ export default async function PlatformAdminPage() {
   const [
     { data: sites }, { data: profiles }, { count: orgs },
     { data: events }, { data: guests }, { data: payments }, { data: messages },
-    { data: stds }, { data: memberships }, responseRows,
+    { data: stds }, { data: memberships }, { data: respStats },
   ] = await Promise.all([
     db.from('sites').select('id, org_id, title, slug, status, is_unlocked, expires_at, archived_at, created_at').order('created_at', { ascending: false }),
     db.from('profiles').select('id, email, created_at').order('created_at', { ascending: false }).limit(200),
@@ -36,10 +35,9 @@ export default async function PlatformAdminPage() {
     db.from('messages').select('site_id'),
     db.from('save_the_dates').select('site_id, published'),
     db.from('memberships').select('org_id, role, profiles(id, email)').eq('role', 'owner'),
-    // Per-site RSVP totals + last activity for the register (4b) — paged
-    // past the 1000-row cap so the counts stay honest at scale.
-    fetchAll<{ site_id: string; responded_at: string | null }>(() =>
-      db.from('responses').select('site_id, responded_at')),
+    // Per-site RSVP aggregates for the register (4b) + ops feed (4c): one
+    // grouped query (O(sites) rows) instead of a full responses fetch.
+    db.rpc('admin_response_stats'),
   ])
   // 4c: real platform activity for the ops feed.
   const { data: logRows } = await db.from('activity_log')
@@ -62,14 +60,11 @@ export default async function PlatformAdminPage() {
   const stdBy = new Map<string, boolean>()
   for (const s of (stds ?? []) as { site_id: string; published: boolean }[]) if (s.published) stdBy.set(s.site_id, true)
 
-  const responses = responseRows.length
-  const rsvpsBy = countBy(responseRows)
-  const lastRsvpBy = new Map<string, string>()
-  for (const r of responseRows) {
-    if (!r.responded_at) continue
-    const prev = lastRsvpBy.get(r.site_id)
-    if (!prev || r.responded_at > prev) lastRsvpBy.set(r.site_id, r.responded_at)
-  }
+  interface RespStat { site_id: string; total: number; last_at: string | null; last_day: number }
+  const stats = (respStats ?? []) as RespStat[]
+  const responses = stats.reduce((n, s) => n + Number(s.total), 0)
+  const rsvpsBy = new Map(stats.map((s) => [s.site_id, Number(s.total)]))
+  const lastRsvpBy = new Map(stats.filter((s) => s.last_at).map((s) => [s.site_id, s.last_at!]))
 
   const ownerByOrg = new Map<string, string>()
   const ownerIdByOrg = new Map<string, string>()
@@ -122,19 +117,11 @@ export default async function PlatformAdminPage() {
     if (!t || !m) continue
     feed.push({ key: `log:${l.verb}:${l.created_at}:${l.site_id}`, tone: m[0], title: t, text: m[1], at: l.created_at })
   }
-  const dayAgo = new Date(nowMs - 86400000).toISOString()
-  const burst = new Map<string, { n: number; last: string }>()
-  for (const r of responseRows) {
-    if (!r.responded_at || r.responded_at < dayAgo) continue
-    const b = burst.get(r.site_id) ?? { n: 0, last: r.responded_at }
-    b.n++
-    if (r.responded_at > b.last) b.last = r.responded_at
-    burst.set(r.site_id, b)
-  }
-  for (const [siteId, b] of burst) {
-    const t = titleBySite.get(siteId)
-    if (!t) continue
-    feed.push({ key: `rsvp:${siteId}`, tone: 'ok', title: t, text: `${b.n} RSVP${b.n === 1 ? '' : 's'} in the last day`, at: b.last })
+  for (const s of stats) {
+    const n = Number(s.last_day)
+    const t = titleBySite.get(s.site_id)
+    if (!n || !t || !s.last_at) continue
+    feed.push({ key: `rsvp:${s.site_id}`, tone: 'ok', title: t, text: `${n} RSVP${n === 1 ? '' : 's'} in the last day`, at: s.last_at })
   }
   const monthAgo = new Date(nowMs - 30 * 86400000).toISOString()
   for (const s of siteRows) {

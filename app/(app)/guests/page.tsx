@@ -54,6 +54,42 @@ export default async function GuestsPage() {
     eventsByGuest.set(i.guest_id, arr)
   }
 
+  // "Answers so far" tallies are aggregated HERE, per event, so the raw
+  // answers/questions tables never ride the RSC payload to the client —
+  // the lens receives O(events × questions × options), not O(answers).
+  const invitedByEvent = new Map<string, Set<string>>()
+  for (const i of invitations) {
+    const set = invitedByEvent.get(i.event_id) ?? new Set()
+    set.add(i.guest_id)
+    invitedByEvent.set(i.event_id, set)
+  }
+  const answersByQuestion = new Map<string, { guestId: string; value: unknown }[]>()
+  for (const a of answers) {
+    const arr = answersByQuestion.get(a.question_id) ?? []
+    arr.push({ guestId: a.guest_id, value: a.value })
+    answersByQuestion.set(a.question_id, arr)
+  }
+  const tallies: Record<string, { label: string; rows: [string, number][] }[]> = {}
+  for (const e of events ?? []) {
+    const invited = invitedByEvent.get(e.id) ?? new Set()
+    tallies[e.id] = (questions ?? [])
+      .filter((q) => q.event_id === e.id || q.event_id === null)
+      .map((q) => {
+        const counts = new Map<string, number>()
+        for (const a of answersByQuestion.get(q.id) ?? []) {
+          if (!invited.has(a.guestId)) continue
+          const vals = Array.isArray(a.value) ? a.value : [a.value]
+          for (const v of vals) {
+            const label = typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v ?? '')
+            if (!label) continue
+            counts.set(label, (counts.get(label) ?? 0) + 1)
+          }
+        }
+        return { label: q.label, rows: [...counts.entries()].sort((x, y) => y[1] - x[1]) as [string, number][] }
+      })
+      .filter((t) => t.rows.length > 0)
+  }
+
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-7">
       <PageHeader
@@ -67,10 +103,7 @@ export default async function GuestsPage() {
           startsAt: e.starts_at, venueName: e.venue_name,
         }))}
         responses={responses.map((r) => ({ guestId: r.guest_id, eventId: r.event_id, status: r.status }))}
-        questions={(questions ?? []).map((q) => ({
-          id: q.id, eventId: q.event_id, label: q.label, type: q.type, options: (q.options ?? []) as string[],
-        }))}
-        answers={answers.map((a) => ({ guestId: a.guest_id, questionId: a.question_id, value: a.value }))}
+        tallies={tallies}
         allocations={(allocations ?? []).map((a) => ({
           householdId: a.household_id, eventId: a.event_id, maxGuests: a.max_guests,
         }))}

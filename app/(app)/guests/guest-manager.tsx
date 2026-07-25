@@ -21,21 +21,20 @@ export interface MatrixGuest {
   isChild: boolean; plusOneAllowed: boolean; invitedEventIds: string[]
 }
 export interface MatrixHousehold { id: string; name: string; side: string | null; guests: MatrixGuest[] }
-/** 2c: RSVP data the lens needs — status per guest × event, plus answers. */
+/** 2c: RSVP data the lens needs — status per guest × event. */
 export interface RsvpStatusRow { guestId: string; eventId: string; status: string }
-export interface LensQuestion { id: string; eventId: string | null; label: string; type: string; options: string[] }
-export interface LensAnswer { guestId: string; questionId: string; value: unknown }
+/** Server-aggregated "answers so far": eventId → question tallies. */
+export type LensTallies = Record<string, { label: string; rows: [string, number][] }[]>
 /** Per-household event cap — "up to N guests" (original-site port). */
 export interface AllocationRow { householdId: string; eventId: string; maxGuests: number }
 
 export function GuestManager({
-  events, households, responses = [], questions = [], answers = [], allocations = [], openedHouseholdIds = [],
+  events, households, responses = [], tallies = {}, allocations = [], openedHouseholdIds = [],
 }: {
   events: MatrixEvent[]
   households: MatrixHousehold[]
   responses?: RsvpStatusRow[]
-  questions?: LensQuestion[]
-  answers?: LensAnswer[]
+  tallies?: LensTallies
   allocations?: AllocationRow[]
   /** Households that have opened their invite link at least once. */
   openedHouseholdIds?: string[]
@@ -52,6 +51,24 @@ export function GuestManager({
   // 2c: pick a celebration to plan it on its own — 'all' keeps the register.
   const [lensId, setLensId] = useState<string>('all')
   const lensEvent = events.find((e) => e.id === lensId) ?? null
+
+  // One pass over guests + one over responses, not per-event scans per render.
+  const lensStats = useMemo(() => {
+    const invitedIdsByEvent = new Map<string, Set<string>>()
+    for (const h of households) for (const g of h.guests) for (const ev of g.invitedEventIds) {
+      const set = invitedIdsByEvent.get(ev) ?? new Set()
+      set.add(g.id)
+      invitedIdsByEvent.set(ev, set)
+    }
+    const stats = new Map<string, { invited: number; going: number }>()
+    for (const e of events) stats.set(e.id, { invited: invitedIdsByEvent.get(e.id)?.size ?? 0, going: 0 })
+    for (const r of responses) {
+      if (r.status !== 'attending') continue
+      const s = stats.get(r.eventId)
+      if (s && invitedIdsByEvent.get(r.eventId)?.has(r.guestId)) s.going++
+    }
+    return stats
+  }, [events, households, responses])
 
   async function onAddHousehold(fd: FormData) {
     setError(null)
@@ -154,9 +171,7 @@ export function GuestManager({
             <span className="mt-0.5 block font-mono text-[9.5px] text-ink-3 nums">{totalGuests} guests</span>
           </button>
           {events.map((e) => {
-            const invited = households.reduce((n, h) => n + h.guests.filter((g) => g.invitedEventIds.includes(e.id)).length, 0)
-            const invitedIds = new Set(households.flatMap((h) => h.guests.filter((g) => g.invitedEventIds.includes(e.id)).map((g) => g.id)))
-            const going = responses.filter((r) => r.eventId === e.id && r.status === 'attending' && invitedIds.has(r.guestId)).length
+            const { invited, going } = lensStats.get(e.id) ?? { invited: 0, going: 0 }
             return (
               <button key={e.id} type="button" onClick={() => setLensId(lensId === e.id ? 'all' : e.id)}
                 className={`min-w-[124px] flex-1 rounded-card border px-3 py-2.5 text-left transition-colors sm:flex-none ${
@@ -195,7 +210,7 @@ export function GuestManager({
 
       {shown.length > 0 && lensEvent && (
         <EventLens event={lensEvent} households={shown} sides={sides}
-          responses={responses} questions={questions} answers={answers}
+          responses={responses} tallies={tallies[lensEvent.id] ?? []}
           openedHouseholdIds={openedHouseholdIds} onChanged={refresh} />
       )}
 
@@ -217,13 +232,13 @@ export function GuestManager({
  * invitation for THIS event (pill = invited, ✓/✗ = answered); RSVP answers
  * and the chase list live beside the list, so the daily "check + chase"
  * loop happens here. */
-function EventLens({ event, households, sides, responses, questions, answers, openedHouseholdIds, onChanged }: {
+function EventLens({ event, households, sides, responses, tallies, openedHouseholdIds, onChanged }: {
   event: MatrixEvent
   households: MatrixHousehold[]
   sides: string[]
   responses: RsvpStatusRow[]
-  questions: LensQuestion[]
-  answers: LensAnswer[]
+  /** Server-aggregated "answers so far" for THIS event. */
+  tallies: { label: string; rows: [string, number][] }[]
   openedHouseholdIds: string[]
   onChanged: () => void
 }) {
@@ -232,16 +247,20 @@ function EventLens({ event, households, sides, responses, questions, answers, op
     () => new Map(responses.filter((r) => r.eventId === event.id).map((r) => [r.guestId, r.status])),
     [responses, event.id])
 
-  const invitedGuests = households.flatMap((h) => h.guests).filter((g) => g.invitedEventIds.includes(event.id))
-  const invitedIds = new Set(invitedGuests.map((g) => g.id))
+  // Derived once per data change, not per keystroke of the parent search box.
+  const { invitedGuests, rows, householdOf } = useMemo(() => {
+    const invitedGuests = households.flatMap((h) => h.guests).filter((g) => g.invitedEventIds.includes(event.id))
+    const rows = households.filter((h) => h.guests.some((g) => g.invitedEventIds.includes(event.id)))
+    const householdOf = new Map(households.flatMap((h) => h.guests.map((g) => [g.id, h.id] as const)))
+    return { invitedGuests, rows, householdOf }
+  }, [households, event.id])
+
   const going = invitedGuests.filter((g) => respBy.get(g.id) === 'attending').length
   const declined = invitedGuests.filter((g) => respBy.get(g.id) === 'declined').length
   const awaitingGuests = invitedGuests.filter((g) => !respBy.get(g.id) || respBy.get(g.id) === 'pending')
   const awaiting = awaitingGuests.length
   const denom = event.capacity && event.capacity > 0 ? Math.max(event.capacity, invitedGuests.length) : invitedGuests.length
   const pct = (n: number) => (denom ? `${(n / denom) * 100}%` : '0%')
-
-  const rows = households.filter((h) => h.guests.some((g) => g.invitedEventIds.includes(event.id)))
   const notYetInvited = households.length - rows.length
 
   async function inviteSide(side: string | null) {
@@ -257,25 +276,6 @@ function EventLens({ event, households, sides, responses, questions, answers, op
     else notify(`${res.invited ?? 0} guests invited to ${event.name}`)
     onChanged()
   }
-
-  // Answers so far: this event's questions plus wedding-wide ones, tallied
-  // over this event's invited guests.
-  const tallies = questions
-    .filter((q) => q.eventId === event.id || q.eventId === null)
-    .map((q) => {
-      const counts = new Map<string, number>()
-      for (const a of answers) {
-        if (a.questionId !== q.id || !invitedIds.has(a.guestId)) continue
-        const vals = Array.isArray(a.value) ? a.value : [a.value]
-        for (const v of vals) {
-          const label = typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v)
-          if (!label) continue
-          counts.set(label, (counts.get(label) ?? 0) + 1)
-        }
-      }
-      return { q, rows: [...counts.entries()].sort((a, b) => b[1] - a[1]) }
-    })
-    .filter((t) => t.rows.length > 0)
 
   return (
     <div className="space-y-3">
@@ -374,10 +374,10 @@ function EventLens({ event, households, sides, responses, questions, answers, op
           {tallies.length > 0 && (
             <div className="rounded-card border border-line bg-surface px-4 py-3.5 shadow-card">
               <p className="mb-1.5 text-[11px] font-medium text-ink-2">Answers so far</p>
-              {tallies.map(({ q, rows: opts }) => (
-                <div key={q.id} className="mb-2 last:mb-0">
-                  <p className="microlabel mb-0.5">{q.label}</p>
-                  {opts.map(([label, n]) => (
+              {tallies.map((t) => (
+                <div key={t.label} className="mb-2 last:mb-0">
+                  <p className="microlabel mb-0.5">{t.label}</p>
+                  {t.rows.map(([label, n]) => (
                     <p key={label} className="flex justify-between border-b border-line py-1 text-[12.5px] text-ink-2 last:border-0">
                       {label} <b className="font-mono font-semibold text-ink nums">{n}</b>
                     </p>
@@ -390,7 +390,6 @@ function EventLens({ event, households, sides, responses, questions, answers, op
             // The single most actionable chase signal (original-site port):
             // they SAW the invitation and went quiet vs never opened it.
             const opened = new Set(openedHouseholdIds)
-            const householdOf = new Map(households.flatMap((h) => h.guests.map((g) => [g.id, h.id] as const)))
             const hot = awaitingGuests.filter((g) => opened.has(householdOf.get(g.id) ?? ''))
             const cold = awaitingGuests.filter((g) => !opened.has(householdOf.get(g.id) ?? ''))
             const names = (list: MatrixGuest[]) => (
@@ -442,8 +441,8 @@ function GuestEventChip({ guest, eventId, status, onChanged }: {
     const next = !on
     setOn(next)
     const res = await setInvitation(guest.id, eventId, next)
+    // revalidatePath in the action refreshes the page; no second refetch.
     if (res?.error) setOn(initial) // roll back on failure
-    else onChanged()
   }
 
   const mark = on && status === 'attending' ? '✓' : on && status === 'declined' ? '✗' : ''
@@ -475,10 +474,21 @@ function Register({ households, events, openId, onOpen }: {
   onOpen: (id: string) => void
 }) {
   const cols = { gridTemplateColumns: `minmax(180px,2fr) 64px 56px repeat(${events.length}, minmax(88px,1fr))` }
+  // One pass over guests; cells and totals become O(1) lookups so search
+  // keystrokes don't re-scan households × events × guests.
+  const { countsByHousehold, totals } = useMemo(() => {
+    const countsByHousehold = new Map<string, Map<string, number>>()
+    for (const h of households) {
+      const m = new Map<string, number>()
+      for (const g of h.guests) for (const ev of g.invitedEventIds) m.set(ev, (m.get(ev) ?? 0) + 1)
+      countsByHousehold.set(h.id, m)
+    }
+    const totals = events.map((e) =>
+      households.reduce((n, h) => n + (countsByHousehold.get(h.id)?.get(e.id) ?? 0), 0))
+    return { countsByHousehold, totals }
+  }, [households, events])
   const invitedTo = (h: MatrixHousehold, eventId: string) =>
-    h.guests.filter((g) => g.invitedEventIds.includes(eventId)).length
-  const totals = events.map((e) =>
-    households.reduce((n, h) => n + invitedTo(h, e.id), 0))
+    countsByHousehold.get(h.id)?.get(eventId) ?? 0
 
   return (
     <div className="overflow-x-auto rounded-card border border-line bg-surface shadow-card">
@@ -561,12 +571,12 @@ function HouseholdDrawer({ household, events, allocations, onClose, onChanged }:
     if (res?.error) setError(res.error); else onChanged()
   }
 
-  /** Whole-household toggle per event — one batched server action. */
+  /** Whole-household toggle per event — one batched server action. The
+   * action's revalidatePath streams the update; no extra refresh. */
   async function toggleAll(eventId: string, invite: boolean) {
     const res = await setHouseholdInvitations(household.id, eventId, invite)
     if (res?.error) notify('Could not update the household — try again')
     else notify(invite ? `${household.name} invited` : `${household.name} uninvited`)
-    onChanged()
   }
 
   const emails = household.guests.filter((g) => g.email).length
@@ -657,8 +667,7 @@ function HouseholdDrawer({ household, events, allocations, onClose, onChanged }:
             <div className="mt-2 space-y-1.5">
               {events.map((e) => (
                 <AllocationField key={e.id} household={household} event={e}
-                  current={allocations.find((a) => a.eventId === e.id)?.maxGuests ?? null}
-                  onChanged={onChanged} />
+                  current={allocations.find((a) => a.eventId === e.id)?.maxGuests ?? null} />
               ))}
             </div>
           </div>
@@ -689,11 +698,10 @@ function HouseholdDrawer({ household, events, allocations, onClose, onChanged }:
 }
 
 /** One event's allocation cap — commits on blur / Enter, clears on blank. */
-function AllocationField({ household, event, current, onChanged }: {
+function AllocationField({ household, event, current }: {
   household: MatrixHousehold
   event: MatrixEvent
   current: number | null
-  onChanged: () => void
 }) {
   const [busy, setBusy] = useState(false)
 
@@ -709,7 +717,6 @@ function AllocationField({ household, event, current, onChanged }: {
       notify(next === null
         ? `${event.name}: cap removed for ${household.name}`
         : `${event.name}: up to ${next} from ${household.name}`)
-      onChanged()
     }
   }
 
@@ -745,8 +752,10 @@ function GuestCard({ guest, events, onChanged }: {
     if (nowInvited) next.add(eventId); else next.delete(eventId)
     setInvited(next)
     const res = await setInvitation(guest.id, eventId, nowInvited)
+    // No router.refresh() here: the action's revalidatePath('/guests')
+    // already streams the updated tree — a second full refetch per pill
+    // toggle just doubled the page's heaviest work.
     if (res?.error) setInvited(initial) // roll back on failure
-    else onChanged()
   }
 
   return (
