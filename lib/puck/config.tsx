@@ -338,6 +338,35 @@ for (const key of Object.keys(siteConfig.components)) {
 
 export type SiteData = Data<SiteBlocks>
 
+/** A valid but empty document — what a blank page should render as. */
+export const EMPTY_DOC: SiteData = { root: { props: {} }, content: [] }
+
+/**
+ * Is this stored `puck_data` something Render can actually take?
+ *
+ * Pages are created with `puck_data` defaulting to `'{}'` (see the schema and
+ * scripts/seed-demo.mjs), and Puck's Render THROWS on a document with no
+ * content array — it does not degrade to blank. A `?? starterDoc` null-check
+ * does not catch `{}`, because `{}` is not nullish. Publishing a freshly seeded
+ * site before touching the editor therefore served guests an error page.
+ *
+ * Every consumer must normalise through this, not null-check.
+ */
+export function isRenderableDoc(doc: unknown): doc is SiteData {
+  const d = doc as SiteData | null
+  return !!d && typeof d === 'object' && Array.isArray(d.content)
+}
+
+/**
+ * The document to render for a page, matching what the editor shows for the
+ * same row — the home page falls back to the template starter, other pages
+ * render blank, and neither can throw.
+ */
+export function docForPage(doc: unknown, isHome: boolean, starter: SiteData): SiteData {
+  if (isRenderableDoc(doc) && doc.content.length > 0) return doc
+  return isHome ? starter : EMPTY_DOC
+}
+
 // Starter document for a new site's home page.
 export const starterDoc: SiteData = {
   root: { props: {} },

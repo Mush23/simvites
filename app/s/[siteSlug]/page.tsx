@@ -2,7 +2,7 @@ import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { Render } from '@puckeditor/core/rsc'
 import { getPublishedSnapshot } from '@/lib/public-site'
-import { siteConfig, starterDoc } from '@/lib/puck/config'
+import { siteConfig, docForPage } from '@/lib/puck/config'
 import { siteStyleProps } from '@/lib/site-style'
 import { GUEST_COOKIE, verifyGuestSession } from '@/lib/guest-session'
 import { createAdminClient } from '@/lib/supabase/server'
@@ -40,7 +40,13 @@ export default async function PublicSitePage({
 
   const styleProps = siteStyleProps(snap.theme)
   const home = snap.pages.find((p) => p.is_home) ?? snap.pages[0]
-  const data = home?.puck_data ?? starterDoc
+  // Normalised, not null-checked: stored `{}` is not nullish, and Render throws
+  // on a document with no content array. The starter also comes from the site's
+  // OWN template, which is what the editor shows for the same row — the generic
+  // starterDoc diverged for every template except the default.
+  const { getTemplate } = await import('@/lib/templates/registry')
+  const template = getTemplate((snap.theme as { template?: string } | null)?.template)
+  const data = docForPage(home?.puck_data, Boolean(home?.is_home), template.starterDoc)
 
   // Personalised greeting: if this visitor followed their invite link, greet
   // their household by name (cookie → household, server-side only).
