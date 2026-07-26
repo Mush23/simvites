@@ -36,7 +36,7 @@ export function DirectoryManager({ rows }: { rows: DirectoryRow[] }) {
       <span className="microlabel mb-1 block">{label}</span>
       <input value={(editing?.[k] as string) ?? ''} placeholder={placeholder}
         onChange={(e) => setEditing((cur) => ({ ...(cur as DirectoryVendorInput), [k]: e.target.value }))}
-        className="w-full rounded-md border border-line bg-paper-2 px-2.5 py-1.5 text-[13px] text-ink outline-none focus:border-accent" />
+        className="w-full rounded-md border border-line bg-paper-2 px-2.5 py-1.5 text-[13px] text-ink outline-none focus:border-selected" />
     </label>
   )
 
@@ -58,7 +58,7 @@ export function DirectoryManager({ rows }: { rows: DirectoryRow[] }) {
               <span className="microlabel mb-1 block">Category</span>
               <select value={editing.category}
                 onChange={(e) => setEditing((c) => ({ ...(c as DirectoryVendorInput), category: e.target.value }))}
-                className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-[13px] text-ink outline-none focus:border-accent">
+                className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-[13px] text-ink outline-none focus:border-selected">
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </label>
@@ -81,7 +81,7 @@ export function DirectoryManager({ rows }: { rows: DirectoryRow[] }) {
             <span className="microlabel mb-1 block">Blurb</span>
             <textarea value={editing.blurb ?? ''} rows={2}
               onChange={(e) => setEditing((c) => ({ ...(c as DirectoryVendorInput), blurb: e.target.value }))}
-              className="w-full rounded-md border border-line bg-paper-2 px-2.5 py-1.5 text-[13px] text-ink outline-none focus:border-accent" />
+              className="w-full rounded-md border border-line bg-paper-2 px-2.5 py-1.5 text-[13px] text-ink outline-none focus:border-selected" />
           </label>
           {err && <p className="mt-2 text-[12.5px] text-bad">{err}</p>}
           <div className="mt-4 flex gap-2">

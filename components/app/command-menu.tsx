@@ -106,7 +106,7 @@ export function CommandMenu({ siteSlug }: { siteSlug: string }) {
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-3 border-t border-line px-4 py-2 font-mono text-[9.5px] uppercase tracking-wider text-ink-3">
+        <div className="flex items-center gap-3 border-t border-line px-4 py-2 font-sans text-[9.5px] uppercase tracking-wider text-ink-3">
           <span>↑↓ navigate</span><span>↵ select</span><span>esc close</span>
         </div>
       </div>

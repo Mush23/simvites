@@ -31,7 +31,7 @@ export function EventCoverage({ vendorId, events }: {
           <input type="checkbox" checked={state[e.id]} onChange={() => toggle(e.id)}
             className="h-4.5 w-4.5 accent-[var(--accent)]" />
           <span className="text-ink">{e.name}</span>
-          <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">{e.meta}</span>
+          <span className="ml-auto font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">{e.meta}</span>
         </label>
       ))}
     </div>

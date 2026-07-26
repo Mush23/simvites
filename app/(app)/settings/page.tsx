@@ -25,7 +25,7 @@ async function VersionList({ siteId }: { siteId: string }) {
         <li key={v.id} className="flex items-center justify-between gap-3 border-b border-line pb-2 text-sm last:border-0">
           <span className="text-ink">
             {new Date(v.published_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
-            {i === 0 && <span className="ml-2 font-mono text-[9px] uppercase tracking-[0.14em] text-accent-ink">live</span>}
+            {i === 0 && <span className="ml-2 font-sans text-[9px] uppercase tracking-[0.14em] text-accent-ink">live</span>}
           </span>
           {i > 0 && (
             <form action={async () => { 'use server'; await (await import('./actions')).restoreVersion(v.id) }}>
@@ -76,7 +76,7 @@ export default async function SettingsPage({
             templateKey={templateKey}
             templates={(await import('@/lib/templates/registry')).listTemplates()}
           />
-          <p className="mt-5 border-t border-line pt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3">
+          <p className="mt-5 border-t border-line pt-4 font-sans text-[10px] uppercase tracking-[0.16em] text-ink-3">
             Address: {row?.slug}.{BASE_DOMAIN} · Status: {row?.status}
           </p>
         </section>
@@ -106,7 +106,7 @@ export default async function SettingsPage({
             <label className="block">
               <span className="eyebrow mb-1.5 block">Their email</span>
               <input name="email" type="email" required placeholder="partner@example.com"
-                className="w-64 rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-accent" />
+                className="w-64 rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-selected" />
             </label>
             <button type="submit" title="They'll sign in via the Email link tab on the login page"
               className="rounded-md bg-accent px-5 py-3 font-semibold text-white">

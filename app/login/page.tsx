@@ -229,7 +229,7 @@ function Field({ label, type, value, onChange, autoComplete }: {
       <input
         type={type} value={value} onChange={(e) => onChange(e.target.value)}
         autoComplete={autoComplete} required
-        className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent"
+        className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-selected"
       />
     </label>
   )

@@ -39,7 +39,7 @@ function GettingStarted({ r, theme, editedSite }: { r: Readiness; theme: SiteSty
     <section className="mb-6 rounded-card border border-accent-line bg-surface p-5 shadow-card">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-[14px] font-semibold tracking-tight text-ink">Your path to the big send</p>
-        <p className="font-mono text-[11px] text-ink-3">{doneCount} of {steps.length} done</p>
+        <p className="text-[11px] text-ink-3"><span className="nums">{doneCount}</span> of <span className="nums">{steps.length}</span> done</p>
       </div>
       <ol className="mt-4 grid gap-2.5 lg:grid-cols-5">
         {steps.map((s, i) => {
@@ -51,8 +51,11 @@ function GettingStarted({ r, theme, editedSite }: { r: Readiness; theme: SiteSty
                 : isCurrent ? 'border-accent bg-accent-soft'
                 : 'border-line bg-paper'
               }`}>
+              {/* "You are here" is a state marker, so it goes ink — the step's
+                  own CTA below is the accent on this card, and there is only
+                  ever one of those. */}
               <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10.5px] font-bold ${
-                s.done ? 'bg-ok text-white' : isCurrent ? 'bg-accent text-white' : 'border border-line-2 text-ink-3'
+                s.done ? 'bg-ok text-white' : isCurrent ? 'bg-ink text-paper' : 'border border-line-2 text-ink-3'
               }`}>
                 {s.done ? '✓' : i + 1}
               </span>
@@ -108,13 +111,18 @@ export default async function DashboardPage() {
       <GettingStarted r={r} theme={theme} editedSite={(editedPages ?? 0) > 0} />
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_2fr]">
-        {/* Readiness ring card (overhaul: 84px SVG ring, coral arc) */}
+        {/* Readiness ring. Progress is neither an action nor an alarm: the arc
+            runs neutral while in flight and turns green only when it is
+            actually done. It used to render in the brand coral at every value,
+            so a 100%-complete ring sat directly above "1 vendor payment
+            overdue" in the same colour. */}
         <section className="rounded-card border border-line bg-surface p-6 shadow-card">
           <p className="text-[12px] font-medium text-ink-2">Readiness</p>
           <div className="mt-4 flex items-center gap-5">
             <svg width="84" height="84" viewBox="0 0 84 84" className="shrink-0 -rotate-90">
-              <circle cx="42" cy="42" r="34" fill="none" stroke="var(--surface-2)" strokeWidth="8" />
-              <circle cx="42" cy="42" r="34" fill="none" stroke="var(--accent)" strokeWidth="8"
+              <circle cx="42" cy="42" r="34" fill="none" stroke="var(--progress-track)" strokeWidth="8" />
+              <circle cx="42" cy="42" r="34" fill="none" strokeWidth="8"
+                stroke={r.score >= 100 ? 'var(--progress-done)' : 'var(--progress-fill)'}
                 strokeLinecap="round"
                 strokeDasharray={`${(r.score / 100) * 213.6} 213.6`} />
             </svg>
@@ -189,9 +197,12 @@ async function LiveActivity({ siteId }: { siteId: string }) {
       color: resp.status === 'attending' ? 'var(--ok)' : resp.status === 'declined' ? 'var(--bad)' : 'var(--warn)',
       text: `${gName.get(resp.guest_id) ?? 'A guest'} ${resp.status === 'attending' ? 'said yes to' : resp.status === 'declined' ? 'declined' : 'answered for'} ${eById.get(resp.event_id)?.name ?? 'an event'}`,
     })),
+    // Platform events are log entries, not actions and not outcomes — a quiet
+    // neutral dot. Coral here put five brand-red dots down the feed, and green
+    // would have claimed the meaning "a guest said yes" already has above.
     ...(log ?? []).map((l) => ({
       at: l.created_at as string,
-      color: 'var(--accent)',
+      color: 'var(--ink-3)',
       text: VERB_LABEL[l.verb] ?? l.verb.replaceAll('_', ' '),
     })),
   ].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 8)
@@ -214,7 +225,7 @@ async function LiveActivity({ siteId }: { siteId: string }) {
           <p key={i} className="flex items-center gap-2.5 text-[13px] text-ink-2">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: it.color }} />
             <span className="min-w-0 flex-1 truncate text-ink">{it.text}</span>
-            <span className="shrink-0 font-mono text-[10.5px] text-ink-3">{rel(it.at)}</span>
+            <span className="shrink-0 text-[10.5px] text-ink-3">{rel(it.at)}</span>
           </p>
         ))}
       </div>

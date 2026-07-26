@@ -30,8 +30,11 @@ function NavLink({ item, active, count, onClick }: {
     <Link href={item.href} onClick={onClick}
       className={cn(
         'mb-0.5 flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13.5px] transition-colors',
+        // Active nav is a STATE, not an action: warm fill, ink text, ink rail.
+        // The coral rail made the sidebar compete with the one real CTA on
+        // every screen.
         active
-          ? 'bg-surface-2 font-semibold text-ink shadow-[inset_2px_0_0_var(--accent)]'
+          ? 'bg-surface-2 font-semibold text-ink shadow-[inset_2px_0_0_var(--nav-rail)]'
           : 'font-medium text-ink-2 hover:bg-surface-2 hover:text-ink',
       )}>
       <Icon size={16} strokeWidth={1.7} className={active ? 'text-ink' : 'text-ink-3'} />
@@ -59,7 +62,7 @@ function NavBody({ site, onNavigate }: { site: SidebarSite; onNavigate?: () => v
         <div className="mt-3 flex items-center gap-2 rounded-lg border border-line bg-paper px-2.5 py-2">
           <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', site.status === 'published' ? 'bg-ok' : 'bg-warn')} />
           <span className="min-w-0 flex-1 truncate font-display text-[15px] leading-none text-ink">{site.title}</span>
-          <span className="font-mono text-[9px] uppercase tracking-wider text-ink-3">
+          <span className="font-sans text-[9px] uppercase tracking-wider text-ink-3">
             {site.status === 'published' ? 'live' : 'draft'}
           </span>
         </div>

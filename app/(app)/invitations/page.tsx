@@ -4,6 +4,7 @@ import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { emailConfigured } from '@/lib/email'
 import { deriveInitials, formatEventDateTime } from '@/lib/utils'
+import { eventColorMap } from '@/lib/event-colors'
 import { InvitationsClient, type HouseholdInviteRow } from './invitations-client'
 
 export const metadata = { title: 'Invitations · Occasio' }
@@ -33,6 +34,11 @@ export default async function InvitationsPage() {
   const { data: opens } = await supabase.from('activity_log')
     .select('entity_id, created_at').eq('site_id', site!.siteId)
     .eq('verb', 'invite_opened').order('created_at', { ascending: false })
+
+  // Built from the FULL ordered event list, then looked up by id — the rows
+  // below render a per-household subset, and indexing into that would give the
+  // same event a different colour on every household's invitation.
+  const eventColors = eventColorMap(events ?? [])
 
   const householdByGuest = new Map((guests ?? []).map((g) => [g.id, g.household_id]))
   const eventIdsByHousehold = new Map<string, Set<string>>()
@@ -68,7 +74,7 @@ export default async function InvitationsPage() {
         venue: e.venue_name,
         address: e.address,
         dressCode: e.dress_code,
-        accent: e.accent,
+        accent: eventColors.get(e.id) ?? null,
       })),
     }
   })

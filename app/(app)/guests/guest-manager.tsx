@@ -13,7 +13,9 @@ import { formatEventDateTime } from '@/lib/utils'
 import { Search, X } from 'lucide-react'
 
 export interface MatrixEvent {
-  id: string; name: string; accent?: string | null; capacity?: number | null
+  /** Already resolved through eventColor() at the page boundary — never null,
+   *  so no dot here can fall back to the brand accent. */
+  id: string; name: string; accent: string; capacity?: number | null
   startsAt?: string | null; venueName?: string | null
 }
 export interface MatrixGuest {
@@ -123,13 +125,19 @@ export function GuestManager({
             Not invited yet · {uninvitedCount}
           </button>
         )}
-        <span className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3 xl:inline">
+        <span className="hidden font-sans text-[10px] uppercase tracking-[0.14em] text-ink-3 xl:inline">
           {households.length} households · {totalGuests} guests
         </span>
         <span aria-hidden className="h-6 w-px bg-line" />
+        {/* Solid while it is the page's offer; outline once the form is open,
+            because then the form's own Add button is the action and two solid
+            corals in one view is exactly what we are removing. */}
         <button type="button" onClick={() => setShowAdd((s) => !s)}
-          className="rounded-md bg-accent px-3.5 py-2 text-[12.5px] font-semibold text-white">
-          ＋ Add household
+          className={`rounded-md px-3.5 py-2 text-[12.5px] font-semibold transition-colors ${
+            showAdd
+              ? 'border border-accent-line text-accent-ink hover:bg-accent-soft'
+              : 'bg-accent text-white'}`}>
+          {showAdd ? 'Close' : '＋ Add household'}
         </button>
         <button type="button" onClick={() => setShowImport((s) => !s)}
           className="rounded-md border border-line bg-paper-2 px-3 py-2 text-[12.5px] text-ink transition-colors hover:border-accent">
@@ -144,12 +152,12 @@ export function GuestManager({
           <label className="block">
             <span className="eyebrow mb-1.5 block">New household</span>
             <input name="name" required placeholder="The Shah Family"
-              className="w-52 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent" />
+              className="w-52 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected" />
           </label>
           <label className="block">
             <span className="eyebrow mb-1.5 block">Side (optional)</span>
             <input name="side" placeholder="Bride"
-              className="w-28 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent" />
+              className="w-28 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected" />
           </label>
           <button type="submit"
             className="rounded-md bg-accent px-5 py-2.5 font-semibold text-white">
@@ -177,7 +185,7 @@ export function GuestManager({
                 className={`min-w-[124px] flex-1 rounded-card border px-3 py-2.5 text-left transition-colors sm:flex-none ${
                   lensId === e.id ? 'border-accent bg-accent-soft shadow-card' : 'border-line bg-surface hover:border-line-2'}`}>
                 <span className="flex items-center gap-1.5 text-[12px] font-semibold text-ink">
-                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: e.accent ?? 'var(--accent)' }} />
+                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: e.accent }} />
                   {e.name}
                 </span>
                 <span className="mt-0.5 block font-mono text-[9.5px] text-ink-3 nums">{invited} invited · {going} going</span>
@@ -283,7 +291,7 @@ function EventLens({ event, households, sides, responses, tallies, openedHouseho
       <div className="rounded-card border border-line bg-surface px-4 py-3.5 shadow-card">
         <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
           <p className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-ink">
-            <span className="h-[9px] w-[9px] rounded-full" style={{ background: event.accent ?? 'var(--accent)' }} />
+            <span className="h-[9px] w-[9px] rounded-full" style={{ background: event.accent }} />
             {event.name}
           </p>
           <span className="font-mono text-[10px] text-ink-3">
@@ -291,9 +299,11 @@ function EventLens({ event, households, sides, responses, tallies, openedHouseho
             {event.venueName ? ` · ${event.venueName}` : ''}
           </span>
           <span className="ml-auto flex gap-2">
+            {/* A cross-link to another screen, not this screen's action —
+                Add household above owns the one solid coral here. */}
             {awaiting > 0 && (
               <Link href="/invitations" title="Every household has its private link — chase from Invitations"
-                className="rounded-md bg-accent px-3 py-1.5 text-[12px] font-semibold text-white">
+                className="rounded-md border border-accent-line px-3 py-1.5 text-[12px] font-semibold text-accent-ink transition-colors hover:bg-accent-soft">
                 Chase {awaiting} awaiting →
               </Link>
             )}
@@ -352,7 +362,7 @@ function EventLens({ event, households, sides, responses, tallies, openedHouseho
             <div key={h.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-line px-4 py-2.5 first-of-type:border-t-0">
               <span className="w-40 shrink-0">
                 <span className="block truncate text-[13px] font-medium text-ink">{h.name}</span>
-                {h.side && <span className="block font-mono text-[8.5px] uppercase tracking-[0.08em] text-ink-3">{h.side}</span>}
+                {h.side && <span className="block font-sans text-[8.5px] uppercase tracking-[0.08em] text-ink-3">{h.side}</span>}
               </span>
               <span className="flex min-w-0 flex-wrap gap-1.5">
                 {h.guests.map((g) => (
@@ -363,7 +373,7 @@ function EventLens({ event, households, sides, responses, tallies, openedHouseho
             </div>
           ))}
           {notYetInvited > 0 && rows.length > 0 && (
-            <p className="border-t border-dashed border-line-2 px-4 py-2.5 text-center font-mono text-[9.5px] uppercase tracking-[0.1em] text-ink-3">
+            <p className="border-t border-dashed border-line-2 px-4 py-2.5 text-center font-sans text-[9.5px] uppercase tracking-[0.1em] text-ink-3">
               + {notYetInvited} household{notYetInvited === 1 ? '' : 's'} not invited yet — invite a side above, or use All events
             </p>
           )}
@@ -500,9 +510,9 @@ function Register({ households, events, openId, onOpen }: {
           <span className="text-[11px] font-medium text-ink-3">Guests</span>
           {events.map((e) => (
             <span key={e.id} className="flex items-center justify-center gap-1.5 text-center text-[11px] font-medium text-ink-2">
-              <span className="h-[7px] w-[7px] shrink-0 rounded-full" style={{ background: e.accent ?? 'var(--accent)' }} />
+              <span className="h-[7px] w-[7px] shrink-0 rounded-full" style={{ background: e.accent }} />
               <span className="truncate">{e.name}</span>
-              {e.capacity != null && <span className="font-mono text-[8.5px] text-ink-3">cap {e.capacity}</span>}
+              {e.capacity != null && <span className="text-[9px] text-ink-3">cap <span className="nums">{e.capacity}</span></span>}
             </span>
           ))}
         </div>
@@ -511,9 +521,9 @@ function Register({ households, events, openId, onOpen }: {
           <button key={h.id} type="button" onClick={() => onOpen(h.id)} style={cols}
             aria-expanded={openId === h.id}
             className={`grid w-full items-center gap-x-3 rounded-none border-t border-line px-4 py-2.5 text-left transition-colors first-of-type:border-t-0 hover:bg-paper-2 ${
-              openId === h.id ? 'bg-surface-2 shadow-[inset_2px_0_0_var(--accent)]' : ''}`}>
+              openId === h.id ? 'bg-surface-2 shadow-[inset_2px_0_0_var(--selected)]' : ''}`}>
             <span className="truncate text-[13px] font-medium text-ink">{h.name}</span>
-            <span className="truncate font-mono text-[10px] uppercase tracking-[0.08em] text-ink-3">{h.side ?? ''}</span>
+            <span className="truncate font-sans text-[10px] uppercase tracking-[0.08em] text-ink-3">{h.side ?? ''}</span>
             <span className="font-mono text-[11px] text-ink-2 nums">{h.guests.length}</span>
             {events.map((e) => <CoveragePill key={e.id} invited={invitedTo(h, e.id)} total={h.guests.length} />)}
           </button>
@@ -587,7 +597,7 @@ function HouseholdDrawer({ household, events, allocations, onClose, onChanged }:
       <div className="flex items-center gap-2 border-b border-line px-4 py-3">
         <p className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-tight text-ink">{household.name}</p>
         {household.side && (
-          <span className="rounded-pill bg-paper-2 px-2 py-0.5 font-mono text-[8.5px] uppercase tracking-[0.08em] text-ink-3">
+          <span className="rounded-pill bg-paper-2 px-2 py-0.5 font-sans text-[8.5px] uppercase tracking-[0.08em] text-ink-3">
             {household.side}
           </span>
         )}
@@ -615,7 +625,7 @@ function HouseholdDrawer({ household, events, allocations, onClose, onChanged }:
                     all ? 'bg-accent-soft text-accent-ink'
                     : invited > 0 ? 'border border-line-2 text-ink-2 hover:border-accent'
                     : 'border border-line text-ink-3 hover:border-accent'}`}>
-                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: e.accent ?? 'var(--accent)' }} />
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: e.accent }} />
                   {e.name} <span className="font-mono text-[9px] nums">{invited}/{household.guests.length}</span>
                 </button>
               )
@@ -638,9 +648,9 @@ function HouseholdDrawer({ household, events, allocations, onClose, onChanged }:
         <form action={onAddGuest} className="mt-4 space-y-2.5 border-t border-line pt-4">
           <p className="eyebrow">Add guest to this household</p>
           <input name="full_name" required placeholder="Priya Shah"
-            className="w-full rounded-md border border-line bg-paper-2 px-3 py-2 text-[13px] text-ink outline-none focus:border-accent" />
+            className="w-full rounded-md border border-line bg-paper-2 px-3 py-2 text-[13px] text-ink outline-none focus:border-selected" />
           <input name="email" type="email" placeholder="priya@example.com (optional)"
-            className="w-full rounded-md border border-line bg-paper-2 px-3 py-2 text-[13px] text-ink outline-none focus:border-accent" />
+            className="w-full rounded-md border border-line bg-paper-2 px-3 py-2 text-[13px] text-ink outline-none focus:border-selected" />
           <div className="flex items-center gap-4">
             <label className="flex items-center gap-1.5 text-xs text-ink-2">
               <input type="checkbox" name="is_child" /> Child
@@ -722,15 +732,15 @@ function AllocationField({ household, event, current }: {
 
   return (
     <label className="flex items-center gap-2">
-      <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: event.accent ?? 'var(--accent)' }} />
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: event.accent }} />
       <span className="min-w-0 flex-1 truncate text-[12px] text-ink-2">{event.name}</span>
       <span className="flex items-center gap-1">
-        <span className="font-mono text-[8.5px] uppercase text-ink-3">up to</span>
+        <span className="font-sans text-[8.5px] uppercase text-ink-3">up to</span>
         <input type="number" min={1} inputMode="numeric" defaultValue={current ?? ''} key={current ?? 'unset'}
           placeholder="—" disabled={busy}
           onBlur={(e) => commit(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
-          className="w-14 rounded-md border border-line bg-paper-2 px-2 py-1 text-center font-mono text-[11.5px] text-ink outline-none focus:border-accent disabled:opacity-50" />
+          className="w-14 rounded-md border border-line bg-paper-2 px-2 py-1 text-center font-mono text-[11.5px] text-ink outline-none focus:border-selected disabled:opacity-50" />
       </span>
     </label>
   )
@@ -765,10 +775,10 @@ function GuestCard({ guest, events, onChanged }: {
           <p className="text-[13px] font-medium text-ink">
             {guest.fullName}
             {guest.isChild && (
-              <span className="ml-1.5 rounded-pill bg-surface-2 px-1.5 py-px font-mono text-[8.5px] uppercase text-ink-3">child</span>
+              <span className="ml-1.5 rounded-pill bg-surface-2 px-1.5 py-px font-sans text-[8.5px] uppercase text-ink-3">child</span>
             )}
             {guest.plusOneAllowed && (
-              <span className="ml-1.5 rounded-pill bg-accent-soft px-1.5 py-px font-mono text-[8.5px] uppercase text-accent-ink">+1</span>
+              <span className="ml-1.5 rounded-pill bg-accent-soft px-1.5 py-px font-sans text-[8.5px] uppercase text-accent-ink">+1</span>
             )}
           </p>
           {guest.email && <p className="mt-0.5 truncate text-[11px] text-ink-3">{guest.email}</p>}
@@ -799,7 +809,7 @@ function GuestCard({ guest, events, onChanged }: {
                   on ? 'bg-accent-soft text-accent-ink'
                   : 'border border-line text-ink-3 hover:border-accent'}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${on ? '' : 'opacity-40'}`}
-                  style={{ background: e.accent ?? 'var(--accent)' }} />
+                  style={{ background: e.accent }} />
                 {e.name}
               </button>
             )
@@ -851,7 +861,7 @@ function ImportWizard({ onDone }: { onDone: () => void }) {
       <textarea
         value={text} onChange={(e) => setText(e.target.value)} rows={6}
         placeholder={'Raj & Priya Shah, priya@example.com\nThe Patels — Anil, Meera and the two kids\nDev Kapoor'}
-        className="w-full rounded-md border border-line bg-surface px-3 py-2.5 font-mono text-xs text-ink outline-none focus:border-accent"
+        className="w-full rounded-md border border-line bg-surface px-3 py-2.5 font-mono text-xs text-ink outline-none focus:border-selected"
       />
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <button type="button" onClick={parse} disabled={parsing}

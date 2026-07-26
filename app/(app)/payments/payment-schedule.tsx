@@ -96,7 +96,7 @@ export function PaymentSchedule({ rows, vendors, budgetItems }: {
           <label className="block">
             <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Remind me</span>
             <select name="remind_days_before" defaultValue="7"
-              className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-accent">
+              className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-selected">
               <option value="3">3 days before</option>
               <option value="7">1 week before</option>
               <option value="14">2 weeks before</option>
@@ -201,7 +201,7 @@ function Field({ name, label, placeholder, type = 'text', required }: {
     <label className="block">
       <span className="mb-1.5 block text-[12px] font-medium text-ink-2">{label}</span>
       <input name={name} type={type} placeholder={placeholder} required={required}
-        className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-accent" />
+        className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-selected" />
     </label>
   )
 }
@@ -211,7 +211,7 @@ function Select({ name, label, options }: { name: string; label: string; options
     <label className="block">
       <span className="mb-1.5 block text-[12px] font-medium text-ink-2">{label}</span>
       <select name={name} defaultValue=""
-        className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-accent">
+        className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-selected">
         <option value="">—</option>
         {options.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
       </select>

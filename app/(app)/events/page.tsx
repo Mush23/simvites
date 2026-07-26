@@ -52,11 +52,11 @@ export default async function EventsPage() {
                 </p>
               </div>
               <div className="flex items-center gap-2 text-right">
-                <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
+                <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">
                   {VIS_LABEL[e.visibility] ?? e.visibility}
                 </span>
                 {e.capacity != null && (
-                  <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
+                  <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">
                     cap {e.capacity}
                   </span>
                 )}

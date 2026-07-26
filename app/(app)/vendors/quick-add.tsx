@@ -19,12 +19,12 @@ export function QuickAddVendor() {
       <label className="block">
         <span className="eyebrow mb-1.5 block">Vendor name</span>
         <input name="name" required placeholder="Golden Gate Catering"
-          className="w-56 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent" />
+          className="w-56 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected" />
       </label>
       <label className="block">
         <span className="eyebrow mb-1.5 block">Category</span>
         <select name="category" defaultValue="Caterer"
-          className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent">
+          className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected">
           {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
         </select>
       </label>

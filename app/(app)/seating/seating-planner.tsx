@@ -98,7 +98,7 @@ export function SeatingPlanner({ tables, seats, guests, events, floorplans }: {
       <div>
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <select value={eventFilter} onChange={(e) => { setEventFilter(e.target.value); setSelected(null) }}
-            className="rounded-lg border border-line bg-surface px-3 py-1.5 text-[13px] text-ink outline-none focus:border-accent">
+            className="rounded-lg border border-line bg-surface px-3 py-1.5 text-[13px] text-ink outline-none focus:border-selected">
             <option value="all">All events</option>
             {events.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
           </select>
@@ -143,9 +143,9 @@ export function SeatingPlanner({ tables, seats, guests, events, floorplans }: {
 
         <form id="add-table-form" action={onAddTable} className="mt-3 flex flex-wrap items-end gap-2">
           <input name="name" required placeholder="Table 1 / Top table"
-            className="w-44 rounded-lg border border-line bg-surface px-3 py-2 text-[13px] text-ink outline-none focus:border-accent" />
+            className="w-44 rounded-lg border border-line bg-surface px-3 py-2 text-[13px] text-ink outline-none focus:border-selected" />
           <input name="capacity" type="number" defaultValue={10} min={1}
-            className="w-20 rounded-lg border border-line bg-surface px-3 py-2 text-[13px] text-ink outline-none focus:border-accent" />
+            className="w-20 rounded-lg border border-line bg-surface px-3 py-2 text-[13px] text-ink outline-none focus:border-selected" />
           <button type="submit" className="rounded-md flex items-center gap-1.5 bg-accent px-3.5 py-2 text-[13px] font-semibold text-white">
             <Plus size={14} strokeWidth={2} /> Add table
           </button>

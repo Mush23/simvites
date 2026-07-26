@@ -117,7 +117,7 @@ export function Inbox({ threads, unlocked, sms, whatsapp }: {
                 <input value={text} onChange={(e) => setText(e.target.value)}
                   placeholder={active.hasPhone ? `Message ${active.name}…` : 'This household has no phone number'}
                   disabled={!active.hasPhone || !unlocked}
-                  className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-3.5 py-2.5 text-[13.5px] text-ink outline-none focus:border-accent disabled:opacity-50" />
+                  className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-3.5 py-2.5 text-[13.5px] text-ink outline-none focus:border-selected disabled:opacity-50" />
                 <button type="submit" disabled={busy || !text.trim() || !active.hasPhone || !unlocked}
                   className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-white disabled:opacity-40" aria-label="Send">
                   <Send size={16} strokeWidth={1.8} />

@@ -88,11 +88,11 @@ export function Recommendations({ vendors, addedIds }: {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-surface-2 px-2 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.06em] text-ink-3">
+                    <span className="rounded-full bg-surface-2 px-2 py-0.5 font-sans text-[9.5px] font-semibold uppercase tracking-[0.06em] text-ink-3">
                       {CATEGORY_LABELS[v.category] ?? v.category}
                     </span>
                     {v.featured && (
-                      <span className="rounded-full px-2 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.06em]"
+                      <span className="rounded-full px-2 py-0.5 font-sans text-[9.5px] font-semibold uppercase tracking-[0.06em]"
                         style={{ background: 'var(--accent-soft)', color: 'var(--accent-ink)' }}>
                         Editor&rsquo;s pick
                       </span>

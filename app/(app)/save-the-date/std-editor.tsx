@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Copy, Download, MessageCircle, Mail, ExternalLink, Check } from 'lucide-react'
 import { StdCard, STD_PALETTES, type StdData } from '@/components/save-the-date/std-card'
+import { eventColor } from '@/lib/event-colors'
 import { uploadSiteImage } from '@/app/(app)/website/actions'
 import { saveStd, setStdPublished } from './actions'
 import { notify } from '@/components/ui/overlays'
@@ -104,7 +105,7 @@ export function StdEditor({ record, events, defaultNames }: {
         <label className="block">
           <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Message</span>
           <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={2}
-            className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-accent" />
+            className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-selected" />
         </label>
 
         <div>
@@ -146,11 +147,13 @@ export function StdEditor({ record, events, defaultNames }: {
           <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Which celebrations to tease? (combine any)</span>
           {events.length === 0 && <p className="text-[13px] text-ink-3">Add events first and they’ll appear here.</p>}
           <div className="flex flex-wrap gap-2">
-            {events.map((e) => (
+            {events.map((e, i) => (
               <button key={e.id} type="button" onClick={() => toggleEvent(e.id)}
                 className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[13px] transition-colors ${
                   eventIds.includes(e.id) ? 'border-accent bg-accent-soft text-accent-ink' : 'border-line text-ink-2 hover:border-line-2'}`}>
-                <span className="h-2 w-2 rounded-full" style={{ background: e.accent ?? 'var(--accent)' }} />
+                {/* Ramp fallback here only — the card itself is guest-layer and
+                    keeps falling back to its own chosen palette accent. */}
+                <span className="h-2 w-2 rounded-full" style={{ background: eventColor(e.accent, i) }} />
                 {e.name}
               </button>
             ))}
@@ -224,7 +227,7 @@ function Field({ label, value, onChange, placeholder }: {
     <label className="block">
       <span className="mb-1.5 block text-[12px] font-medium text-ink-2">{label}</span>
       <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-accent" />
+        className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-selected" />
     </label>
   )
 }

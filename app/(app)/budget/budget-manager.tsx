@@ -51,7 +51,7 @@ export function BudgetManager({ items, events, vendors }: {
         <Text name="label" label="New line" placeholder="Mandap & florals" required w="w-52" />
         <label className="block">
           <span className="eyebrow mb-1.5 block">Category</span>
-          <select name="category" defaultValue="Decor" className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent">
+          <select name="category" defaultValue="Decor" className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected">
             {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
           </select>
         </label>
@@ -106,7 +106,7 @@ function BudgetRow({ item, events, vendors, onChanged }: {
         <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open}
           className="rounded-md min-w-0 flex-1 text-left">
           <p className="font-medium text-ink">{item.label}</p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
+          <p className="font-sans text-[10px] uppercase tracking-[0.14em] text-ink-3">
             {[eventName, vendorName].filter(Boolean).join(' · ') || 'unlinked'}
           </p>
         </button>
@@ -115,7 +115,7 @@ function BudgetRow({ item, events, vendors, onChanged }: {
             {formatPence(item.paid_amount)} paid · {formatPence(balance)} due
           </span>
           <span className="font-mono text-[15px] font-semibold nums text-ink">{formatPence(item.actual_amount ?? item.estimated_amount)}</span>
-          <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
+          <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">
             {STATUS_LABEL[item.status] ?? item.status}
           </span>
           {item.event_id && eventName && (
@@ -132,7 +132,7 @@ function BudgetRow({ item, events, vendors, onChanged }: {
           <Text name="label" label="Label" defaultValue={item.label} required w="w-48" />
           <label className="block">
             <span className="eyebrow mb-1.5 block">Category</span>
-            <select name="category" defaultValue={item.category} className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent">
+            <select name="category" defaultValue={item.category} className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected">
               {[...new Set([item.category, ...CATEGORIES])].map((c) => <option key={c}>{c}</option>)}
             </select>
           </label>
@@ -143,7 +143,7 @@ function BudgetRow({ item, events, vendors, onChanged }: {
           <Text name="paid_amount" label="Paid £" defaultValue={pounds(item.paid_amount)} w="w-26" />
           <label className="block">
             <span className="eyebrow mb-1.5 block">Status</span>
-            <select name="status" defaultValue={item.status} className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent">
+            <select name="status" defaultValue={item.status} className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected">
               {Object.entries(STATUS_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </label>
@@ -176,7 +176,7 @@ function Text({ name, label, defaultValue, placeholder, required, type = 'text',
     <label className="block">
       <span className="eyebrow mb-1.5 block">{label}</span>
       <input name={name} type={type} defaultValue={defaultValue} placeholder={placeholder} required={required}
-        className={`${w} rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent`} />
+        className={`${w} rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected`} />
     </label>
   )
 }
@@ -188,7 +188,7 @@ function Select({ name, label, options, defaultValue }: {
     <label className="block">
       <span className="eyebrow mb-1.5 block">{label}</span>
       <select name={name} defaultValue={defaultValue ?? ''}
-        className="max-w-44 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent">
+        className="max-w-44 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected">
         <option value="">—</option>
         {options.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
       </select>

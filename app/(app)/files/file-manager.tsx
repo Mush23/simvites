@@ -48,7 +48,7 @@ export function FileManager({ files, events, vendors }: {
         <label className="block">
           <span className="eyebrow mb-1.5 block">Kind</span>
           <select name="kind" defaultValue="contract"
-            className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent">
+            className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected">
             {KINDS.map((k) => <option key={k}>{k}</option>)}
           </select>
         </label>
@@ -75,12 +75,12 @@ export function FileManager({ files, events, vendors }: {
           ].filter(Boolean).join(' · ')
           return (
             <div key={f.id} className="flex items-center gap-3 rounded-card border border-line bg-surface p-3.5 shadow-card">
-              <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
+              <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">
                 {f.kind ?? 'file'}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm text-ink">{f.name}</p>
-                {linked && <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">{linked}</p>}
+                {linked && <p className="font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">{linked}</p>}
               </div>
               <a href={`/files/${f.id}/download`}
                 className="rounded-md border border-line bg-paper-2 px-3 py-1.5 text-sm hover:border-accent">
@@ -106,7 +106,7 @@ function Select({ name, label, options }: { name: string; label: string; options
     <label className="block">
       <span className="eyebrow mb-1.5 block">{label}</span>
       <select name={name} defaultValue=""
-        className="max-w-40 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent">
+        className="max-w-40 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected">
         <option value="">—</option>
         {options.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
       </select>

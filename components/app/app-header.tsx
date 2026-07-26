@@ -25,8 +25,11 @@ function NotificationBell({ items }: { items: HeaderNotification[] }) {
       <button type="button" onClick={() => setOpen((o) => !o)} aria-label="Notifications"
         className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-line text-ink-2 hover:border-line-2 hover:text-ink">
         <Bell size={15} strokeWidth={1.7} />
+        {/* A count needing attention, not an action — same treatment the
+            sidebar nav badges already use, so it stops being a second solid
+            coral sitting next to Publish in the same header. */}
         {items.length > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 font-mono text-[9px] font-semibold text-white">
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-warn/30 bg-warn-soft px-1 text-[9px] font-semibold text-warn nums">
             {items.length}
           </span>
         )}

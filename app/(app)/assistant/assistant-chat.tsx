@@ -92,7 +92,7 @@ export function AssistantChat({ configured }: { configured: boolean }) {
       <form onSubmit={(e) => { e.preventDefault(); send(input) }}
         className="flex items-center gap-2 border-t border-line p-3">
         <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask about guests, budget, RSVPs, payments…"
-          className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-3.5 py-2.5 text-[13.5px] text-ink outline-none focus:border-accent" />
+          className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-3.5 py-2.5 text-[13.5px] text-ink outline-none focus:border-selected" />
         <button type="submit" disabled={busy || !input.trim()}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-white disabled:opacity-40" aria-label="Send">
           <Send size={16} strokeWidth={1.8} />

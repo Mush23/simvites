@@ -162,7 +162,7 @@ export function OverlayProvider({ children }: { children: React.ReactNode }) {
             {dialog.kind === 'prompt' && (
               <input ref={promptRef} defaultValue={dialog.opts.initial ?? ''} placeholder={dialog.opts.placeholder}
                 onKeyDown={(e) => { if (e.key === 'Enter') close((e.target as HTMLInputElement).value) }}
-                className="mt-3 w-full rounded-lg border border-line bg-paper-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent" />
+                className="mt-3 w-full rounded-lg border border-line bg-paper-2 px-3 py-2 text-sm text-ink outline-none focus:border-selected" />
             )}
             <div className="mt-5 flex justify-end gap-2">
               <button type="button" onClick={() => close(null)}

@@ -48,7 +48,7 @@ export function OnboardingForm({ templates, preselect }: { templates: TemplateLi
             <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Couple / site name</span>
             <input
               name="site_title" required placeholder="Aanya & Dev"
-              className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent"
+              className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-selected"
             />
           </label>
           <label className="block">

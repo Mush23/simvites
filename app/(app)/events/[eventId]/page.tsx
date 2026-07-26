@@ -124,7 +124,7 @@ async function ConnectedTab({ tab, eventId, siteId, capacity }: { tab: Tab; even
             <span className="font-mono text-[26px] font-semibold tracking-tight nums text-ink">{capacity}</span>
             <span className="text-[13.5px] text-ink-2">capacity</span>
             {counts.attending >= capacity && (
-              <span className="rounded-pill bg-warn-soft px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-warn">Full</span>
+              <span className="rounded-pill bg-warn-soft px-2.5 py-0.5 font-sans text-[10px] uppercase tracking-[0.1em] text-warn">Full</span>
             )}
           </p>
         )}
@@ -224,12 +224,12 @@ function Row({ main, sub, pill, trailing, href }: {
     <>
       <div className="min-w-0">
         <p className="text-sm text-ink">{main}</p>
-        {sub && <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">{sub}</p>}
+        {sub && <p className="font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">{sub}</p>}
       </div>
       <div className="flex items-center gap-3">
         {trailing && <span className="text-sm text-ink-2">{trailing}</span>}
         {pill && (
-          <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">{pill}</span>
+          <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">{pill}</span>
         )}
       </div>
     </>

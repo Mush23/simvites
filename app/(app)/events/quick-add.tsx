@@ -19,14 +19,14 @@ export function QuickAddEvent() {
         <span className="eyebrow mb-1.5 block">Event name</span>
         <input
           name="name" required placeholder="Sangeet"
-          className="w-52 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent"
+          className="w-52 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected"
         />
       </label>
       <label className="block">
         <span className="eyebrow mb-1.5 block">Starts (optional)</span>
         <input
           name="starts_at" type="datetime-local"
-          className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent"
+          className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected"
         />
       </label>
       <button

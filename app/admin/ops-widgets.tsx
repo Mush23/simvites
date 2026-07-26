@@ -81,7 +81,7 @@ export function DangerZone({ sites }: { sites: { id: string; title: string; slug
 
   return (
     <section className="rounded-card border border-bad/30 bg-bad-soft/40 p-5">
-      <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-bad">
+      <p className="font-sans text-[9px] font-semibold uppercase tracking-[0.12em] text-bad">
         Danger zone · archive site
       </p>
       <p className="mt-2 text-[12px] leading-relaxed text-ink-2">

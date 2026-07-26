@@ -58,7 +58,7 @@ export function EventForm({ event }: { event: EventRow }) {
           <span className="eyebrow mb-1.5 block">Visibility</span>
           <select
             name="visibility" defaultValue={event.visibility}
-            className="w-full rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent"
+            className="w-full rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected"
           >
             <option value="invite_only">Invite only</option>
             <option value="public">Public</option>
@@ -73,7 +73,7 @@ export function EventForm({ event }: { event: EventRow }) {
         <span className="eyebrow mb-1.5 block">Description</span>
         <textarea
           name="description" rows={3} defaultValue={event.description ?? ''}
-          className="w-full rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent"
+          className="w-full rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected"
         />
       </label>
 
@@ -111,7 +111,7 @@ function Field({ label, name, defaultValue, type = 'text', required }: {
       <span className="eyebrow mb-1.5 block">{label}</span>
       <input
         name={name} type={type} defaultValue={defaultValue} required={required}
-        className="w-full rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent"
+        className="w-full rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected"
       />
     </label>
   )

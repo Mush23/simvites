@@ -27,11 +27,16 @@ export function StatCard({
   value,
   hint,
   bar,
+  tone = 'progress',
 }: {
   label: string
   value: string | number
   hint?: string
   bar?: number // 0..100
+  /** What the bar MEANS. 'progress' is work in flight (neutral); 'money' is
+   *  value banked, which reads as success. Neither is the brand accent — a
+   *  bar is never the thing you click. */
+  tone?: 'progress' | 'money'
 }) {
   return (
     <div className="rounded-card border border-line bg-surface p-5 shadow-card">
@@ -39,8 +44,11 @@ export function StatCard({
       <p className="mt-2 font-mono text-[22px] font-semibold tracking-tight nums text-ink">{value}</p>
       {hint && <p className="mt-1.5 text-[12.5px] text-ink-3">{hint}</p>}
       {typeof bar === 'number' && (
-        <div className="mt-3.5 h-1 w-full overflow-hidden rounded-full bg-surface-2">
-          <div className="h-full rounded-full bg-accent" style={{ width: `${Math.max(0, Math.min(100, bar))}%` }} />
+        <div className="mt-3.5 h-1 w-full overflow-hidden rounded-full bg-progress-track">
+          <div
+            className={cn('h-full rounded-full', bar >= 100 || tone === 'money' ? 'bg-progress-done' : 'bg-progress-fill')}
+            style={{ width: `${Math.max(0, Math.min(100, bar))}%` }}
+          />
         </div>
       )}
     </div>

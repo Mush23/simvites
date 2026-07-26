@@ -31,6 +31,17 @@
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
 
+  /* Tokens that stop --accent doing five jobs at once. Selection, progress
+     and navigation state are all STATES; the accent is the ACTION. Keeping
+     them apart is the whole point of the split. */
+  --color-selected: var(--selected);
+  --color-selected-soft: var(--selected-soft);
+  --color-selected-line: var(--selected-line);
+  --color-progress-track: var(--progress-track);
+  --color-progress-fill: var(--progress-fill);
+  --color-progress-done: var(--progress-done);
+  --color-nav-rail: var(--nav-rail);
+
   /* Admin identity band (4a) — deliberately theme-independent graphite,
      so "you are in admin" is unmistakable in light and dark alike. */
   --color-graphite: #1A1916;
@@ -66,14 +77,54 @@
   --accent-line: color-mix(in oklab, var(--accent) 35%, transparent);
   --ok: #1B9E5F;
   --warn: #B87A1E;
-  --bad: #D2402A;
+  /* Danger is OXBLOOD, deliberately a different red rather than a darker
+     coral. The old #D2402A was within a whisker of --accent, so "Overdue"
+     and "Publish" were the same colour — the eye could not tell a problem
+     from an action. Deep and low-chroma reads as gravity, not energy. */
+  --bad: #9B2C22;
   --info: #3E63DD;
   --ok-soft: #E5F5EC;
   --warn-soft: #FAF0DD;
-  --bad-soft: #FBEAE6;
+  --bad-soft: #F6E8E6;
   --info-soft: #E8EDFB;
+
+  /* SELECTION & FOCUS — cool, and outside the warm palette on purpose. A
+     selected block must not look like a primary button or an error. */
+  --selected: #3B5BDB;
+  --selected-soft: #EEF1FD;
+  --selected-line: #6980E8;
+
+  /* PROGRESS — neither an action nor an alarm. A readiness ring at 100%
+     was rendering in the same red as "1 vendor payment overdue". */
+  --progress-track: var(--surface-2);
+  --progress-fill: var(--ink-2);
+  --progress-done: var(--ok);
+
+  /* NAVIGATION state: ink rail, so the sidebar stops competing with the
+     one real call to action on the page. */
+  --nav-rail: var(--ink);
+
   --shadow: 0 1px 2px rgba(30, 25, 15, 0.05);
   --shadow-lg: 0 40px 90px -20px rgba(20, 16, 8, 0.45);
+}
+
+/* ── Event identity ramp — CATEGORICAL, never semantic ───────────────────
+   These label events (Mehndi / Sangeet / Ceremony / Reception) in the invite
+   matrix, RSVP cards, guest list and schedule. None of them is the brand
+   coral: a category must never read as an alarm or an action. Desaturated
+   one step so the set reads as taxonomy.
+
+   Declared outside the light/dark blocks below and re-declared in .dark,
+   because these are the couple's data, not app chrome. */
+:root {
+  --event-1: #B8891F;   /* marigold    */
+  --event-2: #3E62A8;   /* indigo      */
+  --event-3: #A33B4E;   /* rose-red    */
+  --event-4: #2C3E63;   /* midnight    */
+  --event-5: #4A7C59;   /* leaf        */
+  --event-6: #7B5EA7;   /* plum        */
+  --event-7: #A85E32;   /* terracotta  */
+  --event-8: #4E7F86;   /* teal        */
 }
 
 /* ── DARK — slick deep navy (founder direction), coral lifts, same hue
@@ -94,14 +145,35 @@
   --accent-line: color-mix(in oklab, var(--accent) 40%, transparent);
   --ok: #3DD68C;
   --warn: #F0B25A;
-  --bad: #F26D56;
+  /* Same split on dark, but by HUE not depth: the old #F26D56 was the dark
+     accent's twin, and a true oxblood is too dark to read as text on navy.
+     This sits at a red/rose hue against the accent's orange-coral, and
+     clears 4.5:1 on --paper. */
+  --bad: #E06C6C;
   --info: #8CA3F0;
   --ok-soft: rgba(61, 214, 140, 0.15);
   --warn-soft: rgba(240, 178, 90, 0.15);
-  --bad-soft: rgba(242, 109, 86, 0.16);
+  --bad-soft: rgba(224, 108, 108, 0.16);
   --info-soft: rgba(110, 139, 232, 0.18);
+
+  --selected: #6980E8;
+  --selected-soft: #1A2145;
+  --selected-line: #3B5BDB;
+
   --shadow: 0 1px 2px rgba(2, 6, 16, 0.5);
   --shadow-lg: 0 40px 90px -20px rgba(2, 6, 16, 0.7);
+}
+
+/* Event colours lifted for contrast on the deep navy ground. */
+.dark {
+  --event-1: #D9A63C;
+  --event-2: #6A8FD4;
+  --event-3: #CC6478;
+  --event-4: #6E82B5;
+  --event-5: #6FA37E;
+  --event-6: #A489CC;
+  --event-7: #CE8355;
+  --event-8: #74A9B0;
 }
 
 /* ── Admin ops theme (4c) — admin stops borrowing the couple's wardrobe.
@@ -125,12 +197,18 @@
   --accent-line: rgba(242, 164, 142, 0.35);
   --ok: #3DD68C;
   --warn: #F0B25A;
-  --bad: #F26D56;
+  --bad: #E06C6C;
   --info: #8CA3F0;
   --ok-soft: rgba(61, 214, 140, 0.13);
   --warn-soft: rgba(240, 178, 90, 0.13);
-  --bad-soft: rgba(242, 109, 86, 0.14);
+  --bad-soft: rgba(224, 108, 108, 0.14);
   --info-soft: rgba(110, 139, 232, 0.16);
+
+  /* Admin runs on a dark ground, so it takes the lifted selection values. */
+  --selected: #6980E8;
+  --selected-soft: #1F2647;
+  --selected-line: #3B5BDB;
+
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 40px 90px -20px rgba(0, 0, 0, 0.7);
   color-scheme: dark;
@@ -171,8 +249,11 @@
   }
   .nums { font-variant-numeric: tabular-nums; }
   ::selection { background: oklch(0.62 0.21 29 / 0.16); }
+  /* Focus is a state, so it takes the cool selection colour rather than the
+     brand accent — otherwise tabbing through a form paints every control
+     the same red as the one button that actually submits it. */
   :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--selected);
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -511,14 +592,18 @@
   color: var(--ink-2);
 }
 
-/* Micro-label: mono uppercase survives ONLY as a group label (sidebar
-   sections, column headers) at 9.5px+, never as an action. */
+/* Micro-label: group labels (sidebar sections, column headers). Now SANS —
+   same structural job, far better texture. At the density this product uses
+   labels (CAP 80, 2 HOUSEHOLDS · 4 GUESTS, INVITED TOTALS) tracked mono made
+   a wedding tool read like a terminal. Mono is demoted to numerals only,
+   via .nums. Sized 11px rather than the old 9.5px because sans needs the
+   extra pixel to hold its own at this tracking. */
 @utility microlabel {
-  font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-family: var(--font-sans);
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   color: var(--ink-3);
 }
 
@@ -559,16 +644,19 @@
 
 /* The editor shell: Puck inherits our theme instead of its grey/azure. */
 .puck-shell {
-  /* Coral takes over every Puck affordance (selection, drop lines, buttons) */
-  --puck-color-azure-04: oklch(0.55 0.21 29);
-  --puck-color-azure-05: oklch(0.62 0.21 29);
-  --puck-color-azure-06: oklch(0.66 0.19 29);
-  --puck-color-azure-07: oklch(0.72 0.15 29);
-  --puck-color-azure-08: oklch(0.8 0.1 29);
-  --puck-color-azure-09: oklch(0.9 0.05 29);
-  --puck-color-azure-10: oklch(0.94 0.035 29);
-  --puck-color-azure-11: oklch(0.96 0.025 29);
-  --puck-color-azure-12: oklch(0.975 0.015 29);
+  /* Puck's affordances are all about the block you are MANIPULATING —
+     selection rings, drop lines, drag handles. That is selection language,
+     not brand language, so they run on the cool ramp. Coral in here made
+     "this block is selected" and "Publish" indistinguishable. */
+  --puck-color-azure-04: oklch(0.42 0.17 268);
+  --puck-color-azure-05: oklch(0.49 0.19 268);
+  --puck-color-azure-06: oklch(0.56 0.18 268);
+  --puck-color-azure-07: oklch(0.64 0.15 268);
+  --puck-color-azure-08: oklch(0.73 0.11 268);
+  --puck-color-azure-09: oklch(0.85 0.06 268);
+  --puck-color-azure-10: oklch(0.91 0.04 268);
+  --puck-color-azure-11: oklch(0.95 0.025 268);
+  --puck-color-azure-12: oklch(0.975 0.015 268);
 }
 
 /* Panels span the full column and sit on our surface tokens. The unclassed
@@ -590,11 +678,11 @@
   background: var(--surface);
 }
 .puck-shell [class*='_SidebarSection-title'] {
-  font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-family: var(--font-sans);
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   color: var(--ink-3);
 }
 .puck-shell [class*='_SidebarSection-content'] { padding: 14px 16px 18px; }
@@ -619,20 +707,20 @@
 }
 .puck-shell [class*='_DrawerItem'] [class*='_DrawerItem-draggable']:hover,
 .puck-shell [class*='_Drawer-draggable']:hover {
-  border-color: var(--accent);
+  border-color: var(--selected-line);
   background: var(--surface);
 }
 
 /* Canvas: say WHERE you are. Hover = dashed coral whisper; selected = a
    confident 2px coral ring. (The name chip appears with it via .ebc-chip.) */
 .puck-shell [class*='_DraggableComponent--hover'] > [class*='_DraggableComponent-overlay'] {
-  outline: 1.5px dashed oklch(0.62 0.21 29 / 0.55) !important;
+  outline: 1.5px dashed color-mix(in oklab, var(--selected) 55%, transparent) !important;
   outline-offset: -1.5px;
 }
 .puck-shell [class*='_DraggableComponent--isSelected'] > [class*='_DraggableComponent-overlay'] {
-  outline: 2px solid oklch(0.62 0.21 29) !important;
+  outline: 2px solid var(--selected) !important;
   outline-offset: -2px;
-  box-shadow: 0 0 0 4px oklch(0.62 0.21 29 / 0.12);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--selected) 14%, transparent);
 }
 
 /* Fields panel: breathing room between controls; inputs on our tokens. */

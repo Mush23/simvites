@@ -42,7 +42,8 @@ export default async function BudgetPage() {
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Estimated" value={formatPence(estimated) || '£0.00'} />
         <StatCard label="Committed" value={formatPence(committed) || '£0.00'} hint="actuals where known" />
-        <StatCard label="Paid" value={formatPence(paid) || '£0.00'} bar={committed ? (paid / committed) * 100 : 0} />
+        <StatCard label="Paid" value={formatPence(paid) || '£0.00'} tone="money"
+          bar={committed ? (paid / committed) * 100 : 0} />
         <StatCard label="Left to pay" value={formatPence(Math.max(0, committed - paid)) || '£0.00'} />
       </div>
 

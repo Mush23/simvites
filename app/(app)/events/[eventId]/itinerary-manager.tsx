@@ -66,17 +66,17 @@ export function ItineraryManager({ eventId, items }: { eventId: string; items: I
         <label className="block">
           <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Time</span>
           <input name="time_label" placeholder="4:00 PM"
-            className="w-28 rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-accent" />
+            className="w-28 rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-selected" />
         </label>
         <label className="block">
           <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Moment</span>
           <input name="title" required placeholder="Baraat arrival"
-            className="w-52 rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-accent" />
+            className="w-52 rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-selected" />
         </label>
         <label className="block">
           <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Note (optional)</span>
           <input name="note" placeholder="Meet at the main gate"
-            className="w-56 rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-accent" />
+            className="w-56 rounded-lg border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-selected" />
         </label>
         <button type="submit" disabled={busy}
           className="rounded-md flex items-center gap-1.5 bg-accent px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-60">

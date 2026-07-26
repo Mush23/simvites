@@ -39,13 +39,13 @@ export function PasswordForm({ redirectTo, cta = 'Set new password' }: {
         <span className="mb-1.5 block text-[12px] font-medium text-ink-2">New password</span>
         <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} required minLength={8}
           autoComplete="new-password"
-          className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent" />
+          className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-selected" />
       </label>
       <label className="block">
         <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Repeat it</span>
         <input type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} required minLength={8}
           autoComplete="new-password"
-          className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent" />
+          className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-selected" />
       </label>
       {error && <p className="text-[13px] text-bad">{error}</p>}
       {done && !redirectTo && <p className="text-[13px] text-ok">Password updated.</p>}

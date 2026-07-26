@@ -77,7 +77,7 @@ export function SitesRegister({ rows }: { rows: RegisterRow[] }) {
         </span>
         <input value={q} onChange={(e) => setQ(e.target.value)}
           placeholder="Search couple, slug or email…"
-          className="ml-auto w-56 rounded-md border border-line bg-surface px-3 py-1.5 text-[12.5px] text-ink outline-none focus:border-accent" />
+          className="ml-auto w-56 rounded-md border border-line bg-surface px-3 py-1.5 text-[12.5px] text-ink outline-none focus:border-selected" />
         <span className="flex gap-1.5">
           {(['all', 'live', 'draft', 'archived'] as const).map((f) => (
             <button key={f} type="button" onClick={() => setFilter(f)} className={chip(filter === f)}>

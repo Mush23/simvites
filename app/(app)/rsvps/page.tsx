@@ -122,8 +122,12 @@ export default async function RsvpsPage() {
         />
         <div className="flex flex-wrap gap-3">
           <form action={async () => { 'use server'; await (await import('./actions')).sendReminders() }}>
+            {/* Outline, not a solid fill. This sat in a row of three actions all
+                shouting at the same volume; RSVPs is a screen you come to read.
+                Still the leading action of the group — accent border and ink,
+                just not the page's one solid call to action. */}
             <button type="submit" title="Email every household that hasn't responded, with a fresh personal link"
-              className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white">
+              className="rounded-md border border-accent-line bg-transparent px-4 py-2 text-sm font-semibold text-accent-ink transition-colors hover:bg-accent-soft">
               Remind pending households
             </button>
           </form>
@@ -226,7 +230,7 @@ export default async function RsvpsPage() {
                 <footer className="mt-3 flex items-baseline justify-between gap-3">
                   <span className="text-[13px] font-medium text-ink-2">— {m.household}</span>
                   {m.at && (
-                    <span className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-ink-3">
+                    <span className="font-sans text-[9.5px] uppercase tracking-[0.1em] text-ink-3">
                       {new Date(m.at).toLocaleDateString('en-GB')}
                     </span>
                   )}

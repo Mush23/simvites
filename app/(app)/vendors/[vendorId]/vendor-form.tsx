@@ -39,7 +39,7 @@ export function VendorForm({ vendor }: { vendor: VendorRow }) {
         <label className="block">
           <span className="eyebrow mb-1.5 block">Pipeline status</span>
           <select name="status" defaultValue={vendor.status}
-            className="w-full rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent">
+            className="w-full rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected">
             <option value="shortlisted">Shortlisted</option>
             <option value="contacted">Contacted</option>
             <option value="quote_in">Quote in</option>
@@ -58,7 +58,7 @@ export function VendorForm({ vendor }: { vendor: VendorRow }) {
       <label className="block">
         <span className="eyebrow mb-1.5 block">Notes</span>
         <textarea name="notes" rows={3} defaultValue={vendor.notes ?? ''}
-          className="w-full rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent" />
+          className="w-full rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected" />
       </label>
       <div className="flex items-center gap-4">
         <button type="submit"
@@ -88,7 +88,7 @@ function Field({ label, name, defaultValue, type = 'text', required, placeholder
     <label className="block">
       <span className="eyebrow mb-1.5 block">{label}</span>
       <input name={name} type={type} defaultValue={defaultValue} required={required} placeholder={placeholder}
-        className="w-full rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent" />
+        className="w-full rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected" />
     </label>
   )
 }

@@ -77,8 +77,8 @@ function PagesPanel() {
           p.id === pageId ? 'bg-accent-soft text-accent-ink' : 'text-ink hover:bg-paper-2'}`}>
           <button type="button" className="rounded-md min-w-0 flex-1 truncate text-left"
             onClick={() => { router.push(`/website?page=${p.id}`); router.refresh() }}>
-            {p.title}{p.is_home && <span className="ml-1.5 font-mono text-[9px] uppercase tracking-wider text-ink-3">home</span>}
-            {p.hidden && <span className="ml-1.5 font-mono text-[9px] uppercase tracking-wider text-warn">hidden</span>}
+            {p.title}{p.is_home && <span className="ml-1.5 font-sans text-[9px] uppercase tracking-wider text-ink-3">home</span>}
+            {p.hidden && <span className="ml-1.5 font-sans text-[9px] uppercase tracking-wider text-warn">hidden</span>}
           </button>
           {!p.is_home && (
             <>
@@ -108,7 +108,7 @@ function PagesPanel() {
         <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
           placeholder="New page name, e.g. Travel"
-          className="min-w-0 flex-1 rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent" />
+          className="min-w-0 flex-1 rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-selected" />
         <button type="button" onClick={add} disabled={busy}
           className="!rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
           {busy ? '…' : 'Add'}
@@ -185,7 +185,7 @@ function ColorPick({ k, label, value, onSet }: {
         key={value ?? 'unset'}
         onBlur={(e) => { if (e.target.value.trim()) commitHex(e.target.value.trim()) }}
         onKeyDown={(e) => { if (e.key === 'Enter') commitHex((e.target as HTMLInputElement).value.trim()) }}
-        className="mt-1 w-full rounded border border-line bg-paper-2 px-1 py-0.5 text-center font-mono text-[9.5px] text-ink outline-none focus:border-accent" />
+        className="mt-1 w-full rounded border border-line bg-paper-2 px-1 py-0.5 text-center font-mono text-[9.5px] text-ink outline-none focus:border-selected" />
       {value ? (
         <button type="button" onClick={() => onSet(k, '')}
           className="rounded-md mt-0.5 text-[9px] text-ink-3 underline hover:text-ink">reset</button>
@@ -269,7 +269,7 @@ function StyleSections() {
       <span className="eyebrow mb-1 block">{label}</span>
       <select defaultValue={(current[k] as string) ?? Object.keys(options)[0]}
         onChange={(e) => set(k, e.target.value)}
-        className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent">
+        className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-selected">
         {Object.entries(options).map(([v, o]) => (
           <option key={v} value={v}>{typeof o === 'string' ? o : o.label}</option>
         ))}
@@ -359,7 +359,7 @@ function StyleSections() {
           <span className="eyebrow mb-1 block">Initials (shown if no monogram)</span>
           <input defaultValue={current.initials ?? ''} placeholder="A & D" maxLength={12}
             onBlur={(e) => { if (e.target.value !== (current.initials ?? '')) set('initials', e.target.value) }}
-            className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent" />
+            className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-selected" />
         </label>
         <p className="mt-1 text-[10px] text-ink-3">Shown at the top of your site and in the page menu guests see.</p>
       </div>
@@ -440,7 +440,7 @@ function AiDraft() {
       <p className="mb-1.5 text-[11.5px] font-medium text-ink-2">What should this section say?</p>
       <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3}
         placeholder={'e.g. "Our story — we met at university in London, bonded over bad coffee, got engaged in Santorini last summer"'}
-        className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-[12px] text-ink outline-none focus:border-accent" />
+        className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-[12px] text-ink outline-none focus:border-selected" />
       <div className="mt-1.5 flex items-center gap-1.5">
         <button type="button" onClick={compose} disabled={busy || !prompt.trim()}
           className="!rounded-md bg-accent px-2.5 py-1.5 text-[11.5px] font-semibold text-white disabled:opacity-50">
@@ -568,7 +568,7 @@ function Dock() {
         <span aria-hidden className="mx-1 h-[18px] w-px shrink-0 bg-paper/20" />
 
         {statusMap[meta.status] && (
-          <span className="shrink-0 px-1.5 font-mono text-[9px] uppercase tracking-[0.1em] text-paper/55">
+          <span className="shrink-0 px-1.5 font-sans text-[9px] uppercase tracking-[0.1em] text-paper/55">
             {statusMap[meta.status]}
           </span>
         )}

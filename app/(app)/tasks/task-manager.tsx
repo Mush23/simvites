@@ -49,19 +49,19 @@ export function TaskManager({ tasks, events, vendors }: {
           <label className="block">
             <span className="eyebrow mb-1.5 block">New task</span>
             <input name="title" required placeholder="Chase caterer for tasting date"
-              className="w-64 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent" />
+              className="w-64 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected" />
           </label>
           <Select name="event_id" label="Event" options={events} />
           <Select name="vendor_id" label="Vendor" options={vendors} />
           <label className="block">
             <span className="eyebrow mb-1.5 block">Due</span>
             <input name="due_date" type="date"
-              className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent" />
+              className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected" />
           </label>
           <label className="block">
             <span className="eyebrow mb-1.5 block">Priority</span>
             <select name="priority" defaultValue="normal"
-              className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent">
+              className="rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected">
               <option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option>
             </select>
           </label>
@@ -130,13 +130,13 @@ function TaskItem({ task, events, vendors, onChanged }: {
         className="h-5 w-5 shrink-0 accent-[var(--accent)]" />
       <div className="min-w-0 flex-1">
         <p className={`text-sm ${done ? 'text-ink-3 line-through' : 'text-ink'}`}>{task.title}</p>
-        {linked && <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">{linked}</p>}
+        {linked && <p className="font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">{linked}</p>}
       </div>
       {task.priority === 'high' && !done && (
-        <span className="rounded-pill bg-bad-soft px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-bad">high</span>
+        <span className="rounded-pill bg-bad-soft px-2 py-0.5 font-sans text-[9px] uppercase tracking-[0.14em] text-bad">high</span>
       )}
       {task.due_date && (
-        <span className={`font-mono text-[10px] uppercase tracking-[0.14em] ${overdue ? 'text-bad' : 'text-ink-3'}`}>
+        <span className={`font-sans text-[10px] uppercase tracking-[0.14em] ${overdue ? 'text-bad' : 'text-ink-3'}`}>
           {new Date(task.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
         </span>
       )}
@@ -160,7 +160,7 @@ function Select({ name, label, options }: { name: string; label: string; options
     <label className="block">
       <span className="eyebrow mb-1.5 block">{label}</span>
       <select name={name} defaultValue=""
-        className="max-w-40 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-accent">
+        className="max-w-40 rounded-md border border-line bg-paper-2 px-3 py-2.5 text-ink outline-none focus:border-selected">
         <option value="">—</option>
         {options.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
       </select>

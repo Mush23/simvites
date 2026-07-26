@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
+import { eventColor } from '@/lib/event-colors'
 import { GuestManager } from './guest-manager'
 
 export const metadata = { title: 'Guests · Occasio' }
@@ -98,8 +99,8 @@ export default async function GuestsPage() {
         description="Households, named guests, and the invite matrix — who is invited to what drives everything a guest can see and RSVP to."
       />
       <GuestManager
-        events={(events ?? []).map((e) => ({
-          id: e.id, name: e.name, accent: e.accent, capacity: e.capacity,
+        events={(events ?? []).map((e, i) => ({
+          id: e.id, name: e.name, accent: eventColor(e.accent, i), capacity: e.capacity,
           startsAt: e.starts_at, venueName: e.venue_name,
         }))}
         responses={responses.map((r) => ({ guestId: r.guest_id, eventId: r.event_id, status: r.status }))}
