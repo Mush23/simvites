@@ -67,7 +67,7 @@ export function SiteNav({ pages, theme, currentSlug }: {
 
   if (design === 'banner') {
     return (
-      <header className="sticky top-0 z-40 flex items-center justify-between gap-6 px-6 py-3"
+      <header className="sticky top-0 z-[var(--z-sticky)] flex items-center justify-between gap-6 px-6 py-3"
         style={{ background: 'var(--surface)', borderBottom: '2px solid var(--accent-line)' }}>
         {hasBrand ? <BrandMark t={t} /> : <span />}
         {links.length > 0 && <NavLinks pages={links} currentSlug={currentSlug} />}
@@ -77,7 +77,7 @@ export function SiteNav({ pages, theme, currentSlug }: {
 
   if (design === 'centered') {
     return (
-      <header className="sticky top-0 z-40 flex flex-col items-center gap-2.5 border-b px-6 py-4"
+      <header className="sticky top-0 z-[var(--z-sticky)] flex flex-col items-center gap-2.5 border-b px-6 py-4"
         style={{
           borderColor: 'var(--line)',
           background: 'color-mix(in oklab, var(--paper) 92%, transparent)',
@@ -102,7 +102,7 @@ export function SiteNav({ pages, theme, currentSlug }: {
   // 'glass' — the original centered translucent bar.
   return (
     <header
-      className="sticky top-0 z-40 flex items-center justify-center gap-6 border-b px-6 py-3"
+      className="sticky top-0 z-[var(--z-sticky)] flex items-center justify-center gap-6 border-b px-6 py-3"
       style={{
         borderColor: 'var(--line)',
         background: 'color-mix(in oklab, var(--paper) 88%, transparent)',

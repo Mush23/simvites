@@ -83,7 +83,7 @@ export function PreviewShell({
       role="dialog"
       aria-modal="true"
       aria-label={`${current.name} preview`}
-      className="fixed inset-0 z-[90] flex flex-col bg-ink/70 backdrop-blur-[3px]"
+      className="fixed inset-0 z-[var(--z-modal)] flex flex-col bg-ink/70 backdrop-blur-[3px]"
       onClick={onClose}
     >
       <div

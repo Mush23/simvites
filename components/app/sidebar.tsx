@@ -124,7 +124,7 @@ export function MobileNav({ site }: { site: SidebarSite }) {
         <Menu size={17} strokeWidth={1.7} />
       </button>
       {open && (
-        <div className="fixed inset-0 z-50 bg-black/45 backdrop-blur-[2px]" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 z-[var(--z-overlay)] bg-black/45 backdrop-blur-[2px]" onClick={() => setOpen(false)}>
           <div onClick={(e) => e.stopPropagation()}
             className="relative flex h-full w-[270px] flex-col overflow-y-auto border-r border-line bg-surface">
             <button type="button" onClick={() => setOpen(false)} aria-label="Close menu"

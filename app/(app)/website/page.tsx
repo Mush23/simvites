@@ -56,6 +56,20 @@ export default async function WebsitePage({
     : (page.puck_data as SiteData)
   const events: SiteEvent[] = (eventRows ?? []) as SiteEvent[]
 
+  // Does the draft differ from what guests can actually see? Compared against
+  // the published snapshot so the editor's save indicator is truthful the
+  // moment it loads, not only about edits made this session. "Is my work live?"
+  // is the question the indicator exists to answer.
+  let hasUnpublishedChanges = false
+  if (site!.status === 'published') {
+    const { getPublishedSnapshot } = await import('@/lib/public-site')
+    const snap = await getPublishedSnapshot(site!.slug)
+    const livePage = snap?.pages.find((p) => p.slug === page.slug)
+    hasUnpublishedChanges = Boolean(
+      snap && (!livePage || JSON.stringify(livePage.puck_data) !== JSON.stringify(data)),
+    )
+  }
+
   const { templateFontClasses } = await import('@/lib/template-fonts')
 
   return (
@@ -70,6 +84,7 @@ export default async function WebsitePage({
         data={data}
         events={events}
         published={site!.status === 'published'}
+        hasUnpublishedChanges={hasUnpublishedChanges}
         templateName={template.name}
         styleProps={siteStyleProps(siteRow?.theme)}
         currentStyle={(siteRow?.theme ?? {}) as import('@/lib/site-style').SiteStyle}

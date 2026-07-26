@@ -593,7 +593,7 @@ function HouseholdDrawer({ household, events, allocations, onClose, onChanged }:
 
   return (
     <aside aria-label={`${household.name} details`}
-      className="fixed inset-y-0 right-0 z-50 flex w-[360px] max-w-[calc(100vw-24px)] flex-col border-l border-line bg-surface shadow-lift">
+      className="fixed inset-y-0 right-0 z-[var(--z-panel)] flex w-[360px] max-w-[calc(100vw-24px)] flex-col border-l border-line bg-surface shadow-lift">
       <div className="flex items-center gap-2 border-b border-line px-4 py-3">
         <p className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-tight text-ink">{household.name}</p>
         {household.side && (

@@ -70,7 +70,9 @@ export function Styled({ opts, children }: { opts?: StyleOpts; children: React.R
 /** The Puck field group added to every block's side panel. */
 export const styleField = {
   type: 'object' as const,
-  label: 'Style — look, colour & motion',
+  // Scope in the label: the dock's Style panel is sitewide, this is one block.
+  // Neither used to say so, which is what made two entry points confusing.
+  label: 'Style this section — look, colour & motion',
   objectFields: {
     variant: {
       type: 'select' as const, label: 'Look (10 options)',

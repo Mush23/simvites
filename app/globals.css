@@ -104,6 +104,31 @@
      one real call to action on the page. */
   --nav-rail: var(--ink);
 
+  /* ── LAYERING ──────────────────────────────────────────────────────────
+     A fixed scale, so panels stop stacking arbitrarily. Before this the app
+     used z-30/40/45/50/70/80/90/95 picked per component, and two of those
+     were wrong in ways you could see: the Assistant launcher (70) floated
+     over the mobile nav scrim and the guest drawer (both 50), and the
+     template preview shell (90) tied with the confirm dialog (90).
+
+     The order is the interaction hierarchy, top to bottom:
+       toast    always visible, never blocks
+       modal    takes over the screen; nothing may cover it
+       overlay  scrims that dim what is behind them
+       panel    side panels, popovers, drawers, menus
+       toolbar  persistent chrome — the editor dock, the ask launcher
+       sticky   headers that scroll with content
+
+     Gaps of 100 leave room to slot something in without renumbering.
+     Component-local stacking (z-0/1/10/20 inside one card) is deliberately
+     left alone — this scale is for layers that float over the app. */
+  --z-sticky: 100;
+  --z-toolbar: 200;
+  --z-panel: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+
   --shadow: 0 1px 2px rgba(30, 25, 15, 0.05);
   --shadow-lg: 0 40px 90px -20px rgba(20, 16, 8, 0.45);
 }
@@ -765,7 +790,7 @@
   top: 60px;
   right: 12px;
   bottom: 80px;
-  z-index: 45;
+  z-index: var(--z-panel);
   width: 268px;
   height: auto;
   overflow-y: auto;
@@ -775,3 +800,10 @@
   box-shadow: var(--shadow-lg);
 }
 .puck-dock [class*='_Sidebar--right']:has(.pf-closed) { display: none; }
+
+/* ONE panel region (Phase 4). A dock panel and the section inspector both want
+   the right rail; while a dock panel is open, Puck's fields sidebar steps aside
+   rather than stacking beside it. Before this the editor could show a 62vh
+   popover over the canvas centre, the inspector on the right and the dock at
+   once — three competing layers with the page unreadable behind them. */
+.puck-dock[data-dock-panel='open'] [class*='_Sidebar--right'] { display: none; }

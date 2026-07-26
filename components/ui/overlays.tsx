@@ -151,7 +151,7 @@ export function OverlayProvider({ children }: { children: React.ReactNode }) {
       {children}
 
       {dialog && (
-        <div className="fixed inset-0 z-[90] flex items-start justify-center bg-black/45 pt-[18vh] backdrop-blur-[3px]"
+        <div className="fixed inset-0 z-[var(--z-modal)] flex items-start justify-center bg-black/45 pt-[18vh] backdrop-blur-[3px]"
           onClick={() => close(null)}>
           <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="overlay-dialog-title"
             onClick={(e) => e.stopPropagation()}
@@ -180,7 +180,7 @@ export function OverlayProvider({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <div aria-live="polite" className="pointer-events-none fixed bottom-4 right-4 z-[95] flex flex-col gap-2">
+      <div aria-live="polite" className="pointer-events-none fixed bottom-4 right-4 z-[var(--z-toast)] flex flex-col gap-2">
         {toasts.map((t) => (
           <div key={t.id}
             className="pointer-events-auto flex items-center gap-2.5 rounded-xl border border-white/10 bg-[#17171A] py-2.5 pl-3 pr-4 text-[13px] text-[#F2F2F0] shadow-lift"

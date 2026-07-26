@@ -73,7 +73,7 @@ export function CommandMenu({ siteSlug }: { siteSlug: string }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[80] bg-black/45 pt-[14vh] backdrop-blur-[3px]" onClick={() => setOpen(false)}>
+    <div className="fixed inset-0 z-[var(--z-modal)] bg-black/45 pt-[14vh] backdrop-blur-[3px]" onClick={() => setOpen(false)}>
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label="Command menu"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => {

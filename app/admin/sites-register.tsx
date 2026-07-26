@@ -128,7 +128,7 @@ export function SitesRegister({ rows }: { rows: RegisterRow[] }) {
 
               {menuId === s.id && (
                 <>
-                  <div className="fixed inset-0 z-30" onClick={() => setMenuId(null)} />
+                  <div className="fixed inset-0 z-[var(--z-overlay)]" onClick={() => setMenuId(null)} />
                   <SiteMenu site={s} onClose={() => setMenuId(null)} />
                 </>
               )}
@@ -163,7 +163,7 @@ function SiteMenu({ site, onClose }: { site: RegisterRow; onClose: () => void })
   const item = 'block w-full rounded-md px-2.5 py-2 text-left text-[12.5px] text-ink hover:bg-paper-2 disabled:opacity-50'
 
   return (
-    <div className="absolute right-3 top-11 z-40 w-64 rounded-card border border-line bg-surface p-1.5 shadow-lift">
+    <div className="absolute right-3 top-11 z-[var(--z-panel)] w-64 rounded-card border border-line bg-surface p-1.5 shadow-lift">
       <div className="border-b border-line px-2.5 pb-2 pt-1">
         <p className="text-[11.5px] text-ink-2">{site.ownerEmail ?? 'no owner email'}</p>
         <p className="font-mono text-[9.5px] text-ink-3">

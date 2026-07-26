@@ -51,7 +51,7 @@ export function Gallery({ heading, images }: { heading?: string; images: Gallery
 
       {open !== null && (
         <div role="dialog" aria-modal="true" aria-label="Photo viewer"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-6" onClick={close}>
+          className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center bg-black/85 p-6" onClick={close}>
           <div className="relative max-h-[85vh] w-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
             <div className="relative aspect-[4/3] w-full">
               <Image src={valid[open].url} alt={valid[open].caption ?? ''} fill sizes="90vw" className="object-contain" />

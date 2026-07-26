@@ -20,7 +20,7 @@ export function AssistantLauncher() {
     <Link href="/assistant"
       title="Ask the assistant"
       aria-label="Ask the assistant"
-      className="fixed bottom-5 right-5 z-[70] flex h-11 items-center gap-2 rounded-pill border border-line bg-surface px-4 text-[13px] font-medium text-ink shadow-lift transition-colors hover:border-line-2">
+      className="fixed bottom-5 right-5 z-[var(--z-toolbar)] flex h-11 items-center gap-2 rounded-pill border border-line bg-surface px-4 text-[13px] font-medium text-ink shadow-lift transition-colors hover:border-line-2">
       <Sparkles size={15} strokeWidth={1.7} className="text-ink-3" aria-hidden />
       <span className="hidden sm:inline">Ask</span>
     </Link>

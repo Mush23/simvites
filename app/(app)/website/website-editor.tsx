@@ -27,7 +27,19 @@ export interface EditorPage {
 }
 
 type DeviceKey = 'desktop' | 'tablet' | 'mobile'
-type Status = 'idle' | 'saving' | 'saved' | 'publishing' | 'published' | 'error' | 'locked'
+/**
+ * ONE save state (Phase 4). `unpublished` is the state that was missing: the
+ * editor said "Saved" after an autosave, which is true of the draft and says
+ * nothing about whether guests can see it. Ambiguity about whether work is
+ * safe — and whether it is live — is a top-three cause of an editor feeling
+ * clunky, so draft-saved and actually-live are now different words.
+ */
+type Status =
+  | 'idle' | 'saving' | 'saved' | 'unpublished'
+  | 'publishing' | 'published' | 'error' | 'locked'
+
+/** Which dock panel is open. Lifted out of Dock so the shell can react. */
+type PanelKey = 'template' | 'pages' | 'add' | 'style'
 
 /** 1c: chrome recedes to one dock — the couple looks at their wedding, not
  * at panels. Dock + popovers read editor state through this context so the
@@ -44,6 +56,8 @@ interface EditorMeta {
   status: Status
   isPublished: boolean
   publish: () => void
+  panel: PanelKey | null
+  setPanel: (p: PanelKey | null) => void
 }
 const EditorMetaCtx = createContext<EditorMeta | null>(null)
 function useEditorMeta(): EditorMeta {
@@ -128,8 +142,8 @@ function HelpMenu() {
     ['Move a section', 'Drag it by its edge, or use the arrows in its toolbar.'],
     ['Add a section', '＋ Add in the dock below — blocks, ready-made sections, or let ✦ AI draft one. Hovering a seam on the page offers ＋ Add below too.'],
     ['Edit a section', 'Click it — its settings appear in a panel beside the page.'],
-    ['Restyle one section', 'Click it, then “Style — look, colour & motion” in its panel: 10 looks, borrowed palettes, animations.'],
-    ['Restyle everything', 'Style in the dock: vibes, fonts, your own colours, buttons, menus, backdrops.'],
+    ['Restyle one section', 'Click it, then “Style this section” in its panel: 10 looks, borrowed palettes, animations.'],
+    ['Restyle everything', 'Style in the dock: vibes, fonts, your own colours, buttons, menus, backdrops. Panels open beside the page, never over it.'],
     ['Change template', 'The template name in the dock — switch any time, content stays.'],
     ['Pages', 'Pages in the dock: add, rename, hide from the menu, or delete.'],
     ['Photos', 'Drop or upload a photo right inside any photo field — or search free photos there.'],
@@ -143,7 +157,7 @@ function HelpMenu() {
         ?
       </button>
       {open && (
-        <div className="absolute right-0 top-11 z-50 max-h-[70vh] w-[330px] overflow-y-auto rounded-card border border-line bg-surface p-4 shadow-lift">
+        <div className="absolute right-0 top-11 z-[var(--z-panel)] max-h-[70vh] w-[330px] overflow-y-auto rounded-card border border-line bg-surface p-4 shadow-lift">
           <p className="microlabel mb-2.5">How the editor works</p>
           {ROWS.map(([t, d]) => (
             <div key={t} className="border-b border-line py-2 last:border-0">
@@ -279,6 +293,16 @@ function StyleSections() {
 
   return (
     <div className="space-y-4 p-3">
+      {/* The two styling entry points confused people because neither said its
+          SCOPE. This panel is sitewide; the per-section accordion in a block's
+          inspector is that block only. Saying so is the fix — the scopes are
+          genuinely different, so collapsing them into one control would lose
+          the ability to restyle a single section. */}
+      <p className="rounded-md border border-line bg-paper-2 px-2.5 py-2 text-[11.5px] leading-snug text-ink-2">
+        Everything here changes <span className="font-semibold text-ink">the whole site</span>.
+        To restyle one section only, click it on the page and open
+        &ldquo;Style this section&rdquo; in its panel.
+      </p>
       {/* V1: vibes first — one tap sets the whole mood, no design degree needed */}
       <div>
         <span className="eyebrow mb-1.5 block">Pick a vibe — one tap styles everything</span>
@@ -491,7 +515,7 @@ function HistoryButtons() {
 /** History docks bottom-left of the canvas — quiet, always in reach. */
 function UndoDock() {
   return (
-    <div className="pointer-events-none sticky bottom-3 z-40 flex h-0 justify-start pl-3">
+    <div className="pointer-events-none sticky bottom-3 z-[var(--z-toolbar)] flex h-0 justify-start pl-3">
       <div className="pointer-events-auto -translate-y-full rounded-lg border border-line bg-surface p-1 shadow-card">
         <HistoryButtons />
       </div>
@@ -507,12 +531,19 @@ const DEVICES = [
 
 /** 1c: THE dock — template · pages · add · style | width | status · publish.
  * One dark pill at the bottom; popovers open above it. */
+const PANEL_TITLE: Record<PanelKey, string> = {
+  template: 'Template',
+  pages: 'Pages',
+  add: 'Add a section',
+  style: 'Style — whole site',
+}
+
 function Dock() {
   const meta = useEditorMeta()
-  const [open, setOpen] = useState<null | 'template' | 'pages' | 'add' | 'style'>(null)
+  const { panel: open, setPanel: setOpen } = meta
   const template = listTemplates().find((t) => t.key === (meta.currentStyle.template ?? 'editorial-gold'))
 
-  const tab = (key: NonNullable<typeof open>, label: React.ReactNode, title: string) => (
+  const tab = (key: PanelKey, label: React.ReactNode, title: string) => (
     <button type="button" title={title} aria-expanded={open === key}
       onClick={() => setOpen(open === key ? null : key)}
       className={`flex items-center gap-1.5 !rounded-pill px-3 py-1.5 text-[12px] font-medium text-paper transition-colors ${
@@ -521,21 +552,42 @@ function Dock() {
     </button>
   )
 
+  // One indicator, and it distinguishes "your draft is safe" from "guests can
+  // see this". `Saved` alone was the ambiguity.
   const statusMap: Record<Status, string> = {
-    idle: '', saving: 'Saving…', saved: 'Saved', publishing: 'Publishing…',
-    published: 'Published ✓', error: 'Save failed', locked: 'Locked',
+    idle: '', saving: 'Saving…', saved: 'Saved', unpublished: 'Unpublished changes',
+    publishing: 'Publishing…', published: 'Published ✓', error: 'Save failed', locked: 'Locked',
   }
 
   return (
-    <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2">
+    <div className="fixed bottom-4 left-1/2 z-[var(--z-toolbar)] -translate-x-1/2">
       {open && (
         <>
           <div className="fixed inset-0 z-[-1]" onClick={() => setOpen(null)} />
-          <div className="absolute bottom-full left-1/2 mb-2.5 max-h-[62vh] w-[330px] max-w-[calc(100vw-20px)] -translate-x-1/2 overflow-y-auto rounded-card border border-line bg-surface shadow-lift">
-            {open === 'template' && <TemplateSwitcher />}
-            {open === 'pages' && <PagesPanel />}
-            {open === 'add' && <AddPanel />}
-            {open === 'style' && <StyleSections />}
+          {/* Dock panels open in the RIGHT RAIL, not over the canvas centre.
+              Three layers used to compete — a 62vh popover above the dock, the
+              section inspector on the right, and the dock itself — with the
+              page unreadable behind them. The dock stays the launcher (it is
+              the strongest part of this editor); its panels just share the one
+              panel region with the inspector, which is hidden while a dock
+              panel is open. Canvas is never covered. */}
+          <div
+            role="region"
+            aria-label={PANEL_TITLE[open]}
+            className="fixed bottom-[84px] right-3 top-[58px] flex w-[320px] max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-card border border-line bg-surface shadow-lift">
+            <div className="flex shrink-0 items-center justify-between gap-2 border-b border-line px-3 py-2">
+              <p className="text-[12.5px] font-semibold text-ink">{PANEL_TITLE[open]}</p>
+              <button type="button" onClick={() => setOpen(null)} aria-label="Close panel"
+                className="flex h-6 w-6 items-center justify-center !rounded-md text-ink-3 hover:bg-surface-2 hover:text-ink">
+                ✕
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              {open === 'template' && <TemplateSwitcher />}
+              {open === 'pages' && <PagesPanel />}
+              {open === 'add' && <AddPanel />}
+              {open === 'style' && <StyleSections />}
+            </div>
           </div>
         </>
       )}
@@ -568,7 +620,17 @@ function Dock() {
         <span aria-hidden className="mx-1 h-[18px] w-px shrink-0 bg-paper/20" />
 
         {statusMap[meta.status] && (
-          <span className="shrink-0 px-1.5 font-sans text-[9px] uppercase tracking-[0.1em] text-paper/55">
+          <span aria-live="polite"
+            title={meta.status === 'unpublished'
+              ? 'Your draft is saved. Guests still see the last published version until you publish.'
+              : undefined}
+            className={`flex shrink-0 items-center gap-1.5 px-1.5 font-sans text-[9px] uppercase tracking-[0.1em] ${
+              meta.status === 'error' ? 'text-bad' : 'text-paper/55'}`}>
+            {/* A dot, not a colour swap on the text: "unpublished" is a state
+                to notice, not an error, and the dock is already dark. */}
+            {meta.status === 'unpublished' && (
+              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-warn" />
+            )}
             {statusMap[meta.status]}
           </span>
         )}
@@ -595,7 +657,7 @@ function DockSpotlight() {
   useEffect(() => { setHidden(localStorage.getItem('editor-dock-spotlight') === '1') }, [])
   if (hidden) return null
   return (
-    <div className="fixed bottom-[68px] left-1/2 z-50 w-[320px] max-w-[calc(100vw-24px)] -translate-x-1/2 rounded-card border border-line bg-surface p-3.5 text-center shadow-lift">
+    <div className="fixed bottom-[68px] left-1/2 z-[var(--z-panel)] w-[320px] max-w-[calc(100vw-24px)] -translate-x-1/2 rounded-card border border-line bg-surface p-3.5 text-center shadow-lift">
       <p className="text-[12.5px] leading-relaxed text-ink-2">
         Click any text on the page and type — it saves by itself. Everything else lives in the dock
         below: <span className="font-medium text-ink">template · pages · ＋ Add · style</span>.
@@ -654,19 +716,30 @@ const puckOverrides: Partial<Overrides> = {
 }
 
 export function WebsiteEditor({
-  siteId, siteTitle, pageId, pages, slug, data, events, published, templateName, styleProps, currentStyle,
+  siteId, siteTitle, pageId, pages, slug, data, events, published, hasUnpublishedChanges,
+  templateName, styleProps, currentStyle,
 }: {
   siteId: string; siteTitle: string; pageId: string; pages: EditorPage[]; slug: string
   data: SiteData; events: SiteEvent[]; published: boolean
+  /** Draft already differs from the live snapshot when the editor loads. */
+  hasUnpublishedChanges?: boolean
   templateName: string
   styleProps: { style: React.CSSProperties; 'data-glow': string; 'data-hover': string }
   currentStyle: SiteStyle
 }) {
-  const [status, setStatus] = useState<Status>('idle')
+  const [status, setStatus] = useState<Status>(hasUnpublishedChanges ? 'unpublished' : 'idle')
   const [isPublished, setIsPublished] = useState(published)
   const [device, setDevice] = useState<DeviceKey>('desktop')
+  const [panel, setPanel] = useState<PanelKey | null>(null)
   const latest = useRef<SiteData>(data)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Read inside the debounced save without making onChange depend on it —
+  // Puck re-mounts its UI when override identities change.
+  const publishedRef = useRef(published)
+  useEffect(() => { publishedRef.current = isPublished }, [isPublished])
+
+  /** Saved-the-draft vs guests-can-see-it are different answers. */
+  const savedState = (): Status => (publishedRef.current ? 'unpublished' : 'saved')
 
   const onChange = useCallback((next: SiteData) => {
     latest.current = next
@@ -674,7 +747,7 @@ export function WebsiteEditor({
     timer.current = setTimeout(async () => {
       setStatus('saving')
       const res = await savePageDraft(pageId, latest.current)
-      setStatus('error' in res && res.error ? 'error' : 'saved')
+      setStatus('error' in res && res.error ? 'error' : savedState())
     }, 1200)
   }, [pageId])
 
@@ -687,8 +760,8 @@ export function WebsiteEditor({
   }, [siteId, pageId])
 
   const meta = useMemo<EditorMeta>(
-    () => ({ pages, pageId, slug, siteTitle, templateName, currentStyle, device, setDevice, status, isPublished, publish }),
-    [pages, pageId, slug, siteTitle, templateName, currentStyle, device, status, isPublished, publish])
+    () => ({ pages, pageId, slug, siteTitle, templateName, currentStyle, device, setDevice, status, isPublished, publish, panel, setPanel }),
+    [pages, pageId, slug, siteTitle, templateName, currentStyle, device, status, isPublished, publish, panel])
 
   // ⌘S / Ctrl+S — flush the autosave immediately (advanced-editor reflex).
   useEffect(() => {
@@ -698,8 +771,8 @@ export function WebsiteEditor({
         if (timer.current) clearTimeout(timer.current)
         setStatus('saving')
         const res = await savePageDraft(pageId, latest.current)
-        setStatus('error' in res && res.error ? 'error' : 'saved')
-        notify('Draft saved')
+        setStatus('error' in res && res.error ? 'error' : savedState())
+        notify(publishedRef.current ? 'Draft saved — publish to make it live' : 'Draft saved')
       }
     }
     window.addEventListener('keydown', onKey)
@@ -707,13 +780,15 @@ export function WebsiteEditor({
   }, [pageId])
 
   return (
-    <div className="puck-shell puck-dock relative h-screen">
+    // data-dock-panel lets CSS collapse Puck's own fields sidebar while a dock
+    // panel occupies the rail — one panel region, never two side by side.
+    <div className="puck-shell puck-dock relative h-screen" data-dock-panel={panel ? 'open' : undefined}>
       {/* Floating return — the tool quotes the artifact instead of framing it */}
       <Link href="/dashboard"
-        className="fixed left-3 top-3 z-50 flex items-center gap-2 rounded-pill bg-ink/85 px-3.5 py-2 text-[12px] font-medium text-paper shadow-lift backdrop-blur-md hover:bg-ink">
+        className="fixed left-3 top-3 z-[var(--z-toolbar)] flex items-center gap-2 rounded-pill bg-ink/85 px-3.5 py-2 text-[12px] font-medium text-paper shadow-lift backdrop-blur-md hover:bg-ink">
         ← <span className="font-display text-[13px]">{siteTitle}</span> <span className="opacity-55">planning</span>
       </Link>
-      <div className="fixed right-3 top-3 z-50 flex items-center gap-1.5">
+      <div className="fixed right-3 top-3 z-[var(--z-toolbar)] flex items-center gap-1.5">
         {isPublished && (
           <a href={`/s/${slug}`} target="_blank" rel="noreferrer"
             className="flex items-center gap-1.5 rounded-pill bg-ink/85 px-3.5 py-2 text-[12px] font-medium text-paper shadow-lift backdrop-blur-md hover:bg-ink">

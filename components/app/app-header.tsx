@@ -36,8 +36,8 @@ function NotificationBell({ items }: { items: HeaderNotification[] }) {
       </button>
       {open && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-11 z-50 w-80 rounded-xl border border-line bg-surface p-1.5 shadow-lift">
+          <div className="fixed inset-0 z-[var(--z-sticky)]" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-11 z-[var(--z-panel)] w-80 rounded-xl border border-line bg-surface p-1.5 shadow-lift">
             <p className="microlabel px-2.5 pb-1 pt-1.5">Needs your attention</p>
             {items.length === 0 && (
               <p className="px-2.5 py-3 text-[13px] text-ink-3">All caught up — nothing needs you right now.</p>
@@ -73,7 +73,7 @@ export function AppHeader({ site, notifications = [] }: { site: SidebarSite; not
   }
 
   return (
-    <header className="app-header sticky top-0 z-40 flex items-center gap-3 border-b border-line px-5 py-2.5">
+    <header className="app-header sticky top-0 z-[var(--z-sticky)] flex items-center gap-3 border-b border-line px-5 py-2.5">
       <MobileNav site={site} />
       <h1 className="text-[14.5px] font-semibold tracking-tight text-ink">{pageTitleFor(pathname)}</h1>
 
