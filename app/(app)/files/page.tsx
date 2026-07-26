@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
+import { SurfaceTabs, VENDOR_TABS } from '@/components/app/surface-tabs'
 import { FileManager, type FileRow, type Option } from './file-manager'
 
 export const metadata = { title: 'Files · Occasio' }
@@ -18,8 +19,9 @@ export default async function FilesPage() {
 
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-7">
+      <SurfaceTabs tabs={VENDOR_TABS} />
       <PageHeader
-        eyebrow="Files"
+        eyebrow="Vendors"
         title="Contracts & documents"
         description="Stored privately; downloads use short-lived signed links. Link each file to its event or vendor."
       />

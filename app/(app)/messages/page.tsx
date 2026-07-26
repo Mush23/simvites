@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
+import { SurfaceTabs, INVITE_TABS } from '@/components/app/surface-tabs'
 import { smsConfigured, whatsappConfigured } from '@/lib/twilio'
 import { Inbox, type Thread, type ThreadMessage } from './inbox'
 
@@ -48,8 +49,9 @@ export default async function MessagesPage() {
 
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-7">
+      <SurfaceTabs tabs={INVITE_TABS} />
       <PageHeader
-        eyebrow="Messages"
+        eyebrow="Invites & messaging"
         title="Talk to your guests"
         description="One thread per household by SMS or WhatsApp — send reminders and see replies in the same place, no group chats."
       />

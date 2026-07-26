@@ -97,7 +97,15 @@ export async function addCollaborator(formData: FormData) {
   return { ok: true, note: `${email} added — they sign in at /login with the "Email link" tab.` }
 }
 
-/** Site defaults (title + site-wide RSVP deadline + template). */
+/**
+ * Site defaults: title + site-wide RSVP deadline.
+ *
+ * Does NOT touch `theme`. Template choice moved to /templates (Phase 2), and
+ * this used to write `theme: { template }` wholesale — so with the picker gone
+ * from this form, an absent `template` field would resolve to the DEFAULT
+ * template and quietly reset the couple's look every time they renamed their
+ * site. Themes are owned by the surfaces that edit them.
+ */
 export async function updateSiteSettings(formData: FormData) {
   const site = await getPrimarySite()
   if (!site) return { error: 'No site.' }
@@ -105,17 +113,14 @@ export async function updateSiteSettings(formData: FormData) {
   const deadline = String(formData.get('rsvp_deadline_default') ?? '').trim() || null
   if (!title) return { error: 'Site name is required.' }
 
-  const { getTemplate } = await import('@/lib/templates/registry')
-  const template = getTemplate(String(formData.get('template') ?? ''))
-
   const supabase = await createClient()
   const { error } = await supabase
     .from('sites')
-    .update({ title, rsvp_deadline_default: deadline, theme: { template: template.key } })
+    .update({ title, rsvp_deadline_default: deadline })
     .eq('id', site.siteId)
   if (error) return { error: error.message }
   revalidatePath('/settings')
   revalidatePath('/dashboard')
   revalidatePath('/website')
-  return { ok: true, note: 'Saved. Re-publish your website to apply the look to the live site.' }
+  return { ok: true }
 }

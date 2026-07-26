@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
+import { SurfaceTabs, VENDOR_TABS } from '@/components/app/surface-tabs'
 import { formatPence } from '@/lib/money'
 import { QuickAddVendor } from './quick-add'
 import { VendorImport } from './import-widget'
@@ -106,6 +107,9 @@ export default async function VendorsPage() {
 
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-7">
+      {/* Pills move between sibling surfaces (Vendors / Files); the underline
+          tabs below switch the view within this one (pipeline / directory). */}
+      <SurfaceTabs tabs={VENDOR_TABS} />
       <PageHeader
         eyebrow="Vendors"
         title="Suppliers"

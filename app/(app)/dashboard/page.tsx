@@ -157,6 +157,13 @@ export default async function DashboardPage() {
           <StatCard label="Vendors booked" value={r.stats.vendorsBooked} />
           <StatCard label="Open tasks" value={r.stats.openTasks}
             hint={r.stats.overdueTasks ? `${r.stats.overdueTasks} overdue` : 'none overdue'} />
+          {/* Reports left the sidebar in Phase 2 — a report is an output you
+              ask for, not a place you visit. This is where you ask. */}
+          <Link href="/reports"
+            className="flex items-center justify-between gap-2 rounded-card border border-dashed border-line bg-paper px-5 py-4 text-[13px] font-medium text-ink-2 transition-colors hover:border-line-2 hover:text-ink sm:col-span-2">
+            View the full report
+            <span aria-hidden className="text-ink-3">→</span>
+          </Link>
         </div>
       </div>
 

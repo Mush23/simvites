@@ -6,6 +6,7 @@ import { Sidebar, type SidebarSite } from '@/components/app/sidebar'
 import { AppHeader } from '@/components/app/app-header'
 import { ChromeGate } from '@/components/app/chrome-gate'
 import { CommandMenu } from '@/components/app/command-menu'
+import { AssistantLauncher } from '@/components/app/assistant-launcher'
 import { OverlayProvider } from '@/components/ui/overlays'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -61,6 +62,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </div>
       <CommandMenu siteSlug={site.slug} />
+      <AssistantLauncher />
     </OverlayProvider>
   )
 }

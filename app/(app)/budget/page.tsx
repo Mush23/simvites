@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader, StatCard } from '@/components/app/ui'
+import { SurfaceTabs, MONEY_TABS } from '@/components/app/surface-tabs'
 import { formatPence } from '@/lib/money'
 import { BudgetManager, type BudgetItemRow, type Option } from './budget-manager'
 import { BudgetImport } from './import-widget'
@@ -28,9 +29,10 @@ export default async function BudgetPage() {
 
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-7">
+      <SurfaceTabs tabs={MONEY_TABS} />
       <div className="flex flex-wrap items-start justify-between gap-4">
         <PageHeader
-          eyebrow="Budget"
+          eyebrow="Budget & payments"
           title="Where the money goes"
           description="Every line can link to an event and a vendor — enter once, reuse everywhere."
         />

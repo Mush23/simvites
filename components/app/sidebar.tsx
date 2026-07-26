@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Menu, X, LogOut } from 'lucide-react'
 import { BRAND_NAME } from '@/lib/brand'
 import { cn } from '@/lib/utils'
-import { NAV_GROUPS, SETTINGS_ITEM, type NavItem } from './nav-model'
+import { NAV_GROUPS, SETTINGS_ITEM, isNavItemActive, type NavItem } from './nav-model'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -50,7 +50,9 @@ function NavLink({ item, active, count, onClick }: {
 
 function NavBody({ site, onNavigate }: { site: SidebarSite; onNavigate?: () => void }) {
   const pathname = usePathname()
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
+  // A merged surface stays lit on any of its tabs, so /messages keeps
+  // "Invites & messaging" highlighted rather than orphaning the user.
+  const isActive = (item: NavItem) => isNavItemActive(item, pathname)
 
   return (
     <>
@@ -73,7 +75,7 @@ function NavBody({ site, onNavigate }: { site: SidebarSite; onNavigate?: () => v
           <div key={g.label} className="mt-4 first:mt-2">
             <p className="microlabel mb-1.5 px-2.5">{g.label}</p>
             {g.items.map((item) => (
-              <NavLink key={item.href} item={item} active={isActive(item.href)}
+              <NavLink key={item.href} item={item} active={isActive(item)}
                 count={item.countKey ? site.counts?.[item.countKey] : undefined} onClick={onNavigate} />
             ))}
           </div>
@@ -81,7 +83,7 @@ function NavBody({ site, onNavigate }: { site: SidebarSite; onNavigate?: () => v
       </nav>
 
       <div className="border-t border-line px-2.5 py-3">
-        <NavLink item={SETTINGS_ITEM} active={isActive(SETTINGS_ITEM.href)} onClick={onNavigate} />
+        <NavLink item={SETTINGS_ITEM} active={isActive(SETTINGS_ITEM)} onClick={onNavigate} />
         <div className="mt-1 flex items-center justify-between px-2.5 py-1">
           <span className="text-[12px] text-ink-3">Appearance</span>
           <ThemeToggle />

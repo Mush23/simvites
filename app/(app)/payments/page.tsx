@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader, StatCard } from '@/components/app/ui'
+import { SurfaceTabs, MONEY_TABS, withBadge } from '@/components/app/surface-tabs'
 import { formatPence } from '@/lib/money'
 import { PaymentSchedule, type PaymentRow, type Opt } from './payment-schedule'
 
@@ -51,8 +52,9 @@ export default async function PaymentsPage() {
 
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-7">
+      <SurfaceTabs tabs={withBadge(MONEY_TABS, '/payments', overdueCount)} />
       <PageHeader
-        eyebrow="Payments"
+        eyebrow="Budget & payments"
         title="Payment schedule"
         description="Every vendor instalment in one place, so you always know who to pay and when. Marking one paid updates its budget line automatically."
       />

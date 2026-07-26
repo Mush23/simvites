@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
+import { SurfaceTabs, INVITE_TABS } from '@/components/app/surface-tabs'
 import { formatEventDateTime } from '@/lib/utils'
 import { StdEditor, type StdEditorEvent, type StdRecord } from './std-editor'
 
@@ -34,8 +35,9 @@ export default async function SaveTheDatePage() {
 
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-7">
+      <SurfaceTabs tabs={INVITE_TABS} />
       <PageHeader
-        eyebrow="Save the Date"
+        eyebrow="Invites & messaging"
         title="Announce the weekend"
         description="A shareable pre-invitation. Pick which celebrations to tease, choose a look, and send it by WhatsApp, email, QR or print. The formal invitations come later."
       />

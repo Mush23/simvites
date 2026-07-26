@@ -7,7 +7,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, MoonStar, ExternalLink } from 'lucide-react'
-import { ALL_NAV_ITEMS } from './nav-model'
+// COMMAND_ITEMS, not the sidebar list: Phase 2 took Assistant, Reports, Files,
+// Save the Date, Messages and Payments out of the rail, and every one of them
+// must still be one ⌘K away.
+import { COMMAND_ITEMS } from './nav-model'
 import { useTheme } from '@/components/theme/theme-provider'
 
 export function CommandMenu({ siteSlug }: { siteSlug: string }) {
@@ -21,7 +24,7 @@ export function CommandMenu({ siteSlug }: { siteSlug: string }) {
 
   interface Cmd { key: string; label: string; hint?: string; icon?: React.ReactNode; run: () => void }
   const commands = useMemo<Cmd[]>(() => [
-    ...ALL_NAV_ITEMS.map((i) => ({
+    ...COMMAND_ITEMS.map((i) => ({
       key: i.href,
       label: `Go to ${i.label}`,
       icon: <i.icon size={15} strokeWidth={1.7} />,

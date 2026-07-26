@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
+import { SurfaceTabs, INVITE_TABS, withBadge } from '@/components/app/surface-tabs'
 import { emailConfigured } from '@/lib/email'
 import { deriveInitials, formatEventDateTime } from '@/lib/utils'
 import { eventColorMap } from '@/lib/event-colors'
@@ -79,10 +80,15 @@ export default async function InvitationsPage() {
     }
   })
 
+  // Same definition the sidebar badge uses: a household with no live link
+  // cannot be invited yet.
+  const unsentCount = rows.filter((r) => r.activeLinks === 0).length
+
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-7">
+      <SurfaceTabs tabs={withBadge(INVITE_TABS, '/invitations', unsentCount)} />
       <PageHeader
-        eyebrow="Invitations"
+        eyebrow="Invites & messaging"
         title="Personal links"
         description="Each household gets a private link. Only the link's hash is ever stored — copy it when it appears, or email it directly."
       />

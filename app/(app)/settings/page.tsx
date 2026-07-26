@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
@@ -55,6 +56,8 @@ export default async function SettingsPage({
     .eq('id', site!.siteId)
     .maybeSingle()
   const templateKey = (row?.theme as { template?: string } | null)?.template ?? 'editorial-gold'
+  const currentTemplate = (await import('@/lib/templates/registry'))
+    .listTemplates().find((t) => t.key === templateKey)
   const price = await getUnlockPrice()
 
   return (
@@ -73,10 +76,19 @@ export default async function SettingsPage({
           <SiteSettingsForm
             title={row?.title ?? ''}
             deadlineDefault={row?.rsvp_deadline_default ?? null}
-            templateKey={templateKey}
-            templates={(await import('@/lib/templates/registry')).listTemplates()}
           />
-          <p className="mt-5 border-t border-line pt-4 font-sans text-[10px] uppercase tracking-[0.16em] text-ink-3">
+          {/* The look moved to its own surface — this is a signpost, not a
+              second place to change it. */}
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4">
+            <span className="text-[13px] text-ink-2">
+              Look: <span className="font-display text-[15px] text-ink">{currentTemplate?.name ?? templateKey}</span>
+            </span>
+            <Link href="/templates"
+              className="rounded-md border border-line bg-paper-2 px-3 py-1.5 text-[12.5px] font-medium text-ink transition-colors hover:border-line-2">
+              Browse templates →
+            </Link>
+          </div>
+          <p className="mt-4 font-sans text-[10px] uppercase tracking-[0.16em] text-ink-3">
             Address: {row?.slug}.{BASE_DOMAIN} · Status: {row?.status}
           </p>
         </section>
