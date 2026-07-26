@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { MessageSquare, Send, Phone } from 'lucide-react'
 import { sendToHousehold } from './actions'
 import { notify } from '@/components/ui/overlays'
+import { ConnectionHint } from '@/components/app/connection-hint'
 
 export interface ThreadMessage {
   id: string; direction: 'in' | 'out'; channel: string; body: string; status: string | null; createdAt: string
@@ -53,9 +54,9 @@ export function Inbox({ threads, unlocked, sms, whatsapp }: {
   return (
     <div>
       {!configured && (
-        <div className="mb-4 rounded-lg border border-warn/40 bg-warn-soft px-4 py-2.5 text-[13px] text-ink">
-          Messaging isn’t connected yet — add your Twilio keys to send and receive. You can still write and save threads here.
-        </div>
+        <ConnectionHint>
+          You can write and save threads now; they send once messaging is connected.
+        </ConnectionHint>
       )}
       <div className="grid gap-4 md:grid-cols-[280px_1fr]">
         {/* Thread list */}

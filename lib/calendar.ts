@@ -1,5 +1,7 @@
 // Add-to-calendar links — ported behaviour from the wedding site.
 
+import { BRAND_NAME } from '@/lib/brand'
+
 export interface CalendarEvent {
   title: string
   startsAt: string // ISO
@@ -31,9 +33,9 @@ export function googleCalendarUrl(e: CalendarEvent): string {
 /** .ics as a data URL — works for Apple/Outlook without a server round-trip. */
 export function icsDataUrl(e: CalendarEvent): string {
   const ics = [
-    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Occasio//EN',
+    'BEGIN:VCALENDAR', 'VERSION:2.0', `PRODID:-//${BRAND_NAME}//EN`,
     'BEGIN:VEVENT',
-    `UID:${crypto.randomUUID()}@occasio`,
+    `UID:${crypto.randomUUID()}@${BRAND_NAME.toLowerCase()}`,
     `DTSTAMP:${fmt(new Date().toISOString())}`,
     `DTSTART:${fmt(e.startsAt)}`,
     `DTEND:${fmt(endOf(e))}`,

@@ -5,8 +5,9 @@ import { formatPence } from '@/lib/money'
 import { formatEventDateTime } from '@/lib/utils'
 import { VendorForm } from './vendor-form'
 import { EventCoverage } from './event-coverage'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Vendor · Occasio' }
+export const metadata = { title: `Vendor · ${BRAND_NAME}` }
 
 export default async function VendorDetailPage({
   params,

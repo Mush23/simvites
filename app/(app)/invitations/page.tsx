@@ -4,11 +4,13 @@ import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { SurfaceTabs, INVITE_TABS, withBadge } from '@/components/app/surface-tabs'
 import { emailConfigured } from '@/lib/email'
+import { ConnectionHint } from '@/components/app/connection-hint'
 import { deriveInitials, formatEventDateTime } from '@/lib/utils'
 import { eventColorMap } from '@/lib/event-colors'
 import { InvitationsClient, type HouseholdInviteRow } from './invitations-client'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Invitations · Occasio' }
+export const metadata = { title: `Invitations · ${BRAND_NAME}` }
 
 export default async function InvitationsPage() {
   const site = await getPrimarySite()
@@ -93,10 +95,10 @@ export default async function InvitationsPage() {
         description="Each household gets a private link. Only the link's hash is ever stored — copy it when it appears, or email it directly."
       />
       {!emailConfigured() && (
-        <p className="mb-6 rounded-md border border-warn/40 bg-warn-soft px-4 py-3 text-sm text-ink">
-          Email isn&apos;t connected yet (no Resend key) — links still work; copy and share them
-          by WhatsApp or message. Add <span className="font-mono text-xs">RESEND_API_KEY</span> to enable sending.
-        </p>
+        <ConnectionHint>
+          Every link below works now — copy and share by WhatsApp or message. Emailing them
+          from here needs email connected.
+        </ConnectionHint>
       )}
       <InvitationsClient rows={rows} siteTitle={siteTitle} initials={initials} deadlineText={deadlineText} />
     </div>

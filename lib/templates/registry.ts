@@ -1,4 +1,5 @@
 import type { SiteData } from '@/lib/puck/config'
+import { BRAND_NAME } from '@/lib/brand'
 
 // ═══════════════════════════════════════════════════════════════════════
 // Template registry — a template is DATA: a scoped CSS-variable theme +
@@ -148,7 +149,7 @@ const goldStarter: SiteData = {
     { type: 'HotelTravel', props: { id: 'hotel', heading: 'Stay & Travel', hotelName: '', address: '', blockCode: '', phone: '', bookingUrl: '', notes: '' } },
     { type: 'RsvpCta', props: { id: 'rsvp', heading: 'Kindly RSVP', body: 'We can’t wait to celebrate with you.', buttonText: 'Open your invitation' } },
     { type: 'GiftsNote', props: { id: 'gifts', heading: 'Your presence is the present', body: 'Please, no boxed gifts — your blessings mean the world.' } },
-    { type: 'SiteFooterBlock', props: { id: 'footer', names: 'Aanya & Dev', note: 'Made with Occasio' } },
+    { type: 'SiteFooterBlock', props: { id: 'footer', names: 'Aanya & Dev', note: `Made with ${BRAND_NAME}` } },
   ],
 }
 
@@ -160,7 +161,7 @@ const luxuryStarter: SiteData = {
     { type: 'Schedule', props: { id: 'schedule', heading: 'The Weekend' } },
     { type: 'HotelTravel', props: { id: 'hotel', heading: 'Travel & Stay', hotelName: '', address: '', blockCode: '', phone: '', bookingUrl: '', notes: '' } },
     { type: 'RsvpCta', props: { id: 'rsvp', heading: 'Kindly respond', body: 'Tell us you’re coming.', buttonText: 'Open your invitation' } },
-    { type: 'SiteFooterBlock', props: { id: 'footer', names: 'Aanya & Dev', note: 'Made with Occasio' } },
+    { type: 'SiteFooterBlock', props: { id: 'footer', names: 'Aanya & Dev', note: `Made with ${BRAND_NAME}` } },
   ],
 }
 

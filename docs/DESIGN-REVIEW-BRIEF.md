@@ -32,7 +32,7 @@ Local: `npm run dev -- -p 3100` → http://localhost:3100.
 | Account | Purpose |
 |---|---|
 | `maharshi.sim@hotmail.com` / `Simvites2026!` | Founder. Fully activated demo "Aanya & Dev" (also platform admin → /admin) |
-| `newbie@occasio.test` / `Occasio2026!` | Fresh, locked site "Zara & Kabir" — empty states + onboarding checklist |
+| `newbie@occasio.test` / `Occasio2026!` | Fresh, locked site "Zara & Kabir" — empty states + onboarding checklist. **Legacy address:** this account predates the Simvites rename and is not created by any seed script, so it has to be recreated by hand as `newbie@simvites.test` — every `Occasio` string in the codebase itself is gone. |
 | `demo@simvites.test` / `SimvitesDemo2026!` | Draft-stage site "Riya & Arjun" (Editorial Luxury, comped unlock) |
 | `scale@simvites.test` / `ScaleTest2026!` | Scale test: 5 sites, flagship 150 households / 359 guests |
 
@@ -72,7 +72,8 @@ Local: `npm run dev -- -p 3100` → http://localhost:3100.
 | `/files` | Private uploads, signed downloads, link to event/vendor; **teaching empty state** (4 what-belongs-here cards) | Empty state on fresh account |
 | `/save-the-date` | Designer: headline/names/date/photo/6 palettes/combine events → publish → share (link/WhatsApp/email/QR/print) | |
 | `/reports` | **Live hub**: stat row (guests/attending/budget/open items) + 6 export cards w/ icons + real row counts | |
-| `/settings` | Site name, RSVP deadline default, template switcher (18 radio cards), billing/unlock card (price from DB), collaborators, version history + restore, change password | Locked vs unlocked states (newbie vs founder) |
+| `/settings` | Site name, RSVP deadline default, Connections status, billing/unlock card (price from DB), collaborators, version history + restore, change password | Locked vs unlocked states (newbie vs founder) |
+| `/templates` | The look, promoted out of Settings: 18 real previews, in-use badge, apply + open full preview | Was 18 radio cards on the settings page |
 
 ## 3 · Guest-facing (public, per site)
 

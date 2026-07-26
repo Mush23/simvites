@@ -227,7 +227,7 @@ export function DeepZoom() {
       </nav>
 
       {/* Scenes 1–4: the 560vh dive */}
-      <section ref={sectionRef} id="product" className="relative bg-[#FAF8F3] dark:bg-[#0A1220]" style={{ height: reduced ? 'auto' : '560vh' }}>
+      <section ref={sectionRef} id="product" className="scroll-mt-24 relative bg-[#FAF8F3] dark:bg-[#0A1220]" style={{ height: reduced ? 'auto' : '560vh' }}>
         <div ref={stageRef} className={reduced ? 'relative' : 'sticky top-0 h-screen overflow-hidden'}>
           {/* soft ivory glow behind the hero (no grid — founder direction) */}
           <div aria-hidden className="absolute inset-0 dark:opacity-0"

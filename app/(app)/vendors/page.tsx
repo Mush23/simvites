@@ -8,8 +8,9 @@ import { QuickAddVendor } from './quick-add'
 import { VendorImport } from './import-widget'
 import { Recommendations, type DirectoryVendor } from './recommendations'
 import { VendorTabs } from './vendor-tabs'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Vendors · Occasio' }
+export const metadata = { title: `Vendors · ${BRAND_NAME}` }
 
 const PIPELINE = ['shortlisted', 'contacted', 'quote_in', 'booked', 'declined'] as const
 const STATUS_LABEL: Record<string, string> = {

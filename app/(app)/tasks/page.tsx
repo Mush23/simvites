@@ -2,8 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { TaskManager, type TaskRow, type Option } from './task-manager'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Tasks · Occasio' }
+export const metadata = { title: `Tasks · ${BRAND_NAME}` }
 
 export default async function TasksPage() {
   const site = await getPrimarySite()

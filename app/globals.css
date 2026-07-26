@@ -3,7 +3,7 @@
 /* Class-based dark mode (.dark on <html>). */
 @custom-variant dark (&:is(.dark *));
 
-/* ── Map Occasio tokens to Tailwind utilities (bg-paper, text-ink, …) ── */
+/* ── Map product tokens to Tailwind utilities (bg-paper, text-ink, …) ── */
 @theme inline {
   --font-display: var(--font-instrument), 'Georgia', serif;
   --font-sans: var(--font-hanken), 'Helvetica Neue', sans-serif;

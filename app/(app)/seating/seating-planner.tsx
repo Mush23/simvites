@@ -124,11 +124,16 @@ export function SeatingPlanner({ tables, seats, guests, events, floorplans }: {
                 onPointerDown={(e) => onPointerDown(e, t.id)}
                 className="absolute -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none active:cursor-grabbing"
                 style={{ left: `${p.x}%`, top: `${p.y}%` }}>
-                <div className={`flex h-16 w-16 flex-col items-center justify-center border-2 text-center ${
+                {/* 76px, not 64px: "Family Table" truncated to "Family T…" at
+                    the old 56px cap. Wider node, two lines allowed, and the
+                    full name on hover — a table you cannot read is not a plan.
+                    Selected border is the selection token, not the accent. */}
+                <div className={`flex h-[76px] w-[76px] flex-col items-center justify-center border-2 px-1 text-center ${
                   t.shape === 'rect' ? 'rounded-md' : 'rounded-full'} ${
-                  isSel ? 'border-accent' : full ? 'border-ok' : 'border-line-2'}`}
+                  isSel ? 'border-selected' : full ? 'border-ok' : 'border-line-2'}`}
                   style={{ background: 'var(--surface)', boxShadow: 'var(--shadow)' }}>
-                  <span className="max-w-[56px] truncate px-1 text-[10px] font-semibold text-ink">{t.name}</span>
+                  <span title={t.name}
+                    className="line-clamp-2 max-w-[68px] text-[10px] font-semibold leading-tight text-ink">{t.name}</span>
                   <span className={`font-mono text-[10px] ${full ? 'text-ok' : 'text-ink-3'}`}>{n}/{t.capacity}</span>
                 </div>
               </div>

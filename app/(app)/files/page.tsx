@@ -3,8 +3,9 @@ import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { SurfaceTabs, VENDOR_TABS } from '@/components/app/surface-tabs'
 import { FileManager, type FileRow, type Option } from './file-manager'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Files · Occasio' }
+export const metadata = { title: `Files · ${BRAND_NAME}` }
 
 export default async function FilesPage() {
   const site = await getPrimarySite()

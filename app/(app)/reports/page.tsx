@@ -3,8 +3,9 @@ import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader, StatCard } from '@/components/app/ui'
 import { formatPence } from '@/lib/money'
 import { Users, ClipboardCheck, Wallet, CalendarClock, Store, ListChecks } from 'lucide-react'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Reports · Occasio' }
+export const metadata = { title: `Reports · ${BRAND_NAME}` }
 
 // V2: a real reports hub — live numbers up top, then exports that say
 // exactly how many rows are waiting inside them.

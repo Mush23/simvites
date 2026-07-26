@@ -4,8 +4,9 @@ import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { eventColor } from '@/lib/event-colors'
 import { GuestManager } from './guest-manager'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Guests · Occasio' }
+export const metadata = { title: `Guests · ${BRAND_NAME}` }
 
 export default async function GuestsPage() {
   const site = await getPrimarySite()

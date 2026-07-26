@@ -4,8 +4,9 @@ import { PageHeader } from '@/components/app/ui'
 import { SurfaceTabs, INVITE_TABS } from '@/components/app/surface-tabs'
 import { formatEventDateTime } from '@/lib/utils'
 import { StdEditor, type StdEditorEvent, type StdRecord } from './std-editor'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Save the Date · Occasio' }
+export const metadata = { title: `Save the Date · ${BRAND_NAME}` }
 
 export default async function SaveTheDatePage() {
   const site = await getPrimarySite()

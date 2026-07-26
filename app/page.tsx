@@ -23,7 +23,7 @@ export default function LandingPage() {
 
       {/* Scene 4b — the wedding dimension (ivory; templates stay ivory in dark
           mode on purpose — the artifact keeps its own identity) */}
-      <section id="templates" className="px-6 py-24" style={{ background: 'oklch(0.975 0.006 85)' }}>
+      <section id="templates" className="scroll-mt-24 px-6 py-24" style={{ background: 'oklch(0.975 0.006 85)' }}>
         <div className="mx-auto max-w-[1060px]">
           <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#97753F]">Templates · the artifact</p>
           <h2 className="mx-auto mt-4 max-w-[640px] text-center font-display text-[clamp(30px,4.4vw,48px)] leading-[1.08] text-[#211D18]">
@@ -70,7 +70,7 @@ export default function LandingPage() {
       </section>
 
       {/* Scene 5 — USP duo */}
-      <section id="rsvp" className="px-6 py-24">
+      <section id="rsvp" className="scroll-mt-24 px-6 py-24">
         <div className="mx-auto max-w-[1060px]">
           <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#8F8D88] dark:text-[#5B6A8C]">Why couples switch</p>
           <h2 className="mt-3 text-center text-[clamp(26px,3.6vw,40px)] font-[650] leading-tight tracking-[-0.03em]">
@@ -144,7 +144,7 @@ export default function LandingPage() {
       </section>
 
       {/* What you get — the full picture, so nobody has to guess (D7) */}
-      <section id="what-you-get" className="px-6 pb-24">
+      <section id="what-you-get" className="scroll-mt-24 px-6 pb-24">
         <div className="mx-auto max-w-[1060px]">
           <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#8F8D88] dark:text-[#5B6A8C]">Everything included</p>
           <h2 className="mt-3 text-center text-[clamp(26px,3.6vw,40px)] font-[650] leading-tight tracking-[-0.03em]">
@@ -170,7 +170,7 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ (D7) — the questions every couple actually asks */}
-      <section id="faq" className="px-6 pb-24">
+      <section id="faq" className="scroll-mt-24 px-6 pb-24">
         <div className="mx-auto max-w-[760px]">
           <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#8F8D88] dark:text-[#5B6A8C]">Questions, answered</p>
           <h2 className="mt-3 text-center text-[clamp(26px,3.6vw,40px)] font-[650] leading-tight tracking-[-0.03em]">
@@ -208,7 +208,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="px-6 pb-24">
+      <section id="pricing" className="scroll-mt-24 px-6 pb-24">
         <div className="mx-auto max-w-[760px] overflow-hidden rounded-[22px] p-10 text-center sm:p-14"
           style={{ background: '#0A1220', boxShadow: '0 40px 90px -20px rgba(0,0,0,0.45)' }}>
           <div className="pointer-events-none absolute" aria-hidden />

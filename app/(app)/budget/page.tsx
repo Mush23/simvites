@@ -5,8 +5,9 @@ import { SurfaceTabs, MONEY_TABS } from '@/components/app/surface-tabs'
 import { formatPence } from '@/lib/money'
 import { BudgetManager, type BudgetItemRow, type Option } from './budget-manager'
 import { BudgetImport } from './import-widget'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Budget · Occasio' }
+export const metadata = { title: `Budget · ${BRAND_NAME}` }
 
 export default async function BudgetPage() {
   const site = await getPrimarySite()

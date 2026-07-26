@@ -1,4 +1,5 @@
 import type { Config, Data } from '@puckeditor/core'
+import { BRAND_NAME } from '@/lib/brand'
 import {
   SiteHero, SiteSchedule, SiteEventDetail, SiteRsvpCta, SiteTravel, SiteFaq, SiteFooter,
   SiteStory, SiteFamily, SiteHotelTravel, SiteGiftsNote,
@@ -298,7 +299,7 @@ export const siteConfig: Config<SiteBlocks> = {
     SiteFooterBlock: {
       label: 'Footer',
       fields: { names: text('Names', true), note: text('Note', true) },
-      defaultProps: { names: 'Aanya & Dev', note: 'Made with Occasio' },
+      defaultProps: { names: 'Aanya & Dev', note: `Made with ${BRAND_NAME}` },
       render: (p) => <SiteFooter {...p} />,
     },
   },
@@ -344,6 +345,6 @@ export const starterDoc: SiteData = {
     { type: 'Hero', props: { id: 'hero', kicker: 'Together with our families', title: 'Aanya & Dev', subtitle: '', dateText: '19 September 2026', location: 'Manchester, UK', imageUrl: '' } },
     { type: 'Schedule', props: { id: 'schedule', heading: 'The Celebrations' } },
     { type: 'RsvpCta', props: { id: 'rsvp', heading: 'Kindly RSVP', body: 'We can’t wait to celebrate with you.', buttonText: 'Open your invitation' } },
-    { type: 'SiteFooterBlock', props: { id: 'footer', names: 'Aanya & Dev', note: 'Made with Occasio' } },
+    { type: 'SiteFooterBlock', props: { id: 'footer', names: 'Aanya & Dev', note: `Made with ${BRAND_NAME}` } },
   ],
 }

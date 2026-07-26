@@ -62,7 +62,7 @@ export function TemplatePreview({ template, compact = false }: { template: SiteT
             Aanya &amp; Dev
           </h2>
           <p className="mt-2 text-[11px] uppercase tracking-[0.18em]" style={{ color: accentInk, fontFamily: bodyFont }}>
-            19 · 09 · 2026 — Jaipur
+            19 · 09 · 2026 — Manchester
           </p>
 
           <div className={alignLeft ? '' : 'mx-auto w-fit'}>

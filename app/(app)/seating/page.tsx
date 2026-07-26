@@ -3,8 +3,9 @@ import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { SeatingPlanner, type PlannerTable } from './seating-planner'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Seating · Occasio' }
+export const metadata = { title: `Seating · ${BRAND_NAME}` }
 
 export default async function SeatingPage() {
   const site = await getPrimarySite()

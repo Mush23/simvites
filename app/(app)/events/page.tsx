@@ -4,8 +4,9 @@ import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { formatEventDateTime } from '@/lib/utils'
 import { QuickAddEvent } from './quick-add'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Events · Occasio' }
+export const metadata = { title: `Events · ${BRAND_NAME}` }
 
 const VIS_LABEL: Record<string, string> = {
   public: 'Public', invite_only: 'Invite only', hidden: 'Hidden',

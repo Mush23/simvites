@@ -18,7 +18,7 @@ async function ownerId() {
   const { data: list } = await admin.auth.admin.listUsers()
   let u = list.users.find((x) => x.email === ownerEmail)
   if (!u) {
-    const { data } = await admin.auth.admin.createUser({ email: ownerEmail, password: 'Occasio2026!', email_confirm: true })
+    const { data } = await admin.auth.admin.createUser({ email: ownerEmail, password: 'Simvites2026!', email_confirm: true })
     u = data.user
   }
   await admin.from('profiles').upsert({ id: u.id, email: ownerEmail, full_name: 'Demo Host' })
@@ -50,11 +50,22 @@ const siteId = site.id
 await admin.from('pages').insert({ site_id: siteId, slug: 'home', title: 'Home', is_home: true, nav_order: 0 })
 
 // ── Events ──
+// ONE coherent wedding: Aanya & Dev, 19 September 2026, Manchester. Every
+// surface must agree — the builder hero, the Save the Date, the template
+// previews and the marketing mock all read from this same wedding. They used
+// to disagree (Manchester in the builder and Events, Jaipur on the Save the
+// Date and in the marketing mock), and that contradiction is the first thing
+// visible in every screenshot and demo.
+//
+// `accent` is set explicitly, drawn from the --event-* ramp in globals.css.
+// Nothing in the product asks a couple to pick an event colour yet, so an
+// unseeded demo fell back to the ramp for every dot; seeding them means the
+// demo shows the intended taxonomy rather than a default.
 const eventDefs = [
-  { name: 'Mehndi', starts_at: '2026-09-17T16:00:00Z', venue_name: 'The Garden Room', capacity: 80, visibility: 'invite_only', sort_order: 0 },
-  { name: 'Sangeet', starts_at: '2026-09-18T19:00:00Z', venue_name: 'Royal Banqueting Hall', capacity: 250, visibility: 'invite_only', sort_order: 1 },
-  { name: 'Wedding Ceremony', starts_at: '2026-09-19T10:30:00Z', venue_name: 'Heaton Park Pavilion', capacity: 300, visibility: 'public', sort_order: 2 },
-  { name: 'Reception', starts_at: '2026-09-19T18:30:00Z', venue_name: 'Heaton Park Pavilion', capacity: 300, visibility: 'invite_only', sort_order: 3 },
+  { name: 'Mehndi', starts_at: '2026-09-17T16:00:00Z', venue_name: 'The Garden Room', capacity: 80, visibility: 'invite_only', sort_order: 0, accent: '#B8891F' },
+  { name: 'Sangeet', starts_at: '2026-09-18T19:00:00Z', venue_name: 'Royal Banqueting Hall', capacity: 250, visibility: 'invite_only', sort_order: 1, accent: '#3E62A8' },
+  { name: 'Wedding Ceremony', starts_at: '2026-09-19T10:30:00Z', venue_name: 'Heaton Park Pavilion', capacity: 300, visibility: 'public', sort_order: 2, accent: '#A33B4E' },
+  { name: 'Reception', starts_at: '2026-09-19T18:30:00Z', venue_name: 'Heaton Park Pavilion', capacity: 300, visibility: 'invite_only', sort_order: 3, accent: '#2C3E63' },
 ]
 const { data: events } = await admin
   .from('events')

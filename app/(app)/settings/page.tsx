@@ -7,6 +7,7 @@ import { getUnlockPrice } from '@/lib/pricing'
 import { BASE_DOMAIN, BRAND_NAME } from '@/lib/brand'
 import { SiteSettingsForm } from './settings-form'
 import { UnlockCard } from './unlock-card'
+import { Connections } from './connections'
 import { PasswordForm } from '@/components/auth/password-form'
 
 export const metadata = { title: `Settings · ${BRAND_NAME}` }
@@ -97,6 +98,8 @@ export default async function SettingsPage({
           unlocked={!!row?.is_unlocked}
           priceDisplay={formatPence(price.amount)}
         />
+
+        <Connections />
 
         <section className="rounded-card border border-line bg-surface p-7 shadow-card">
           <p className="eyebrow mb-2">Version history</p>

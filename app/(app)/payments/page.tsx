@@ -4,8 +4,9 @@ import { PageHeader, StatCard } from '@/components/app/ui'
 import { SurfaceTabs, MONEY_TABS, withBadge } from '@/components/app/surface-tabs'
 import { formatPence } from '@/lib/money'
 import { PaymentSchedule, type PaymentRow, type Opt } from './payment-schedule'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Payments · Occasio' }
+export const metadata = { title: `Payments · ${BRAND_NAME}` }
 
 export default async function PaymentsPage() {
   const site = await getPrimarySite()

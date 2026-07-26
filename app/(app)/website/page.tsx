@@ -3,8 +3,9 @@ import { getPrimarySite } from '@/lib/workspace'
 import { type SiteData } from '@/lib/puck/config'
 import type { SiteEvent } from '@/components/site/blocks'
 import { WebsiteEditor, type EditorPage } from './website-editor'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Website · Occasio' }
+export const metadata = { title: `Website · ${BRAND_NAME}` }
 
 function isEmpty(doc: unknown): boolean {
   const d = doc as SiteData | null

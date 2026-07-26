@@ -92,7 +92,8 @@ function NavBody({ site, onNavigate }: { site: SidebarSite; onNavigate?: () => v
           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-2 text-[10px] font-semibold uppercase text-ink-2">
             {site.email.slice(0, 1)}
           </span>
-          <span className="min-w-0 flex-1 truncate text-[11.5px] text-ink-3">{site.email}</span>
+          {/* title so a truncated address is still recoverable on hover */}
+          <span title={site.email} className="min-w-0 flex-1 truncate text-[11.5px] text-ink-3">{site.email}</span>
           <form action="/auth/signout" method="post">
             <button type="submit" title="Sign out" aria-label="Sign out"
               className="flex h-7 w-7 items-center justify-center rounded-md text-ink-3 hover:bg-surface-2 hover:text-ink">

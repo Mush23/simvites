@@ -3,8 +3,9 @@ import { fetchAll } from '@/lib/supabase/fetch-all'
 import { getPrimarySite } from '@/lib/workspace'
 import { PageHeader } from '@/components/app/ui'
 import { formatEventDateTime } from '@/lib/utils'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'RSVPs · Occasio' }
+export const metadata = { title: `RSVPs · ${BRAND_NAME}` }
 
 export default async function RsvpsPage() {
   const site = await getPrimarySite()

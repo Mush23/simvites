@@ -127,7 +127,7 @@ function HouseholdRow({ row, brand, onChanged }: {
         <div>
           <p className="text-[14.5px] font-semibold tracking-tight text-ink">{row.name}</p>
           <p className="mt-0.5 font-sans text-[10px] uppercase tracking-[0.14em] text-ink-3">
-            {row.guestCount} guests · {row.emailCount} emails · {row.activeLinks} active link{row.activeLinks === 1 ? '' : 's'}
+            {row.guestCount} guest{row.guestCount === 1 ? '' : 's'} · {row.emailCount} email{row.emailCount === 1 ? '' : 's'} · {row.activeLinks} active link{row.activeLinks === 1 ? '' : 's'}
             {row.lastSentAt && ` · sent ${new Date(row.lastSentAt).toLocaleDateString('en-GB')}`}
             {row.lastOpenedAt && (
               <span className="text-accent-ink"> · opened {new Date(row.lastOpenedAt).toLocaleDateString('en-GB')}</span>

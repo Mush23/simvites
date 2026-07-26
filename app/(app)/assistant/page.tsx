@@ -1,8 +1,9 @@
 import { PageHeader } from '@/components/app/ui'
 import { aiConfigured } from '@/lib/ai'
 import { AssistantChat } from './assistant-chat'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Assistant · Occasio' }
+export const metadata = { title: `Assistant · ${BRAND_NAME}` }
 
 export default function AssistantPage() {
   return (

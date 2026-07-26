@@ -5,8 +5,9 @@ import { PageHeader } from '@/components/app/ui'
 import { SurfaceTabs, INVITE_TABS } from '@/components/app/surface-tabs'
 import { smsConfigured, whatsappConfigured } from '@/lib/twilio'
 import { Inbox, type Thread, type ThreadMessage } from './inbox'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Messages · Occasio' }
+export const metadata = { title: `Messages · ${BRAND_NAME}` }
 
 export default async function MessagesPage() {
   const site = await getPrimarySite()

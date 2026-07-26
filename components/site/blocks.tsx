@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { formatEventDateTime } from '@/lib/utils'
+import { BRAND_NAME } from '@/lib/brand'
 
 // Presentational blocks for the public site. Pure + theme-token styled, so the
 // same components render in the Puck editor preview and the live snapshot.
@@ -256,7 +257,7 @@ export function SiteGiftsNote({ heading, body }: { heading?: string; body?: stri
 export function SiteFooter({ names, note }: { names?: string; note?: string }) {
   return (
     <footer className="border-t border-line bg-paper px-6 py-14 text-center">
-      <p className="font-display text-3xl text-ink">{names ?? 'Made with Occasio'}</p>
+      <p className="font-display text-3xl text-ink">{names ?? `Made with ${BRAND_NAME}`}</p>
       {note && <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">{note}</p>}
     </footer>
   )

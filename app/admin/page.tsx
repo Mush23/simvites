@@ -7,8 +7,9 @@ import { PriceEditor } from './price-editor'
 import { SitesRegister } from './sites-register'
 import { NeedsYou, DangerZone, type NeedsYouItem } from './ops-widgets'
 import { formatPence } from '@/lib/money'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Platform admin · Occasio' }
+export const metadata = { title: `Platform admin · ${BRAND_NAME}` }
 
 function countBy(rows: { site_id: string }[] | null): Map<string, number> {
   const m = new Map<string, number>()

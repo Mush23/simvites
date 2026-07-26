@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { requirePlatformAdmin } from '@/lib/platform-admin'
 import { randomBytes } from 'node:crypto'
+import { BRAND_NAME } from '@/lib/brand'
 
 async function gate() {
   const admin = await requirePlatformAdmin()
@@ -49,7 +50,7 @@ export async function adminExtendExpiry(siteId: string, months: number): Promise
 /** Reset a user's password — returns a one-time temp password to hand over. */
 export async function adminResetPassword(userId: string): Promise<{ temp?: string; error?: string }> {
   const db = await gate()
-  const temp = `Occasio-${randomBytes(6).toString('base64url')}`
+  const temp = `${BRAND_NAME}-${randomBytes(6).toString('base64url')}`
   const { error } = await db.auth.admin.updateUserById(userId, { password: temp })
   if (error) return { error: error.message }
   return { temp }

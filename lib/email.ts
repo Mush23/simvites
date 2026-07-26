@@ -2,6 +2,8 @@
 // that reports `skipped` — so invite-link generation works before email is
 // connected. When the key is added, the same calls start delivering.
 
+import { BRAND_NAME } from '@/lib/brand'
+
 export interface SendResult {
   id?: string
   skipped?: boolean
@@ -43,7 +45,7 @@ export function invitationEmailHtml(opts: {
   householdName: string
   link: string
 }) {
-  // Occasio design language: warm ivory, ink text, one terracotta accent, serif.
+  // Brand design language: warm ivory, ink text, one terracotta accent, serif.
   return `
   <div style="background:#fbf9f5;padding:36px 16px">
     <div style="font-family:Georgia,'Times New Roman',serif;max-width:520px;margin:0 auto;background:#ffffff;border:1px solid #e8e2d8;border-radius:13px;padding:36px;color:#2a241d">
@@ -56,6 +58,6 @@ export function invitationEmailHtml(opts: {
       </p>
       <p style="font-size:12.5px;color:#8a8072;line-height:1.6">This link is personal to your household — please don't forward it.<br>If the button doesn't work, paste this into your browser:<br><span style="word-break:break-all">${opts.link}</span></p>
     </div>
-    <p style="font-family:Consolas,monospace;text-align:center;letter-spacing:.18em;text-transform:uppercase;font-size:10px;color:#a49a8a;margin-top:18px">Made with Occasio</p>
+    <p style="font-family:Consolas,monospace;text-align:center;letter-spacing:.18em;text-transform:uppercase;font-size:10px;color:#a49a8a;margin-top:18px">Made with ${BRAND_NAME}</p>
   </div>`
 }

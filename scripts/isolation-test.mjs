@@ -42,8 +42,8 @@ async function setupOrg(userId, label) {
   return { orgId: org.id, siteId: site.id }
 }
 
-const emailA = `iso-a-${rnd}@occasio.test`
-const emailB = `iso-b-${rnd}@occasio.test`
+const emailA = `iso-a-${rnd}@simvites.test`
+const emailB = `iso-b-${rnd}@simvites.test`
 
 const userA = await getOrCreateUser(emailA)
 const userB = await getOrCreateUser(emailB)

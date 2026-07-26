@@ -5,8 +5,9 @@ import { fetchAll } from '@/lib/supabase/fetch-all'
 import { formatPence } from '@/lib/money'
 import { EventForm } from './event-form'
 import { ItineraryManager, type ItineraryItem } from './itinerary-manager'
+import { BRAND_NAME } from '@/lib/brand'
 
-export const metadata = { title: 'Event · Occasio' }
+export const metadata = { title: `Event · ${BRAND_NAME}` }
 
 const TABS = ['overview', 'itinerary', 'guests', 'rsvp', 'vendors', 'budget', 'tasks', 'files'] as const
 type Tab = (typeof TABS)[number]

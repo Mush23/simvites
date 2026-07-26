@@ -1,14 +1,16 @@
 // ─────────────────────────────────────────────────────────────────────────
 // Tenant resolution — subdomain ↔ site, modelled on vercel/platforms.
 //
-// Production: sites live at `<slug>.occasio.events` via wildcard DNS.
+// Production: sites live at `<slug>.<NEXT_PUBLIC_ROOT_DOMAIN>` via wildcard DNS.
 // Local dev:  use lvh.me (resolves *.lvh.me → 127.0.0.1), so a site is at
 //             http://<slug>.lvh.me:3000 and the apex is http://lvh.me:3000.
 // ─────────────────────────────────────────────────────────────────────────
 
-/** Root domain incl. port in dev, e.g. "lvh.me:3000" or "occasio.events". */
+/** Root domain incl. port in dev, e.g. "lvh.me:3000" or "simvites.co.uk". */
 export const ROOT_DOMAIN =
   process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'
+
+const isLocal = () => ROOT_DOMAIN.includes('localhost') || ROOT_DOMAIN.includes('lvh.me')
 
 /** Hostnames that are NOT tenants (serve the marketing site / app shell). */
 const RESERVED_SUBDOMAINS = new Set(['www', 'app', 'api', 'admin', 'mail', 'assets'])
@@ -46,8 +48,18 @@ export function getSubdomain(host: string | null | undefined): string | null {
 
 /** Build the public URL for a tenant site (used in invitations, emails). */
 export function siteUrl(slug: string): string {
-  const protocol = ROOT_DOMAIN.includes('localhost') || ROOT_DOMAIN.includes('lvh.me')
-    ? 'http'
-    : 'https'
-  return `${protocol}://${slug}.${ROOT_DOMAIN}`
+  return `${isLocal() ? 'http' : 'https'}://${slug}.${ROOT_DOMAIN}`
+}
+
+/**
+ * Absolute URL on the apex, for guest-facing links that are NOT tenant-scoped
+ * — the Save the Date share link lives at /std/<token>.
+ *
+ * Derived from the configured root domain rather than window.location.origin,
+ * which put "localhost:3000/std/…" in the Share box that couples copy and send
+ * to their guests. A dev host is not a shareable link.
+ */
+export function publicUrl(path: string): string {
+  const p = path.startsWith('/') ? path : `/${path}`
+  return `${isLocal() ? 'http' : 'https'}://${ROOT_DOMAIN}${p}`
 }

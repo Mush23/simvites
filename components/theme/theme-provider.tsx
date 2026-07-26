@@ -22,7 +22,11 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-const STORAGE_KEY = 'occasio-theme'
+const STORAGE_KEY = 'simvites-theme'
+/** Pre-rename key. Read once as a fallback so existing visitors keep the
+ *  light/dark choice they already made instead of silently reverting to
+ *  system on their next visit. */
+const LEGACY_STORAGE_KEY = 'occasio-theme'
 
 function systemPrefersDark() {
   return (
@@ -44,7 +48,7 @@ function applyClass(resolved: Resolved) {
 export function ThemeScript({ defaultMode = 'system' }: { defaultMode?: ThemeMode }) {
   const js = `(function(){try{
     var d='${defaultMode}';
-    var s=localStorage.getItem('${STORAGE_KEY}');
+    var s=localStorage.getItem('${STORAGE_KEY}')||localStorage.getItem('${LEGACY_STORAGE_KEY}');
     var m=s||d;
     var dark = m==='dark' || (m!=='light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     if(dark)document.documentElement.classList.add('dark');
@@ -64,8 +68,14 @@ export function ThemeProvider({
 
   // Hydrate preference from storage on mount.
   useEffect(() => {
-    const stored = (localStorage.getItem(STORAGE_KEY) as ThemeMode | null) ?? defaultMode
-    setModeState(stored)
+    const stored = (localStorage.getItem(STORAGE_KEY)
+      ?? localStorage.getItem(LEGACY_STORAGE_KEY)) as ThemeMode | null
+    if (stored && stored !== localStorage.getItem(STORAGE_KEY)) {
+      // Migrate forward once, then the legacy key is never consulted again.
+      localStorage.setItem(STORAGE_KEY, stored)
+      localStorage.removeItem(LEGACY_STORAGE_KEY)
+    }
+    setModeState(stored ?? defaultMode)
   }, [defaultMode])
 
   // Apply + persist whenever the mode changes, and follow the OS in system mode.

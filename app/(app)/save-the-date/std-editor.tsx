@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Copy, Download, MessageCircle, Mail, ExternalLink, Check } from 'lucide-react'
 import { StdCard, STD_PALETTES, type StdData } from '@/components/save-the-date/std-card'
 import { eventColor } from '@/lib/event-colors'
+import { publicUrl } from '@/lib/tenant'
 import { uploadSiteImage } from '@/app/(app)/website/actions'
 import { saveStd, setStdPublished } from './actions'
 import { notify } from '@/components/ui/overlays'
@@ -41,7 +42,10 @@ export function StdEditor({ record, events, defaultNames }: {
   const [copied, setCopied] = useState(false)
   const [qr, setQr] = useState<string | null>(null)
 
-  const shareUrl = token ? (typeof window !== 'undefined' ? `${window.location.origin}/std/${token}` : `/std/${token}`) : ''
+  // Derived from the configured root domain, not window.location.origin: this
+  // is the link a couple copies and sends to guests, and it was reading
+  // "localhost:3000/std/…" in development.
+  const shareUrl = token ? publicUrl(`/std/${token}`) : ''
 
   const previewData: StdData = useMemo(() => ({
     headline, names: names || null, message: message || null, dateText: dateText || null,
@@ -100,7 +104,7 @@ export function StdEditor({ record, events, defaultNames }: {
           <Field label="Headline" value={headline} onChange={setHeadline} />
           <Field label="Names" value={names} onChange={setNames} placeholder="Aanya & Dev" />
           <Field label="Date (your words)" value={dateText} onChange={setDateText} placeholder="September 2026" />
-          <Field label="Location" value={location} onChange={setLocation} placeholder="Jaipur, India" />
+          <Field label="Location" value={location} onChange={setLocation} placeholder="Manchester, UK" />
         </div>
         <label className="block">
           <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Message</span>

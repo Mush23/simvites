@@ -230,7 +230,7 @@ export function LiveDemo({ active = true, showScrubber = true, className = '' }:
                 style={{ background: IVORY, outline: '2px solid transparent', outlineOffset: 2 }}>
                 <p className="font-mono text-[7px] uppercase tracking-[0.2em]" style={{ color: TPL_GOLD }}>Together with our families</p>
                 <p data-d="herotitle" className="mt-1 font-display text-[20px] leading-tight" style={{ color: TPL_INK }}>Your names</p>
-                <p className="mt-1 font-mono text-[7.5px] uppercase tracking-[0.16em]" style={{ color: TPL_GOLD }}>19 September 2026 · Jaipur</p>
+                <p className="mt-1 font-mono text-[7.5px] uppercase tracking-[0.16em]" style={{ color: TPL_GOLD }}>19 September 2026 · Manchester</p>
               </div>
               <div className="relative">
                 <div data-d="countdown" className="relative rounded-[4px] px-3 py-2 transition-none" style={{ background: '#FBF7EE', border: '1px solid #E7DFCC' }}>
