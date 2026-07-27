@@ -183,22 +183,35 @@
   --accent-line: color-mix(in oklab, var(--accent) 40%, transparent);
   --ok: #3DD68C;
   --warn: #F0B25A;
-  /* Same split on dark, but by HUE not depth: the old #F26D56 was the dark
-     accent's twin, and a true oxblood is too dark to read as text on navy.
-     This sits at a red/rose hue against the accent's orange-coral, and
-     clears 4.5:1 on --paper. */
-  --bad: #E06C6C;
+  /* Danger on dark, separated by CHROMA rather than depth.
+     Light mode separates danger from the accent by going dark — oxblood sits
+     0.169 from the coral in OKLab. Dark mode cannot use that lever: danger has
+     to stay light enough to read as text on navy, and the accent is also a
+     light red, so two light reds end up close. Searching the space made the
+     ceiling explicit: holding chroma high enough to still "alarm" caps the
+     separation at ~0.09, barely above where it already was.
+
+     So this takes the token file's own reasoning for oxblood — "deep, low
+     chroma, reads as gravity rather than energy" — and applies the half of it
+     that dark mode allows. Dropping chroma to 0.08 while keeping the lightness
+     moves it from 0.052 to 0.120 from the accent, 2.3x the old separation and
+     71% of what the light theme manages. Beside the vivid coral it reads
+     duller and graver, which is the distinction that matters.
+
+     Pushing further (hue toward 350) tested as clearly PINK, which does not
+     say danger on a wedding product; dropping chroma further reads grey. */
+  --bad: #B8787C;
   --info: #8CA3F0;
   --ok-soft: rgba(61, 214, 140, 0.15);
   --warn-soft: rgba(240, 178, 90, 0.15);
-  --bad-soft: rgba(224, 108, 108, 0.16);
+  --bad-soft: rgba(184, 120, 124, 0.18);
   --info-soft: rgba(110, 139, 232, 0.18);
 
   /* On dark the softs composite to a deep tint, so status text goes LIGHTER
      rather than darker. ok/warn already cleared 4.5 as-is; bad was 4.30. */
   --ok-text: #6FCBA9;
   --warn-text: #EBC079;
-  --bad-text: #E68A7C;
+  --bad-text: #E7ACAE;
 
   --selected: #6980E8;
   --selected-soft: #1A2145;
@@ -246,15 +259,18 @@
   --accent-line: rgba(242, 164, 142, 0.35);
   --ok: #3DD68C;
   --warn: #F0B25A;
-  --bad: #E06C6C;
+  /* Admin's accent is salmon (#F2A48E), so danger needs the same muted
+     treatment here — a light salmon-red danger beside a light salmon accent
+     is the same collision the main dark theme had. */
+  --bad: #B8787C;
   --info: #8CA3F0;
   --ok-soft: rgba(61, 214, 140, 0.13);
   --warn-soft: rgba(240, 178, 90, 0.13);
-  --bad-soft: rgba(224, 108, 108, 0.14);
+  --bad-soft: rgba(184, 120, 124, 0.16);
   --info-soft: rgba(110, 139, 232, 0.16);
   --ok-text: #6FCBA9;
   --warn-text: #EBC079;
-  --bad-text: #E68A7C;
+  --bad-text: #E7ACAE;
 
   /* Admin runs on a dark ground, so it takes the lifted selection values. */
   --selected: #6980E8;
