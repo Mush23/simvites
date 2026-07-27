@@ -69,7 +69,7 @@ export function SurfaceTabs({ tabs }: { tabs: SurfaceTab[] }) {
             {t.label}
             {t.badge != null && t.badge > 0 && (
               <span className={`rounded-full px-1.5 py-px text-[9.5px] font-semibold nums ${
-                active ? 'bg-warn-soft text-warn' : 'bg-surface-2 text-ink-3'}`}>
+                active ? 'bg-warn-soft text-warn-text' : 'bg-surface-2 text-ink-3'}`}>
                 {t.badge}
               </span>
             )}

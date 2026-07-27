@@ -40,7 +40,7 @@ function NavLink({ item, active, count, onClick }: {
       <Icon size={16} strokeWidth={1.7} className={active ? 'text-ink' : 'text-ink-3'} />
       <span className="flex-1">{item.label}</span>
       {typeof count === 'number' && count > 0 && (
-        <span className="rounded-full bg-warn-soft px-1.5 py-px font-mono text-[9.5px] font-semibold text-warn">
+        <span className="rounded-full bg-warn-soft px-1.5 py-px font-mono text-[9.5px] font-semibold text-warn-text">
           {count}
         </span>
       )}

@@ -125,7 +125,7 @@ async function ConnectedTab({ tab, eventId, siteId, capacity }: { tab: Tab; even
             <span className="font-mono text-[26px] font-semibold tracking-tight nums text-ink">{capacity}</span>
             <span className="text-[13.5px] text-ink-2">capacity</span>
             {counts.attending >= capacity && (
-              <span className="rounded-pill bg-warn-soft px-2.5 py-0.5 font-sans text-[10px] uppercase tracking-[0.1em] text-warn">Full</span>
+              <span className="rounded-pill bg-warn-soft px-2.5 py-0.5 font-sans text-[10px] uppercase tracking-[0.1em] text-warn-text">Full</span>
             )}
           </p>
         )}

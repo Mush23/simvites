@@ -24,10 +24,13 @@
   --color-accent-line: var(--accent-line);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
+  --color-ok-text: var(--ok-text);
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
+  --color-warn-text: var(--warn-text);
   --color-bad: var(--bad);
   --color-bad-soft: var(--bad-soft);
+  --color-bad-text: var(--bad-text);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
 
@@ -87,6 +90,16 @@
   --warn-soft: #FAF0DD;
   --bad-soft: #F6E8E6;
   --info-soft: #E8EDFB;
+
+  /* Status TEXT, for labels sitting on a *-soft background.
+     --ok and --warn are tuned to be legible as fills and dots; as text on their
+     own soft tint they measured 3.05:1 and 3.18:1, under the 4.5 that the
+     11-13px status pills need. These darker steps land at 8.59 / 7.13 / 9.71,
+     and still read as the same colour family. Use text-ok-text (etc.) whenever
+     the background is bg-ok-soft; plain text-ok is for icons and dots. */
+  --ok-text: #0B4E3A;
+  --warn-text: #6F4808;
+  --bad-text: #6B1D16;
 
   /* SELECTION & FOCUS — cool, and outside the warm palette on purpose. A
      selected block must not look like a primary button or an error. */
@@ -181,6 +194,12 @@
   --bad-soft: rgba(224, 108, 108, 0.16);
   --info-soft: rgba(110, 139, 232, 0.18);
 
+  /* On dark the softs composite to a deep tint, so status text goes LIGHTER
+     rather than darker. ok/warn already cleared 4.5 as-is; bad was 4.30. */
+  --ok-text: #6FCBA9;
+  --warn-text: #EBC079;
+  --bad-text: #E68A7C;
+
   --selected: #6980E8;
   --selected-soft: #1A2145;
   /* LIGHTER than --selected here, not darker. On the light theme the line is a
@@ -233,6 +252,9 @@
   --warn-soft: rgba(240, 178, 90, 0.13);
   --bad-soft: rgba(224, 108, 108, 0.14);
   --info-soft: rgba(110, 139, 232, 0.16);
+  --ok-text: #6FCBA9;
+  --warn-text: #EBC079;
+  --bad-text: #E68A7C;
 
   /* Admin runs on a dark ground, so it takes the lifted selection values. */
   --selected: #6980E8;

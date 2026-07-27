@@ -29,7 +29,7 @@ function NotificationBell({ items }: { items: HeaderNotification[] }) {
             sidebar nav badges already use, so it stops being a second solid
             coral sitting next to Publish in the same header. */}
         {items.length > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-warn/30 bg-warn-soft px-1 text-[9px] font-semibold text-warn nums">
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-warn/30 bg-warn-soft px-1 text-[9px] font-semibold text-warn-text nums">
             {items.length}
           </span>
         )}

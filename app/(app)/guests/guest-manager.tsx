@@ -458,11 +458,15 @@ function GuestEventChip({ guest, eventId, status, onChanged }: {
   }
 
   const mark = on && status === 'attending' ? '✓' : on && status === 'declined' ? '✗' : ''
+  // The RSVP status scale, and it now matches the RSVPs page exactly:
+  // attending green, declined red, awaiting a reply AMBER. This last state used
+  // to be the brand accent, which made "we haven't heard back" look like an
+  // action and put a fourth colour in a three-state scale.
   const cls = !on
     ? 'border border-line text-ink-3 hover:border-accent'
-    : status === 'attending' ? 'bg-ok-soft text-ok'
-    : status === 'declined' ? 'bg-bad-soft text-bad'
-    : 'bg-accent-soft text-accent-ink'
+    : status === 'attending' ? 'bg-ok-soft text-ok-text'
+    : status === 'declined' ? 'bg-bad-soft text-bad-text'
+    : 'bg-warn-soft text-warn-text'
 
   return (
     <button type="button" onClick={toggle}
@@ -549,9 +553,11 @@ function CoveragePill({ invited, total }: { invited: number; total: number }) {
   if (invited === 0) return <span className="text-center font-mono text-[10px] text-ink-3 nums">{t}</span>
   return (
     <span className="text-center">
+      {/* A coverage COUNT, not a status — no status colour. Full coverage just
+          gets weight; the scale for how people replied lives in the cells. */}
       <span className={`inline-block min-w-[34px] rounded-pill px-2 py-0.5 font-mono text-[10px] nums ${
         invited === total
-          ? 'bg-accent-soft text-accent-ink'
+          ? 'bg-surface-2 font-semibold text-ink'
           : 'border border-line-2 text-ink-2'}`}>
         {t}
       </span>
@@ -624,7 +630,10 @@ function HouseholdDrawer({ household, events, allocations, onClose, onChanged }:
                 <button key={e.id} type="button" onClick={() => toggleAll(e.id, !all)}
                   title={all ? `Uninvite everyone from ${e.name}` : `Invite the whole household to ${e.name} — one click`}
                   className={`flex min-h-[30px] items-center gap-1.5 rounded-pill px-2.5 text-[11.5px] font-medium transition-colors ${
-                    all ? 'bg-accent-soft text-accent-ink'
+                    // A toggle, not a status: "invited" is a settled fact, so it
+                    // gets weight rather than a status colour. Amber here would
+                    // make every invited household look like it needs chasing.
+                    all ? 'bg-surface-2 font-semibold text-ink'
                     : invited > 0 ? 'border border-line-2 text-ink-2 hover:border-accent'
                     : 'border border-line text-ink-3 hover:border-accent'}`}>
                   <span className="h-1.5 w-1.5 rounded-full" style={{ background: e.accent }} />
@@ -779,8 +788,10 @@ function GuestCard({ guest, events, onChanged }: {
             {guest.isChild && (
               <span className="ml-1.5 rounded-pill bg-surface-2 px-1.5 py-px font-sans text-[8.5px] uppercase text-ink-3">child</span>
             )}
+            {/* Same kind of thing as the "child" badge beside it — a guest
+                attribute, so the same neutral treatment. */}
             {guest.plusOneAllowed && (
-              <span className="ml-1.5 rounded-pill bg-accent-soft px-1.5 py-px font-sans text-[8.5px] uppercase text-accent-ink">+1</span>
+              <span className="ml-1.5 rounded-pill bg-surface-2 px-1.5 py-px font-sans text-[8.5px] uppercase text-ink-3">+1</span>
             )}
           </p>
           {guest.email && <p className="mt-0.5 truncate text-[11px] text-ink-3">{guest.email}</p>}
@@ -795,7 +806,7 @@ function GuestCard({ guest, events, onChanged }: {
             })
             onChanged()
           }}
-          className="-m-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-bad-soft hover:text-bad">
+          className="-m-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-bad-soft hover:text-bad-text">
           <X size={13} strokeWidth={1.7} />
         </button>
       </div>
@@ -808,7 +819,7 @@ function GuestCard({ guest, events, onChanged }: {
                 role="checkbox" aria-checked={on}
                 aria-label={`${guest.fullName} invited to ${e.name}`}
                 className={`flex min-h-[30px] items-center gap-1.5 rounded-pill px-2.5 text-[11.5px] font-medium transition-colors ${
-                  on ? 'bg-accent-soft text-accent-ink'
+                  on ? 'bg-surface-2 font-semibold text-ink'
                   : 'border border-line text-ink-3 hover:border-accent'}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${on ? '' : 'opacity-40'}`}
                   style={{ background: e.accent }} />

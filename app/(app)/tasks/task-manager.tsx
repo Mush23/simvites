@@ -133,7 +133,7 @@ function TaskItem({ task, events, vendors, onChanged }: {
         {linked && <p className="font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">{linked}</p>}
       </div>
       {task.priority === 'high' && !done && (
-        <span className="rounded-pill bg-bad-soft px-2 py-0.5 font-sans text-[9px] uppercase tracking-[0.14em] text-bad">high</span>
+        <span className="rounded-pill bg-bad-soft px-2 py-0.5 font-sans text-[9px] uppercase tracking-[0.14em] text-bad-text">high</span>
       )}
       {task.due_date && (
         <span className={`font-sans text-[10px] uppercase tracking-[0.14em] ${overdue ? 'text-bad' : 'text-ink-3'}`}>
@@ -150,7 +150,7 @@ function TaskItem({ task, events, vendors, onChanged }: {
         onChanged()
       }}
         aria-label={`Archive ${task.title}`}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-3 hover:bg-bad-soft hover:text-bad"><X size={14} strokeWidth={1.7} /></button>
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-3 hover:bg-bad-soft hover:text-bad-text"><X size={14} strokeWidth={1.7} /></button>
     </div>
   )
 }

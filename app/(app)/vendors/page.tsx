@@ -19,9 +19,9 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_TONE: Record<string, string> = {
   shortlisted: 'bg-paper-2 text-ink-3',
   contacted: 'bg-info-soft text-info',
-  quote_in: 'bg-warn-soft text-warn',
-  booked: 'bg-ok-soft text-ok',
-  declined: 'bg-bad-soft text-bad',
+  quote_in: 'bg-warn-soft text-warn-text',
+  booked: 'bg-ok-soft text-ok-text',
+  declined: 'bg-bad-soft text-bad-text',
 }
 
 export default async function VendorsPage() {
