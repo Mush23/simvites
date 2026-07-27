@@ -81,14 +81,25 @@ export function TemplateGallery({
               className={`group relative overflow-hidden rounded-card border bg-surface shadow-card transition-colors ${
                 applied ? 'border-selected-line' : 'border-line hover:border-line-2'}`}>
 
+              {/* The whole card opens the preview. A stretched button rather
+                  than wrapping the card in one, because a <button> may not
+                  contain block content — this keeps valid markup while making
+                  the card a single pointer and keyboard target.
+                  Negative outline-offset so the focus ring is not clipped by
+                  the card's own overflow-hidden. */}
+              <button type="button" onClick={() => setOpen(pos)}
+                aria-label={`Preview ${t.name}`}
+                className="absolute inset-0 z-[2] cursor-pointer rounded-card focus-visible:[outline-offset:-3px]" />
+
               <div className="relative border-b border-line">
                 {thumbs[i]}
-                {/* Hover is an affordance, not a second set of controls. It used
-                    to duplicate the footer's buttons, which meant two solid
-                    accents for one action on the hovered card — and the hover
-                    copies were unreachable by keyboard. The footer row below is
-                    always visible and does both jobs. */}
-                <div aria-hidden className="pointer-events-none absolute inset-0 bg-ink/0 transition-colors duration-200 group-hover:bg-ink/10" />
+                {/* Purely visual: the stretched button above owns the click and
+                    the accessible name, so this must not be interactive. */}
+                <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center bg-ink/0 transition-colors duration-200 group-hover:bg-ink/25">
+                  <span className="rounded-md bg-surface px-3 py-1.5 text-[12.5px] font-semibold text-ink opacity-0 shadow-lift transition-opacity duration-200 group-hover:opacity-100">
+                    Preview
+                  </span>
+                </div>
               </div>
 
               <div className="flex items-start justify-between gap-2 p-3.5">
@@ -103,27 +114,18 @@ export function TemplateGallery({
                     ))}
                   </span>
                   {applied && (
-                    <span className="rounded-pill bg-selected-soft px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.09em] text-ink">
+                    <span className="rounded-pill bg-selected-soft px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.09em] text-ink">
                       In use
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Keyboard-reachable equivalents of the hover pair. */}
-              <div className="flex items-center gap-2 px-3.5 pb-3.5">
-                <button type="button" onClick={() => setOpen(pos)}
-                  className="flex-1 rounded-md border border-line px-3 py-1.5 text-[12.5px] font-medium text-ink-2 transition-colors hover:border-line-2 hover:text-ink">
-                  Preview
-                </button>
-                {onUse && (applied
-                  ? <span className="flex-1 text-center text-[12px] text-ink-3">Applied</span>
-                  : <button type="button" onClick={() => onUse(t.id)}
-                      className="flex-1 rounded-md bg-accent px-3 py-1.5 text-[12.5px] font-semibold text-white">
-                      Use this template
-                    </button>
-                )}
-              </div>
+              {/* No apply button here. Choosing a look off a 4:3 thumbnail is a
+                  decision made on too little; the preview is where you can
+                  actually see the thing, so that is where committing belongs —
+                  the pattern Squarespace and Framer both use. It also takes
+                  eighteen solid accents off one screen. */}
             </div>
           )
         })}
