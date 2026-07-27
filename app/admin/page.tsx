@@ -226,7 +226,7 @@ export default async function PlatformAdminPage() {
           {profileRows.map((p) => (
             <div key={p.id} className="flex items-center justify-between gap-3 rounded-card border border-line bg-surface p-3.5 shadow-card">
               <span className="text-[13.5px] text-ink">{p.email}
-                <span className="ml-2 font-sans text-[9px] uppercase text-ink-3">joined {fmt(p.created_at)}</span></span>
+                <span className="ml-2 font-sans text-[11px] uppercase text-ink-3">joined {fmt(p.created_at)}</span></span>
               <ResetButton userId={p.id} email={p.email} />
             </div>
           ))}

@@ -125,7 +125,7 @@ export function GuestManager({
             Not invited yet · {uninvitedCount}
           </button>
         )}
-        <span className="hidden font-sans text-[10px] uppercase tracking-[0.14em] text-ink-3 xl:inline">
+        <span className="hidden font-sans text-[12px] uppercase tracking-[0.14em] text-ink-3 xl:inline">
           {households.length} households · {totalGuests} guests
         </span>
         <span aria-hidden className="h-6 w-px bg-line" />
@@ -364,7 +364,7 @@ function EventLens({ event, households, sides, responses, tallies, openedHouseho
             <div key={h.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-line px-4 py-2.5 first-of-type:border-t-0">
               <span className="w-40 shrink-0">
                 <span className="block truncate text-[13px] font-medium text-ink">{h.name}</span>
-                {h.side && <span className="block font-sans text-[8.5px] uppercase tracking-[0.08em] text-ink-3">{h.side}</span>}
+                {h.side && <span className="block font-sans text-[11px] uppercase tracking-[0.08em] text-ink-3">{h.side}</span>}
               </span>
               <span className="flex min-w-0 flex-wrap gap-1.5">
                 {h.guests.map((g) => (
@@ -375,7 +375,7 @@ function EventLens({ event, households, sides, responses, tallies, openedHouseho
             </div>
           ))}
           {notYetInvited > 0 && rows.length > 0 && (
-            <p className="border-t border-dashed border-line-2 px-4 py-2.5 text-center font-sans text-[9.5px] uppercase tracking-[0.1em] text-ink-3">
+            <p className="border-t border-dashed border-line-2 px-4 py-2.5 text-center font-sans text-[12px] uppercase tracking-[0.1em] text-ink-3">
               + {notYetInvited} household{notYetInvited === 1 ? '' : 's'} not invited yet — invite a side above, or use All events
             </p>
           )}
@@ -529,7 +529,7 @@ function Register({ households, events, openId, onOpen }: {
             className={`grid w-full items-center gap-x-3 rounded-none border-t border-line px-4 py-2.5 text-left transition-colors first-of-type:border-t-0 hover:bg-paper-2 ${
               openId === h.id ? 'bg-surface-2 shadow-[inset_2px_0_0_var(--selected)]' : ''}`}>
             <span className="truncate text-[13px] font-medium text-ink">{h.name}</span>
-            <span className="truncate font-sans text-[10px] uppercase tracking-[0.08em] text-ink-3">{h.side ?? ''}</span>
+            <span className="truncate font-sans text-[12px] uppercase tracking-[0.08em] text-ink-3">{h.side ?? ''}</span>
             <span className="font-mono text-[11px] text-ink-2 nums">{h.guests.length}</span>
             {events.map((e) => <CoveragePill key={e.id} invited={invitedTo(h, e.id)} total={h.guests.length} />)}
           </button>
@@ -605,7 +605,7 @@ function HouseholdDrawer({ household, events, allocations, onClose, onChanged }:
       <div className="flex items-center gap-2 border-b border-line px-4 py-3">
         <p className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-tight text-ink">{household.name}</p>
         {household.side && (
-          <span className="rounded-pill bg-paper-2 px-2 py-0.5 font-sans text-[8.5px] uppercase tracking-[0.08em] text-ink-3">
+          <span className="rounded-pill bg-paper-2 px-2 py-0.5 font-sans text-[11px] uppercase tracking-[0.08em] text-ink-3">
             {household.side}
           </span>
         )}
@@ -746,7 +746,7 @@ function AllocationField({ household, event, current }: {
       <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: event.accent }} />
       <span className="min-w-0 flex-1 truncate text-[12px] text-ink-2">{event.name}</span>
       <span className="flex items-center gap-1">
-        <span className="font-sans text-[8.5px] uppercase text-ink-3">up to</span>
+        <span className="font-sans text-[12px] uppercase text-ink-3">up to</span>
         <input type="number" min={1} inputMode="numeric" defaultValue={current ?? ''} key={current ?? 'unset'}
           placeholder="—" disabled={busy}
           onBlur={(e) => commit(e.target.value)}
@@ -786,12 +786,12 @@ function GuestCard({ guest, events, onChanged }: {
           <p className="text-[13px] font-medium text-ink">
             {guest.fullName}
             {guest.isChild && (
-              <span className="ml-1.5 rounded-pill bg-surface-2 px-1.5 py-px font-sans text-[8.5px] uppercase text-ink-3">child</span>
+              <span className="ml-1.5 rounded-pill bg-surface-2 px-1.5 py-px font-sans text-[11px] uppercase text-ink-3">child</span>
             )}
             {/* Same kind of thing as the "child" badge beside it — a guest
                 attribute, so the same neutral treatment. */}
             {guest.plusOneAllowed && (
-              <span className="ml-1.5 rounded-pill bg-surface-2 px-1.5 py-px font-sans text-[8.5px] uppercase text-ink-3">+1</span>
+              <span className="ml-1.5 rounded-pill bg-surface-2 px-1.5 py-px font-sans text-[11px] uppercase text-ink-3">+1</span>
             )}
           </p>
           {guest.email && <p className="mt-0.5 truncate text-[11px] text-ink-3">{guest.email}</p>}

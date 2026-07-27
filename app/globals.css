@@ -668,7 +668,7 @@
    extra pixel to hold its own at this tracking. */
 @utility microlabel {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.09em;
@@ -747,7 +747,7 @@
 }
 .puck-shell [class*='_SidebarSection-title'] {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.09em;

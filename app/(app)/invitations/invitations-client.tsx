@@ -126,7 +126,7 @@ function HouseholdRow({ row, brand, onChanged }: {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[14.5px] font-semibold tracking-tight text-ink">{row.name}</p>
-          <p className="mt-0.5 font-sans text-[10px] uppercase tracking-[0.14em] text-ink-3">
+          <p className="mt-0.5 font-sans text-[12px] uppercase tracking-[0.14em] text-ink-3">
             {row.guestCount} guest{row.guestCount === 1 ? '' : 's'} · {row.emailCount} email{row.emailCount === 1 ? '' : 's'} · {row.activeLinks} active link{row.activeLinks === 1 ? '' : 's'}
             {row.lastSentAt && ` · sent ${new Date(row.lastSentAt).toLocaleDateString('en-GB')}`}
             {row.lastOpenedAt && (
@@ -146,7 +146,7 @@ function HouseholdRow({ row, brand, onChanged }: {
           </button>
           {row.activeLinks > 0 && (
             <button type="button" onClick={onRevoke} disabled={busy}
-              className="rounded-md font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3 hover:text-bad">
+              className="rounded-md font-sans text-[11px] uppercase tracking-[0.14em] text-ink-3 hover:text-bad">
               Revoke
             </button>
           )}

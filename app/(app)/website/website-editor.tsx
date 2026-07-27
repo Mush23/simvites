@@ -91,8 +91,8 @@ function PagesPanel() {
           p.id === pageId ? 'bg-selected-soft text-ink' : 'text-ink hover:bg-paper-2'}`}>
           <button type="button" className="rounded-md min-w-0 flex-1 truncate text-left"
             onClick={() => { router.push(`/website?page=${p.id}`); router.refresh() }}>
-            {p.title}{p.is_home && <span className="ml-1.5 font-sans text-[9px] uppercase tracking-wider text-ink-3">home</span>}
-            {p.hidden && <span className="ml-1.5 font-sans text-[9px] uppercase tracking-wider text-warn">hidden</span>}
+            {p.title}{p.is_home && <span className="ml-1.5 font-sans text-[11px] uppercase tracking-wider text-ink-3">home</span>}
+            {p.hidden && <span className="ml-1.5 font-sans text-[11px] uppercase tracking-wider text-warn">hidden</span>}
           </button>
           {!p.is_home && (
             <>
@@ -629,7 +629,7 @@ function Dock() {
             title={meta.status === 'unpublished'
               ? 'Your draft is saved. Guests still see the last published version until you publish.'
               : undefined}
-            className={`flex shrink-0 items-center gap-1.5 px-1.5 font-sans text-[9px] uppercase tracking-[0.1em] ${
+            className={`flex shrink-0 items-center gap-1.5 px-1.5 font-sans text-[11px] uppercase tracking-[0.1em] ${
               meta.status === 'error' ? 'text-bad' : 'text-paper/55'}`}>
             {/* A dot, not a colour swap on the text: "unpublished" is a state
                 to notice, not an error, and the dock is already dark. */}

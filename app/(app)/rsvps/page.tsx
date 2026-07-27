@@ -231,7 +231,7 @@ export default async function RsvpsPage() {
                 <footer className="mt-3 flex items-baseline justify-between gap-3">
                   <span className="text-[13px] font-medium text-ink-2">— {m.household}</span>
                   {m.at && (
-                    <span className="font-sans text-[9.5px] uppercase tracking-[0.1em] text-ink-3">
+                    <span className="font-sans text-[12px] uppercase tracking-[0.1em] text-ink-3">
                       {new Date(m.at).toLocaleDateString('en-GB')}
                     </span>
                   )}

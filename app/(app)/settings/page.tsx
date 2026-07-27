@@ -27,7 +27,7 @@ async function VersionList({ siteId }: { siteId: string }) {
         <li key={v.id} className="flex items-center justify-between gap-3 border-b border-line pb-2 text-sm last:border-0">
           <span className="text-ink">
             {new Date(v.published_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
-            {i === 0 && <span className="ml-2 font-sans text-[9px] uppercase tracking-[0.14em] text-accent-ink">live</span>}
+            {i === 0 && <span className="ml-2 font-sans text-[11px] uppercase tracking-[0.14em] text-accent-ink">live</span>}
           </span>
           {i > 0 && (
             <form action={async () => { 'use server'; await (await import('./actions')).restoreVersion(v.id) }}>
@@ -89,7 +89,7 @@ export default async function SettingsPage({
               Browse templates →
             </Link>
           </div>
-          <p className="mt-4 font-sans text-[10px] uppercase tracking-[0.16em] text-ink-3">
+          <p className="mt-4 font-sans text-[12px] uppercase tracking-[0.16em] text-ink-3">
             Address: {row?.slug}.{BASE_DOMAIN} · Status: {row?.status}
           </p>
         </section>

@@ -75,12 +75,12 @@ export function FileManager({ files, events, vendors }: {
           ].filter(Boolean).join(' · ')
           return (
             <div key={f.id} className="flex items-center gap-3 rounded-card border border-line bg-surface p-3.5 shadow-card">
-              <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">
+              <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-sans text-[11px] uppercase tracking-[0.14em] text-ink-3">
                 {f.kind ?? 'file'}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm text-ink">{f.name}</p>
-                {linked && <p className="font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">{linked}</p>}
+                {linked && <p className="font-sans text-[12px] uppercase tracking-[0.14em] text-ink-3">{linked}</p>}
               </div>
               <a href={`/files/${f.id}/download`}
                 className="rounded-md border border-line bg-paper-2 px-3 py-1.5 text-sm hover:border-accent">

@@ -78,7 +78,7 @@ export default async function VendorDetailPage({
             {(tasks ?? []).map((t) => (
               <div key={t.id} className="flex items-baseline justify-between border-b border-line py-1.5 text-sm last:border-0">
                 <span className={t.status === 'done' ? 'text-ink-3 line-through' : 'text-ink'}>{t.title}</span>
-                {t.due_date && <span className="font-sans text-[10px] uppercase text-ink-3">{t.due_date}</span>}
+                {t.due_date && <span className="font-sans text-[12px] uppercase text-ink-3">{t.due_date}</span>}
               </div>
             ))}
           </section>

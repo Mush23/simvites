@@ -130,13 +130,13 @@ function TaskItem({ task, events, vendors, onChanged }: {
         className="h-5 w-5 shrink-0 accent-[var(--accent)]" />
       <div className="min-w-0 flex-1">
         <p className={`text-sm ${done ? 'text-ink-3 line-through' : 'text-ink'}`}>{task.title}</p>
-        {linked && <p className="font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">{linked}</p>}
+        {linked && <p className="font-sans text-[12px] uppercase tracking-[0.14em] text-ink-3">{linked}</p>}
       </div>
       {task.priority === 'high' && !done && (
-        <span className="rounded-pill bg-bad-soft px-2 py-0.5 font-sans text-[9px] uppercase tracking-[0.14em] text-bad-text">high</span>
+        <span className="rounded-pill bg-bad-soft px-2 py-0.5 font-sans text-[11px] uppercase tracking-[0.14em] text-bad-text">high</span>
       )}
       {task.due_date && (
-        <span className={`font-sans text-[10px] uppercase tracking-[0.14em] ${overdue ? 'text-bad' : 'text-ink-3'}`}>
+        <span className={`font-sans text-[12px] uppercase tracking-[0.14em] ${overdue ? 'text-bad' : 'text-ink-3'}`}>
           {new Date(task.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
         </span>
       )}

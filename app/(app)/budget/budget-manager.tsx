@@ -106,7 +106,7 @@ function BudgetRow({ item, events, vendors, onChanged }: {
         <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open}
           className="rounded-md min-w-0 flex-1 text-left">
           <p className="font-medium text-ink">{item.label}</p>
-          <p className="font-sans text-[10px] uppercase tracking-[0.14em] text-ink-3">
+          <p className="font-sans text-[12px] uppercase tracking-[0.14em] text-ink-3">
             {[eventName, vendorName].filter(Boolean).join(' · ') || 'unlinked'}
           </p>
         </button>
@@ -115,7 +115,7 @@ function BudgetRow({ item, events, vendors, onChanged }: {
             {formatPence(item.paid_amount)} paid · {formatPence(balance)} due
           </span>
           <span className="font-mono text-[15px] font-semibold nums text-ink">{formatPence(item.actual_amount ?? item.estimated_amount)}</span>
-          <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-sans text-[9px] uppercase tracking-[0.14em] text-ink-3">
+          <span className="rounded-pill bg-paper-2 px-2.5 py-1 font-sans text-[11px] uppercase tracking-[0.14em] text-ink-3">
             {STATUS_LABEL[item.status] ?? item.status}
           </span>
           {item.event_id && eventName && (

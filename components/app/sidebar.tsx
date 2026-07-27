@@ -64,7 +64,7 @@ function NavBody({ site, onNavigate }: { site: SidebarSite; onNavigate?: () => v
         <div className="mt-3 flex items-center gap-2 rounded-lg border border-line bg-paper px-2.5 py-2">
           <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', site.status === 'published' ? 'bg-ok' : 'bg-warn')} />
           <span className="min-w-0 flex-1 truncate font-display text-[15px] leading-none text-ink">{site.title}</span>
-          <span className="font-sans text-[9px] uppercase tracking-wider text-ink-3">
+          <span className="font-sans text-[11px] uppercase tracking-wider text-ink-3">
             {site.status === 'published' ? 'live' : 'draft'}
           </span>
         </div>

@@ -86,7 +86,7 @@ export default async function VendorsPage() {
                             {formatPence(v.contracted_amount ?? v.quote_amount)}
                           </span>
                         )}
-                        <span className={`rounded-full px-2.5 py-1 font-sans text-[9px] uppercase tracking-[0.08em] ${STATUS_TONE[v.status]}`}>
+                        <span className={`rounded-full px-2.5 py-1 font-sans text-[11px] uppercase tracking-[0.08em] ${STATUS_TONE[v.status]}`}>
                           {STATUS_LABEL[v.status]}
                         </span>
                       </div>
