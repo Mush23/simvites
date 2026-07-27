@@ -83,20 +83,12 @@ export function TemplateGallery({
 
               <div className="relative border-b border-line">
                 {thumbs[i]}
-                {/* Hover pair. Always reachable by keyboard via the buttons
-                    below — this layer is a shortcut, not the only route. */}
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2 bg-ink/0 opacity-0 transition-all duration-200 group-hover:bg-ink/25 group-hover:opacity-100">
-                  <button type="button" onClick={() => setOpen(pos)}
-                    className="pointer-events-auto rounded-md bg-surface px-3 py-1.5 text-[12.5px] font-semibold text-ink shadow-lift">
-                    Preview
-                  </button>
-                  {onUse && !applied && (
-                    <button type="button" onClick={() => onUse(t.id)}
-                      className="pointer-events-auto rounded-md bg-accent px-3 py-1.5 text-[12.5px] font-semibold text-white shadow-lift">
-                      Use this
-                    </button>
-                  )}
-                </div>
+                {/* Hover is an affordance, not a second set of controls. It used
+                    to duplicate the footer's buttons, which meant two solid
+                    accents for one action on the hovered card — and the hover
+                    copies were unreachable by keyboard. The footer row below is
+                    always visible and does both jobs. */}
+                <div aria-hidden className="pointer-events-none absolute inset-0 bg-ink/0 transition-colors duration-200 group-hover:bg-ink/10" />
               </div>
 
               <div className="flex items-start justify-between gap-2 p-3.5">

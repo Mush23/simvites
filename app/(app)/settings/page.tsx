@@ -124,7 +124,7 @@ export default async function SettingsPage({
                 className="w-64 rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-selected" />
             </label>
             <button type="submit" title="They'll sign in via the Email link tab on the login page"
-              className="rounded-md bg-accent px-5 py-3 font-semibold text-white">
+              className="rounded-md border border-accent-line px-5 py-3 font-semibold text-accent-ink transition-colors hover:bg-accent-soft">
               Add collaborator
             </button>
           </form>

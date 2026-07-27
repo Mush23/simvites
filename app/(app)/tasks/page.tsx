@@ -51,7 +51,10 @@ export default async function TasksPage() {
             )}
           </div>
           <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-surface-2">
-            <div className="h-full rounded-full bg-accent transition-[width] duration-500" style={{ width: `${pct}%` }} />
+            {/* Progress is never the brand accent — Phase 1 token. Missed on
+                this bar because it is a bare div, not a StatCard. */}
+            <div className={`h-full rounded-full transition-[width] duration-500 ${
+              pct >= 100 ? 'bg-progress-done' : 'bg-progress-fill'}`} style={{ width: `${pct}%` }} />
           </div>
         </div>
       )}

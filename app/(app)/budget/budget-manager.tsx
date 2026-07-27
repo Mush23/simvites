@@ -148,7 +148,9 @@ function BudgetRow({ item, events, vendors, onChanged }: {
             </select>
           </label>
           <Text name="due_date" label="Due" type="date" defaultValue={item.due_date ?? ''} w="w-36" />
-          <button type="submit" className="rounded-md bg-accent px-4 py-2.5 font-semibold text-white">Save</button>
+          {/* Row editor: confirming an edit, not the screen's headline action —
+              "Add" above owns the solid. */}
+          <button type="submit" className="rounded-md border border-accent-line px-4 py-2.5 font-semibold text-accent-ink transition-colors hover:bg-accent-soft">Save</button>
           <button type="button"
             onClick={async () => {
               if (!(await askConfirm({ title: 'Archive this budget line?', body: 'It leaves your totals but is never deleted.' }))) return

@@ -129,17 +129,19 @@ export function GuestManager({
           {households.length} households · {totalGuests} guests
         </span>
         <span aria-hidden className="h-6 w-px bg-line" />
-        {/* Solid while it is the page's offer; outline once the form is open,
-            because then the form's own Add button is the action and two solid
-            corals in one view is exactly what we are removing. */}
-        <button type="button" onClick={() => setShowAdd((s) => !s)}
+        {/* Solid only while it is the page's offer. Outlines once EITHER
+            disclosure is open — the add form or the importer — because each
+            brings its own confirm button, and that button is then the action. */}
+        {/* Mutually exclusive: two open forms would mean two confirm buttons,
+            and the whole point is that one action leads at a time. */}
+        <button type="button" onClick={() => { setShowAdd((s) => !s); setShowImport(false) }}
           className={`rounded-md px-3.5 py-2 text-[12.5px] font-semibold transition-colors ${
-            showAdd
+            showAdd || showImport
               ? 'border border-accent-line text-accent-ink hover:bg-accent-soft'
               : 'bg-accent text-white'}`}>
           {showAdd ? 'Close' : '＋ Add household'}
         </button>
-        <button type="button" onClick={() => setShowImport((s) => !s)}
+        <button type="button" onClick={() => { setShowImport((s) => !s); setShowAdd(false) }}
           className="rounded-md border border-line bg-paper-2 px-3 py-2 text-[12.5px] text-ink transition-colors hover:border-accent">
           {showImport ? 'Close import' : 'Paste import'}
         </button>

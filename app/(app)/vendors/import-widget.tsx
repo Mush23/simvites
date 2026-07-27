@@ -41,7 +41,7 @@ export function VendorImport() {
             className="w-full rounded-md border border-line bg-surface px-3 py-2.5 font-mono text-xs text-ink outline-none focus:border-selected" />
           <div className="mt-3 flex items-center gap-3">
             <button type="button" onClick={run} disabled={busy}
-              className="rounded-md bg-accent px-5 py-2 font-semibold text-white disabled:opacity-50">
+              className="rounded-md border border-accent-line px-5 py-2 font-semibold text-accent-ink transition-colors hover:bg-accent-soft disabled:opacity-50">
               {busy ? 'Importing…' : 'Import'}
             </button>
             {note && <span className="text-sm text-ink-2">{note}</span>}

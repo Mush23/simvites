@@ -123,8 +123,10 @@ function PagesPanel() {
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
           placeholder="New page name, e.g. Travel"
           className="min-w-0 flex-1 rounded-md border border-line bg-paper-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-selected" />
+        {/* Panel actions outline: Publish in the dock is the editor's one solid,
+            and it is visible at the same time as every open panel. */}
         <button type="button" onClick={add} disabled={busy}
-          className="!rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
+          className="!rounded-md border border-accent-line px-3 py-1.5 text-xs font-semibold text-accent-ink transition-colors hover:bg-accent-soft disabled:opacity-50">
           {busy ? '…' : 'Add'}
         </button>
       </div>
@@ -235,7 +237,10 @@ function TemplateSwitcher() {
         {listTemplates().map((t) => (
           <div key={t.key}
             className={`rounded-[10px] border p-2 text-left transition-colors ${
-              t.key === activeKey ? 'border-accent bg-accent-soft' : 'border-line hover:border-line-2'
+              // Crib item: "Selected template card border → selected-border".
+              // Done in the Phase 3 gallery, missed here in the editor's own
+              // switcher — the applied template is state, not an action.
+              t.key === activeKey ? 'border-selected-line bg-selected-soft' : 'border-line hover:border-line-2'
             }`}>
             <button type="button" onClick={() => pick(t.key)} className="!rounded-md block w-full text-left">
               <span className="flex h-9 w-full overflow-hidden rounded-md border border-line">
@@ -467,7 +472,7 @@ function AiDraft() {
         className="w-full rounded-md border border-line bg-paper-2 px-2 py-1.5 text-[12px] text-ink outline-none focus:border-selected" />
       <div className="mt-1.5 flex items-center gap-1.5">
         <button type="button" onClick={compose} disabled={busy || !prompt.trim()}
-          className="!rounded-md bg-accent px-2.5 py-1.5 text-[11.5px] font-semibold text-white disabled:opacity-50">
+          className="!rounded-md border border-accent-line px-2.5 py-1.5 text-[11.5px] font-semibold text-accent-ink transition-colors hover:bg-accent-soft disabled:opacity-50">
           {busy ? 'Writing…' : 'Write it'}
         </button>
         <button type="button" onClick={() => setOpen(false)}

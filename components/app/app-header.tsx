@@ -106,9 +106,19 @@ export function AppHeader({ site, notifications = [] }: { site: SidebarSite; not
             Unlock to publish →
           </Link>
         ) : (
+          // Outline, not a fill. This header is on EVERY screen, so a solid
+          // Publish here meant every screen showed two solid corals — its own
+          // primary plus this one. Publishing is not the Guest list's job or
+          // the Budget's; it stays one click away as a strong secondary, and
+          // the screen's own action owns the solid. On /website, where
+          // publishing IS the task, the dock's Publish is solid and this header
+          // is not rendered at all (ChromeGate). `Live ✓` keeps its green fill:
+          // that is success feedback, not brand.
           <button type="button" onClick={publish} disabled={pub === 'publishing'}
-            className={`rounded-md px-3.5 py-1.5 text-[13px] font-semibold text-white disabled:opacity-60 ${
-              pub === 'live' ? 'bg-ok' : 'bg-accent'}`}>
+            className={`rounded-md px-3.5 py-1.5 text-[13px] font-semibold transition-colors disabled:opacity-60 ${
+              pub === 'live'
+                ? 'bg-ok text-white'
+                : 'border border-accent-line text-accent-ink hover:bg-accent-soft'}`}>
             {pub === 'publishing' ? 'Publishing…' : pub === 'live' ? 'Live ✓' : 'Publish'}
           </button>
         )}

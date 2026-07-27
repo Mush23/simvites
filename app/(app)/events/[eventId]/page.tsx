@@ -47,7 +47,7 @@ export default async function EventHubPage({
           <Link key={t} href={`/events/${eventId}${t === 'overview' ? '' : `?tab=${t}`}`}
             aria-current={tab === t ? 'page' : undefined}
             className={`-mb-px whitespace-nowrap border-b-2 px-3 py-2 text-sm ${
-              tab === t ? 'border-accent font-medium text-ink' : 'border-transparent text-ink-3 hover:text-ink'
+              tab === t ? 'border-ink font-semibold text-ink' : 'border-transparent text-ink-3 hover:text-ink'
             }`}>
             {TAB_LABEL[t]}
           </Link>

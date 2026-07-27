@@ -39,9 +39,11 @@ export default async function SeatingPage() {
           title="Plan the room"
           description="Upload your floor plan or start blank, add tables, then drag them into place and seat each guest. Guests see their table on their personal RSVP page."
         />
+        {/* Outline: arranging the room is this screen's job, so the canvas's
+            "Add table" owns the solid. Sending the plan is what you do after. */}
         <form action={async () => { 'use server'; await (await import('./actions')).sendSeatingUpdate() }}>
           <button type="submit" title="Email every seated household a fresh personal link — opening it shows their table"
-            className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white">
+            className="rounded-md border border-accent-line px-4 py-2 text-sm font-semibold text-accent-ink transition-colors hover:bg-accent-soft">
             Send seating plan to guests
           </button>
         </form>

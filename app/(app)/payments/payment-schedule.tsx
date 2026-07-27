@@ -80,8 +80,13 @@ export function PaymentSchedule({ rows, vendors, budgetItems }: {
   return (
     <div>
       <div className="mb-6 flex justify-end">
+        {/* Solid while it is the offer; outline once the form is open, because
+            then the form's own "Add to schedule" is the action. */}
         <button type="button" onClick={() => setShowAdd((s) => !s)}
-          className="rounded-md flex items-center gap-1.5 bg-accent px-3.5 py-2 text-[13px] font-semibold text-white">
+          className={`rounded-md flex items-center gap-1.5 px-3.5 py-2 text-[13px] font-semibold transition-colors ${
+            showAdd
+              ? 'border border-accent-line text-accent-ink hover:bg-accent-soft'
+              : 'bg-accent text-white'}`}>
           <Plus size={14} strokeWidth={2} /> Schedule a payment
         </button>
       </div>

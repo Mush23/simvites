@@ -36,9 +36,12 @@ export default function TemplateGalleryPage() {
 
         <PreviewClient templates={MANIFESTS} thumbs={thumbs} />
 
+        {/* Outline: every card above already offers this exact path, so a solid
+            fill here is a nineteenth competing accent rather than a new offer.
+            The cards are the action; this is the catch-all. */}
         <div className="mt-12 text-center">
           <Link href="/login"
-            className="inline-block rounded-[10px] bg-accent px-6 py-3 text-[14px] font-semibold text-white">
+            className="inline-block rounded-[10px] border border-accent-line px-6 py-3 text-[14px] font-semibold text-accent-ink transition-colors hover:bg-accent-soft">
             Start building free
           </Link>
         </div>

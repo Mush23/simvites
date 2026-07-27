@@ -43,7 +43,7 @@ export function SiteSettingsForm({ title, deadlineDefault }: {
       </label>
       <div className="flex items-center gap-4">
         <button type="submit"
-          className="rounded-md bg-accent px-6 py-3 font-semibold text-white">
+          className="rounded-md border border-accent-line px-6 py-3 font-semibold text-accent-ink transition-colors hover:bg-accent-soft">
           Save
         </button>
         {status === 'saved' && <span className="eyebrow text-accent-ink">Saved</span>}
