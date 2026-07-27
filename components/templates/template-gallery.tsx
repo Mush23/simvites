@@ -103,7 +103,7 @@ export function TemplateGallery({
                     ))}
                   </span>
                   {applied && (
-                    <span className="rounded-pill bg-selected-soft px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.09em] text-selected">
+                    <span className="rounded-pill bg-selected-soft px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.09em] text-ink">
                       In use
                     </span>
                   )}

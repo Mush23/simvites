@@ -154,7 +154,7 @@ export function StdEditor({ record, events, defaultNames }: {
             {events.map((e, i) => (
               <button key={e.id} type="button" onClick={() => toggleEvent(e.id)}
                 className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[13px] transition-colors ${
-                  eventIds.includes(e.id) ? 'border-accent bg-accent-soft text-accent-ink' : 'border-line text-ink-2 hover:border-line-2'}`}>
+                  eventIds.includes(e.id) ? 'border-selected-line bg-selected-soft text-ink' : 'border-line text-ink-2 hover:border-line-2'}`}>
                 {/* Ramp fallback here only — the card itself is guest-layer and
                     keeps falling back to its own chosen palette accent. */}
                 <span className="h-2 w-2 rounded-full" style={{ background: eventColor(e.accent, i) }} />

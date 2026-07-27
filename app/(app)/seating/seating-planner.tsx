@@ -168,11 +168,11 @@ export function SeatingPlanner({ tables, seats, guests, events, floorplans }: {
               </div>
               <div className="flex items-center gap-1">
                 <button type="button" title="Round table" onClick={async () => { await setTableShape(sel.id, 'round'); refresh() }}
-                  className={`flex h-7 w-7 items-center justify-center rounded-md ${sel.shape === 'round' ? 'bg-accent-soft text-accent-ink' : 'text-ink-3 hover:bg-surface-2'}`}>
+                  className={`flex h-7 w-7 items-center justify-center rounded-md ${sel.shape === 'round' ? 'bg-selected-soft text-ink' : 'text-ink-3 hover:bg-surface-2'}`}>
                   <Circle size={14} strokeWidth={1.8} />
                 </button>
                 <button type="button" title="Long table" onClick={async () => { await setTableShape(sel.id, 'rect'); refresh() }}
-                  className={`flex h-7 w-7 items-center justify-center rounded-md ${sel.shape === 'rect' ? 'bg-accent-soft text-accent-ink' : 'text-ink-3 hover:bg-surface-2'}`}>
+                  className={`flex h-7 w-7 items-center justify-center rounded-md ${sel.shape === 'rect' ? 'bg-selected-soft text-ink' : 'text-ink-3 hover:bg-surface-2'}`}>
                   <Square size={14} strokeWidth={1.8} />
                 </button>
                 <button type="button" title="Delete table"

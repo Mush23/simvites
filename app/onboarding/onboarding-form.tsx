@@ -71,9 +71,9 @@ export function OnboardingForm({ templates, preselect }: { templates: TemplateLi
         <div className="grid gap-2.5 sm:grid-cols-2">
           {shown.map((t, i) => (
             <label key={t.key}
-              className="group flex cursor-pointer flex-col gap-2 rounded-xl border border-line bg-surface p-3.5 transition-colors has-checked:border-accent has-checked:shadow-[0_0_0_1px_var(--accent)]">
+              className="group flex cursor-pointer flex-col gap-2 rounded-xl border border-line bg-surface p-3.5 transition-colors has-checked:border-selected-line has-checked:shadow-[0_0_0_1px_var(--selected-line)]">
               <span className="flex items-center gap-2">
-                <input type="radio" name="template" value={t.key} defaultChecked={i === checkedIx} className="accent-[var(--accent)]" />
+                <input type="radio" name="template" value={t.key} defaultChecked={i === checkedIx} className="accent-[var(--selected)]" />
                 <span className="font-display text-[15px] text-ink">{t.name}</span>
                 <span className="ml-auto flex gap-1">
                   {t.swatches.map((c) => (
@@ -104,7 +104,7 @@ export function OnboardingForm({ templates, preselect }: { templates: TemplateLi
         <div className="flex flex-wrap gap-2">
           {STARTER_EVENTS.map((name) => (
             <label key={name}
-              className="flex min-h-9 cursor-pointer items-center gap-2 rounded-full border border-line bg-surface px-3.5 text-[13px] text-ink transition-colors has-checked:border-accent has-checked:bg-accent-soft">
+              className="flex min-h-9 cursor-pointer items-center gap-2 rounded-full border border-line bg-surface px-3.5 text-[13px] text-ink transition-colors has-checked:border-selected-line has-checked:bg-selected-soft">
               <input type="checkbox" name="events" value={name} defaultChecked={PRESELECTED.has(name)}
                 className="accent-[var(--accent)]" />
               {name}

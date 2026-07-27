@@ -88,7 +88,7 @@ function PagesPanel() {
       <p className="microlabel mb-2">Your pages</p>
       {pages.map((p) => (
         <div key={p.id} className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm ${
-          p.id === pageId ? 'bg-accent-soft text-accent-ink' : 'text-ink hover:bg-paper-2'}`}>
+          p.id === pageId ? 'bg-selected-soft text-ink' : 'text-ink hover:bg-paper-2'}`}>
           <button type="button" className="rounded-md min-w-0 flex-1 truncate text-left"
             onClick={() => { router.push(`/website?page=${p.id}`); router.refresh() }}>
             {p.title}{p.is_home && <span className="ml-1.5 font-sans text-[9px] uppercase tracking-wider text-ink-3">home</span>}

@@ -183,7 +183,12 @@
 
   --selected: #6980E8;
   --selected-soft: #1A2145;
-  --selected-line: #3B5BDB;
+  /* LIGHTER than --selected here, not darker. On the light theme the line is a
+     deeper indigo because it sits on white; mirroring that on navy put a dark
+     border on a dark surface — 2.99:1, under the 3:1 that non-text UI needs.
+     A border has to be visible against the ground it is drawn on, and on dark
+     that means going up, not down. */
+  --selected-line: #7C90EC;
 
   --shadow: 0 1px 2px rgba(2, 6, 16, 0.5);
   --shadow-lg: 0 40px 90px -20px rgba(2, 6, 16, 0.7);

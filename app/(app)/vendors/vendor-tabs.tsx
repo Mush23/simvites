@@ -19,7 +19,7 @@ export function VendorTabs({ pipeline, recommendations, recommendationCount }: {
       {label}
       {badge != null && (
         <span className={`rounded-full px-1.5 py-px font-mono text-[9.5px] font-semibold ${
-          tab === id ? 'bg-accent-soft text-accent-ink' : 'bg-surface-2 text-ink-3'}`}>{badge}</span>
+          tab === id ? 'bg-surface-2 text-ink' : 'bg-surface-2 text-ink-3'}`}>{badge}</span>
       )}
     </button>
   )

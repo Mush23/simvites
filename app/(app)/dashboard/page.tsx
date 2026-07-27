@@ -48,7 +48,7 @@ function GettingStarted({ r, theme, editedSite }: { r: Readiness; theme: SiteSty
             <li key={s.title}
               className={`rounded-[10px] border p-3 ${
                 s.done ? 'border-line bg-paper opacity-60'
-                : isCurrent ? 'border-accent bg-accent-soft'
+                : isCurrent ? 'border-selected-line bg-selected-soft'
                 : 'border-line bg-paper'
               }`}>
               {/* "You are here" is a state marker, so it goes ink — the step's

@@ -176,7 +176,7 @@ export function GuestManager({
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => setLensId('all')}
             className={`min-w-[124px] flex-1 rounded-card border px-3 py-2.5 text-left transition-colors sm:flex-none ${
-              lensId === 'all' ? 'border-accent bg-accent-soft shadow-card' : 'border-line bg-surface hover:border-line-2'}`}>
+              lensId === 'all' ? 'border-selected-line bg-selected-soft shadow-card' : 'border-line bg-surface hover:border-line-2'}`}>
             <span className="text-[12px] font-semibold text-ink">All events</span>
             <span className="mt-0.5 block font-mono text-[9.5px] text-ink-3 nums">{totalGuests} guests</span>
           </button>
@@ -185,7 +185,7 @@ export function GuestManager({
             return (
               <button key={e.id} type="button" onClick={() => setLensId(lensId === e.id ? 'all' : e.id)}
                 className={`min-w-[124px] flex-1 rounded-card border px-3 py-2.5 text-left transition-colors sm:flex-none ${
-                  lensId === e.id ? 'border-accent bg-accent-soft shadow-card' : 'border-line bg-surface hover:border-line-2'}`}>
+                  lensId === e.id ? 'border-selected-line bg-selected-soft shadow-card' : 'border-line bg-surface hover:border-line-2'}`}>
                 <span className="flex items-center gap-1.5 text-[12px] font-semibold text-ink">
                   <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: e.accent }} />
                   {e.name}
