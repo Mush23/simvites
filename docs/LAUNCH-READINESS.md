@@ -123,7 +123,7 @@ valuable suites (`test:isolation`, `test:rsvp`) are manual and need a live
 Supabase, so in practice they run rarely. At minimum wire them to a seeded test
 project on a schedule.
 
-### 10a. A removed block type silently blanks published sites — NEW, unfixed
+### 10a. A removed block type silently blanks published sites — FIXED
 Found while testing the error boundary below. Puck's `Render` **silently drops**
 content entries whose `type` is not in `siteConfig` — no error, no placeholder.
 A snapshot referencing `BlockThatNoLongerExists` rendered `[data-site-root]`
@@ -134,11 +134,27 @@ Published snapshots are immutable and can be months old, so the first time a
 block is renamed or retired, every site using it quietly loses that section —
 and if it was the only block, the whole page. Nobody is told.
 
-**Suggested:** never remove a block type; keep a tombstone renderer that emits
-nothing visible but logs. Failing that, validate snapshot block types against
-`siteConfig` at publish time and refuse, so the breakage surfaces to the host
-rather than to guests. *Verified by publishing an unknown block type and
-loading the site.*
+**Fixed** with a tombstone renderer. `normaliseDoc()` in `lib/puck/config.tsx`
+rewrites any block whose type is not in `siteConfig` — and any malformed entry —
+to a `RetiredBlock`, which:
+
+- renders **nothing** for guests (the content is genuinely gone; it cannot be
+  conjured back) while the rest of the page survives intact
+- renders a **deletable notice for the host** in the editor, naming the original
+  block type, so the gap is discoverable and fixable
+- **logs server-side**, naming the site and every offending type
+
+All three render paths go through it — the published home page, published
+sub-pages, and the editor. In the editor this is a real migration: the host's
+next save persists the tombstone in place of the dead type, turning an invisible
+landmine into a visible one.
+
+*Verified against a production build with a snapshot mixing a real block, an
+unknown type and a `null`: both real blocks rendered (including the one AFTER
+the bad entries), no error page, nothing leaked to guests, and the server logged
+`2 block(s) no longer in siteConfig — BlockThatNoLongerExists, (malformed
+entry)`. The host-facing notice is unverified — it only renders in the editor,
+which is behind auth.*
 
 ### 10. Wedding guests see Simvites branding on an error — FIXED
 `app/error.tsx` is the root boundary, so it also catches failures on the couple's

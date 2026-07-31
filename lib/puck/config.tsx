@@ -39,6 +39,8 @@ interface GalleryProps { heading: string; images: { url: string; caption: string
 interface HotelProps { heading: string; hotelName: string; address: string; blockCode: string; phone: string; bookingUrl: string; notes: string }
 interface GiftsProps { heading: string; body: string }
 type FreeformBlockProps = FreeformProps
+/** Tombstone for a block type that no longer exists — see normaliseDoc. */
+interface RetiredBlockProps { originalType: string }
 
 export interface SiteBlocks {
   Hero: HeroProps
@@ -55,6 +57,7 @@ export interface SiteBlocks {
   GiftsNote: GiftsProps
   FreeformBlock: FreeformBlockProps
   SiteFooterBlock: FooterProps
+  RetiredBlock: RetiredBlockProps
 }
 
 // `inline: true` = editable by clicking the text ON the canvas (Sprint B).
@@ -302,7 +305,42 @@ export const siteConfig: Config<SiteBlocks> = {
       defaultProps: { names: 'Aanya & Dev', note: `Made with ${BRAND_NAME}` },
       render: (p) => <SiteFooter {...p} />,
     },
+    // Tombstone. Never inserted by a host — normaliseDoc() swaps it in for any
+    // block whose type is no longer in this config. Guests get nothing (the
+    // content is genuinely gone and cannot be conjured back); the HOST gets a
+    // visible, deletable marker so the gap is discoverable rather than silent.
+    RetiredBlock: {
+      label: 'Retired section',
+      // Puck requires a field per prop. Shown but not useful to edit — it is a
+      // record of what used to be here.
+      fields: { originalType: text('Original block type') },
+      defaultProps: { originalType: 'unknown' },
+      render: (p) => {
+        const editing = (p.puck as { isEditing?: boolean } | undefined)?.isEditing
+        // Guests get an empty fragment, not null: Puck types render as Element.
+        if (!editing) return <></>
+        return <RetiredNotice originalType={String(p.originalType ?? 'unknown')} />
+      },
+    },
   },
+}
+
+/** Host-only marker for a block whose type this build no longer knows. */
+function RetiredNotice({ originalType }: { originalType: string }) {
+  return (
+    <div style={{
+      margin: '12px auto', maxWidth: 640, padding: '14px 16px',
+      border: '1px dashed var(--line-2)', borderRadius: 12,
+      background: 'var(--paper-2)', color: 'var(--ink-2)',
+      fontFamily: 'var(--font-sans)', fontSize: 13, lineHeight: 1.5, textAlign: 'center',
+    }}>
+      <strong style={{ color: 'var(--ink)' }}>This section is no longer available</strong>
+      <div style={{ marginTop: 4 }}>
+        It used to be a <code style={{ fontFamily: 'var(--font-mono)' }}>{originalType}</code> block.
+        Your guests see nothing here — delete it, or add a new section in its place.
+      </div>
+    </div>
+  )
 }
 
 // ── Sprint A injection: EVERY block gains the Style group (5 variants +
@@ -358,13 +396,61 @@ export function isRenderableDoc(doc: unknown): doc is SiteData {
 }
 
 /**
+ * Replace blocks this build cannot render with a tombstone.
+ *
+ * Published snapshots are IMMUTABLE and can be months old, so they outlive the
+ * block library. Puck's Render silently drops content whose `type` is not in
+ * the config: rename or retire a block and every site using it quietly loses
+ * that section — the whole page, if it was the only one — with nobody told.
+ * A malformed entry (a null in `content`) is worse still, and throws.
+ *
+ * Both become a RetiredBlock here: the rest of the page survives, the host sees
+ * a deletable marker in the editor, and the original type name is preserved so
+ * the loss is legible rather than mysterious.
+ *
+ * Note this is a real migration when it runs in the EDITOR — the host's next
+ * save persists `RetiredBlock` in place of the dead type. That is intended: it
+ * turns an invisible landmine into a visible, fixable one.
+ */
+export function normaliseDoc(doc: SiteData): { doc: SiteData; retired: string[] } {
+  const known = new Set(Object.keys(siteConfig.components))
+  const retired: string[] = []
+
+  const content = doc.content.map((block, i) => {
+    const type = (block as { type?: string } | null)?.type
+    if (type && known.has(type)) return block
+    retired.push(type ?? '(malformed entry)')
+    // Reuse the original id where there is one so React keys stay stable.
+    const id = (block as { props?: { id?: string } } | null)?.props?.id ?? `retired-${i}`
+    return { type: 'RetiredBlock', props: { id, originalType: type ?? 'unknown' } }
+  })
+
+  return { doc: { ...doc, content: content as SiteData['content'] }, retired }
+}
+
+/**
  * The document to render for a page, matching what the editor shows for the
  * same row — the home page falls back to the template starter, other pages
  * render blank, and neither can throw.
+ *
+ * `label` only appears in the warning when something had to be tombstoned.
  */
-export function docForPage(doc: unknown, isHome: boolean, starter: SiteData): SiteData {
-  if (isRenderableDoc(doc) && doc.content.length > 0) return doc
-  return isHome ? starter : EMPTY_DOC
+export function docForPage(
+  doc: unknown,
+  isHome: boolean,
+  starter: SiteData,
+  label = 'page',
+): SiteData {
+  const base = isRenderableDoc(doc) && doc.content.length > 0 ? doc : isHome ? starter : EMPTY_DOC
+  const { doc: safe, retired } = normaliseDoc(base)
+  if (retired.length) {
+    // Loud on the server so this reaches logs rather than only the host's eye.
+    console.warn(
+      `[site] ${label}: ${retired.length} block(s) no longer in siteConfig — ` +
+      `rendered as tombstones: ${retired.join(', ')}`,
+    )
+  }
+  return safe
 }
 
 // Starter document for a new site's home page.

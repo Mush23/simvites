@@ -1,16 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
-import { type SiteData } from '@/lib/puck/config'
+import { docForPage, type SiteData } from '@/lib/puck/config'
 import type { SiteEvent } from '@/components/site/blocks'
 import { WebsiteEditor, type EditorPage } from './website-editor'
 import { BRAND_NAME } from '@/lib/brand'
 
 export const metadata = { title: `Website · ${BRAND_NAME}` }
-
-function isEmpty(doc: unknown): boolean {
-  const d = doc as SiteData | null
-  return !d || !Array.isArray(d.content) || d.content.length === 0
-}
 
 export default async function WebsitePage({
   searchParams,
@@ -51,9 +46,16 @@ export default async function WebsitePage({
   const { siteStyleProps } = await import('@/lib/site-style')
   const template = getTemplate(templateKey)
   // Only the HOME page inherits the template starter — new pages start blank.
-  const data: SiteData = isEmpty(page.puck_data)
-    ? (page.is_home ? template.starterDoc : { root: { props: {} }, content: [] })
-    : (page.puck_data as SiteData)
+  // Routed through docForPage so the editor and the published site agree, and
+  // so a block type this build no longer knows becomes a visible tombstone here
+  // rather than silently vanishing. This is the surface where a host can act on
+  // it; their next save persists the tombstone in place of the dead type.
+  const data: SiteData = docForPage(
+    page.puck_data,
+    page.is_home,
+    template.starterDoc,
+    `editor:${page.slug}`,
+  )
   const events: SiteEvent[] = (eventRows ?? []) as SiteEvent[]
 
   // Does the draft differ from what guests can actually see? Compared against

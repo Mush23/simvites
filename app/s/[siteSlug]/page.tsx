@@ -46,7 +46,7 @@ export default async function PublicSitePage({
   // starterDoc diverged for every template except the default.
   const { getTemplate } = await import('@/lib/templates/registry')
   const template = getTemplate((snap.theme as { template?: string } | null)?.template)
-  const data = docForPage(home?.puck_data, Boolean(home?.is_home), template.starterDoc)
+  const data = docForPage(home?.puck_data, Boolean(home?.is_home), template.starterDoc, `site:${siteSlug}`)
 
   // Personalised greeting: if this visitor followed their invite link, greet
   // their household by name (cookie → household, server-side only).

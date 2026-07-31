@@ -28,7 +28,7 @@ export default async function PublicPage({
         <SiteNav pages={snap.pages} theme={snap.theme} currentSlug={pageSlug} />
         {/* A sub-page with no content renders blank, never the wedding starter
             (new pages are deliberately created empty) — and never throws. */}
-        <Render config={siteConfig} data={docForPage(page.puck_data, false, EMPTY_DOC)}
+        <Render config={siteConfig} data={docForPage(page.puck_data, false, EMPTY_DOC, `site:${siteSlug}/${pageSlug}`)}
           metadata={{ events: snap.events }} />
       </div>
     </div>
