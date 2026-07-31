@@ -6,7 +6,7 @@
 // Env: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SMS_FROM (E.164),
 //      TWILIO_WHATSAPP_FROM (E.164, without the "whatsapp:" prefix).
 
-import { createHmac } from 'node:crypto'
+import { createHmac, timingSafeEqual } from 'node:crypto'
 
 export function smsConfigured() {
   return !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_SMS_FROM)
@@ -59,11 +59,22 @@ export async function sendMessage(opts: {
  * signs the full URL + sorted POST params with the auth token. Returns true
  * if no auth token is set (dev) so local testing works.
  */
+/**
+ * Verify Twilio's X-Twilio-Signature.
+ *
+ * Fails closed in production: an unset auth token used to return `true`, which
+ * accepted ANY unsigned POST — forged inbound messages would appear in a
+ * couple's inbox attributed to a real guest's number. Skipping the check is
+ * only tolerable locally, where there is no tunnel to sign against.
+ */
 export function validateTwilioSignature(url: string, params: Record<string, string>, signature: string | null): boolean {
   const token = process.env.TWILIO_AUTH_TOKEN
-  if (!token) return true
+  if (!token) return process.env.NODE_ENV !== 'production'
   if (!signature) return false
   const data = url + Object.keys(params).sort().map((k) => k + params[k]).join('')
   const expected = createHmac('sha1', token).update(Buffer.from(data, 'utf-8')).digest('base64')
-  return expected === signature
+  // Constant-time: a plain === on an HMAC leaks its prefix through timing.
+  const a = Buffer.from(expected)
+  const b = Buffer.from(signature)
+  return a.length === b.length && timingSafeEqual(a, b)
 }

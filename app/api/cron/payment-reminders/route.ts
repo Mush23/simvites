@@ -14,11 +14,17 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET
-  if (secret) {
-    const auth = req.headers.get('authorization')
-    if (auth !== `Bearer ${secret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Fail closed. The check used to be wrapped in `if (secret)`, so an unset
+  // variable skipped authentication entirely and left this endpoint open —
+  // anyone knowing the path could fire payment-reminder emails at a couple's
+  // vendors, as often as they liked. Unauthenticated is only tolerable locally.
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[cron] CRON_SECRET is not set — refusing to run unauthenticated.')
+      return NextResponse.json({ error: 'Cron is not configured.' }, { status: 503 })
     }
+  } else if (req.headers.get('authorization') !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const db = createAdminClient()

@@ -1,0 +1,174 @@
+# Launch readiness — end-to-end review
+
+Reviewed 2026-07-27 against `e0287b8`. Findings are grouped by whether they
+block a real customer, and each says how it was established so nothing here has
+to be taken on trust.
+
+**Method note.** Everything marked *verified* was checked against running code or
+measured. Everything marked *unverified* is a reasoned concern I could not
+confirm, mostly because the authenticated screens were never opened. That
+distinction matters: the one bug that actually reached users this cycle
+(publishing an unedited page served an error to guests) passed typecheck, build
+and review, and only surfaced when something was published and looked at.
+
+---
+
+## What is genuinely solid
+
+Worth stating plainly, because the list below is all problems.
+
+- **Tenancy isolation.** All 34 tables have RLS enabled, 32 policies. Verified
+  by parsing every migration, including the `DO`-block loop that enables it for
+  19 tables at once. There is a dedicated 2-org isolation test that signs in as
+  a real user under RLS and proves cross-tenant reads fail.
+- **Guest token handling.** Raw tokens are never stored — only
+  `sha256(TOKEN_PEPPER + raw)` — and `lib/tokens.ts` throws rather than hash
+  without the pepper. Guest sessions are HMAC-signed with `timingSafeEqual`.
+- **RSVP correctness.** `scripts/test-rsvp.mjs` covers invite-gating,
+  resubmission, capacity including a concurrent race, deadlines, archived
+  guests and question validation. This is the crown-jewel logic and it is tested.
+- **Idempotent webhooks.** Stripe events are deduped via `webhook_events` on a
+  unique provider + event id.
+- **No dead TODOs.** Zero `TODO`/`FIXME`/`HACK` across `app`, `components`, `lib`.
+- **Design system.** Colour is coherent and measured: one accent per screen,
+  indigo selection, ink navigation state, status with dedicated `-text` tokens,
+  a categorical event ramp, a z-scale. Contrast verified in light, dark and
+  admin themes.
+
+---
+
+## P0 — blocks launch
+
+> **Items 1–4 are FIXED** (see the commit that added this file). All three
+> endpoints were re-tested against a real `next start` production build with no
+> secrets set — Stripe `503`, cron `503`, Twilio `403` — while the local
+> development path still returns `200`. The descriptions are kept because the
+> *pattern* is the lesson: a dev convenience that keys off "is the secret set?"
+> becomes a production hole the moment config drifts.
+
+### 1. Stripe webhook accepts unsigned payloads if the secret is unset — FIXED
+`app/api/stripe/webhook/route.ts` verifies the signature **only when**
+`STRIPE_WEBHOOK_SECRET` is present; otherwise it `JSON.parse`s the body and
+trusts it. That is a deliberate dev convenience, but in production a missing env
+var silently turns into a **paywall bypass** — anyone can POST a
+`checkout.session.completed` with a `site_id` and unlock a site for free.
+
+**Fix:** gate the unsigned branch on `process.env.NODE_ENV !== 'production'`, or
+fail closed when the secret is absent. *Verified by reading the route.*
+
+### 2. Cron endpoint is open if `CRON_SECRET` is unset — FIXED
+`app/api/cron/payment-reminders/route.ts` wraps the auth check in `if (secret)`.
+With the variable unset the check is skipped entirely, so anyone who knows the
+path can trigger payment-reminder emails to a couple's vendors, repeatedly.
+
+**Fix:** invert it — reject when the secret is missing. *Verified by reading
+lines 15–22.*
+
+### 3. Twilio webhook signature check is a no-op without the auth token — FIXED
+Same pattern, lower blast radius: forged inbound SMS/WhatsApp messages appear in
+a couple's inbox. **Fix:** fail closed in production.
+
+### 4. `.env.example` is missing five variables the code reads — FIXED
+Verified by diffing `process.env.*` across `app`, `lib`, `scripts` against the file:
+
+| Variable | Consequence if unset |
+|---|---|
+| `TOKEN_PEPPER` | **App throws on the first invite link generated.** Correct behaviour, but undocumented, so a fresh deploy breaks at the worst moment |
+| `NEXT_PUBLIC_BASE_DOMAIN` | Settings advertises the wrong address to couples |
+| `UNSPLASH_ACCESS_KEY` | Photo search silently degrades to Openverse |
+| `NEXT_PUBLIC_POSTHOG_KEY` / `_HOST` | No analytics — the launch funnel is invisible |
+
+### 5. No privacy policy, terms, or cookie notice
+No `/privacy` or `/terms` route exists, and nothing in the marketing footer links
+to one. This is a paid UK product storing named guests, emails, phone numbers and
+dietary requirements — i.e. personal and special-category data for people who
+never signed up themselves. **This is a legal gate, not a polish item.**
+
+### 6. No favicon or app icon
+No `favicon.ico`, `icon.tsx`, or `icon.png`. Every browser tab — including the
+couple's published wedding site — shows the default globe.
+
+### 7. Nothing behind auth has been visually verified
+The entire design overhaul (11 commits) is typechecked, built and colour-measured
+but **never opened**. Highest-risk screens, because they are dense and changed
+most:
+- **Guest list** — the invite matrix moved to a new status scale; labels went to
+  12px inside a fixed-width grid (a 56px side column) where wrapping is plausible
+- **Website editor** — dock panels now share the right rail with the section
+  inspector; the "inspector steps aside" behaviour has never been observed
+- **Settings → Connections**, the three merged tab bars, the seeded Templates gallery
+
+---
+
+## P1 — fix before you take real money
+
+### 8. Linting does not run, anywhere
+`npm run lint` fails: `next lint` was removed in this Next version, so the script
+is dead. CI does not lint either. The project has had **no lint pass at all**
+during the whole design overhaul. *Verified — the command errors.*
+
+### 9. CI does not run the tests
+`.github/workflows/ci.yml` runs typecheck + build only. The two genuinely
+valuable suites (`test:isolation`, `test:rsvp`) are manual and need a live
+Supabase, so in practice they run rarely. At minimum wire them to a seeded test
+project on a schedule.
+
+### 10. Wedding guests see Simvites branding on an error
+`app/error.tsx` is the root boundary, so it also catches failures on the couple's
+published site — and it renders the Simvites wordmark plus "Something went
+wrong." A guest opening their invitation should never see the vendor's brand.
+Add an error boundary under `app/s/[siteSlug]/` in the couple's own template
+voice. *Observed directly while testing the publish bug.*
+
+### 11. No `global-error.tsx`
+An error thrown in the root layout is unhandled.
+
+### 12. No `robots.txt` or `sitemap.xml`
+The marketing site cannot be indexed properly, and — more importantly —
+**published wedding sites have no crawl policy.** Many couples would consider
+their site being indexed a privacy problem. Decide deliberately and state it.
+
+### 13. Rate limiting is per-instance memory
+`lib/rate-limit.ts` is honest about this in its own comment. On serverless each
+warm instance keeps a separate window, so the effective limit is
+`max × instances`. Fine at launch volume; move to Upstash before any marketing push.
+
+### 14. The `newbie@occasio.test` review account still exists
+Not created by any seed script, so it must be recreated by hand as
+`newbie@simvites.test`. Every `Occasio` string in the codebase is gone; this one
+lives only in the database.
+
+---
+
+## P2 — weak or unproven, not blocking
+
+- **Assistant and Messaging are unproven.** Both degrade gracefully when
+  unconfigured (verified — good empty states), but neither has been exercised
+  with real keys. They are the two features most likely to disappoint.
+- **Accessibility is only half-checked.** Colour contrast is measured and passing
+  throughout. Keyboard order, focus management in the editor's floating panels,
+  and screen-reader labelling are **unaudited**. The preview shell traps focus
+  correctly; nothing else has been checked.
+- **Responsive behaviour is unverified** beyond the marketing page. The invite
+  matrix is a wide fixed grid and is the most likely thing to break on a phone.
+- **No monitoring.** No Sentry or equivalent, so a production error surfaces only
+  if a couple reports it.
+- **No backup/restore story** for a couple's data. `published_versions` gives
+  site-content history, but guests, RSVPs and budget have no user-facing undo.
+- **`ComingSoon` in `components/app/ui.tsx` is dead code** — zero usages.
+- **Two design judgement calls** left deliberately open: dark-mode danger sits
+  0.120 OKLab from the accent (the measured ceiling for a legible red on navy,
+  vs 0.169 in light), and micro-labels use 12px/11px rather than a single size.
+
+---
+
+## Suggested order
+
+1. ~~Three webhook/cron fail-closed fixes (#1–3)~~ **done**
+2. ~~`.env.example` (#4)~~ **done** — a deploy checklist is still worth writing
+3. **Legal pages** (#5) — needs a decision and probably a template, so start early
+4. **Click-through of guest list + editor** (#7) — the only way to find what
+   review cannot
+5. **Favicon** (#6), **guest error page** (#10), **robots decision** (#12)
+6. **Fix lint, add it to CI** (#8–9)
+7. Everything in P2 as capacity allows

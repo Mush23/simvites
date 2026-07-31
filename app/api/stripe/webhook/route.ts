@@ -5,20 +5,33 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { track } from '@/lib/analytics'
 
 /**
- * Stripe webhook (handoff route map). Signature-verified when
- * STRIPE_WEBHOOK_SECRET is set (in dev without a secret it accepts unsigned
- * JSON so the flow is testable). Idempotent via webhook_events (unique on
+ * Stripe webhook (handoff route map). Idempotent via webhook_events (unique on
  * provider + event id). checkout.session.completed → sites.is_unlocked.
+ *
+ * SIGNATURE VERIFICATION IS MANDATORY IN PRODUCTION. The unsigned path exists
+ * only so the flow is testable locally without a Stripe CLI tunnel. It used to
+ * be reached whenever the secret was absent, for any environment — which meant
+ * one missing env var in production turned this endpoint into a paywall bypass:
+ * anyone could POST a checkout.session.completed carrying a site_id and unlock
+ * a site for free. Missing config now fails closed instead.
  */
 export async function POST(request: NextRequest) {
   const raw = await request.text()
   const stripe = getStripe()
   const secret = process.env.STRIPE_WEBHOOK_SECRET
+  const signed = Boolean(stripe && secret)
+
+  if (!signed && process.env.NODE_ENV === 'production') {
+    // 503, not 400: the caller did nothing wrong — we are misconfigured, and
+    // Stripe will retry, so the events are not lost once the secret is set.
+    console.error('[stripe] STRIPE_WEBHOOK_SECRET is not set — refusing unsigned webhooks.')
+    return NextResponse.json({ error: 'Webhook not configured.' }, { status: 503 })
+  }
 
   let event: Stripe.Event
-  if (stripe && secret) {
+  if (signed) {
     try {
-      event = stripe.webhooks.constructEvent(raw, request.headers.get('stripe-signature') ?? '', secret)
+      event = stripe!.webhooks.constructEvent(raw, request.headers.get('stripe-signature') ?? '', secret!)
     } catch (e) {
       return NextResponse.json({ error: `signature: ${e instanceof Error ? e.message : 'invalid'}` }, { status: 400 })
     }
