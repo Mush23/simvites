@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
-import { track } from '@/lib/analytics'
 import type { SiteData } from '@/lib/puck/config'
 
 /**

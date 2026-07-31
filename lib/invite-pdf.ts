@@ -84,7 +84,7 @@ export async function downloadInvitePdf(opts: {
   doc.setTextColor(...DEEP)
   centered('R E Q U E S T   T H E   P L E A S U R E   O F   Y O U R   C O M P A N Y', 78)
 
-  let y = 89
+  const y = 89
   doc.setFont('times', 'italic')
   doc.setFontSize(17)
   doc.setTextColor(...INK)

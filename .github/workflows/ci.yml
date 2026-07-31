@@ -20,6 +20,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Fails on any ESLint ERROR, and on more than the 36 warnings that
+      # existed when linting was first switched on (the budget lives in the
+      # npm script). Existing React Compiler debt can shrink, never grow.
+      - name: Lint
+        run: npm run lint
+
       - name: Typecheck
         run: npm run typecheck
 

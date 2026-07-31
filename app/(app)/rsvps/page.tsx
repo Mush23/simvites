@@ -245,12 +245,3 @@ export default async function RsvpsPage() {
   )
 }
 
-function Stat({ label, value, tone }: { label: string; value: number; tone: 'ok' | 'bad' | 'warn' }) {
-  const toneClass = { ok: 'text-ok', bad: 'text-bad', warn: 'text-warn' }[tone]
-  return (
-    <div className="rounded-md bg-paper-2 py-3">
-      <p className={`font-mono text-[22px] font-semibold tracking-tight nums ${toneClass}`}>{value}</p>
-      <p className="eyebrow mt-1">{label}</p>
-    </div>
-  )
-}

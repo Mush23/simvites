@@ -102,10 +102,20 @@ most:
 
 ## P1 — fix before you take real money
 
-### 8. Linting does not run, anywhere
-`npm run lint` fails: `next lint` was removed in this Next version, so the script
-is dead. CI does not lint either. The project has had **no lint pass at all**
-during the whole design overhaul. *Verified — the command errors.*
+### 8. Linting does not run, anywhere — FIXED
+`npm run lint` failed: `next lint` was removed in this Next version, so the
+script was dead and there was no ESLint config or dependency at all — the
+project had **never been linted**.
+
+Now ESLint 9 flat config (`eslint.config.mjs`) with `eslint-config-next` 16,
+wired into CI. The first run surfaced 43 problems; 7 were clean fixes and are
+done. The remaining **36 are React Compiler rules** (21 components declared
+inside other components, plus set-state-in-effect, purity and ref-during-render)
+and are held as **budgeted warnings**: `npm run lint` fails above 36, so the
+debt can shrink but never grow. Clearing it means hoisting components out of
+their parents in the website editor and admin directory — a real refactor in the
+least-verifiable code, not a lint tidy-up, so it is deliberately deferred rather
+than silenced.
 
 ### 9. CI does not run the tests
 `.github/workflows/ci.yml` runs typecheck + build only. The two genuinely
@@ -187,5 +197,5 @@ lives only in the database.
 4. **Click-through of guest list + editor** (#7) — the only way to find what
    review cannot
 5. ~~Favicon (#6), guest error page (#10)~~ **done** — **robots decision (#12)** and the block-tombstone question (#10a) remain
-6. **Fix lint, add it to CI** (#8–9)
+6. ~~Fix lint, add it to CI (#8)~~ **done** — **wiring the two test suites into CI (#9)** remains
 7. Everything in P2 as capacity allows

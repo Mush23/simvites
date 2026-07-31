@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --max-warnings=36",
     "typecheck": "tsc --noEmit",
     "db:apply": "node --env-file=.env.local scripts/db-apply.mjs",
     "db:verify": "node --env-file=.env.local scripts/db-verify.mjs",
@@ -35,12 +35,15 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.6",
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "22.10.7",
     "@types/pg": "^8.20.0",
     "@types/qrcode": "^1.5.6",
     "@types/react": "19.0.7",
     "@types/react-dom": "19.0.3",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.12",
     "postcss": "8.5.1",
     "tailwindcss": "^4.3.0",
     "typescript": "5.7.3"

@@ -41,6 +41,11 @@ export async function createClient() {
  * after validating the opaque invitation token.
  */
 export function createAdminClient() {
+  // Deliberately a lazy require, not a top-level import: this keeps
+  // @supabase/supabase-js out of any module graph that merely imports this file
+  // for its other exports. Making it a static import would change bundling, and
+  // a dynamic import() would force every caller to become async.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { createClient: createSupabaseClient } = require('@supabase/supabase-js')
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

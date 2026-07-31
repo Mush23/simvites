@@ -38,7 +38,7 @@ interface FamilyProps { heading: string; sides: { side: string; name: string; pa
 interface GalleryProps { heading: string; images: { url: string; caption: string }[] }
 interface HotelProps { heading: string; hotelName: string; address: string; blockCode: string; phone: string; bookingUrl: string; notes: string }
 interface GiftsProps { heading: string; body: string }
-interface FreeformBlockProps extends FreeformProps { }
+type FreeformBlockProps = FreeformProps
 
 export interface SiteBlocks {
   Hero: HeroProps

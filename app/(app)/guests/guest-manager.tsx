@@ -369,7 +369,7 @@ function EventLens({ event, households, sides, responses, tallies, openedHouseho
               <span className="flex min-w-0 flex-wrap gap-1.5">
                 {h.guests.map((g) => (
                   <GuestEventChip key={`${g.id}:${g.invitedEventIds.includes(event.id)}`}
-                    guest={g} eventId={event.id} status={respBy.get(g.id)} onChanged={onChanged} />
+                    guest={g} eventId={event.id} status={respBy.get(g.id)} />
                 ))}
               </span>
             </div>
@@ -440,11 +440,13 @@ function EventLens({ event, households, sides, responses, tallies, openedHouseho
 
 /** One guest chip in the lens: toggles the invitation for this event.
  * Pill = invited (✓ going, ✗ declined), outline = not invited. */
-function GuestEventChip({ guest, eventId, status, onChanged }: {
+// No onChanged: the chip toggles optimistically and setInvitation's own
+// revalidatePath refreshes the page, so a caller-supplied refresh was dead
+// weight — passed in but never invoked.
+function GuestEventChip({ guest, eventId, status }: {
   guest: MatrixGuest
   eventId: string
   status: string | undefined
-  onChanged: () => void
 }) {
   const initial = guest.invitedEventIds.includes(eventId)
   const [on, setOn] = useState(initial)
