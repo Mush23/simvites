@@ -5,9 +5,15 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    # Nightly, 07:00 UTC. The integration suite talks to a real database, so a
+    # regression can also arrive from Supabase's side — a schema change, an RLS
+    # policy edited in the dashboard — with no commit to trigger CI.
+    - cron: '0 7 * * *'
 
 jobs:
   verify:
+    name: Lint, typecheck, build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,3 +42,62 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
           NEXT_PUBLIC_ROOT_DOMAIN: simvites.co.uk
+
+  integration:
+    name: Integration tests (live Supabase)
+    runs-on: ubuntu-latest
+    # Only worth the database round-trips once the cheap checks are green.
+    needs: verify
+    env:
+      # ⚠ Point these at a DEDICATED TEST PROJECT, never production. Both suites
+      # run with the service-role key and CREATE AND DELETE organisations and
+      # auth users. They scope their cleanup to rows they made, but a
+      # service-role key in CI should never address real couples' data.
+      #
+      # Required repo secrets:
+      #   TEST_SUPABASE_URL
+      #   TEST_SUPABASE_ANON_KEY           (isolation test signs in as a user,
+      #                                     so RLS is exercised for real)
+      #   TEST_SUPABASE_SERVICE_ROLE_KEY
+      # The project needs the migrations applied first: npm run db:apply.
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Secrets are unavailable to pull requests from forks, so this job must
+      # not hard-fail there. It skips with a VISIBLE notice rather than passing
+      # quietly — a green tick that ran nothing is worse than no job at all.
+      - name: Are test credentials configured?
+        id: creds
+        run: |
+          if [ -n "$NEXT_PUBLIC_SUPABASE_URL" ] \
+            && [ -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ] \
+            && [ -n "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Integration tests skipped::TEST_SUPABASE_URL, TEST_SUPABASE_ANON_KEY and TEST_SUPABASE_SERVICE_ROLE_KEY are not set on this repo (expected on fork PRs). See docs/LAUNCH-READINESS.md."
+          fi
+
+      - name: Install dependencies
+        if: steps.creds.outputs.ok == 'true'
+        run: npm ci
+
+      # Signs in as a real user under RLS and proves one org cannot read or
+      # write another's rows. The single most important thing in the product.
+      - name: Tenant isolation (RLS)
+        if: steps.creds.outputs.ok == 'true'
+        run: npm run test:isolation
+
+      # Invite-gating, resubmission, capacity (including a concurrent race),
+      # deadlines, archived guests, question validation.
+      - name: RSVP correctness
+        if: steps.creds.outputs.ok == 'true'
+        run: npm run test:rsvp
