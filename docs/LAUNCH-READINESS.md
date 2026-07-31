@@ -26,9 +26,9 @@ Worth stating plainly, because the list below is all problems.
   without the pepper. Guest sessions are HMAC-signed with `timingSafeEqual`.
 - **RSVP correctness is well TESTED** — `scripts/test-rsvp.mjs` covers
   invite-gating, resubmission, capacity including a concurrent race, deadlines,
-  archived guests and question validation. 13 of its 15 assertions pass. The
-  other two do not: see 4a, which those tests found the first time anyone ran
-  them. The suite is excellent; the code under it regressed.
+  archived guests and question validation. All 15 assertions pass — though two of
+  them did not until 4a, a regression these tests caught the first time anyone
+  ran them.
 - **Idempotent webhooks.** Stripe events are deduped via `webhook_events` on a
   unique provider + event id.
 - **No dead TODOs.** Zero `TODO`/`FIXME`/`HACK` across `app`, `components`, `lib`.
@@ -80,7 +80,7 @@ Verified by diffing `process.env.*` across `app`, `lib`, `scripts` against the f
 | `UNSPLASH_ACCESS_KEY` | Photo search silently degrades to Openverse |
 | `NEXT_PUBLIC_POSTHOG_KEY` / `_HOST` | No analytics — the launch funnel is invisible |
 
-### 4a. RSVP answer validation is silently disabled in the live database — NEW
+### 4a. RSVP answer validation is silently disabled in the live database — FIXED
 Found the moment the test suites were run (they had not been, which is the whole
 argument for wiring them into CI).
 
@@ -95,22 +95,31 @@ add household-allocation checks and **carried over everything except those two**
 | answer must be in the question's option list | ✓ | **dropped** |
 | required questions must be answered before attending | ✓ | **dropped** |
 
-Consequences, both live today:
+Consequences while it was live:
 
-- a guest can mark themselves **attending without answering a required
-  question** — so a couple's meal-choice or dietary numbers can be incomplete,
-  and they find out at the venue
-- an answer **outside the option list is accepted and stored**, so a fixed-choice
-  question can hold arbitrary values
+- a guest could mark themselves **attending without answering a required
+  question** — so a couple's meal-choice or dietary numbers could be incomplete,
+  and they would find out at the venue
+- an answer **outside the option list was accepted and stored**, so a
+  fixed-choice question could hold arbitrary values
 
-*Verified: `npm run test:rsvp` fails exactly two assertions —
+*How it presented: `npm run test:rsvp` failed exactly two assertions —
 `attending without required answer → rejected [no error raised]` and
 `answer outside the option list is rejected [no error raised]` — while all 13
-other assertions, including the concurrent capacity race, pass.*
+others, including the concurrent capacity race, passed. That pattern is what
+identified 0018 as the culprit: everything IT added still worked.*
 
-**Fix:** a new migration re-adding 0005's two blocks into 0018's function body.
-The SQL already exists in 0005 and can be lifted verbatim. Not done here because
-redefining a `security definer` RPC deserves review before it runs.
+**Fixed** by `0019_restore_answer_validation.sql`: 0018's body verbatim plus the
+restored guards, so everything 0018 introduced — the event row lock, the
+allocation check, the message contract — is preserved. A third loss came back
+too: 0005's `coalesce(r -> 'value', 'null'::jsonb)`, without which an entry
+posted with no `value` key hit the NOT NULL constraint on `rsvp_answers.value`.
+
+*Verified: `npm run test:rsvp` now passes all 15 assertions, including the two
+that were failing AND the 13 that were not — the concurrent capacity race and
+the conditional-question case among them, so 0018's work survived. Tenant
+isolation still passes 7/7. `db:apply` sorts filenames, so 0019 lands after 0018
+and a fresh deploy ends on the restored function.*
 
 ### 5. No privacy policy, terms, or cookie notice
 No `/privacy` or `/terms` route exists, and nothing in the marketing footer links
@@ -165,9 +174,8 @@ organisations and auth users):
     TEST_SUPABASE_ANON_KEY            # isolation signs in as a user, so RLS is real
     TEST_SUPABASE_SERVICE_ROLE_KEY
 
-Apply the migrations there first with `npm run db:apply`. Note the suites
-currently FAIL two assertions against a migrated database — see 4a; fix that
-before switching the secrets on, or the first run is red.
+Apply the migrations there first with `npm run db:apply`. Both suites pass as of 4a's fix, so the first
+run against a correctly migrated project should be green.
 
 ### 10a. A removed block type silently blanks published sites — FIXED
 Found while testing the error boundary below. Puck's `Render` **silently drops**
