@@ -84,7 +84,7 @@ to one. This is a paid UK product storing named guests, emails, phone numbers an
 dietary requirements — i.e. personal and special-category data for people who
 never signed up themselves. **This is a legal gate, not a polish item.**
 
-### 6. No favicon or app icon
+### 6. No favicon or app icon — FIXED
 No `favicon.ico`, `icon.tsx`, or `icon.png`. Every browser tab — including the
 couple's published wedding site — shows the default globe.
 
@@ -113,14 +113,31 @@ valuable suites (`test:isolation`, `test:rsvp`) are manual and need a live
 Supabase, so in practice they run rarely. At minimum wire them to a seeded test
 project on a schedule.
 
-### 10. Wedding guests see Simvites branding on an error
+### 10a. A removed block type silently blanks published sites — NEW, unfixed
+Found while testing the error boundary below. Puck's `Render` **silently drops**
+content entries whose `type` is not in `siteConfig` — no error, no placeholder.
+A snapshot referencing `BlockThatNoLongerExists` rendered `[data-site-root]`
+with 34 characters inside it: a blank wedding site, with the couple's name still
+in the tab.
+
+Published snapshots are immutable and can be months old, so the first time a
+block is renamed or retired, every site using it quietly loses that section —
+and if it was the only block, the whole page. Nobody is told.
+
+**Suggested:** never remove a block type; keep a tombstone renderer that emits
+nothing visible but logs. Failing that, validate snapshot block types against
+`siteConfig` at publish time and refuse, so the breakage surfaces to the host
+rather than to guests. *Verified by publishing an unknown block type and
+loading the site.*
+
+### 10. Wedding guests see Simvites branding on an error — FIXED
 `app/error.tsx` is the root boundary, so it also catches failures on the couple's
 published site — and it renders the Simvites wordmark plus "Something went
 wrong." A guest opening their invitation should never see the vendor's brand.
 Add an error boundary under `app/s/[siteSlug]/` in the couple's own template
 voice. *Observed directly while testing the publish bug.*
 
-### 11. No `global-error.tsx`
+### 11. No `global-error.tsx` — FIXED
 An error thrown in the root layout is unhandled.
 
 ### 12. No `robots.txt` or `sitemap.xml`
@@ -169,6 +186,6 @@ lives only in the database.
 3. **Legal pages** (#5) — needs a decision and probably a template, so start early
 4. **Click-through of guest list + editor** (#7) — the only way to find what
    review cannot
-5. **Favicon** (#6), **guest error page** (#10), **robots decision** (#12)
+5. ~~Favicon (#6), guest error page (#10)~~ **done** — **robots decision (#12)** and the block-tombstone question (#10a) remain
 6. **Fix lint, add it to CI** (#8–9)
 7. Everything in P2 as capacity allows
