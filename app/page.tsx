@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { BRAND_NAME, BASE_DOMAIN } from '@/lib/brand'
+import { LEGAL_CONTACT_EMAIL } from '@/lib/legal'
 import { DeepZoom } from '@/components/landing/deep-zoom'
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -258,7 +259,7 @@ export default function LandingPage() {
           {[
             ['Product', [['#product', 'The editor'], ['#rsvp', 'Invitations & RSVP'], ['#templates', 'Templates'], ['#pricing', 'Pricing']]],
             ['Company', [['mailto:maharshi.sim@hotmail.com', 'Early access'], ['mailto:maharshi.sim@hotmail.com', 'Talk to the founder'], ['#', 'Changelog']]],
-            ['Legal', [['#', 'Privacy'], ['#', 'Terms'], ['mailto:maharshi.sim@hotmail.com', 'Contact']]],
+            ['Legal', [['/privacy', 'Privacy'], ['/cookies', 'Cookies'], ['/terms', 'Terms'], [`mailto:${LEGAL_CONTACT_EMAIL}`, 'Contact']]],
           ].map(([group, links]) => (
             <div key={group as string}>
               <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.1em] text-[#8F8D88]">{group as string}</p>

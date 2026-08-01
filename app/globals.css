@@ -850,3 +850,85 @@
    popover over the canvas centre, the inspector on the right and the dock at
    once — three competing layers with the page unreadable behind them. */
 .puck-dock[data-dock-panel='open'] [class*='_Sidebar--right'] { display: none; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Legal prose (/privacy, /cookies, /terms)
+
+   These pages are long, and someone reading one is usually looking for a
+   single answer — "do you sell my data", "how do I delete this". So: a narrow
+   measure, headings that are scannable without being shouty, and real spacing
+   between sections. No accent colour except on links; nothing here should feel
+   like marketing.
+   ───────────────────────────────────────────────────────────────────────── */
+.legal-prose { font-size: 15px; line-height: 1.68; color: var(--ink-2); }
+.legal-prose > h1 {
+  font-family: var(--font-display, var(--font-sans));
+  font-size: clamp(28px, 5vw, 36px);
+  line-height: 1.16;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+/* The standfirst: what this document is, before the reader commits to it. */
+.legal-prose > h1 + p { font-size: 16px; color: var(--ink-2); margin-bottom: 34px; }
+.legal-prose h2 {
+  font-size: 19px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 40px 0 12px;
+}
+.legal-prose h3 {
+  font-size: 15px;
+  font-weight: 620;
+  color: var(--ink);
+  margin: 26px 0 8px;
+}
+.legal-prose p { margin-bottom: 14px; }
+.legal-prose ul, .legal-prose ol { margin: 0 0 16px 0; padding-left: 20px; }
+.legal-prose ul { list-style: disc; }
+.legal-prose ol { list-style: decimal; }
+.legal-prose li { margin-bottom: 7px; padding-left: 3px; }
+.legal-prose li::marker { color: var(--ink-3); }
+.legal-prose strong { color: var(--ink); font-weight: 600; }
+.legal-prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.legal-prose a:hover { color: var(--ink); }
+
+/* Data tables — who receives what. Scrolls rather than squashing on mobile;
+   a processor list with an unreadable "purpose" column answers nothing. */
+.legal-prose .legal-table-wrap { overflow-x: auto; margin-bottom: 18px; }
+.legal-prose table { width: 100%; min-width: 460px; border-collapse: collapse; font-size: 13.5px; }
+.legal-prose th, .legal-prose td {
+  border-bottom: 1px solid var(--line);
+  padding: 9px 12px 9px 0;
+  text-align: left;
+  vertical-align: top;
+}
+.legal-prose th {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-3);
+  border-bottom-color: var(--ink-3);
+}
+.legal-prose td:last-child, .legal-prose th:last-child { padding-right: 0; }
+
+/* An unresolved question, marked on the page rather than buried in a comment. */
+.legal-prose .legal-open-question {
+  border-left: 2px solid var(--warn);
+  background: var(--warn-soft);
+  border-radius: 0 var(--radius-card, 12px) var(--radius-card, 12px) 0;
+  padding: 12px 16px;
+  margin: 0 0 18px;
+  font-size: 13.5px;
+}
+.legal-prose .legal-open-question p:last-child { margin-bottom: 0; }
+
+/* A required detail the business has not supplied yet. */
+.legal-prose .legal-todo {
+  color: var(--bad);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}

@@ -121,11 +121,58 @@ the conditional-question case among them, so 0018's work survived. Tenant
 isolation still passes 7/7. `db:apply` sorts filenames, so 0019 lands after 0018
 and a fresh deploy ends on the restored function.*
 
-### 5. No privacy policy, terms, or cookie notice
+### 5. No privacy policy, terms, or cookie notice — DRAFTED, still gated
 No `/privacy` or `/terms` route exists, and nothing in the marketing footer links
 to one. This is a paid UK product storing named guests, emails, phone numbers and
 dietary requirements — i.e. personal and special-category data for people who
 never signed up themselves. **This is a legal gate, not a polish item.**
+
+`/privacy`, `/cookies` and `/terms` now exist and are linked from the footer. The
+*factual* half is done and was compiled by reading the code, not by filling in a
+template: the cookie table matches the two cookies actually set, the processor
+table matches the integrations actually called, and the retention periods match
+`lib/publish.ts`. Contrast measured in both themes; page does not scroll
+horizontally at 375px.
+
+**It is still a gate, for three reasons:**
+
+1. `LEGAL_REVIEWED` in `lib/legal.ts` is `false`, so every page renders a visible
+   "not yet reviewed by a solicitor" banner. That is deliberate — flip it only
+   after a real review. It is the one-line switch that turns the banner off.
+2. `LEGAL_ENTITY` is all `null`. Registered name, address, company number and ICO
+   registration render as red `[to be completed]` markers on the live page. A
+   privacy notice without the controller's identity is not a valid one, and most
+   UK businesses processing personal data electronically must register with the
+   ICO and pay the fee. **Only the founder can supply these.**
+3. Two substantive questions are flagged *on the page* rather than buried here,
+   because a non-lawyer cannot settle them:
+   - **Controller vs processor for guest data.** The draft says the couple is
+     controller and we are processor. But we set the retention period and count
+     guests for our own billing — decisions the couple does not make — which
+     points at joint controllership and an Art. 26 arrangement.
+   - **Dietary requirements may be Art. 9 health data.** The field is free text,
+     so "coeliac" and "nut allergy" go in it. If Art. 9 applies, legitimate
+     interests is not available and explicit consent is likely needed at the
+     point of asking — which would change the RSVP form, not just the wording.
+
+Contact address is still a personal Hotmail account (`LEGAL_CONTACT_EMAIL`). Not
+suitable for a data controller: it cannot be handed over or monitored by anyone
+else, and a subject-access request landing in a personal inbox is its own
+weakness. Move to a role address on the business domain.
+
+### 5a. The homepage promises hosting we do not deliver
+`app/page.tsx` says a site "stays live for 18 months **after the wedding**", twice.
+`lib/publish.ts:59` starts an 18-month clock at **first publish**. For a couple who
+publishes a save-the-date 14 months out — the normal case — that is 4 months after
+the wedding, not 18. This is a pricing claim on the page where people decide to
+pay, so it is a consumer-protection problem, not a copy nit.
+
+Two ways to fix it and **they are not equivalent**, which is why neither has been
+done here: change the copy to match the code, or change the code to match the
+promise (expiry = wedding date + 18 months, falling back to publish + 18 months
+when no date is set). The second is what the marketing has been selling. Whoever
+decides should also decide what happens to couples who have already paid — the
+terms page currently says we will honour the advertised version if asked.
 
 ### 6. No favicon or app icon — FIXED
 No `favicon.ico`, `icon.tsx`, or `icon.png`. Every browser tab — including the
@@ -263,9 +310,14 @@ lives only in the database.
 
 1. ~~Three webhook/cron fail-closed fixes (#1–3)~~ **done**
 2. ~~`.env.example` (#4)~~ **done** — a deploy checklist is still worth writing
-3. **Legal pages** (#5) — needs a decision and probably a template, so start early
-4. **Click-through of guest list + editor** (#7) — the only way to find what
+3. ~~Legal pages (#5)~~ **drafted** — now blocked on things only you can do:
+   company details for `LEGAL_ENTITY`, a solicitor to settle the two flagged
+   questions, then flip `LEGAL_REVIEWED`
+4. **The 18-month hosting claim (#5a)** — decide whether the copy or the code is
+   wrong. Cheap to fix, and it is a promise on the pricing section
+5. **Click-through of guest list + editor** (#7) — the only way to find what
    review cannot
-5. ~~Favicon (#6), guest error page (#10)~~ **done** — **robots decision (#12)** and the block-tombstone question (#10a) remain
-6. ~~Fix lint, add it to CI (#8)~~ **done** — **wiring the two test suites into CI (#9)** remains
-7. Everything in P2 as capacity allows
+6. ~~Favicon (#6), guest error page (#10), block tombstone (#10a)~~ **done** — **robots decision (#12)** remains
+7. ~~Fix lint, add it to CI (#8); wire the test suites into CI (#9)~~ **done** —
+   the integration job needs `TEST_SUPABASE_*` repo secrets to actually run
+8. Everything in P2 as capacity allows
