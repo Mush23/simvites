@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
-import { sendEmail, emailConfigured } from '@/lib/email'
+import { sendEmail, emailConfigured, escapeHtml } from '@/lib/email'
 import { generateGuestToken } from '@/lib/tokens'
 import { siteUrl } from '@/lib/tenant'
 
@@ -39,7 +39,8 @@ export async function sendReminders() {
       const res = await sendEmail({
         to,
         subject: `A gentle reminder — ${site.title}`,
-        html: `<div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;padding:32px;color:#2a241d"><h1 style="font-weight:400">Dear ${h.name},</h1><p style="line-height:1.65">We'd love to know if you can join us. It takes under a minute:</p><p style="margin:26px 0"><a href="${link}" style="background:#b4552d;color:#fff;text-decoration:none;padding:12px 28px;border-radius:999px;font-weight:600">Respond now</a></p></div>`,
+        // M5: household name is user-controlled — escape before it becomes markup.
+        html: `<div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;padding:32px;color:#2a241d"><h1 style="font-weight:400">Dear ${escapeHtml(h.name)},</h1><p style="line-height:1.65">We'd love to know if you can join us. It takes under a minute:</p><p style="margin:26px 0"><a href="${escapeHtml(link)}" style="background:#b4552d;color:#fff;text-decoration:none;padding:12px 28px;border-radius:999px;font-weight:600">Respond now</a></p></div>`,
       })
       if (!res.error && !res.skipped) sent++
     }

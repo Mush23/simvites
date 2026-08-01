@@ -56,11 +56,24 @@ export async function sendInvitation(householdId: string) {
   if (!site.isUnlocked) {
     return { error: 'Email sending is part of the unlock — see Settings → Billing.' }
   }
+
+  // M5: outbound mail leaves on our SPF/DKIM domain, so abuse here costs our
+  // sending reputation rather than the sender's. One unlock used to buy an
+  // unlimited send loop to arbitrary addresses.
+  const { rateLimit } = await import('@/lib/rate-limit')
+  if (!rateLimit(`invite-send:${site.siteId}`, 60, 60 * 60_000)) {
+    return { error: 'That is a lot of invitations at once — try again in an hour.' }
+  }
+
   const supabase = await createClient()
 
+  // M4: gate on the primary site, so act on the primary site. RLS alone would
+  // have allowed a household belonging to a DIFFERENT accessible site through.
   const [{ data: household }, { data: guests }] = await Promise.all([
-    supabase.from('households').select('name').eq('id', householdId).maybeSingle(),
+    supabase.from('households').select('name').eq('id', householdId)
+      .eq('site_id', site.siteId).maybeSingle(),
     supabase.from('guests').select('email').eq('household_id', householdId)
+      .eq('site_id', site.siteId)
       .is('archived_at', null).not('email', 'is', null),
   ])
   if (!household) return { error: 'Household not found.' }

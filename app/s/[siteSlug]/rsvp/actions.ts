@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/server'
-import { GUEST_COOKIE, verifyGuestSession } from '@/lib/guest-session'
+import { GUEST_COOKIE, loadGuestSession } from '@/lib/guest-session'
 import { track } from '@/lib/analytics'
 
 export interface EventChoice {
@@ -20,6 +20,40 @@ export interface SubmitResult {
   error?: string
   /** guestId:eventId → error for partial failures (e.g. one event filled up) */
   eventErrors?: Record<string, string>
+}
+
+// M8/M9 — bounds on everything a guest controls. Generous against any real
+// household; the point is that "unbounded" stops being the answer.
+const MAX_GUESTS_PER_SUBMISSION = 25
+const MAX_EVENTS_PER_GUEST = 25
+const MAX_ANSWERS_PER_GUEST = 60
+/** Longest single free-text answer. `rsvp_answers.value` is unbounded jsonb
+ *  and the schema has no length constraint anywhere, so this is the only cap. */
+const MAX_ANSWER_CHARS = 2_000
+const MAX_MESSAGE_CHARS = 1_000
+
+/** M11: 'pending' is a valid rsvp_status, and submit_response only applies
+ *  capacity, allocation and required-answer checks when the status is
+ *  'attending'. The client filters it out; the server did not — so a crafted
+ *  submission could reset a guest to "never responded" and skip every guard.
+ *  Types are erased at runtime, so this has to be a real check. */
+const SUBMITTABLE = new Set(['attending', 'declined'])
+
+/**
+ * Clamp one answer value to something storable. Strings are truncated; arrays
+ * (multi_choice) are capped and their members truncated; objects are refused
+ * outright — no question type produces one, so it can only be someone probing.
+ */
+function clampAnswer(value: unknown): unknown | undefined {
+  if (value === null || typeof value === 'boolean' || typeof value === 'number') return value
+  if (typeof value === 'string') return value.slice(0, MAX_ANSWER_CHARS)
+  if (Array.isArray(value)) {
+    return value
+      .slice(0, MAX_ANSWERS_PER_GUEST)
+      .filter((v) => typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean')
+      .map((v) => (typeof v === 'string' ? v.slice(0, MAX_ANSWER_CHARS) : v))
+  }
+  return undefined
 }
 
 const FRIENDLY: [RegExp, string][] = [
@@ -43,9 +77,27 @@ export async function submitGuestRsvp(
    * responses (original-site port: "a message for the couple"). */
   message?: string,
 ): Promise<SubmitResult> {
-  const session = verifyGuestSession((await cookies()).get(GUEST_COOKIE)?.value)
+  const session = await loadGuestSession((await cookies()).get(GUEST_COOKIE)?.value)
   if (!session) return { error: 'Your session has expired — please reopen your invitation link.' }
-  if (!submissions.length) return { error: 'Nothing to submit.' }
+  if (!Array.isArray(submissions) || !submissions.length) return { error: 'Nothing to submit.' }
+
+  // M8: neither array was length-checked, and the loop below makes ONE
+  // round-trip per guest × event — each taking a `for update` lock on the
+  // event row. The 10/minute limiter capped requests, not work, so a single
+  // request could issue thousands of serialised writes and stall every other
+  // guest submitting to the same event. A household is a handful of people
+  // attending a handful of events; these bounds are far above any real one.
+  if (submissions.length > MAX_GUESTS_PER_SUBMISSION) {
+    return { error: 'That is more guests than we can process at once.' }
+  }
+  for (const s of submissions) {
+    if (!s || typeof s.guestId !== 'string' || !Array.isArray(s.choices)) {
+      return { error: 'Something went wrong — please try again.' }
+    }
+    if (s.choices.length > MAX_EVENTS_PER_GUEST) {
+      return { error: 'That is more events than we can process at once.' }
+    }
+  }
 
   const { rateLimit } = await import('@/lib/rate-limit')
   if (!rateLimit(`rsvp:${session.householdId}`, 10, 60_000)) {
@@ -84,13 +136,24 @@ export async function submitGuestRsvp(
   // and surfaced per event through the FRIENDLY mapping above.
 
   for (const s of submissions) {
+    // M9: cap the answer map before it is read. Unknown ids are dropped by the
+    // scope filter below, but the map itself was unbounded and every value went
+    // straight into unbounded jsonb.
+    const answerEntries = Object.entries(s.answers ?? {}).slice(0, MAX_ANSWERS_PER_GUEST)
+
     for (const choice of s.choices) {
-      const answersForEvent = Object.entries(s.answers)
+      // M11: reject anything that is not a real guest-submittable status.
+      if (!choice || typeof choice.eventId !== 'string' || !SUBMITTABLE.has(choice.status)) {
+        continue
+      }
+
+      const answersForEvent = answerEntries
         .filter(([qid]) => {
           const scope = questionScope.get(qid)
           return scope === undefined ? false : scope === null || scope === choice.eventId
         })
-        .map(([qid, value]) => ({ question_id: qid, value }))
+        .map(([qid, value]) => ({ question_id: qid, value: clampAnswer(value) }))
+        .filter((a) => a.value !== undefined)
 
       const { error } = await db.rpc('submit_response', {
         p_guest: s.guestId,
@@ -98,7 +161,7 @@ export async function submitGuestRsvp(
         p_status: choice.status,
         // Contract with the RPC: null preserves the stored note, '' clears
         // it, text replaces it — an edit never silently wipes the message.
-        p_message: message === undefined ? null : message.trim().slice(0, 1000),
+        p_message: message === undefined ? null : message.trim().slice(0, MAX_MESSAGE_CHARS),
         p_custom: {},
         p_answers: answersForEvent,
       })

@@ -3,16 +3,14 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { track } from '@/lib/analytics'
+import { isReservedSlug, normalizeSlug } from '@/lib/reserved-slugs'
 
 export interface OnboardingState {
   error?: string
 }
 
-function normalizeSlug(input: string): string {
-  return input.toLowerCase().trim().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40)
-}
-
-const RESERVED = new Set(['www', 'app', 'api', 'admin', 'dashboard', 'login', 'auth', 'onboarding', 'i', 's'])
+// M13: slug rules live in ONE place now — the router reserves exactly what
+// this form refuses to hand out. See lib/reserved-slugs.ts.
 
 export async function createWorkspace(
   _prev: OnboardingState,
@@ -24,7 +22,7 @@ export async function createWorkspace(
 
   if (!siteTitle) return { error: 'Please name your wedding site.' }
   if (!slug) return { error: 'Please choose a web address.' }
-  if (RESERVED.has(slug)) return { error: 'That address is reserved — pick another.' }
+  if (isReservedSlug(slug)) return { error: 'That address is reserved — pick another.' }
 
   const supabase = await createClient()
   const { data: siteId, error } = await supabase.rpc('create_org_and_site', {

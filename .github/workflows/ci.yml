@@ -35,6 +35,13 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # Misuse regressions (docs/MISUSE-REVIEW.md). Feeds hostile input to the
+      # real modules and needs NO database, so unlike the integration job it
+      # runs on every push including fork PRs. Each assertion names the finding
+      # it guards; a failure means that fix has been undone.
+      - name: Misuse regressions
+        run: npm run test:misuse
+
       - name: Build
         run: npm run build
         env:

@@ -75,6 +75,14 @@ export async function addCollaborator(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim().toLowerCase()
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: 'Enter a valid email.' }
 
+  // M5/M1: this mints confirmed auth accounts for arbitrary addresses. Cap it
+  // so a single account cannot be used to bulk-create users or spray
+  // memberships across the platform.
+  const { rateLimit } = await import('@/lib/rate-limit')
+  if (!rateLimit(`collab:${site.orgId}`, 10, 60 * 60_000)) {
+    return { error: 'Too many collaborator invites in the last hour — try again later.' }
+  }
+
   const { createAdminClient } = await import('@/lib/supabase/server')
   const admin = createAdminClient()
 
@@ -83,10 +91,22 @@ export async function addCollaborator(formData: FormData) {
   const { data: created, error: cErr } = await admin.auth.admin.createUser({ email, email_confirm: true })
   if (!cErr) userId = created.user?.id
   else {
-    const { data: list } = await admin.auth.admin.listUsers()
-    userId = list?.users.find((u: { email?: string; id: string }) => u.email === email)?.id
+    // M14: listUsers() is paginated and defaults to the first 50 users. Once
+    // the platform outgrew that, re-adding an EXISTING collaborator failed
+    // with "Could not create that account." for anyone outside page one — a
+    // bug that gets more common the more successful you are. Prefer our own
+    // profiles table (indexed, RLS-exempt under service role) and fall back to
+    // walking the auth pages only if the profile row is missing.
+    const { data: profile } = await admin.from('profiles').select('id').eq('email', email).maybeSingle()
+    userId = (profile as { id: string } | null)?.id
+    for (let page = 1; !userId && page <= 20; page++) {
+      const { data: list } = await admin.auth.admin.listUsers({ page, perPage: 200 })
+      const users = list?.users ?? []
+      if (!users.length) break
+      userId = users.find((u: { email?: string; id: string }) => u.email === email)?.id
+    }
   }
-  if (!userId) return { error: 'Could not create that account.' }
+  if (!userId) return { error: 'Could not add that collaborator — check the address and try again.' }
 
   await admin.from('profiles').upsert({ id: userId, email })
   const { error } = await admin.from('memberships')

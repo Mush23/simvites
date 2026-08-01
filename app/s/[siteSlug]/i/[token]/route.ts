@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { hashToken } from '@/lib/tokens'
-import { GUEST_COOKIE, signGuestSession } from '@/lib/guest-session'
+import { GUEST_COOKIE, GUEST_SESSION_TTL_MS, signGuestSession } from '@/lib/guest-session'
 import { getSubdomain } from '@/lib/tenant'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
@@ -55,13 +55,20 @@ export async function GET(
   const res = redirect()
   res.cookies.set(
     GUEST_COOKIE,
-    signGuestSession({ householdId: row.household_id, siteId: row.site_id }),
+    // M2: bind the session to the token that minted it, and give it a real
+    // expiry. Without these the cookie outlived revocation entirely.
+    signGuestSession({
+      householdId: row.household_id,
+      siteId: row.site_id,
+      tokenId: row.id,
+      exp: Date.now() + GUEST_SESSION_TTL_MS,
+    }),
     {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      maxAge: 60 * 60 * 24 * 180, // 180 days — the wedding season
+      maxAge: GUEST_SESSION_TTL_MS / 1000,
     },
   )
   return res

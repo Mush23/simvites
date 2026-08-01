@@ -14,8 +14,9 @@
     "user:create": "node --env-file=.env.local scripts/create-test-user.mjs",
     "test:isolation": "node --env-file-if-exists=.env.local scripts/isolation-test.mjs",
     "test:rsvp": "node --env-file-if-exists=.env.local scripts/test-rsvp.mjs",
-    "test:all": "npm run test:isolation && npm run test:rsvp",
-    "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs"
+    "test:all": "npm run test:misuse && npm run test:isolation && npm run test:rsvp",
+    "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs",
+    "test:misuse": "node --experimental-strip-types scripts/test-misuse.mjs"
   },
   "dependencies": {
     "@puckeditor/core": "^0.21.3",

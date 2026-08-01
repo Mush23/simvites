@@ -70,7 +70,7 @@ export async function sendSeatingUpdate() {
   if (!site) return { error: 'No site.' }
   if (!site.isUnlocked) return { error: 'Sending is part of the unlock — see Settings.' }
   const supabase = await createClient()
-  const { sendEmail, emailConfigured } = await import('@/lib/email')
+  const { sendEmail, emailConfigured, escapeHtml } = await import('@/lib/email')
   const { generateGuestToken } = await import('@/lib/tokens')
   const { siteUrl } = await import('@/lib/tenant')
 
@@ -92,7 +92,7 @@ export async function sendSeatingUpdate() {
       const res = await sendEmail({
         to,
         subject: `Your table is ready — ${site.title}`,
-        html: `<div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;padding:32px;color:#2a241d"><h1 style="font-weight:400">The seating plan is live.</h1><p style="line-height:1.65">Open your invitation to see which table you're at:</p><p style="margin:26px 0"><a href="${link}" style="background:#b4552d;color:#fff;text-decoration:none;padding:12px 28px;border-radius:999px;font-weight:600">Find your table</a></p></div>`,
+        html: `<div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;padding:32px;color:#2a241d"><h1 style="font-weight:400">The seating plan is live.</h1><p style="line-height:1.65">Open your invitation to see which table you're at:</p><p style="margin:26px 0"><a href="${escapeHtml(link)}" style="background:#b4552d;color:#fff;text-decoration:none;padding:12px 28px;border-radius:999px;font-weight:600">Find your table</a></p></div>`,
       })
       if (!res.error && !res.skipped) sent++
     }

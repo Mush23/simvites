@@ -6,14 +6,24 @@
 //             http://<slug>.lvh.me:3000 and the apex is http://lvh.me:3000.
 // ─────────────────────────────────────────────────────────────────────────
 
+import { RESERVED_SLUGS } from '@/lib/reserved-slugs'
+
 /** Root domain incl. port in dev, e.g. "lvh.me:3000" or "simvites.co.uk". */
 export const ROOT_DOMAIN =
   process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'
 
 const isLocal = () => ROOT_DOMAIN.includes('localhost') || ROOT_DOMAIN.includes('lvh.me')
 
-/** Hostnames that are NOT tenants (serve the marketing site / app shell). */
-const RESERVED_SUBDOMAINS = new Set(['www', 'app', 'api', 'admin', 'mail', 'assets'])
+/**
+ * Hostnames that are NOT tenants (serve the marketing site / app shell).
+ *
+ * M13: this is the SAME set the onboarding form refuses to hand out — see
+ * lib/reserved-slugs.ts. It used to be a second, different list: `mail` and
+ * `assets` were reserved here but claimable at signup, so a couple could be
+ * given an address whose subdomain silently served the marketing site instead
+ * of their wedding, with no error to explain it.
+ */
+const RESERVED_SUBDOMAINS = RESERVED_SLUGS
 
 /**
  * Extract the tenant subdomain from a request host, or null when the host is

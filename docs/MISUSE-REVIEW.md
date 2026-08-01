@@ -16,9 +16,61 @@ below cluster around actions that forgot one.
 
 ---
 
+## Status — all 15 fixed
+
+Each finding below keeps its original text so the reasoning stays auditable;
+the fix is summarised here.
+
+| | Finding | Fix |
+|---|---|---|
+| M1 | Workspace takeover | `getPrimarySite` prefers a site the user **owns** over an older one they merely collaborate on; returns `role` + `accessibleCount` |
+| M2 | Revoke did nothing | Session payload now carries `tokenId` + `exp`; `loadGuestSession` re-reads the token row on every use |
+| M3 | CSV formula injection | `toCsv` prefixes `'` to cells starting `= + - @`, tab or CR |
+| M4 | Paywall bypass | Unlock check moved **inside** `publishSnapshot`, against the site being published; `saveAndPublish` refuses a foreign `siteId` |
+| M5 | Email HTML injection | `escapeHtml` at every interpolation in all three templates; send capped at 60/site/hour |
+| M6 | SSRF via redirect | `redirect: 'manual'` with per-hop DNS + private-range validation; size capped **while streaming** |
+| M7 | Open redirect | `safeNextPath` accepts only single-slash paths, resolved through `new URL(next, origin)` |
+| M8 | Unbounded RSVP writes | Submissions/choices/answers bounded before the loop |
+| M9 | No length limits | App-level clamps **and** migration `0020_input_bounds.sql` |
+| M10 | Limiter flushable | LRU eviction of expired-then-oldest, never a global `clear()` |
+| M11 | `pending` bypass | Status validated against an explicit submittable set |
+| M12 | Prototype chain | `Object.hasOwn` |
+| M13 | Two slug lists | One `lib/reserved-slugs.ts`, imported by signup and router |
+| M14 | 50-user ceiling | Look up `profiles` by email, then paginate `listUsers` |
+| M15 | SVG in public bucket | Magic-byte sniffing; the **sniffed** type is stored, SVG refused |
+
+**`scripts/test-misuse.mjs`** (`npm run test:misuse`) locks in M2, M3, M5, M7,
+M12 and M13 — 51 assertions that feed hostile input to the real modules. It
+needs no database, so it runs in CI on every push including fork PRs. The
+remaining findings are structural (a moved check, a bounded loop) and are
+covered by typecheck plus the existing suites.
+
+### Two things still need you
+
+1. **Apply `0020_input_bounds.sql`.** It has not been run — the only Supabase
+   project configured here is the live one, and I am not applying schema
+   changes to production unprompted. The app-level clamps are already in force,
+   so this is defence in depth rather than the only guard.
+   ```
+   node --env-file=.env.local scripts/db-apply.mjs supabase/migrations/0020_input_bounds.sql
+   ```
+2. **Collaborator consent is a product decision, not a bug fix.** M1's
+   *exploitable* half is closed: nobody can displace your workspace any more.
+   But `addCollaborator` still adds a membership without the recipient
+   accepting it, so a stranger can still make an unwanted site appear in your
+   account. Closing that properly means a pending-invitation table, an accept
+   screen and an email — a feature, and one I did not want to half-build. Until
+   then it is rate-limited to 10 per org per hour.
+
+Existing guest cookies are invalidated by the M2 change (they lack `tokenId`
+and `exp`, and are rejected rather than grandfathered). Anyone mid-RSVP reopens
+their invitation link. On a pre-launch database that is nobody.
+
+---
+
 ## P0 — fix before launch
 
-### M1. Anyone who knows your email can take over your workspace
+### M1. Anyone who knows your email can take over your workspace — FIXED
 `app/(app)/settings/actions.ts:72` · **read, not executed**
 
 `addCollaborator` takes an email, creates a *confirmed* auth user for it if none
@@ -60,7 +112,7 @@ normal use, with no fix available to the user.
 Fix: an invitation the recipient accepts; a site switcher; and primary-site
 selection that prefers a site the user *owns* over one they merely collaborate on.
 
-### M2. Revoking an invitation link does nothing once it has been opened
+### M2. Revoking an invitation link does nothing once it has been opened — FIXED
 `lib/guest-session.ts` + `app/s/[siteSlug]/i/[token]/route.ts:44` · **read, not executed**
 
 The token route checks `revoked` and `expires_at` correctly. It then issues a
@@ -90,7 +142,7 @@ reassures without doing anything.
 Fix: put `tokenId` and an `exp` in the signed payload; verify the token row is
 still live on each use, or at least re-check on a short interval.
 
-### M3. Guests can put spreadsheet formulas in the sheet you hand your caterer
+### M3. Guests can put spreadsheet formulas in the sheet you hand your caterer — FIXED
 `lib/csv.ts:5` · **verified**
 
 `toCsv` implements RFC 4180 quoting correctly — and that is the whole problem, because
@@ -124,7 +176,7 @@ of guard in one function.
 
 ## P1 — fix before you take real money
 
-### M4. `saveAndPublish` checks one site's entitlement and publishes another
+### M4. `saveAndPublish` checks one site's entitlement and publishes another — FIXED
 `app/(app)/website/actions.ts:193` · **read, not executed**
 
 ```ts
@@ -152,7 +204,7 @@ gate on `getPrimarySite()`, act on a client-supplied `householdId`.
 Fix: gate and act on the same id. Better, move the unlock check inside
 `publishSnapshot` so it cannot be forgotten again.
 
-### M5. The invitation email is a phishing relay on your verified domain
+### M5. The invitation email is a phishing relay on your verified domain — FIXED
 `lib/email.ts:52-59` · **verified by reading the template**
 
 ```ts
@@ -179,7 +231,7 @@ reputation, and it is your domain that gets blocklisted.
 Fix: escape both interpolations; cap sends per site per hour; and keep a
 deliverability eye on new accounts sending to many distinct domains.
 
-### M6. SSRF: the host check doesn't survive a redirect
+### M6. SSRF: the host check doesn't survive a redirect — FIXED
 `app/(app)/website/actions.ts:36-52` · **read, not executed**
 
 ```ts
@@ -211,7 +263,7 @@ The cap is checked *after* the whole body is in memory. A hostile host streaming
 Fix: `redirect: 'manual'` and re-validate each hop; reject private ranges after
 DNS resolution; check `content-length` and stream with a hard cap.
 
-### M7. Open redirect in the auth callback
+### M7. Open redirect in the auth callback — FIXED
 `app/auth/callback/route.ts:11,17` · **verified**
 
 ```ts
@@ -240,7 +292,7 @@ Fix: `if (!next.startsWith('/') || next.startsWith('//')) next = '/dashboard'`.
 
 ## P2 — real, lower blast radius
 
-### M8. One RSVP request can trigger unbounded database writes
+### M8. One RSVP request can trigger unbounded database writes — FIXED
 `app/s/[siteSlug]/rsvp/actions.ts:86` · **read, not executed**
 
 ```ts
@@ -257,7 +309,7 @@ guests' submissions.
 
 Fix: cap both arrays (a household has maybe 8 guests × 8 events), and batch.
 
-### M9. Nothing in the schema has a length limit
+### M9. Nothing in the schema has a length limit — FIXED
 **verified** — `grep -rn "varchar(\|length(\|char_length" supabase/migrations/*.sql` returns nothing.
 
 Every text column is unbounded `text`, and `rsvp_answers.value` is unbounded
@@ -265,7 +317,7 @@ Every text column is unbounded `text`, and `rsvp_answers.value` is unbounded
 guest names, household names and site titles are capped nowhere at any layer. A
 guest can store megabytes per answer, and M8 multiplies it.
 
-### M10. The rate limiter can be flushed for everyone
+### M10. The rate limiter can be flushed for everyone — FIXED
 `lib/rate-limit.ts:11` · **verified by reading**
 
 ```ts
@@ -280,7 +332,7 @@ counting also allows a 2× burst across a window boundary.
 
 This compounds the known per-instance-memory limitation (readiness #13).
 
-### M11. A guest can un-RSVP themselves back to "pending"
+### M11. A guest can un-RSVP themselves back to "pending" — FIXED
 `app/s/[siteSlug]/rsvp/actions.ts` · **verified** (`rsvp_status` = `pending|attending|declined`, `0001_occasio.sql:15`)
 
 `EventChoice.status` is typed `'attending' | 'declined'`, and the client filters
@@ -294,7 +346,7 @@ skipping every guard. It corrupts the couple's counts rather than exposing data.
 
 Fix: `if (choice.status !== 'attending' && choice.status !== 'declined') continue`.
 
-### M12. `in` walks the prototype chain
+### M12. `in` walks the prototype chain — FIXED
 `app/(app)/actions.ts:19` · **verified**
 
 ```ts
@@ -311,7 +363,7 @@ the allowlist is not doing what it reads as doing.
 
 Fix: `Object.hasOwn(RESTORABLE, table)`.
 
-### M13. Two different reserved-slug lists disagree
+### M13. Two different reserved-slug lists disagree — FIXED
 **verified**
 
 | | list |
@@ -325,7 +377,7 @@ their wedding is unreachable on its own address, with no error explaining why.
 
 Fix: one exported list, imported by both.
 
-### M14. Adding an existing collaborator breaks past 50 users
+### M14. Adding an existing collaborator breaks past 50 users — FIXED
 `app/(app)/settings/actions.ts:86` · **read, not executed**
 
 ```ts
@@ -343,7 +395,7 @@ addresses.
 
 Fix: `listUsers({ page, perPage })` in a loop, or query `profiles` by email.
 
-### M15. SVG uploads land in a public bucket with an executable content type
+### M15. SVG uploads land in a public bucket with an executable content type — FIXED
 `app/(app)/website/actions.ts:12-29` · **read, not executed**
 
 `file.type` is client-supplied and never checked against magic bytes;

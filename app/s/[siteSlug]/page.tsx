@@ -4,7 +4,7 @@ import { Render } from '@puckeditor/core/rsc'
 import { getPublishedSnapshot } from '@/lib/public-site'
 import { siteConfig, docForPage } from '@/lib/puck/config'
 import { siteStyleProps } from '@/lib/site-style'
-import { GUEST_COOKIE, verifyGuestSession } from '@/lib/guest-session'
+import { GUEST_COOKIE, loadGuestSession } from '@/lib/guest-session'
 import { createAdminClient } from '@/lib/supabase/server'
 import { SiteNav } from '@/components/site/site-nav'
 import { BackdropFx } from '@/components/site/backdrop-fx'
@@ -51,7 +51,7 @@ export default async function PublicSitePage({
   // Personalised greeting: if this visitor followed their invite link, greet
   // their household by name (cookie → household, server-side only).
   let guestName: string | undefined
-  const session = verifyGuestSession((await cookies()).get(GUEST_COOKIE)?.value)
+  const session = await loadGuestSession((await cookies()).get(GUEST_COOKIE)?.value)
   if (session) {
     const db = createAdminClient()
     const { data: hh } = await db.from('households')

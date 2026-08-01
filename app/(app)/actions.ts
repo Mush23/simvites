@@ -16,7 +16,10 @@ const RESTORABLE = {
 } as const
 
 export async function restoreArchived(table: keyof typeof RESTORABLE, id: string) {
-  if (!(table in RESTORABLE)) return { error: 'Not restorable.' }
+  // M12: `in` walks the prototype chain, so '__proto__', 'toString' and
+  // 'constructor' all passed this allowlist. It failed safe (PostgREST 404s on
+  // the bogus table) but the check was not doing what it reads as doing.
+  if (!Object.hasOwn(RESTORABLE, table)) return { error: 'Not restorable.' }
   const supabase = await createClient()
   const { error } = await supabase.from(table).update({ archived_at: null }).eq('id', id)
   if (error) return { error: error.message }

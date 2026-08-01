@@ -2,7 +2,7 @@ import 'server-only'
 import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/server'
 import { fetchAll } from '@/lib/supabase/fetch-all'
-import { GUEST_COOKIE, verifyGuestSession } from '@/lib/guest-session'
+import { GUEST_COOKIE, loadGuestSession } from '@/lib/guest-session'
 
 // Guest RSVP context. Loaded with the SERVICE ROLE after cookie validation —
 // guests never hold a Supabase session, and uninvited events are never
@@ -55,7 +55,7 @@ export interface GuestRsvpContext {
 }
 
 export async function getGuestRsvpContext(siteSlug: string): Promise<GuestRsvpContext | null> {
-  const session = verifyGuestSession((await cookies()).get(GUEST_COOKIE)?.value)
+  const session = await loadGuestSession((await cookies()).get(GUEST_COOKIE)?.value)
   if (!session) return null
 
   const db = createAdminClient()

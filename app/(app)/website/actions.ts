@@ -1,9 +1,108 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { lookup } from 'node:dns/promises'
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
 import type { SiteData } from '@/lib/puck/config'
+
+// ── SSRF guards for importImageFromUrl (M6) ──────────────────────────────
+
+/** Loopback, private, link-local and cloud-metadata ranges. */
+function isPrivateIp(ip: string): boolean {
+  const v4 = ip.match(/^(\d+)\.(\d+)\.\d+\.\d+$/)
+  if (v4) {
+    const a = Number(v4[1])
+    const b = Number(v4[2])
+    return (
+      a === 0 || a === 10 || a === 127 ||
+      (a === 169 && b === 254) ||           // link-local — AWS/GCP metadata
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 100 && b >= 64 && b <= 127) || // CGNAT
+      a >= 224                              // multicast / reserved
+    )
+  }
+  const v6 = ip.toLowerCase()
+  if (v6.startsWith('::ffff:')) return isPrivateIp(v6.slice(7)) // IPv4-mapped
+  return (
+    v6 === '::1' || v6 === '::' ||
+    v6.startsWith('fc') || v6.startsWith('fd') || v6.startsWith('fe80')
+  )
+}
+
+/**
+ * Returns a user-facing reason to refuse, or null to allow.
+ *
+ * Resolves DNS and rejects hosts that point anywhere internal. Note this still
+ * leaves a DNS-rebinding window — we resolve here and the runtime resolves
+ * again when it connects. Closing that properly means dialling the resolved IP
+ * with a Host header, which Node's fetch does not expose; the redirect and
+ * range checks below are the meaningful part of the defence.
+ */
+async function disallowedHost(u: URL): Promise<string | null> {
+  if (u.protocol !== 'https:') return 'Only https image links are allowed.'
+  const host = u.hostname.toLowerCase().replace(/^\[/, '').replace(/\]$/, '')
+  if (
+    host === 'localhost' || host.endsWith('.localhost') ||
+    host.endsWith('.internal') || host.endsWith('.local')
+  ) return 'That host is not allowed.'
+  if (isPrivateIp(host)) return 'That host is not allowed.'
+  try {
+    const addrs = await lookup(host, { all: true })
+    if (!addrs.length) return 'That host could not be resolved.'
+    if (addrs.some((a) => isPrivateIp(a.address))) return 'That host is not allowed.'
+  } catch {
+    return 'That host could not be resolved.'
+  }
+  return null
+}
+
+/**
+ * Identify an image by its magic bytes. Returns the content-type to store, or
+ * null if it is not a raster format we serve. Deliberately excludes SVG: it is
+ * an XML document that can execute script, and nothing in the product needs it.
+ */
+function sniffImageType(b: Uint8Array): string | null {
+  const at = (i: number) => b[i]
+  if (b.length >= 3 && at(0) === 0xff && at(1) === 0xd8 && at(2) === 0xff) return 'image/jpeg'
+  if (
+    b.length >= 8 && at(0) === 0x89 && at(1) === 0x50 && at(2) === 0x4e && at(3) === 0x47 &&
+    at(4) === 0x0d && at(5) === 0x0a && at(6) === 0x1a && at(7) === 0x0a
+  ) return 'image/png'
+  if (b.length >= 6 && at(0) === 0x47 && at(1) === 0x49 && at(2) === 0x46 && at(3) === 0x38) return 'image/gif'
+  // RIFF....WEBP
+  if (
+    b.length >= 12 && at(0) === 0x52 && at(1) === 0x49 && at(2) === 0x46 && at(3) === 0x46 &&
+    at(8) === 0x57 && at(9) === 0x45 && at(10) === 0x42 && at(11) === 0x50
+  ) return 'image/webp'
+  return null
+}
+
+/** Read a response body, aborting the moment it exceeds `max` bytes. */
+async function readCapped(res: Response, max: number): Promise<Uint8Array> {
+  const reader = res.body?.getReader()
+  if (!reader) throw new Error('no body')
+  const chunks: Uint8Array[] = []
+  let total = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.byteLength
+    if (total > max) {
+      await reader.cancel()
+      throw new Error('too large')
+    }
+    chunks.push(value)
+  }
+  const out = new Uint8Array(total)
+  let offset = 0
+  for (const c of chunks) {
+    out.set(c, offset)
+    offset += c.byteLength
+  }
+  return out
+}
 
 /**
  * Upload an image to the PUBLIC site-assets bucket and return its URL —
@@ -15,14 +114,22 @@ export async function uploadSiteImage(formData: FormData): Promise<{ url?: strin
   const file = formData.get('file') as File | null
   if (!file || file.size === 0) return { error: 'Choose an image first.' }
   if (file.size > 10 * 1024 * 1024) return { error: 'Images are limited to 10 MB.' }
-  if (!file.type.startsWith('image/')) return { error: 'That file is not an image.' }
+
+  // M15: `file.type` is whatever the client claims. It used to be both the
+  // check AND the stored content-type, so `image/svg+xml` sailed through and
+  // landed in a PUBLIC bucket — and SVG carries <script>, giving anyone a
+  // script-hosting primitive on infrastructure with our name on it. Sniff the
+  // real bytes and store the content-type WE determined, not the one we were told.
+  const bytes = new Uint8Array(await file.arrayBuffer())
+  const sniffed = sniffImageType(bytes)
+  if (!sniffed) return { error: 'That file is not a JPG, PNG, WebP or GIF.' }
 
   const { createAdminClient } = await import('@/lib/supabase/server')
   const admin = createAdminClient()
   const safe = file.name.replace(/[^\w.\-]+/g, '_').slice(-80)
   const path = `${workspace.siteId}/${crypto.randomUUID()}-${safe}`
   const { error } = await admin.storage.from('site-assets')
-    .upload(path, file, { contentType: file.type })
+    .upload(path, bytes, { contentType: sniffed })
   if (error) return { error: error.message }
   const { data } = admin.storage.from('site-assets').getPublicUrl(path)
   return { url: data.publicUrl }
@@ -39,23 +146,54 @@ export async function importImageFromUrl(url: string): Promise<{ url?: string; e
 
   let parsed: URL
   try { parsed = new URL(url) } catch { return { error: 'That is not a valid link.' } }
-  if (parsed.protocol !== 'https:') return { error: 'Only https image links are allowed.' }
-  if (/^(localhost$|\d+\.\d+\.\d+\.\d+$|\[)/i.test(parsed.hostname)) return { error: 'That host is not allowed.' }
 
+  // M6: the host check used to run once, on the URL the user typed, and then
+  // `redirect: 'follow'` went wherever that host pointed — so any https host
+  // returning `302 → http://169.254.169.254/…` was fetched with no further
+  // checks. Follow redirects MANUALLY and re-validate every hop.
   let res: Response
+  let current = parsed
   try {
-    res = await fetch(parsed, { redirect: 'follow', signal: AbortSignal.timeout(15_000) })
+    for (let hop = 0; ; hop++) {
+      if (hop > 5) return { error: 'That link redirects too many times.' }
+      const bad = await disallowedHost(current)
+      if (bad) return { error: bad }
+      res = await fetch(current, { redirect: 'manual', signal: AbortSignal.timeout(15_000) })
+      if (res.status < 300 || res.status >= 400) break
+      const location = res.headers.get('location')
+      if (!location) break
+      current = new URL(location, current) // relative Location is legal
+    }
   } catch { return { error: 'Could not fetch that photo — try another one.' } }
+
   const type = res.headers.get('content-type')?.split(';')[0] ?? ''
   if (!res.ok || !type.startsWith('image/')) return { error: 'That link is not an image.' }
-  const buf = await res.arrayBuffer()
-  if (buf.byteLength > 15 * 1024 * 1024) return { error: 'That image is too large (15 MB max).' }
+  if (type === 'image/svg+xml') return { error: 'SVG images are not supported — use a JPG or PNG.' }
+
+  // M6: the size cap used to be checked AFTER `await res.arrayBuffer()`, so a
+  // hostile host streaming 10 GB exhausted memory before the check ever ran.
+  // Trust the declared length when present, then enforce the real cap while
+  // reading so a lying or absent Content-Length cannot get past it.
+  const MAX = 15 * 1024 * 1024
+  const declared = Number(res.headers.get('content-length') ?? '')
+  if (Number.isFinite(declared) && declared > MAX) {
+    return { error: 'That image is too large (15 MB max).' }
+  }
+  let buf: Uint8Array
+  try {
+    buf = await readCapped(res, MAX)
+  } catch { return { error: 'That image is too large (15 MB max).' } }
+
+  // M15: the remote server's Content-Type is a claim, same as a browser's.
+  // Store what the bytes actually are.
+  const sniffed = sniffImageType(buf)
+  if (!sniffed) return { error: 'That link is not a JPG, PNG, WebP or GIF.' }
 
   const { createAdminClient } = await import('@/lib/supabase/server')
   const admin = createAdminClient()
-  const ext = type.slice(6).replace('jpeg', 'jpg').replace(/[^a-z0-9]/g, '') || 'jpg'
+  const ext = sniffed.slice(6).replace('jpeg', 'jpg')
   const path = `${workspace.siteId}/${crypto.randomUUID()}.${ext}`
-  const { error } = await admin.storage.from('site-assets').upload(path, buf, { contentType: type })
+  const { error } = await admin.storage.from('site-assets').upload(path, buf, { contentType: sniffed })
   if (error) return { error: error.message }
   const { data } = admin.storage.from('site-assets').getPublicUrl(path)
   return { url: data.publicUrl }
@@ -194,14 +332,17 @@ export async function saveAndPublish(siteId: string, pageId: string, data: SiteD
   const saved = await savePageDraft(pageId, data)
   if ('error' in saved && saved.error) return saved
 
-  // The business model (handoff §7): free tier = draft + preview only.
+  // M4: gate and act on the SAME site. This used to check
+  // getPrimarySite().isUnlocked and then publish the client-supplied `siteId`
+  // — a paywall bypass for anyone able to reach an unlocked site and a locked
+  // one. `siteId` is now only honoured when it is the caller's own workspace;
+  // publishSnapshot re-checks the unlock against the site it is publishing.
   const workspace = await getPrimarySite()
-  if (!workspace?.isUnlocked) {
-    return { error: 'locked', locked: true as const }
-  }
+  if (!workspace) return { error: 'No site.' }
+  if (siteId !== workspace.siteId) return { error: 'That site is not open in your workspace.' }
 
   const { publishSnapshot } = await import('@/lib/publish')
-  const res = await publishSnapshot(siteId)
+  const res = await publishSnapshot(workspace.siteId)
   if ('error' in res && res.error) return res
 
   revalidatePath('/website')
