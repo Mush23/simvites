@@ -7,6 +7,7 @@ import { generateGuestToken } from '@/lib/tokens'
 import { siteUrl } from '@/lib/tenant'
 import { sendEmail, invitationEmailHtml, emailConfigured } from '@/lib/email'
 import { track } from '@/lib/analytics'
+import { dedupeEmails } from '@/lib/guests'
 
 /**
  * Create a personalised link for a household. The raw token is returned ONCE
@@ -78,7 +79,7 @@ export async function sendInvitation(householdId: string) {
   ])
   if (!household) return { error: 'Household not found.' }
 
-  const emails = [...new Set((guests ?? []).map((g) => g.email as string).filter(Boolean))]
+  const emails = dedupeEmails((guests ?? []).map((g) => g.email as string))
   if (!emails.length) return { error: 'No guest in this household has an email address.' }
 
   const gen = await generateHouseholdLink(householdId)

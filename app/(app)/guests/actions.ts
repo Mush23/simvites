@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
+import { guestKey, normaliseEmail } from '@/lib/guests'
 
 const str = (fd: FormData, k: string) => {
   const v = String(fd.get(k) ?? '').trim()
@@ -33,15 +34,38 @@ export async function addGuest(householdId: string, formData: FormData) {
   if (!fullName) return { error: 'Guest name is required.' }
 
   const supabase = await createClient()
+
+  // C2: `importGuests` has always skipped a guest already in the household,
+  // but this path had no check — so pasting a spreadsheet deduped and typing
+  // the same name did not. Same rule, both doors.
+  const { data: siblings } = await supabase
+    .from('guests').select('full_name')
+    .eq('household_id', householdId).eq('site_id', site.siteId).is('archived_at', null)
+  const clash = (siblings ?? []).some(
+    (g) => guestKey(householdId, g.full_name) === guestKey(householdId, fullName),
+  )
+  if (clash) {
+    return { error: `${fullName} is already in this household.` }
+  }
+
   const { error } = await supabase.from('guests').insert({
     site_id: site.siteId,
     household_id: householdId,
     full_name: fullName,
-    email: str(formData, 'email'),
+    // C2: stored lowercase so every Set-based dedupe downstream actually
+    // matches. Two guests MAY share an address — a couple with one inbox is
+    // normal — they just must not be mailed twice.
+    email: normaliseEmail(str(formData, 'email')),
     is_child: formData.get('is_child') === 'on',
     plus_one_allowed: formData.get('plus_one_allowed') === 'on',
   })
-  if (error) return { error: error.message }
+  if (error) {
+    // The 0023 partial unique index is the backstop if the check above races.
+    if (/guests_unique_name_per_household/.test(error.message)) {
+      return { error: `${fullName} is already in this household.` }
+    }
+    return { error: error.message }
+  }
   revalidatePath('/guests')
   return { ok: true }
 }
@@ -208,7 +232,8 @@ export async function importGuests(rows: ImportRow[]) {
     .from('guests').select('full_name, household_id').eq('site_id', site.siteId).is('archived_at', null)
 
   const hhByName = new Map((households ?? []).map((h) => [h.name.toLowerCase(), h.id]))
-  const existing = new Set((guests ?? []).map((g) => `${g.household_id}:${g.full_name.toLowerCase()}`))
+  // Same key the manual add now uses — see lib/guests.ts.
+  const existing = new Set((guests ?? []).map((g) => guestKey(g.household_id, g.full_name)))
 
   let createdHouseholds = 0
   let createdGuests = 0
@@ -229,12 +254,12 @@ export async function importGuests(rows: ImportRow[]) {
       createdHouseholds++
     }
 
-    if (existing.has(`${hhId}:${guestName.toLowerCase()}`)) { skipped++; continue }
+    if (existing.has(guestKey(hhId, guestName))) { skipped++; continue }
     const { error } = await supabase.from('guests').insert({
-      site_id: site.siteId, household_id: hhId, full_name: guestName, email: row.email?.trim() || null,
+      site_id: site.siteId, household_id: hhId, full_name: guestName, email: normaliseEmail(row.email),
     })
     if (error) return { error: `Guest "${guestName}": ${error.message}` }
-    existing.add(`${hhId}:${guestName.toLowerCase()}`)
+    existing.add(guestKey(hhId, guestName))
     createdGuests++
   }
 

@@ -272,7 +272,20 @@ and a fabricated date contradicting their own schedule ("DATE TBC"). Partial
 substitution is what makes it read as a bug rather than as placeholder text, and
 it is the first screen a paying customer sees.
 
-**C2 (medium). No duplicate detection on the guest list.** The same person added
+**C2 — FIXED 2026-08-02.** The rule already existed: `importGuests` skipped a
+guest already in the household, keyed on household + lowercased name, and
+reported how many it skipped. `addGuest` simply had no check — so pasting a
+spreadsheet deduped and typing the same name did not. Both doors now share
+`lib/guests.ts`, emails are stored lowercase, and all three send paths dedupe
+case-insensitively so a legacy mixed-case row cannot double-mail anyone.
+`0023_guest_dedupe.sql` adds a partial unique index as the backstop and closes
+the check-then-insert race. Deliberately NOT unique on email: a couple sharing
+one inbox is ordinary, they just must not be mailed twice. Verified against the
+live schema — exact, case- and whitespace-variant duplicates rejected; same name
+in another household, a shared inbox, and re-adding after archiving all still
+allowed. 91 assertions.
+
+**C2 (medium) — original report. No duplicate detection on the guest list.** The same person added
 twice — same name, email differing only in case — creates two guests with no
 warning ("2 guests · 2 emails"). Emails are stored as typed
 (`Chidi.Okonkwo@Example.COM`), so `sendInvitation`'s `[...new Set(emails)]`

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
 import { sendEmail, emailConfigured, escapeHtml } from '@/lib/email'
+import { dedupeEmails } from '@/lib/guests'
 import { generateGuestToken } from '@/lib/tokens'
 import { siteUrl } from '@/lib/tenant'
 
@@ -30,7 +31,7 @@ export async function sendReminders() {
 
   let sent = 0
   for (const h of pending) {
-    const emails = [...new Set((guests ?? []).filter((g) => g.household_id === h.id && g.email).map((g) => g.email as string))]
+    const emails = dedupeEmails((guests ?? []).filter((g) => g.household_id === h.id).map((g) => g.email as string))
     if (!emails.length) continue
     const { raw, hash } = generateGuestToken()
     await supabase.from('guest_access_tokens').insert({ site_id: site.siteId, household_id: h.id, token_hash: hash })
