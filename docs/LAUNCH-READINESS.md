@@ -254,13 +254,28 @@ Verified three ways: all 18 seeded starters are free of demo strings
 browser showed no leakage and the couple's own name; and its persisted
 `puck_data` was clean.
 
-**One pre-existing site still needs a decision.** `sana-and-omar` is
-**published** with a stored hero reading `title: "Aanya & Dev"`, dated
-19 September 2026 in Manchester — it was created under the old code. The fix
-above only affects sites created from now on; it does not rewrite stored
-content, and I did not want to edit a published page automatically. Either
-re-seed it or correct the hero by hand. (`meera-and-jay` looked affected on a
-first pass but is not — that couple really is called Meera and one parent Raj.)
+**`sana-and-omar` — CORRECTED 2026-08-02** (data fix, no code change).
+
+It was worse than first reported: the footer named the demo couple too, and the
+same values were in the **published snapshot**, which is the only thing the
+public site reads. So a visitor to that address genuinely saw "Aanya & Dev".
+Confirmed by fetching the rendered page before touching anything.
+
+Eight values corrected across the draft page and the live snapshot: Hero title
+and Footer names to "Sana & Omar"; the fabricated date and Manchester location
+blanked, because the site's one event has no date and no venue — absent rather
+than wrong, the same principle as the C1 fix.
+
+Done as a **new** `published_versions` row rather than a rewrite of the old
+one, so publish history stays honest and the couple can still see what was
+previously live. Dry-run first, applied in a transaction, and an `activity_log`
+entry records that support made the change.
+
+Afterwards, all nine sites were swept — comparing every stored `Hero.title` and
+`Footer.names`, in both draft and live snapshot, against the site's own title.
+No site names a couple other than its own. (`meera-and-jay` looked affected on
+an earlier pass and is not: that couple really is called Meera and one parent
+Raj. Matching on names needs the comparison, not a keyword.)
 
 **C1 (high) — original report. The starter site ships another couple's family.** A brand-new site
 titled "Priya & Sam" opens with a FAMILIES block reading *The Groom: Dev, Son of
