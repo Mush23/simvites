@@ -181,13 +181,21 @@ export async function removeCollaborator(userId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (user?.id === userId) return { error: 'You cannot remove yourself.' }
 
-  const { error } = await supabase
+  // `.select()` so a delete blocked by RLS is visible. Without it this returned
+  // no error AND no rows, so "Remove" reported success and removed nothing —
+  // memberships had no DELETE policy at all until 0025. A silent no-op is the
+  // worst outcome here: the owner believes access is revoked when it is not.
+  const { data: removed, error } = await supabase
     .from('memberships')
     .delete()
     .eq('org_id', site.orgId)
     .eq('user_id', userId)
     .neq('role', 'owner')
+    .select('user_id')
   if (error) return { error: error.message }
+  if (!removed?.length) {
+    return { error: 'Could not remove that collaborator — please refresh and try again.' }
+  }
   revalidatePath('/settings')
   return { ok: true }
 }

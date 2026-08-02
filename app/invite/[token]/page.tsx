@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { hashToken } from '@/lib/tokens'
 import { BRAND_NAME } from '@/lib/brand'
-import { invitedAddressMatches } from '@/lib/collaborators'
 import { AcceptButton } from './accept-button'
 
 export const metadata: Metadata = { title: `Invitation — ${BRAND_NAME}`, robots: { index: false } }
@@ -79,9 +78,24 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
 
   // Signed in as somebody else. The RPC would refuse anyway; say so plainly
   // here rather than letting them click into an error.
+  //
+  // Compared EXACTLY, server-side, against the real address. An earlier version
+  // compared against the masked address the peek RPC returns, which had to be
+  // lenient to avoid stranding anyone — and was therefore wrong in an ordinary
+  // case: `zz-owner@simvites.test` matched a mask of `z***@simvites.test`, so
+  // the owner was shown an Accept button that could only fail. Same domain and
+  // same first letter is not a coincidence between partners.
+  //
+  // The real address never reaches the browser; only this boolean does.
   const signedInAs = (user.email ?? '').toLowerCase()
+  const { data: invited } = await admin
+    .from('collaborator_invitations')
+    .select('email')
+    .eq('token_hash', hashToken(token))
+    .maybeSingle()
+  const invitedEmail = ((invited as { email: string } | null)?.email ?? '').toLowerCase()
   const invitedMask = peek?.invited_email ?? ''
-  const looksMismatched = !invitedAddressMatches(invitedMask, signedInAs)
+  const looksMismatched = !!invitedEmail && invitedEmail !== signedInAs
 
   if (looksMismatched) {
     return (

@@ -94,6 +94,52 @@ correctly. `npm run test:misuse` covers the mask comparison and the reserved
 
 Migrations 0020 and 0021 are both applied and recorded.
 
+### Walked end to end 2026-08-02 — three bugs the guards did not cover
+
+Two throwaway accounts, the invitee given **their own site created after the
+owner's**, which is the exact shape M1 was about. Every database guard held;
+all three failures were above that line, which is why the schema-level
+verification had not found them.
+
+**M1 confirmed in the product.** The invitee accepted an invitation to the
+owner's *older* site and their dashboard still showed **their own** wedding.
+Under the old code they would have been displaced. Invitation ≠ membership held
+too: after the invite was sent and before it was accepted, the invitee had no
+membership at all.
+
+**1. The wrong-account screen did not fire.** Signed in as the owner, opening
+the invitee's link offered an **Accept invitation** button. The pre-check
+compared against the *masked* address the peek RPC returns, so it had to be
+lenient — and `zz-owner@simvites.test` matched a mask of `z***@simvites.test`
+on domain and first letter. Same domain and same initial is not a coincidence
+between partners. Security held (the RPC refused, no membership created), but
+the check existed precisely so nobody clicks into that error. Now compared
+**exactly, server-side**, against the real address; only the boolean reaches the
+browser, so nothing is leaked. The lenient helper is deleted.
+
+**2. Collaborators showed as `unknown`.** `profiles` had one policy,
+`profiles_self => (id = auth.uid())`, so the embedded `profiles(email)` was
+NULL for everyone but yourself — and the owner's own row rendered fine, which
+made it look like a display quirk. Worse than cosmetic: the **Remove** button sat
+next to a name that could not be read. `0024` makes profiles readable to people
+who share an organisation, via a security-definer helper.
+
+**3. Remove silently did nothing.** `memberships` has RLS enabled and exactly
+one policy — SELECT. With no DELETE policy the delete matched zero rows and
+returned no error, so the action reported success and revoked nothing. Nothing
+had ever written to that table directly (memberships are created by two
+SECURITY DEFINER RPCs), which is how the gap survived. `0025` adds an
+owner-only DELETE policy that cannot remove an owner, and `removeCollaborator`
+now `.select()`s the deleted row and errors if nothing came back — a silent
+no-op is the worst outcome, because the owner believes access is revoked when
+it is not.
+
+Also verified: replaying an accepted link shows "already accepted"; the owner's
+pending list shows the address, a 14-day expiry and Withdraw; and after Remove
+the collaborator keeps their own site.
+
+Migrations 0020, 0021, 0023, 0024 and 0025 are applied and recorded.
+
 Existing guest cookies are invalidated by the M2 change (they lack `tokenId`
 and `exp`, and are rejected rather than grandfathered). Anyone mid-RSVP reopens
 their invitation link. On a pre-launch database that is nobody.
