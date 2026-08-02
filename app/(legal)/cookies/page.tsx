@@ -46,7 +46,7 @@ export default function CookiesPage() {
           </thead>
           <tbody>
             <tr>
-              <td>simvites_guest</td>
+              <td>milestones_guest</td>
               <td>
                 Remembers which invitation you opened, so you can come back to a wedding
                 site and reply without hunting for the original link. It holds a reference

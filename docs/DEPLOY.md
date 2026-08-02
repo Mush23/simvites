@@ -1,4 +1,4 @@
-# Deploying Simvites to Vercel
+# Deploying Milestones to Vercel
 
 Two ways to deploy. **Dashboard** is easiest for a one-time setup; **CLI** lets
 me drive it if you give me a token.
@@ -17,7 +17,7 @@ Production values (Preview/Production scope):
 | `NEXT_PUBLIC_ROOT_DOMAIN` | `simvites.co.uk` (once the domain is attached) |
 | `GUEST_SESSION_SECRET` | a long random string (e.g. `openssl rand -base64 32`) |
 | `RESEND_API_KEY` | optional, when email is connected |
-| `RESEND_FROM` | optional, e.g. `Simvites <invitations@simvites.co.uk>` |
+| `RESEND_FROM` | optional, e.g. `Milestones <invitations@simvites.co.uk>` |
 | `STRIPE_SECRET_KEY` | optional, when payments are connected |
 | `STRIPE_WEBHOOK_SECRET` | optional (set after creating the webhook) |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | optional |
@@ -29,10 +29,10 @@ migration scripts.
 
 ## Option A — Vercel dashboard (recommended, one-time)
 
-1. Go to vercel.com → **Add New… → Project** → import **Mush23/simvites**
+1. Go to vercel.com → **Add New… → Project** → import **Mush23/milestones**
    (authorise GitHub if asked). Vercel auto-detects Next.js — no settings to change.
 2. Before the first deploy, add the env vars above.
-3. Deploy. You get `https://simvites.vercel.app` (marketing + dashboard + login work here).
+3. Deploy. You get `https://milestones.vercel.app` (marketing + dashboard + login work here).
 4. Every `git push` to `main` now auto-deploys.
 
 ## Option B — CLI (I can drive this with a token)

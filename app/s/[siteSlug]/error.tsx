@@ -3,7 +3,7 @@
 // Error boundary for the couple's PUBLISHED site.
 //
 // Without this, failures here fell through to app/error.tsx — which greets a
-// wedding guest with the Simvites wordmark and "Something went wrong." A guest
+// wedding guest with the Milestones wordmark and "Something went wrong." A guest
 // opening their invitation should never see the tool their hosts happened to
 // use; as far as they are concerned this is the couple's website.
 //

@@ -14,7 +14,7 @@
 #
 # Nothing here affects local development or the deployed app.
 
-project_id = "simvites"
+project_id = "milestones"
 
 [api]
 enabled = true

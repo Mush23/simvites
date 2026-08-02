@@ -21,7 +21,7 @@ const service = process.env.SUPABASE_SERVICE_ROLE_KEY
 const pepper = process.env.TOKEN_PEPPER // optional — tokens skipped if unset
 const admin = createClient(url, service, { auth: { persistSession: false } })
 
-const OWNER_EMAIL = 'scale@simvites.test'
+const OWNER_EMAIL = 'scale@milestones.test'
 const OWNER_PW = 'ScaleTest2026!'
 const ORG_NAME = 'Scale Test Studio'
 
@@ -60,7 +60,7 @@ const homeDoc = (o) => ({
     { type: 'HotelTravel', props: { id: 'hotel', heading: 'Stay & Travel', hotelName: o.hotel.name, address: o.hotel.address, blockCode: o.hotel.code, phone: o.hotel.phone, bookingUrl: o.hotel.url, notes: o.hotel.notes } },
     { type: 'RsvpCta', props: { id: 'rsvp', heading: 'Kindly RSVP', body: 'We can’t wait to celebrate with you.', buttonText: 'Open your invitation' } },
     { type: 'GiftsNote', props: { id: 'gifts', heading: o.gifts.heading, body: o.gifts.body } },
-    { type: 'SiteFooterBlock', props: { id: 'footer', names: o.names, note: 'Made with Simvites' } },
+    { type: 'SiteFooterBlock', props: { id: 'footer', names: o.names, note: 'Made with Milestones' } },
   ],
 })
 

@@ -1,4 +1,4 @@
-# Simvites
+# Milestones
 
 Multi-tenant SaaS **event-website builder** — beautiful wedding & event sites
 with a real per-event RSVP engine, personalised invitations and live updates.

@@ -249,7 +249,7 @@ export default function LandingPage() {
         <div className="mx-auto grid max-w-[1060px] gap-10 sm:grid-cols-4">
           <div>
             <p className="flex items-center gap-1.5 text-[13px] font-semibold tracking-tight">
-              <span className="flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-bold text-white" style={{ background: CORAL }}>S</span>
+              <span className="flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-bold text-white" style={{ background: CORAL }}>{BRAND_NAME[0]}</span>
               {BRAND_NAME}
             </p>
             <p className="mt-3 max-w-[220px] text-[12px] leading-relaxed text-[#8F8D88]">

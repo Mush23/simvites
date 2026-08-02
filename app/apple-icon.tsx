@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og'
+import { BRAND_NAME } from '@/lib/brand'
 
 // Home-screen icon for iOS. Same mark as the favicon, sized for the larger
 // canvas — iOS applies its own rounding, so this one is square.
@@ -22,7 +23,7 @@ export default function AppleIcon() {
           fontWeight: 700,
         }}
       >
-        S
+        {BRAND_NAME[0]}
       </div>
     ),
     { ...size },

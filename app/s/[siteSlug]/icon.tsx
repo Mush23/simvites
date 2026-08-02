@@ -8,7 +8,7 @@ import { toStaticHex } from '@/lib/color'
 //
 // Same reasoning as the error boundary beside this file: a guest's browser tab
 // belongs to the couple. Without this the root app/icon.tsx applies and every
-// wedding site flies the Simvites mark.
+// wedding site flies the Milestones mark.
 //
 // Drawn in the site's OWN template colours, so the tab matches the page it
 // belongs to.

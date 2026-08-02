@@ -10,7 +10,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { BRAND_NAME } from '@/lib/brand'
+import { BRAND_NAME, BASE_DOMAIN } from '@/lib/brand'
 import { LiveDemo } from './live-demo'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 
@@ -71,7 +71,7 @@ const TUNNEL = [
     body: (
       <div className="space-y-2.5 text-[10.5px]">
         <p className="font-medium text-white/90">The Shah Family</p>
-        <p className="rounded-md bg-white/[0.06] px-2.5 py-1.5 font-mono text-[9px] text-white/60">simvites.co.uk/i/9f2c…d41a · opened twice</p>
+        <p className="rounded-md bg-white/[0.06] px-2.5 py-1.5 font-mono text-[9px] text-white/60">{BASE_DOMAIN}/i/9f2c…d41a · opened twice</p>
         <div className="flex items-center gap-2">
           <span className="grid h-11 w-11 shrink-0 grid-cols-4 gap-px overflow-hidden rounded-sm bg-white p-1">
             {Array.from({ length: 16 }).map((_, i) => (
@@ -213,7 +213,7 @@ export function DeepZoom() {
       {/* Fixed glass nav pill */}
       <nav className="fixed left-1/2 top-4 z-50 flex max-w-[calc(100vw-24px)] -translate-x-1/2 flex-nowrap items-center gap-0.5 whitespace-nowrap rounded-[13px] border border-black/[0.07] bg-white/75 px-2 py-1.5 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.25)] backdrop-blur-xl dark:border-white/10 dark:bg-[#0E1830]/85 sm:gap-1">
         <Link href="/" className="flex shrink-0 items-center gap-1.5 px-2 text-[13px] font-semibold tracking-tight text-[#191918] dark:text-[#EEF2FA]">
-          <span className="flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-bold text-white" style={{ background: 'oklch(0.62 0.21 29)' }}>S</span>
+          <span className="flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-bold text-white" style={{ background: 'oklch(0.62 0.21 29)' }}>{BRAND_NAME[0]}</span>
           {BRAND_NAME}
         </Link>
         {[['#product', 'Product'], ['#templates', 'Templates'], ['#rsvp', 'RSVP'], ['#faq', 'FAQ'], ['#pricing', 'Pricing']].map(([h, l]) => (

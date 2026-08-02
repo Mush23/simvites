@@ -11,9 +11,9 @@
 // questions in particular are unresolved and are flagged inline on the page:
 //
 //   1. Controller vs processor for GUEST data. Guests never signed up to
-//      Simvites; the couple uploaded them. The draft treats the couple as
-//      controller and Simvites as processor, which is the common reading, but
-//      Simvites decides retention and uses guest counts for its own billing —
+//      Milestones; the couple uploaded them. The draft treats the couple as
+//      controller and Milestones as processor, which is the common reading, but
+//      Milestones decides retention and uses guest counts for its own billing —
 //      facts that point at joint controllership. If it IS joint, a Art. 26
 //      arrangement is required and the couple must be told the essence of it.
 //

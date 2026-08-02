@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
 import { parsePounds } from '@/lib/money'
+import { BRAND_NAME } from '@/lib/brand'
 
 const str = (fd: FormData, k: string) => {
   const v = String(fd.get(k) ?? '').trim()
@@ -56,7 +57,7 @@ export async function addFromDirectory(directoryId: string) {
       site_id: site.siteId, name: rec.name, category: rec.category,
       website: rec.website, instagram: rec.instagram, email: rec.email, phone: rec.phone,
       status: 'shortlisted', source_directory_id: directoryId,
-      notes: 'Added from Simvites recommendations.',
+      notes: `Added from ${BRAND_NAME} recommendations.`,
     })
     .select('id')
     .single()

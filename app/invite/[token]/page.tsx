@@ -82,7 +82,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   // Compared EXACTLY, server-side, against the real address. An earlier version
   // compared against the masked address the peek RPC returns, which had to be
   // lenient to avoid stranding anyone — and was therefore wrong in an ordinary
-  // case: `zz-owner@simvites.test` matched a mask of `z***@simvites.test`, so
+  // case: `zz-owner@milestones.test` matched a mask of `z***@milestones.test`, so
   // the owner was shown an Accept button that could only fail. Same domain and
   // same first letter is not a coincidence between partners.
   //

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getPrimarySite } from '@/lib/workspace'
 import { getStripe, UNLOCK_PRODUCT_NAME } from '@/lib/stripe'
 import { getUnlockPrice } from '@/lib/pricing'
+import { BRAND_NAME } from '@/lib/brand'
 import { track } from '@/lib/analytics'
 import { INVITE_EXPIRY_DAYS } from '@/lib/collaborators'
 
@@ -134,7 +135,7 @@ export async function inviteCollaborator(formData: FormData) {
     subject: `${user.email ?? 'Someone'} invited you to help plan ${site.title}`,
     html: collaboratorInviteEmailHtml({
       orgName: site.title,
-      inviterEmail: user.email ?? 'A Simvites user',
+      inviterEmail: user.email ?? `A ${BRAND_NAME} user`,
       link,
       expiresInDays: INVITE_EXPIRY_DAYS,
     }),

@@ -221,7 +221,7 @@ couple's published wedding site — shows the default globe.
 The entire design overhaul was typechecked, built and colour-measured but never
 opened. It has now been walked end to end.
 
-**How.** A throwaway account (`zz-clickthrough@simvites.test`) signed in via a
+**How.** A throwaway account (`zz-clickthrough@milestones.test`) signed in via a
 magic link minted with the admin API — no password typed into any form — then
 onboarding → guest list → invite matrix → editor → publish. The account, its
 org and every row it created were deleted afterwards; the temporary sign-in
@@ -516,9 +516,9 @@ the bad entries), no error page, nothing leaked to guests, and the server logged
 entry)`. The host-facing notice is unverified — it only renders in the editor,
 which is behind auth.*
 
-### 10. Wedding guests see Simvites branding on an error — FIXED
+### 10. Wedding guests see Milestones branding on an error — FIXED
 `app/error.tsx` is the root boundary, so it also catches failures on the couple's
-published site — and it renders the Simvites wordmark plus "Something went
+published site — and it renders the Milestones wordmark plus "Something went
 wrong." A guest opening their invitation should never see the vendor's brand.
 Add an error boundary under `app/s/[siteSlug]/` in the couple's own template
 voice. *Observed directly while testing the publish bug.*
@@ -538,7 +538,7 @@ warm instance keeps a separate window, so the effective limit is
 
 ### 14. The `newbie@occasio.test` review account still exists
 Not created by any seed script, so it must be recreated by hand as
-`newbie@simvites.test`. Every `Occasio` string in the codebase is gone; this one
+`newbie@milestones.test`. Every `Occasio` string in the codebase is gone; this one
 lives only in the database.
 
 ---

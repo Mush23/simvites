@@ -12,8 +12,8 @@ if (!url || !serviceKey) {
   process.exit(1)
 }
 
-const email = process.argv[2] ?? 'founder@simvites.test'
-const password = process.argv[3] ?? 'Simvites!2026'
+const email = process.argv[2] ?? 'founder@milestones.test'
+const password = process.argv[3] ?? 'Milestones!2026'
 
 const admin = createClient(url, serviceKey, {
   auth: { persistSession: false, autoRefreshToken: false },

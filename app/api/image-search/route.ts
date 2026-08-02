@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { rateLimit } from '@/lib/rate-limit'
+import { BRAND_NAME } from '@/lib/brand'
 
 export interface ImageSearchResult {
   thumb: string
@@ -43,7 +44,7 @@ export async function GET(req: Request) {
     } else {
       const r = await fetch(
         `https://api.openverse.org/v1/images/?q=${encodeURIComponent(q)}&page_size=12&license_type=commercial&mature=false`,
-        { headers: { 'User-Agent': 'Simvites/1.0 (event website builder)' }, signal: AbortSignal.timeout(10_000) },
+        { headers: { 'User-Agent': `${BRAND_NAME}/1.0 (event website builder)` }, signal: AbortSignal.timeout(10_000) },
       )
       if (!r.ok) throw new Error(`Openverse ${r.status}`)
       const j = (await r.json()) as { results: { thumbnail?: string; url: string; creator?: string; source?: string }[] }

@@ -18,7 +18,7 @@ async function ownerId() {
   const { data: list } = await admin.auth.admin.listUsers()
   let u = list.users.find((x) => x.email === ownerEmail)
   if (!u) {
-    const { data } = await admin.auth.admin.createUser({ email: ownerEmail, password: 'Simvites2026!', email_confirm: true })
+    const { data } = await admin.auth.admin.createUser({ email: ownerEmail, password: 'Milestones2026!', email_confirm: true })
     u = data.user
   }
   await admin.from('profiles').upsert({ id: u.id, email: ownerEmail, full_name: 'Demo Host' })

@@ -1,8 +1,8 @@
 {
-  "name": "simvites",
+  "name": "milestones",
   "version": "0.1.0",
   "private": true,
-  "description": "Simvites — multi-tenant event-website builder (South Asian wedding wedge)",
+  "description": "Milestones — multi-tenant event-website builder (South Asian wedding wedge)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

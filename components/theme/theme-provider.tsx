@@ -22,11 +22,12 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-const STORAGE_KEY = 'simvites-theme'
-/** Pre-rename key. Read once as a fallback so existing visitors keep the
- *  light/dark choice they already made instead of silently reverting to
- *  system on their next visit. */
-const LEGACY_STORAGE_KEY = 'occasio-theme'
+const STORAGE_KEY = 'milestones-theme'
+/** Pre-rename keys, newest first. Read as fallbacks so existing visitors keep
+ *  the light/dark choice they already made instead of silently reverting to
+ *  system on their next visit. Two renames deep now — Occasio → Simvites →
+ *  Milestones — so this is a list rather than a single key. */
+const LEGACY_STORAGE_KEYS = ['simvites-theme', 'occasio-theme']
 
 function systemPrefersDark() {
   return (
@@ -48,7 +49,8 @@ function applyClass(resolved: Resolved) {
 export function ThemeScript({ defaultMode = 'system' }: { defaultMode?: ThemeMode }) {
   const js = `(function(){try{
     var d='${defaultMode}';
-    var s=localStorage.getItem('${STORAGE_KEY}')||localStorage.getItem('${LEGACY_STORAGE_KEY}');
+    var k=${JSON.stringify([STORAGE_KEY, ...LEGACY_STORAGE_KEYS])};
+    var s=null; for(var i=0;i<k.length&&!s;i++) s=localStorage.getItem(k[i]);
     var m=s||d;
     var dark = m==='dark' || (m!=='light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     if(dark)document.documentElement.classList.add('dark');
@@ -68,12 +70,14 @@ export function ThemeProvider({
 
   // Hydrate preference from storage on mount.
   useEffect(() => {
-    const stored = (localStorage.getItem(STORAGE_KEY)
-      ?? localStorage.getItem(LEGACY_STORAGE_KEY)) as ThemeMode | null
-    if (stored && stored !== localStorage.getItem(STORAGE_KEY)) {
-      // Migrate forward once, then the legacy key is never consulted again.
+    const current = localStorage.getItem(STORAGE_KEY)
+    const stored = (current
+      ?? LEGACY_STORAGE_KEYS.map((k) => localStorage.getItem(k)).find(Boolean)
+      ?? null) as ThemeMode | null
+    if (stored && stored !== current) {
+      // Migrate forward once, then the legacy keys are never consulted again.
       localStorage.setItem(STORAGE_KEY, stored)
-      localStorage.removeItem(LEGACY_STORAGE_KEY)
+      LEGACY_STORAGE_KEYS.forEach((k) => localStorage.removeItem(k))
     }
     setModeState(stored ?? defaultMode)
   }, [defaultMode])

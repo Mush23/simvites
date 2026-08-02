@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { adminSaveDirectoryVendor, adminArchiveDirectoryVendor, type DirectoryVendorInput } from '../actions'
 import { notify } from '@/components/ui/overlays'
+import { BRAND_NAME } from '@/lib/brand'
 
 export interface DirectoryRow extends Required<Omit<DirectoryVendorInput, 'featured'>> {
   featured: boolean
@@ -69,8 +70,8 @@ export function DirectoryManager({ rows }: { rows: DirectoryRow[] }) {
             <F k="instagram" label="Instagram" placeholder="@handle" />
             <F k="email" label="Email" />
             <F k="phone" label="Phone" />
-            <F k="discount" label="Partner discount (shown to couples)" placeholder="10% off booking through Simvites" />
-            <F k="promo_code" label="Promo code" placeholder="SIMVITES10" />
+            <F k="discount" label="Partner discount (shown to couples)" placeholder={`10% off booking through ${BRAND_NAME}`} />
+            <F k="promo_code" label="Promo code" placeholder={`${BRAND_NAME.toUpperCase()}10`} />
             <label className="flex items-end gap-2 pb-1 text-[13px] text-ink">
               <input type="checkbox" checked={editing.featured ?? false}
                 onChange={(e) => setEditing((c) => ({ ...(c as DirectoryVendorInput), featured: e.target.checked }))} />

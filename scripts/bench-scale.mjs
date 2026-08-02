@@ -51,7 +51,7 @@ await c.end()
 // ── (B) End-to-end as an authenticated user (RLS included) ──────────────────
 console.log('\n══ (B) Page query bundles, authenticated + RLS (median of 5) ══\n')
 const authed = createClient(SUPA_URL, ANON, { auth: { persistSession: false } })
-const { error: signErr } = await authed.auth.signInWithPassword({ email: 'scale@simvites.test', password: 'ScaleTest2026!' })
+const { error: signErr } = await authed.auth.signInWithPassword({ email: 'scale@milestones.test', password: 'ScaleTest2026!' })
 if (signErr) { console.log('sign-in failed:', signErr.message); process.exit(1) }
 
 // getPrimarySite would return the oldest accessible site; the flagship is first.

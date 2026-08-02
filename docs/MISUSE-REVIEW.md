@@ -110,7 +110,7 @@ membership at all.
 **1. The wrong-account screen did not fire.** Signed in as the owner, opening
 the invitee's link offered an **Accept invitation** button. The pre-check
 compared against the *masked* address the peek RPC returns, so it had to be
-lenient — and `zz-owner@simvites.test` matched a mask of `z***@simvites.test`
+lenient — and `zz-owner@milestones.test` matched a mask of `z***@milestones.test`
 on domain and first letter. Same domain and same initial is not a coincidence
 between partners. Security held (the RPC refused, no membership created), but
 the check existed precisely so nobody clicks into that error. Now compared
@@ -303,7 +303,7 @@ On its own that is a couple attacking their own guests. What makes it worse:
   need no relationship to any real wedding.
 
 So one £149 unlock buys arbitrary HTML, sent to arbitrary addresses, from
-Simvites' SPF/DKIM-authenticated domain. The cost lands on your sender
+Milestones' SPF/DKIM-authenticated domain. The cost lands on your sender
 reputation, and it is your domain that gets blocklisted.
 
 Fix: escape both interpolations; cap sends per site per hour; and keep a

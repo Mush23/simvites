@@ -22,7 +22,7 @@ export interface DirectoryVendor {
   instagram: string | null
   rating: number | null
   featured: boolean
-  /** E4: partner perk, e.g. "10% off through Simvites" + optional promo code. */
+  /** E4: partner perk, e.g. "10% off through Milestones" + optional promo code. */
   discount?: string | null
   promo_code?: string | null
   mentions: { quote: string; author: string | null; source: string | null }[]

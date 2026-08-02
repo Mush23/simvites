@@ -36,7 +36,7 @@ export function getSubdomain(host: string | null | undefined): string | null {
   const hostname = host.split(':')[0].toLowerCase()
   const rootHostname = ROOT_DOMAIN.split(':')[0].toLowerCase()
 
-  // Vercel preview deployments (e.g. simvites-git-x.vercel.app) → marketing.
+  // Vercel preview deployments (e.g. milestones-git-x.vercel.app) → marketing.
   if (hostname.endsWith('.vercel.app')) return null
 
   // Exact apex match → no tenant.

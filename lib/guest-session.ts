@@ -4,7 +4,12 @@ import { createHmac, timingSafeEqual } from 'node:crypto'
 // personalised /i/<token> link. Never readable by JS; signed so it can't be
 // forged. Holds only household + site + token ids (no PII).
 
-export const GUEST_COOKIE = 'simvites_guest'
+// Renamed with the brand (2026-08-02). No legacy fallback on purpose: M2 gave
+// this cookie a bound payload, so every pre-M2 value is already rejected, and
+// the cookie notice names it — a cookie called `simvites_guest` under a
+// Milestones notice would be a documentation bug. Any guest holding a live one
+// reopens their invitation link, which is one tap.
+export const GUEST_COOKIE = 'milestones_guest'
 
 /** 180 days — the wedding season. Matches the cookie's maxAge. */
 export const GUEST_SESSION_TTL_MS = 180 * 24 * 60 * 60 * 1000

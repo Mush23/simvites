@@ -1,4 +1,4 @@
-# Connecting Simvites to its services
+# Connecting Milestones to its services
 
 A plain-English checklist of every external service, what it's for, where to get
 the credential, and where it goes. Secrets live in **`.env.local`** (gitignored —
@@ -9,7 +9,7 @@ Status legend: ✅ connected · ⏳ needed now · 🔜 later phase
 ---
 
 ## ✅ GitHub — source control
-- **Repo:** https://github.com/Mush23/simvites (private)
+- **Repo:** https://github.com/Mush23/milestones (private)
 - **Auth:** `gh` CLI, logged in as `Mush23`. Nothing more to do.
 
 ## ✅ Supabase — database, storage, auth (project `rpkcrazictrjuxheugod`)

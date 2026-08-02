@@ -10,6 +10,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 
 import { useEffect, useRef } from 'react'
+import { BASE_DOMAIN } from '@/lib/brand'
 
 const LOOP = 22 // seconds
 const NAMES = 'Aanya & Dev'
@@ -167,7 +168,7 @@ export function LiveDemo({ active = true, showScrubber = true, className = '' }:
       }
       if (q.url) {
         const live = t >= 18 && t < 21.5
-        const label = live ? 'aanya-and-dev.simvites.co.uk · live ●' : 'aanya-and-dev.simvites.co.uk · editing'
+        const label = `aanya-and-dev.${BASE_DOMAIN} · ${live ? 'live ●' : 'editing'}`
         if (q.url.textContent !== label) q.url.textContent = label
         q.url.style.color = live ? '#1B9E5F' : '#928D81'
       }
@@ -200,7 +201,7 @@ export function LiveDemo({ active = true, showScrubber = true, className = '' }:
             <i className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" /><i className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]" /><i className="h-2.5 w-2.5 rounded-full bg-[#28C840]" />
           </span>
           <span data-d="url" className="flex-1 truncate rounded-md border border-[#EAE5DA] bg-white px-3 py-1 text-center font-mono text-[10px] text-[#928D81]">
-            aanya-and-dev.simvites.co.uk · editing
+            {`aanya-and-dev.${BASE_DOMAIN} · editing`}
           </span>
           <span className="hidden gap-0.5 rounded-md border border-[#EAE5DA] bg-white p-0.5 text-[9.5px] text-[#6B675E] sm:flex">
             <i data-d="devdesk" className="rounded px-1.5 py-0.5 not-italic" style={{ background: '#F4F1E9' }}>Desktop</i>

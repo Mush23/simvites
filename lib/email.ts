@@ -15,7 +15,7 @@ export interface SendResult {
   error?: string
 }
 
-const FROM = process.env.RESEND_FROM ?? 'Simvites <onboarding@resend.dev>'
+const FROM = process.env.RESEND_FROM ?? `${BRAND_NAME} <onboarding@resend.dev>`
 
 export function emailConfigured() {
   return !!process.env.RESEND_API_KEY
