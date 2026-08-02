@@ -32,13 +32,25 @@ async function getOrCreateUser(email) {
 }
 
 async function setupOrg(userId, label) {
-  const { data: org } = await admin.from('organisations').insert({ name: `${label} org ${rnd}` }).select('id').single()
-  await admin.from('memberships').insert({ org_id: org.id, user_id: userId, role: 'owner' })
-  const { data: site } = await admin
+  const { data: org, error: orgErr } = await admin
+    .from('organisations').insert({ name: `${label} org ${rnd}` }).select('id').single()
+  if (orgErr) throw new Error(`could not create org ${label}: ${orgErr.message}`)
+
+  const { error: memErr } = await admin
+    .from('memberships').insert({ org_id: org.id, user_id: userId, role: 'owner' })
+  if (memErr) throw new Error(`could not create membership ${label}: ${memErr.message}`)
+
+  // Slug must be lowercase: 0020 added `sites_slug_shape`
+  // (^[a-z0-9]([a-z0-9-]{0,38}[a-z0-9])?$) to match what normalizeSlug produces
+  // and what the subdomain router expects. `label` stays upper-case in the
+  // human-readable names so the assertions below still read A vs B.
+  const { data: site, error: siteErr } = await admin
     .from('sites')
-    .insert({ org_id: org.id, slug: `${label}-${rnd}`, title: `${label} site` })
+    .insert({ org_id: org.id, slug: `${label.toLowerCase()}-${rnd}`, title: `${label} site` })
     .select('id')
     .single()
+  if (siteErr) throw new Error(`could not create site ${label}: ${siteErr.message}`)
+
   return { orgId: org.id, siteId: site.id }
 }
 
