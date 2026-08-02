@@ -71,7 +71,10 @@ jobs:
       # only one that existed was production, and both suites create and delete
       # organisations and auth users. This also means the job runs on pull
       # requests from forks, where secrets are unavailable by design.
-      - uses: supabase/setup-cli@v1
+      # v1 was a node20 action, which GitHub deprecated — the runner was forcing
+      # it onto node24 and warning on every run. v2 is a composite action, so it
+      # has no Node runtime to deprecate.
+      - uses: supabase/setup-cli@v2
         with:
           version: latest
 
