@@ -374,22 +374,49 @@ their parents in the website editor and admin directory — a real refactor in t
 least-verifiable code, not a lint tidy-up, so it is deliberately deferred rather
 than silenced.
 
-### 9. CI does not run the tests — FIXED (needs secrets to activate)
-An `integration` job now runs both suites after lint/typecheck/build, on every
-push and PR to main plus nightly at 07:00 UTC. It **skips with a visible notice**
-when the credentials are absent — which is the case today, and correct for fork
-PRs, since a green tick that ran nothing is worse than no job.
+### 9. CI does not run the tests — FIXED AND RUNNING 2026-08-02
+Both suites now run on every push and PR to main, plus nightly at 07:00 UTC,
+against a Supabase stack CI boots for itself. **First green run: 30747803312** —
+7 isolation assertions and 15 RSVP assertions. They had never actually executed
+in CI before that.
 
-To activate, add three repo secrets pointing at a **dedicated test project**
-(never production — both suites use the service-role key and create/delete
-organisations and auth users):
+**Why not TEST_SUPABASE_* secrets.** That was the original plan and it was
+wrong. The only Supabase project that exists is production, and both suites
+create and delete organisations and auth users; pointing them there would run
+that against real couples' weddings on every push, and would park a production
+service-role key in GitHub Actions where any workflow could read it. Instead
+`supabase/config.toml` is committed and the job runs `supabase start`,
+throwing the stack away afterwards. **No secrets are involved at all**, so the
+job also runs on pull requests from forks — where the old, secret-dependent job
+was permanently skipped.
 
-    TEST_SUPABASE_URL
-    TEST_SUPABASE_ANON_KEY            # isolation signs in as a user, so RLS is real
-    TEST_SUPABASE_SERVICE_ROLE_KEY
+Postgres is pinned to major 17 to match production (checked: 17.6). Studio,
+Inbucket, Storage, Realtime and Analytics are off purely for boot speed.
 
-Apply the migrations there first with `npm run db:apply`. Both suites pass as of 4a's fix, so the first
-run against a correctly migrated project should be green.
+Three real problems surfaced getting the first run green, none of which any
+amount of reading would have found:
+
+1. **PostgREST caches the schema at startup** and can come up before the
+   migrations land, leaving every table invisible over REST while direct SQL
+   looks perfect. `scripts/ci-db-ready.mjs` now nudges the cache and polls REST
+   until it agrees with SQL.
+2. **A hosted project grants new public tables** to anon/authenticated/
+   service_role through default privileges; the ephemeral stack does not for the
+   role the CLI migrates as, so PostgREST answered `42501` on everything.
+   `supabase/ci-grants.sql` mirrors what production actually has, read off the
+   live database. **Functions are deliberately excluded** — production confirms
+   `submit_response` is postgres + service_role only, and a blanket
+   `grant execute on all routines` would hand it to anon and let the RSVP suite
+   pass for the wrong reason. That is the exact shape of 4a.
+3. **The isolation suite built an invalid slug.** It used an upper-case label,
+   which violates the `sites_slug_shape` constraint added by 0020 — a migration
+   written and applied to production while the suite was not running. A
+   migration and a test had drifted apart with nobody watching, which is the
+   whole argument for this work.
+
+The suite also no longer swallows insert errors: two runs were spent decoding
+`Cannot read properties of null` for a failure the database had already
+explained precisely.
 
 ### 10a. A removed block type silently blanks published sites — FIXED
 Found while testing the error boundary below. Puck's `Render` **silently drops**
@@ -486,5 +513,6 @@ lives only in the database.
    (starter site shows the demo couple's family) is worth fixing before launch**
 6. ~~Favicon (#6), guest error page (#10), block tombstone (#10a)~~ **done** — **robots decision (#12)** remains
 7. ~~Fix lint, add it to CI (#8); wire the test suites into CI (#9)~~ **done** —
-   the integration job needs `TEST_SUPABASE_*` repo secrets to actually run
+   both suites now run per push against a Supabase stack CI boots for itself.
+   No secrets, and it works on fork PRs
 8. Everything in P2 as capacity allows
