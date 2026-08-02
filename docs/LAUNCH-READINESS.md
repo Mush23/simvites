@@ -309,13 +309,27 @@ assertions.
 `Priya and Sam!! 2027` yields `priya-and-sam-2027` with no live preview and no
 confirmation. Couples print this address.
 
-**C4 (low).** The address does not derive from the couple's name; leaving it
-blank gives a browser "Please fill in this field" rather than a default.
+**C4 — FIXED 2026-08-02.** The address now follows the couple's name as it is
+typed, and stops the moment they edit it themselves; clearing the field hands
+control back, so a mistaken edit is recoverable. Nobody has to invent an address
+any more, and the browser validation bubble is no longer the first feedback.
 
-**C5 (low).** "1 HOUSEHOLDS · 1 GUESTS" — unpluralised counts.
+**C5 — FIXED 2026-08-02.** `lib/plural.ts`, applied at the four genuine count
+labels on the guest list. Written as a helper rather than a ternary per site
+because there were several and the next one would have been wrong too.
 
-**C6 (low).** Selecting the Families block exposes only its heading; the names
-sit in a nested array field, so C1 is not only wrong but awkward to correct.
+*A note on how this nearly went wrong:* a regex sweep for `{expr} noun` also
+matched JSX ATTRIBUTE boundaries — `households={shown} events={events}` became
+`households={plural(shown, 'event')}={events}`. Five of the nine "hits" were
+false positives of that kind. Reverted and done by hand. Grep-and-replace across
+JSX needs the output read, not just the match count.
+
+**C6 — FIXED 2026-08-02.** The array item summary was `i.name || 'Side'`. Once
+C1 stopped seeding the demo couple's names, both rows arrived blank — so every
+summary read "Side" and the two were indistinguishable without opening each in
+turn. It now falls back to the side label, so a couple with nothing filled in
+sees "The Groom" and "The Bride" and knows which to open. Fixing C1 is what made
+this worse; the two belong together.
 
 **Not a finding, recorded so it is not re-investigated:** an admin-generated
 magic link lands on `/login?error=auth`, because `generateLink` uses the

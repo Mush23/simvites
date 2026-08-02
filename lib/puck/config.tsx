@@ -130,7 +130,12 @@ export const siteConfig: Config<SiteBlocks> = {
         sides: {
           type: 'array', label: 'Sides',
           arrayFields: { side: text('Side label', true), name: text('Name', true), parents: text('Parents line', true) },
-          getItemSummary: (i) => i.name || 'Side',
+          // C6: this was `i.name || 'Side'`. Since C1 stopped seeding the demo
+          // couple's names, both rows arrive blank — so every summary read
+          // "Side" and the two were indistinguishable without opening each.
+          // Falling back to the side label means a couple with nothing filled
+          // in still sees "The Groom" and "The Bride" and knows which to open.
+          getItemSummary: (i) => i.name || i.side || 'Side',
         },
       },
       defaultProps: {

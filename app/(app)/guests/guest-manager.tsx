@@ -10,6 +10,7 @@ import {
 import { askConfirm, notify } from '@/components/ui/overlays'
 import { restoreArchived, restoreHousehold } from '@/app/(app)/actions'
 import { formatEventDateTime } from '@/lib/utils'
+import { plural } from '@/lib/plural'
 import { Search, X } from 'lucide-react'
 
 export interface MatrixEvent {
@@ -126,7 +127,7 @@ export function GuestManager({
           </button>
         )}
         <span className="hidden font-sans text-[12px] uppercase tracking-[0.14em] text-ink-3 xl:inline">
-          {households.length} households · {totalGuests} guests
+          {plural(households.length, 'household')} · {plural(totalGuests, 'guest')}
         </span>
         <span aria-hidden className="h-6 w-px bg-line" />
         {/* Solid only while it is the page's offer. Outlines once EITHER
@@ -178,7 +179,7 @@ export function GuestManager({
             className={`min-w-[124px] flex-1 rounded-card border px-3 py-2.5 text-left transition-colors sm:flex-none ${
               lensId === 'all' ? 'border-selected-line bg-selected-soft shadow-card' : 'border-line bg-surface hover:border-line-2'}`}>
             <span className="text-[12px] font-semibold text-ink">All events</span>
-            <span className="mt-0.5 block font-mono text-[9.5px] text-ink-3 nums">{totalGuests} guests</span>
+            <span className="mt-0.5 block font-mono text-[9.5px] text-ink-3 nums">{plural(totalGuests, 'guest')}</span>
           </button>
           {events.map((e) => {
             const { invited, going } = lensStats.get(e.id) ?? { invited: 0, going: 0 }
@@ -199,7 +200,7 @@ export function GuestManager({
 
       {filtered && households.length > 0 && (
         <p className="text-[12px] text-ink-3">
-          Showing {shown.length} of {households.length} households · {shownGuests} guests
+          Showing {shown.length} of {plural(households.length, 'household')} · {plural(shownGuests, 'guest')}
         </p>
       )}
 
@@ -886,7 +887,7 @@ function ImportWizard({ onDone }: { onDone: () => void }) {
         {preview && (
           <button type="button" onClick={confirm} disabled={busy}
             className="rounded-md bg-accent px-5 py-2 font-semibold text-white disabled:opacity-50">
-            {busy ? 'Importing…' : `Import ${preview.length} guests`}
+            {busy ? 'Importing…' : `Import ${plural(preview.length, 'guest')}`}
           </button>
         )}
         {result && <span className="text-sm text-ink-2">{result}</span>}

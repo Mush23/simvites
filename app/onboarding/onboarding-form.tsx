@@ -33,6 +33,12 @@ function MoveLabel({ n, title, hint }: { n: string; title: string; hint?: string
 export function OnboardingForm({ templates, preselect }: { templates: TemplateListing[]; preselect?: string }) {
   const [state, action, pending] = useActionState(createWorkspace, initial)
   const [slug, setSlug] = useState('')
+  // C4: the address used to start empty, so everyone had to invent one, and
+  // submitting without it produced a browser validation bubble rather than a
+  // sensible default. It now follows the couple's name — until they edit it
+  // themselves, after which it is theirs and we stop touching it. Clearing the
+  // field hands control back, so a mistaken edit is recoverable.
+  const [slugEdited, setSlugEdited] = useState(false)
   const preIx = preselect ? templates.findIndex((t) => t.key === preselect) : -1
   // If the chosen look sits past the fold, open the full grid so its radio renders.
   const [showAll, setShowAll] = useState(preIx >= 4)
@@ -49,6 +55,7 @@ export function OnboardingForm({ templates, preselect }: { templates: TemplateLi
             <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Couple / site name</span>
             <input
               name="site_title" required placeholder="Aanya & Dev"
+              onChange={(e) => { if (!slugEdited) setSlug(normalizeSlugAsTyped(e.target.value)) }}
               className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-selected"
             />
           </label>
@@ -61,7 +68,12 @@ export function OnboardingForm({ templates, preselect }: { templates: TemplateLi
                   dash; the server normalises again regardless. */}
               <input
                 name="slug" required value={slug}
-                onChange={(e) => setSlug(normalizeSlugAsTyped(e.target.value))}
+                onChange={(e) => {
+                  const next = normalizeSlugAsTyped(e.target.value)
+                  setSlug(next)
+                  // Emptying it hands control back to the couple's name.
+                  setSlugEdited(next !== '')
+                }}
                 onBlur={() => setSlug(normalizeSlug(slug))}
                 inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false}
                 aria-describedby="slug-hint"
