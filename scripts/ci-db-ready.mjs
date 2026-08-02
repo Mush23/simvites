@@ -59,8 +59,48 @@ try {
     for (const m of missing) console.error(`   - ${m}`)
     console.error('\n  The migrations did not apply. Check the `supabase start` step above.')
     process.exitCode = 1
+    await client.end().catch(() => {})
+    process.exit(1)
+  }
+  console.log(`✓ schema ready — ${TABLES.length} tables, ${FUNCTIONS.length} functions, RLS on, 0019 guards present`)
+
+  // ── PostgREST, which is what the suites actually talk to ────────────────
+  //
+  // The schema being correct is not enough. PostgREST caches the schema at
+  // startup, and on a fresh stack it can come up before the migrations land —
+  // leaving every table invisible over REST while direct SQL looks perfect.
+  // That failed as `Cannot read properties of null (reading 'id')` deep inside
+  // the isolation suite, because the suite ignores insert errors.
+  //
+  // Nudge the cache, then poll until REST agrees with SQL.
+  await client.query(`notify pgrst, 'reload schema'`)
+
+  const restUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!restUrl || !key) {
+    console.error('✗ NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are not set')
+    process.exitCode = 1
   } else {
-    console.log(`✓ CI database ready — ${TABLES.length} tables, ${FUNCTIONS.length} functions, RLS on, 0019 guards present`)
+    const headers = { apikey: key, Authorization: `Bearer ${key}` }
+    let lastErr = 'no attempt made'
+    let ok = false
+    for (let attempt = 1; attempt <= 20 && !ok; attempt++) {
+      try {
+        const res = await fetch(`${restUrl}/rest/v1/organisations?select=id&limit=1`, { headers })
+        if (res.ok) { ok = true; break }
+        lastErr = `HTTP ${res.status} ${(await res.text()).slice(0, 120)}`
+      } catch (e) {
+        lastErr = e.message
+      }
+      if (attempt % 5 === 0) await client.query(`notify pgrst, 'reload schema'`)
+      await new Promise((r) => setTimeout(r, 1000))
+    }
+    if (ok) {
+      console.log('✓ PostgREST is serving the migrated schema')
+    } else {
+      console.error(`✗ PostgREST never picked up the schema: ${lastErr}`)
+      process.exitCode = 1
+    }
   }
 } catch (e) {
   console.error(`✗ Could not reach the CI database: ${e.message}`)
