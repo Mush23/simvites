@@ -352,7 +352,7 @@ implicit flow and puts tokens in the URL fragment, which never reaches the
 server. Real users are unaffected — `createBrowserClient` uses PKCE, so their
 link carries `?code=`.
 
-### C7. Magic links do not work across devices — PARTLY FIXED 2026-08-02
+### C7. Magic links do not work across devices — FIXED AND VERIFIED 2026-08-02
 Tested rather than assumed, by driving `exchangeCodeForSession` with and
 without the cookie a real browser stores:
 
@@ -381,12 +381,31 @@ Fixed in code:
   `?error=other-device`, distinct from a genuinely expired or reused link.
 - The login page now explains both cases above the form.
 
-**Still needs you — a dashboard change.** The emailed URL is built from
-Supabase's own email template, which lives in the project's control plane. The
-service-role key cannot reach it (that is data-plane only), and there is no
-Personal Access Token in this environment, so it cannot be changed from here.
+**The dashboard templates were updated, and the flow was re-tested.**
 
-Dashboard → Authentication → Email Templates. Replace the link in each body:
+`generateLink` returns `properties.hashed_token` — the same value the template
+now renders as `{{ .TokenHash }}` — so the URL under test is the one the email
+actually carries. It was opened from a context with **no cookies at all**, which
+is exactly what a second device is:
+
+    status        : 307
+    redirected to : /dashboard
+    auth cookies  : sb-<ref>-auth-token
+
+**Signed in on a device that never requested the link.** Three follow-ups
+confirmed the result means what it appears to:
+
+- `/dashboard` **without** cookies redirects to `/login`, so the session was
+  genuinely established rather than the page being open to anyone. (With the
+  cookies it went on to `/onboarding` — correct for an account with no site.)
+- The old PKCE path still reports itself properly: `?code=…` with no verifier
+  redirects to `/login?error=other-device`. That matters, because links issued
+  **before** the template change are still sitting in inboxes.
+- The token is **single use** — first use signs in, replaying the same URL gives
+  `/login?error=auth`. A magic link that has already been used grants nothing if
+  it is later forwarded or leaked.
+
+For future reference, the templates now in place:
 
 | Template | Link href |
 |---|---|
@@ -395,37 +414,11 @@ Dashboard → Authentication → Email Templates. Replace the link in each body:
 | Reset password | `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery` |
 | Invite user | `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=invite` |
 
-So the Magic Link body becomes:
-
-```html
-<h2>Sign in to Simvites</h2>
-<p>
-  <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=magiclink">
-    Sign in
-  </a>
-</p>
-<p>If you didn't ask for this, you can ignore it.</p>
-```
-
-Two things worth knowing before pasting:
-
-- **`&`, not `?`.** `{{ .RedirectTo }}` is the whole URL the client asked for,
-  and every call site already appends a query string —
-  `/auth/callback?next=…` at `app/login/page.tsx:74`, `:87` and `:103`. Starting
-  with `?` would produce two of them. Using `{{ .RedirectTo }}` rather than
-  `{{ .SiteURL }}` is also what preserves `next`, which is how a collaborator
-  invitation returns to `/invite/<token>` after sign-in.
-- **`type` must match the template.** The route allowlists
-  magiclink / signup / invite / recovery / email_change / email, and an
-  unrecognised value is ignored rather than forwarded.
-
-Safe to do at any time and in any order: `/auth/callback` accepts `token_hash`
-**and** `code`, so nothing breaks in the window before or after. Changing only
-the Magic Link template leaves password resets same-device — worth doing all
-four.
-
-Verify afterwards by requesting a link on one device and opening it on another;
-it should sign in rather than land on `/login?error=other-device`.
+`&` rather than `?` because `{{ .RedirectTo }}` is the whole URL the client
+asked for and every call site already appends a query string
+(`app/login/page.tsx:74`, `:87`, `:103`); using `{{ .RedirectTo }}` rather than
+`{{ .SiteURL }}` is what preserves `next`, which is how a collaborator
+invitation returns to `/invite/<token>` after sign-in.
 
 ---
 
