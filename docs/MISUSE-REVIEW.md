@@ -488,6 +488,47 @@ Fix: sniff magic bytes; either reject SVG or re-serve it as
 
 ---
 
+### Guest RSVP walked end to end 2026-08-02 — nothing broken
+
+The last untested journey, and the only one that touches a person who never
+signed up to anything. Walked on an isolated fixture built to force the edge
+cases: three invited events (one with a deadline already passed), a fourth the
+household was **not** invited to, two guests including a child, and a REQUIRED
+meal question scoped to one event.
+
+Unlike the collaborator walkthrough, this one found no product bugs. What it
+confirmed, in the product rather than in a test:
+
+- **USP #2 holds at the wire.** The uninvited event and its venue appear
+  **nowhere in the server-rendered HTML** — not hidden by CSS, genuinely never
+  serialised. Checked by fetching the page and searching the raw response.
+- **The passed deadline renders CLOSED** and read-only, per event.
+- **The required question blocks submission** — the client catches it with
+  "answer needed ↑" before the request leaves, and 0019 stands behind it.
+- **The raw token never lingers**: `/i/<token>` redirects to a clean `/rsvp`,
+  and the cookie is HttpOnly (invisible to `document.cookie`, as intended).
+- **Editing works and does not lose data.** On return, selections, the
+  free-text dietary answer and the household note are all prefilled, and the
+  saved choices carry `aria-pressed="true"` so the state reaches assistive tech
+  and not just the eye. Resubmitting UPDATED the meal answer in place
+  (Vegetarian → Vegan, still one row) and added the new decline — four
+  responses, three answers, no duplicates. The note survived an edit that never
+  touched it, which is the message contract.
+- **The confirmation is accurate**: "1 of 2 going", "Chidi — Vegan", calendar
+  links for exactly the attending events.
+- **M2 end to end.** Revoking the link locked the guest out on the very next
+  request even though the browser still held a valid signed cookie — and the
+  refusal leaked nothing: no guest names, no dietary answer, just the generic
+  "open this from your invitation" message. That is the finding that mattered
+  most, confirmed on the real path.
+
+*One thing learned that is worth keeping.* Two fixture inserts failed with
+`null value in column "is_child" violates not-null constraint` on rows that
+never mentioned `is_child`. PostgREST **unions the key sets of a bulk insert**
+and sends `null` for whatever a row omits, so column defaults never apply. Give
+every row in a bulk insert identical keys. Product code is unaffected —
+`importGuests` inserts one row at a time — but it will bite anyone who batches.
+
 ## What held up
 
 Worth recording, because these are the places the obvious attack fails:
