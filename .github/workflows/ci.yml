@@ -96,8 +96,15 @@ jobs:
           } >> "$GITHUB_ENV"
           rm -f "$RUNNER_TEMP/supa.env"
 
+      # A hosted project grants new public tables to anon/authenticated/
+      # service_role through default privileges; the ephemeral stack does not
+      # for the role the CLI migrates as, so PostgREST 403s on everything.
+      # Mirrors production exactly — tables and sequences only, never functions.
+      - name: Match production grants
+        run: node scripts/ci-apply-grants.mjs
+
       # A migration that failed to apply otherwise surfaces as a confusing
-      # PostgREST 404 mid-suite, which reads as "isolation is broken". Fail
+      # PostgREST error mid-suite, which reads as "isolation is broken". Fail
       # here instead, naming the missing piece.
       - name: Database ready?
         run: node scripts/ci-db-ready.mjs
