@@ -28,13 +28,53 @@ export const RESERVED_SLUGS = new Set([
   'test', 'staging', 'dev', 'demo', 'internal', 'root', 'system',
 ])
 
-/** Lowercase, strip anything not a-z0-9-, collapse edges, cap length. */
+/**
+ * Fold accents to their base letters before stripping.
+ *
+ * Without this, "Zoë & Arjun" became `zo-arjun` — the ë simply vanished,
+ * because it is not in `a-z`. Losing a letter out of someone's name in the
+ * address they will print on stationery is not acceptable for a product whose
+ * guest lists are full of Zoës, Chloés and Björns. NFD splits a letter into
+ * base + combining mark; dropping the marks leaves `zoe-arjun`.
+ */
+function foldAccents(input: string): string {
+  return input.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+/** Lowercase, fold accents, strip anything not a-z0-9-, trim edges, cap length. */
 export function normalizeSlug(input: string): string {
-  return input
+  return foldAccents(input)
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9-]+/g, '-')
     .replace(/^-+|-+$/g, '')
+    .slice(0, 40)
+}
+
+/**
+ * C3: the same rules, applied while the user is still typing.
+ *
+ * The address field used to keep whatever was typed and let the server rewrite
+ * it on submit, so `Priya and Sam!! 2027` silently became `priya-and-sam-2027`
+ * — with no preview and no confirmation, for an address couples print on
+ * stationery. Now the field shows the real thing as it is typed.
+ *
+ * Two deliberate differences from the strict version, both about not fighting
+ * the keyboard:
+ *
+ *  - a TRAILING dash survives, so "priya-" is a valid waypoint on the way to
+ *    "priya-and-sam" rather than something that deletes itself mid-word
+ *  - no `trim()` before substitution, so a typed space becomes the dash the
+ *    user obviously meant instead of vanishing and gluing two words together
+ *
+ * `normalizeSlug` still runs on blur and again on the server, so the trailing
+ * dash never survives to the database.
+ */
+export function normalizeSlugAsTyped(input: string): string {
+  return foldAccents(input)
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+/, '')
     .slice(0, 40)
 }
 

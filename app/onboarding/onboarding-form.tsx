@@ -7,6 +7,7 @@
 import { useActionState, useState } from 'react'
 import { createWorkspace, type OnboardingState } from './actions'
 import { BASE_DOMAIN } from '@/lib/brand'
+import { normalizeSlug, normalizeSlugAsTyped } from '@/lib/reserved-slugs'
 import type { TemplateListing } from '@/lib/templates/registry'
 
 const initial: OnboardingState = {}
@@ -54,13 +55,26 @@ export function OnboardingForm({ templates, preselect }: { templates: TemplateLi
           <label className="block">
             <span className="mb-1.5 block text-[12px] font-medium text-ink-2">Web address</span>
             <div className="flex items-center rounded-lg border border-line bg-surface focus-within:border-accent">
+              {/* C3: normalise as they type, so the field IS the address —
+                  it used to keep the raw text and let the server rewrite it on
+                  submit, with no preview. Strict pass on blur drops a trailing
+                  dash; the server normalises again regardless. */}
               <input
-                name="slug" required value={slug} onChange={(e) => setSlug(e.target.value)}
+                name="slug" required value={slug}
+                onChange={(e) => setSlug(normalizeSlugAsTyped(e.target.value))}
+                onBlur={() => setSlug(normalizeSlug(slug))}
+                inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false}
+                aria-describedby="slug-hint"
                 placeholder="aanya-and-dev"
                 className="min-w-0 flex-1 bg-transparent px-3.5 py-2.5 text-[14px] text-ink outline-none"
               />
               <span className="shrink-0 pr-3.5 font-mono text-[11px] text-ink-3">.{BASE_DOMAIN}</span>
             </div>
+            <span id="slug-hint" className="mt-1.5 block text-[12px] text-ink-3">
+              {slug
+                ? <>Your guests will visit <span className="font-mono text-ink-2">{slug}.{BASE_DOMAIN}</span></>
+                : <>Letters, numbers and dashes. This is the address you&rsquo;ll share.</>}
+            </span>
           </label>
         </div>
       </section>

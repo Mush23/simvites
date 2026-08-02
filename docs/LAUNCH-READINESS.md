@@ -292,7 +292,20 @@ warning ("2 guests · 2 emails"). Emails are stored as typed
 dedupe is case-sensitive and would mail them twice. Duplicates are the single
 most common guest-list data problem, and they inflate the catering numbers.
 
-**C3 (medium). The web address is silently rewritten.** Typing
+**C3 — FIXED 2026-08-02.** The field now normalises as you type, so it IS the
+address: `normalizeSlugAsTyped` on change, strict `normalizeSlug` on blur, and a
+hint reading "Your guests will visit <slug>.<domain>". Two deliberate departures
+from the strict rule keep typing natural — a trailing dash survives (so "priya-"
+is a waypoint, not something that deletes itself mid-word) and a typed space
+becomes a dash rather than vanishing and gluing words together. The server still
+normalises regardless.
+
+Also fixed while there: accents were being DROPPED, not folded, so "Zoë & Arjun"
+became `zo-arjun` — a letter missing from a name on printed stationery. NFD
+normalisation now yields `zoe-arjun`. Verified in the running form; 109
+assertions.
+
+**C3 (medium) — original report. The web address is silently rewritten.** Typing
 `Priya and Sam!! 2027` yields `priya-and-sam-2027` with no live preview and no
 confirmation. Couples print this address.
 
