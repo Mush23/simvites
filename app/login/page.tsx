@@ -12,6 +12,7 @@ import { Mail } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { BRAND_NAME } from '@/lib/brand'
+import { safeNextPath } from '@/lib/safe-redirect'
 
 type Tab = 'link' | 'password'
 
@@ -26,6 +27,20 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [linkSent, setLinkSent] = useState(false)
+  // Where to land after signing in — set when something sent the user here to
+  // authenticate first, e.g. a collaborator invitation. Validated with the
+  // same helper the auth callback uses, so `?next=@evil.com` cannot turn the
+  // login page into a redirector either.
+  //
+  // A lazy initialiser rather than an effect: `next` is never rendered, only
+  // read inside the submit handlers, so there is nothing to hydrate-mismatch —
+  // and setting state from an effect would cascade a second render for no
+  // reason.
+  const [next] = useState(() =>
+    typeof window === 'undefined'
+      ? '/dashboard'
+      : safeNextPath(new URLSearchParams(window.location.search).get('next')),
+  )
 
   // Remember a template chosen on /preview/[template] so onboarding can
   // preselect it — a cookie survives the email-link round trip.
@@ -39,7 +54,7 @@ export default function LoginPage() {
     setPending(true); setError(null); setNotice(null)
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
     })
     setPending(false)
     if (error) setError(error.message)
@@ -52,15 +67,15 @@ export default function LoginPage() {
     if (signup) {
       const { data, error } = await supabase.auth.signUp({
         email, password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
       })
       if (error) { setError(error.message); setPending(false); return }
-      if (data.session) { router.push('/dashboard'); router.refresh() }
+      if (data.session) { router.push(next); router.refresh() }
       else { setNotice('Check your email to confirm, then sign in.'); setSignup(false); setPending(false) }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) { setError(error.message); setPending(false); return }
-      router.push('/dashboard'); router.refresh()
+      router.push(next); router.refresh()
     }
   }
 

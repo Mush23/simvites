@@ -18,7 +18,7 @@ export const RESERVED_SLUGS = new Set([
   // Product routes — a slug matching one of these is confusing even when it
   // routes correctly, because the couple will see it in their own URL bar.
   'dashboard', 'login', 'logout', 'signup', 'auth', 'onboarding', 'account',
-  'settings', 'billing', 'preview', 'tour', 'std', 'admin-panel',
+  'settings', 'billing', 'preview', 'tour', 'std', 'admin-panel', 'invite',
   // Legal + support surfaces
   'privacy', 'terms', 'cookies', 'legal', 'help', 'support', 'contact',
   'status', 'docs', 'blog', 'about', 'pricing', 'security',

@@ -72,3 +72,34 @@ export function invitationEmailHtml(opts: {
     <p style="font-family:Consolas,monospace;text-align:center;letter-spacing:.18em;text-transform:uppercase;font-size:10px;color:#a49a8a;margin-top:18px">Made with ${BRAND_NAME}</p>
   </div>`
 }
+
+/**
+ * Collaborator invitation (M1). Unlike the guest invitation, this link does
+ * NOT by itself grant anything — the recipient has to sign in as the invited
+ * address and accept. The wording says so, because an email that overstates
+ * what a link does is how people get trained to click them.
+ */
+export function collaboratorInviteEmailHtml(opts: {
+  orgName: string
+  inviterEmail: string
+  link: string
+  expiresInDays: number
+}) {
+  const orgName = escapeHtml(opts.orgName)
+  const inviter = escapeHtml(opts.inviterEmail)
+  const link = escapeHtml(opts.link)
+  return `
+  <div style="background:#fbf9f5;padding:36px 16px">
+    <div style="font-family:Georgia,'Times New Roman',serif;max-width:520px;margin:0 auto;background:#ffffff;border:1px solid #e8e2d8;border-radius:13px;padding:36px;color:#2a241d">
+      <p style="font-family:Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;font-size:11px;color:#8a8072;margin:0">${BRAND_NAME}</p>
+      <h1 style="font-weight:400;font-size:30px;line-height:1.15;margin:10px 0 18px">You've been invited to help plan ${orgName}.</h1>
+      <p style="font-size:16px;line-height:1.65;margin:0 0 8px">${inviter} would like you to join them on ${BRAND_NAME}, where they're organising the wedding — the guest list, the schedule, the budget and the website.</p>
+      <p style="font-size:16px;line-height:1.65;margin:0">Accepting gives you full access to plan alongside them. You'll be asked to sign in first.</p>
+      <p style="margin:30px 0">
+        <a href="${link}" style="background:#b4552d;color:#fff;text-decoration:none;padding:13px 30px;border-radius:9px;font-weight:600;font-size:15px">Review the invitation</a>
+      </p>
+      <p style="font-size:12.5px;color:#8a8072;line-height:1.6">This invitation expires in ${opts.expiresInDays} days, and nothing happens until you accept it — if you weren't expecting this, you can safely ignore this email and no account will be created for you.<br><br>If the button doesn't work, paste this into your browser:<br><span style="word-break:break-all">${link}</span></p>
+    </div>
+    <p style="font-family:Consolas,monospace;text-align:center;letter-spacing:.18em;text-transform:uppercase;font-size:10px;color:#a49a8a;margin-top:18px">Made with ${BRAND_NAME}</p>
+  </div>`
+}

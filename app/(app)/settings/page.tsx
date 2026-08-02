@@ -8,6 +8,7 @@ import { BASE_DOMAIN, BRAND_NAME } from '@/lib/brand'
 import { SiteSettingsForm } from './settings-form'
 import { UnlockCard } from './unlock-card'
 import { Connections } from './connections'
+import { Collaborators } from './collaborators'
 import { PasswordForm } from '@/components/auth/password-form'
 
 export const metadata = { title: `Settings · ${BRAND_NAME}` }
@@ -110,25 +111,7 @@ export default async function SettingsPage({
           <VersionList siteId={site!.siteId} />
         </section>
 
-        <section className="rounded-card border border-line bg-surface p-7 shadow-card">
-          <p className="eyebrow mb-2">Collaborators</p>
-          <p className="mb-4 text-sm text-ink-2">
-            Weddings are planned together. Add your partner, a parent or your planner —
-            they get full access to plan, and sign in with a magic link (no password to share).
-          </p>
-          <form action={async (fd) => { 'use server'; await (await import('./actions')).addCollaborator(fd) }}
-            className="flex flex-wrap items-end gap-3">
-            <label className="block">
-              <span className="eyebrow mb-1.5 block">Their email</span>
-              <input name="email" type="email" required placeholder="partner@example.com"
-                className="w-64 rounded-md border border-line bg-paper-2 px-3.5 py-3 text-ink outline-none focus:border-selected" />
-            </label>
-            <button type="submit" title="They'll sign in via the Email link tab on the login page"
-              className="rounded-md border border-accent-line px-5 py-3 font-semibold text-accent-ink transition-colors hover:bg-accent-soft">
-              Add collaborator
-            </button>
-          </form>
-        </section>
+        <Collaborators />
 
         <section className="rounded-card border border-line bg-surface p-7 shadow-card">
           <p className="eyebrow mb-2">Account security</p>

@@ -6,6 +6,7 @@ import { getPrimarySite } from '@/lib/workspace'
 import { getStripe, UNLOCK_PRODUCT_NAME } from '@/lib/stripe'
 import { getUnlockPrice } from '@/lib/pricing'
 import { track } from '@/lib/analytics'
+import { INVITE_EXPIRY_DAYS } from '@/lib/collaborators'
 
 function appBaseUrl() {
   const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'
@@ -66,55 +67,129 @@ export async function restoreVersion(versionId: string) {
 }
 
 /**
- * Invite a collaborator (partner, parent, planner) into the org. Creates the
- * auth user if new; they sign in with the magic-link tab on /login.
+ * Invite a collaborator (partner, parent, planner) into the org.
+ *
+ * M1: this used to call `auth.admin.createUser({ email_confirm: true })` for
+ * whatever address was typed into the box and insert the membership on the
+ * spot — a confirmed account and full access to a stranger's wedding, with no
+ * acceptance step and no email to the person it happened to.
+ *
+ * Now it writes a pending invitation and sends a link. Nothing exists for the
+ * invitee until they sign in AS that address and accept, which also means an
+ * invitation sent to the wrong address creates nothing at all.
  */
-export async function addCollaborator(formData: FormData) {
+export async function inviteCollaborator(formData: FormData) {
   const site = await getPrimarySite()
   if (!site) return { error: 'No site.' }
+  // Only an owner can hand out access to the wedding they own.
+  if (site.role !== 'owner') {
+    return { error: 'Only the owner of this wedding can invite collaborators.' }
+  }
+
   const email = String(formData.get('email') ?? '').trim().toLowerCase()
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: 'Enter a valid email.' }
+  if (email.length > 320) return { error: 'That email address is too long.' }
 
-  // M5/M1: this mints confirmed auth accounts for arbitrary addresses. Cap it
-  // so a single account cannot be used to bulk-create users or spray
-  // memberships across the platform.
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Please sign in again.' }
+  if (email === (user.email ?? '').toLowerCase()) {
+    return { error: 'That is your own address — you already have access.' }
+  }
+
+  // Outbound mail on our domain, and rows in someone else's name. Capped.
   const { rateLimit } = await import('@/lib/rate-limit')
   if (!rateLimit(`collab:${site.orgId}`, 10, 60 * 60_000)) {
-    return { error: 'Too many collaborator invites in the last hour — try again later.' }
+    return { error: 'Too many invitations in the last hour — try again later.' }
   }
 
-  const { createAdminClient } = await import('@/lib/supabase/server')
-  const admin = createAdminClient()
+  const { generateGuestToken } = await import('@/lib/tokens')
+  const { raw, hash } = generateGuestToken()
+  const expiresAt = new Date(Date.now() + INVITE_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
 
-  // Find or create the auth user (confirmed; they use magic-link to sign in).
-  let userId: string | undefined
-  const { data: created, error: cErr } = await admin.auth.admin.createUser({ email, email_confirm: true })
-  if (!cErr) userId = created.user?.id
-  else {
-    // M14: listUsers() is paginated and defaults to the first 50 users. Once
-    // the platform outgrew that, re-adding an EXISTING collaborator failed
-    // with "Could not create that account." for anyone outside page one — a
-    // bug that gets more common the more successful you are. Prefer our own
-    // profiles table (indexed, RLS-exempt under service role) and fall back to
-    // walking the auth pages only if the profile row is missing.
-    const { data: profile } = await admin.from('profiles').select('id').eq('email', email).maybeSingle()
-    userId = (profile as { id: string } | null)?.id
-    for (let page = 1; !userId && page <= 20; page++) {
-      const { data: list } = await admin.auth.admin.listUsers({ page, perPage: 200 })
-      const users = list?.users ?? []
-      if (!users.length) break
-      userId = users.find((u: { email?: string; id: string }) => u.email === email)?.id
-    }
-  }
-  if (!userId) return { error: 'Could not add that collaborator — check the address and try again.' }
+  // Re-inviting the same address replaces the live invitation rather than
+  // stacking rows — the partial unique index enforces one live per address.
+  await supabase
+    .from('collaborator_invitations')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('org_id', site.orgId)
+    .eq('email', email)
+    .is('accepted_at', null)
+    .is('revoked_at', null)
 
-  await admin.from('profiles').upsert({ id: userId, email })
-  const { error } = await admin.from('memberships')
-    .upsert({ org_id: site.orgId, user_id: userId, role: 'collaborator' }, { onConflict: 'org_id,user_id' })
+  const { error } = await supabase.from('collaborator_invitations').insert({
+    org_id: site.orgId,
+    email,
+    role: 'collaborator',
+    token_hash: hash,
+    invited_by: user.id,
+    expires_at: expiresAt.toISOString(),
+  })
   if (error) return { error: error.message }
 
+  const { sendEmail, collaboratorInviteEmailHtml, emailConfigured } = await import('@/lib/email')
+  const link = `${appBaseUrl()}/invite/${raw}`
+  const res = await sendEmail({
+    to: email,
+    subject: `${user.email ?? 'Someone'} invited you to help plan ${site.title}`,
+    html: collaboratorInviteEmailHtml({
+      orgName: site.title,
+      inviterEmail: user.email ?? 'A Simvites user',
+      link,
+      expiresInDays: INVITE_EXPIRY_DAYS,
+    }),
+  })
+
   revalidatePath('/settings')
-  return { ok: true, note: `${email} added — they sign in at /login with the "Email link" tab.` }
+  if (res.error) {
+    return { error: `Invitation saved, but the email failed to send: ${res.error}` }
+  }
+  if (!emailConfigured() || res.skipped) {
+    // The raw token is only ever visible here — after this response it exists
+    // nowhere, since the database stores the hash.
+    return { ok: true, note: `Email isn't connected yet. Send them this link yourself: ${link}` }
+  }
+  return { ok: true, note: `Invitation sent to ${email}. It expires in ${INVITE_EXPIRY_DAYS} days.` }
+}
+
+/** Withdraw a pending invitation. Owner-only, enforced by RLS as well. */
+export async function revokeCollaboratorInvitation(invitationId: string) {
+  const site = await getPrimarySite()
+  if (!site) return { error: 'No site.' }
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('collaborator_invitations')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('id', invitationId)
+    .eq('org_id', site.orgId)
+    .is('accepted_at', null)
+  if (error) return { error: error.message }
+  revalidatePath('/settings')
+  return { ok: true }
+}
+
+/**
+ * Remove someone's access. Owners cannot be removed this way — ownership comes
+ * from creating the org, and letting a collaborator strip it would be a
+ * privilege inversion.
+ */
+export async function removeCollaborator(userId: string) {
+  const site = await getPrimarySite()
+  if (!site) return { error: 'No site.' }
+  if (site.role !== 'owner') return { error: 'Only the owner can remove collaborators.' }
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user?.id === userId) return { error: 'You cannot remove yourself.' }
+
+  const { error } = await supabase
+    .from('memberships')
+    .delete()
+    .eq('org_id', site.orgId)
+    .eq('user_id', userId)
+    .neq('role', 'owner')
+  if (error) return { error: error.message }
+  revalidatePath('/settings')
+  return { ok: true }
 }
 
 /**

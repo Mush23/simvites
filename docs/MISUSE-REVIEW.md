@@ -23,7 +23,7 @@ the fix is summarised here.
 
 | | Finding | Fix |
 |---|---|---|
-| M1 | Workspace takeover | `getPrimarySite` prefers a site the user **owns** over an older one they merely collaborate on; returns `role` + `accessibleCount` |
+| M1 | Workspace takeover | `getPrimarySite` prefers a site the user **owns**; and collaborators are now invited, not inserted — see 0021 below |
 | M2 | Revoke did nothing | Session payload now carries `tokenId` + `exp`; `loadGuestSession` re-reads the token row on every use |
 | M3 | CSV formula injection | `toCsv` prefixes `'` to cells starting `= + - @`, tab or CR |
 | M4 | Paywall bypass | Unlock check moved **inside** `publishSnapshot`, against the site being published; `saveAndPublish` refuses a foreign `siteId` |
@@ -40,7 +40,7 @@ the fix is summarised here.
 | M15 | SVG in public bucket | Magic-byte sniffing; the **sniffed** type is stored, SVG refused |
 
 **`scripts/test-misuse.mjs`** (`npm run test:misuse`) locks in M2, M3, M5, M7,
-M12 and M13 — 51 assertions that feed hostile input to the real modules. It
+M12 and M13, plus the invite flow's address check — 59 assertions that feed hostile input to the real modules. It
 needs no database, so it runs in CI on every push including fork PRs. The
 remaining findings are structural (a moved check, a bounded loop) and are
 covered by typecheck plus the existing suites.
@@ -64,15 +64,35 @@ Two things surfaced while doing it:
   Both are now recorded. Worth knowing for next time: applying a single file by
   name never updates the tracker.
 
-### One thing still needs you
+### Collaborator consent — now built (0021)
 
-1. **Collaborator consent is a product decision, not a bug fix.** M1's
-   *exploitable* half is closed: nobody can displace your workspace any more.
-   But `addCollaborator` still adds a membership without the recipient
-   accepting it, so a stranger can still make an unwanted site appear in your
-   account. Closing that properly means a pending-invitation table, an accept
-   screen and an email — a feature, and one I did not want to half-build. Until
-   then it is rate-limited to 10 per org per hour.
+M1's second half is closed too. `addCollaborator` is gone; `inviteCollaborator`
+writes a pending row and emails a link, and nothing exists for the invitee
+until they sign in as the invited address and accept.
+
+- **The link is not a capability.** `accept_collaborator_invitation` locks the
+  row, re-checks revoked/accepted/expired, and requires the signed-in email to
+  match the invitation. A forwarded email gets somebody nowhere.
+- **No accounts are created for strangers.** The old code called
+  `auth.admin.createUser({ email_confirm: true })` on whatever was typed in the
+  box. It no longer creates anything for anyone who has not asked.
+- **Invitations are visible and withdrawable.** Settings now lists who has
+  access and who has been asked, with Remove and Withdraw. Previously there was
+  an add box and no list — no way to see or undo access.
+- **Ownership cannot be granted.** A CHECK constraint restricts invited roles
+  to collaborator/viewer, so no invitation can hand over a wedding.
+- **The invite page never leaks the address.** `peek_collaborator_invitation`
+  returns it masked (`p***@example.com`), so someone holding a link learns
+  which inbox to use without it becoming an address harvest.
+
+Verified against the live schema with a throwaway org, rolled back: RLS on,
+both policies present, both functions security-definer, accept refuses with no
+signed-in user, owner-role invites rejected, one live invitation per address
+enforced, revoke frees the address for a fresh invite, expiry reported
+correctly. `npm run test:misuse` covers the mask comparison and the reserved
+`/invite` slug.
+
+Migrations 0020 and 0021 are both applied and recorded.
 
 Existing guest cookies are invalidated by the M2 change (they lack `tokenId`
 and `exp`, and are rejected rather than grandfathered). Anyone mid-RSVP reopens
