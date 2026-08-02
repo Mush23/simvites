@@ -238,7 +238,31 @@ defused.
 
 Six things it found — none blocking, the first worth fixing before launch:
 
-**C1 (high). The starter site ships another couple's family.** A brand-new site
+**C1 — FIXED 2026-08-02.** Cause: `app/onboarding/actions.ts` hand-substituted
+Hero `title` and the footer only, instead of using `applySeed` — which is the
+one function that knows which props name a wedding, and which the template
+previews already use. `applySeed` itself had two gaps: it never touched
+`FamilyBlock`, and it only set the countdown date *when the seed had one*, so a
+couple with no dates inherited the demo instant. Onboarding now calls
+`applySeed` with empty date/location and no `families`, so unknown fields are
+**absent rather than wrong**: side labels survive, names blank (matching the
+block's own `defaultProps`), and the countdown self-hides on an empty date.
+`PreviewSeed.families` keeps the marketing gallery fully dressed.
+
+Verified three ways: all 18 seeded starters are free of demo strings
+(`test:misuse`, 80 assertions); a real site created through onboarding in the
+browser showed no leakage and the couple's own name; and its persisted
+`puck_data` was clean.
+
+**One pre-existing site still needs a decision.** `sana-and-omar` is
+**published** with a stored hero reading `title: "Aanya & Dev"`, dated
+19 September 2026 in Manchester — it was created under the old code. The fix
+above only affects sites created from now on; it does not rewrite stored
+content, and I did not want to edit a published page automatically. Either
+re-seed it or correct the hero by hand. (`meera-and-jay` looked affected on a
+first pass but is not — that couple really is called Meera and one parent Raj.)
+
+**C1 (high) — original report. The starter site ships another couple's family.** A brand-new site
 titled "Priya & Sam" opens with a FAMILIES block reading *The Groom: Dev, Son of
 Anil & Meera* / *The Bride: Aanya, Daughter of Raj & Priya*, plus a hero dated
 *19 September 2026, Manchester UK* — the demo wedding, hardcoded in

@@ -48,11 +48,27 @@ export async function createWorkspace(
   const { getTemplate, DEFAULT_TEMPLATE_KEY } = await import('@/lib/templates/registry')
   const template = getTemplate(String(formData.get('template') ?? DEFAULT_TEMPLATE_KEY))
   if (siteId) {
-    const doc = structuredClone(template.starterDoc)
-    for (const block of doc.content) {
-      if (block.type === 'Hero') (block.props as { title?: string }).title = siteTitle
-      if (block.type === 'SiteFooterBlock') (block.props as { names?: string }).names = siteTitle
-    }
+    // C1: this used to hand-substitute Hero.title and the footer only, so a
+    // brand-new site opened showing the couple's own name above the DEMO
+    // couple's parents ("Son of Anil & Meera"), a fabricated hero date and a
+    // countdown to someone else's wedding. The partial substitution is what
+    // made it read as a bug rather than as placeholder text — and it was the
+    // first screen a paying customer saw.
+    //
+    // applySeed is the one place that knows which props name a wedding, and
+    // it is already what the template previews use. Passing empty date and
+    // location clears the template's demo values; omitting `families` blanks
+    // the family names while keeping the side labels, matching what the block
+    // does when a couple adds it by hand. Everything the couple has not told
+    // us yet is now absent rather than wrong.
+    const { applySeed } = await import('@/lib/templates/seed')
+    const doc = applySeed(structuredClone(template.starterDoc), {
+      coupleNames: siteTitle,
+      dateText: '',
+      dateISO: null,
+      location: '',
+      events: [],
+    })
     await supabase.from('sites').update({ theme: { template: template.key } }).eq('id', siteId)
     await supabase.from('pages').update({ puck_data: doc }).eq('site_id', siteId).eq('is_home', true)
   }

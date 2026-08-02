@@ -17,13 +17,20 @@ import { eventColor } from '@/lib/event-colors'
 
 export interface PreviewSeed {
   coupleNames: string
-  /** Human date, as the couple would write it. */
+  /** Human date, as the couple would write it. '' clears the template's. */
   dateText: string
-  /** ISO instant for the countdown block, when known. */
+  /** ISO instant for the countdown block. null clears the template's. */
   dateISO: string | null
+  /** '' clears the template's. */
   location: string
   events: SiteEvent[]
   heroPhotoUrl?: string | null
+  /**
+   * Who is being married, and their parents. Omit when unknown — the side
+   * LABELS survive but the names blank out, which is what the FamilyBlock's
+   * own defaultProps do when a couple adds the block by hand.
+   */
+  families?: { side: string; name: string; parents: string }[]
 }
 
 function demoEvent(
@@ -52,6 +59,10 @@ export const DEMO_SEED: PreviewSeed = {
     demoEvent(3, 'Reception', '2026-09-19T18:30:00Z', 'Heaton Park Pavilion'),
   ],
   heroPhotoUrl: null,
+  families: [
+    { side: 'The Groom', name: 'Dev', parents: 'Son of Anil & Meera' },
+    { side: 'The Bride', name: 'Aanya', parents: 'Daughter of Raj & Priya' },
+  ],
 }
 
 /**
@@ -80,8 +91,23 @@ export function applySeed(doc: SiteData, seed: PreviewSeed): SiteData {
         },
       }
     }
-    if (block.type === 'CountdownBlock' && seed.dateISO) {
-      return { ...block, props: { ...block.props, dateISO: seed.dateISO } }
+    // C1: this used to substitute ONLY when the seed had a date, so a couple
+    // with no dates yet inherited the template's demo instant and got a live
+    // countdown to somebody else's wedding. Always substitute; Countdown
+    // renders null on an empty/invalid date, so it hides itself instead.
+    if (block.type === 'CountdownBlock') {
+      return { ...block, props: { ...block.props, dateISO: seed.dateISO ?? '' } }
+    }
+    // C1: FamilyBlock was not handled at all, so every starter kept the demo
+    // couple's parents — "Son of Anil & Meera" on a stranger's wedding site.
+    // With no family data, keep the template's side LABELS and blank the rest,
+    // which is exactly what this block's own defaultProps do.
+    if (block.type === 'FamilyBlock') {
+      const declared = (block.props as { sides?: { side: string; name: string; parents: string }[] }).sides ?? []
+      const sides = seed.families?.length
+        ? seed.families
+        : declared.map((s) => ({ side: s.side, name: '', parents: '' }))
+      return { ...block, props: { ...block.props, sides } }
     }
     if (block.type === 'SiteFooterBlock') {
       return { ...block, props: { ...block.props, names: seed.coupleNames } }
