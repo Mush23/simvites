@@ -42,6 +42,23 @@ export default function LoginPage() {
       : safeNextPath(new URLSearchParams(window.location.search).get('next')),
   )
 
+  // A failed sign-in link used to land here with `?error=auth` and NOTHING was
+  // shown — a blank form, no explanation. The commonest cause is opening the
+  // link on a different device from the one that asked for it, which cannot
+  // work under PKCE (the verifier is stored on the requesting device). Someone
+  // hitting that silently would request another link and loop forever.
+  const [linkError] = useState(() => {
+    if (typeof window === 'undefined') return null
+    const e = new URLSearchParams(window.location.search).get('error')
+    if (e === 'other-device') {
+      return 'That link was opened on a different device from the one that asked for it, which we can’t verify. Request a fresh one below and open it on this device.'
+    }
+    if (e === 'auth') {
+      return 'That sign-in link didn’t work — it may have expired, already been used, or been opened on a different device. Enter your email for a fresh one.'
+    }
+    return null
+  })
+
   // Remember a template chosen on /preview/[template] so onboarding can
   // preselect it — a cookie survives the email-link round trip.
   useEffect(() => {
@@ -143,6 +160,17 @@ export default function LoginPage() {
                 </button>
               ))}
             </div>
+
+            {/* Shown above the form, not beside the submit button: this is
+                about the link they just clicked, not about what they type. */}
+            {linkError && (
+              <p
+                role="status"
+                className="mt-6 rounded-md border border-warn/40 bg-warn-soft px-3.5 py-3 text-[13px] leading-relaxed text-ink"
+              >
+                {linkError}
+              </p>
+            )}
 
             <form onSubmit={tab === 'link' ? sendLink : withPassword} className="mt-6 space-y-4">
               <Field label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" />

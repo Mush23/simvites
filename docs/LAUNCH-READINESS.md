@@ -350,10 +350,43 @@ this worse; the two belong together.
 magic link lands on `/login?error=auth`, because `generateLink` uses the
 implicit flow and puts tokens in the URL fragment, which never reaches the
 server. Real users are unaffected — `createBrowserClient` uses PKCE, so their
-link carries `?code=` and `/auth/callback` handles it. **Worth testing by hand:**
-PKCE stores the verifier in the requesting browser, so requesting a link on a
-laptop and opening it on a phone should be expected to fail. That is a common
-thing for people to do.
+link carries `?code=`.
+
+### C7. Magic links do not work across devices — PARTLY FIXED 2026-08-02
+Tested rather than assumed, by driving `exchangeCodeForSession` with and
+without the cookie a real browser stores:
+
+| | result |
+|---|---|
+| **Different device** (no verifier cookie) | fails in **1ms**, no network call — *"PKCE code verifier not found in storage"* |
+| **Same device** (cookie present) | reaches the server in **104ms** and is judged on the code itself |
+
+So it is broken by construction, not by a bad link. `@supabase/ssr` defaults to
+PKCE and stores the verifier in `sb-<ref>-auth-token-code-verifier` on the
+device that **requested** the link — confirmed by watching that cookie get
+written. Request on a laptop, open on a phone, and it cannot work. People do
+this constantly.
+
+**What made it bad was the silence.** The failure redirected to
+`/login?error=auth` and the login page ignored the parameter entirely — a blank
+form, no explanation. The natural response is to request another link, which
+fails identically. An unbounded loop with no information.
+
+Fixed in code:
+
+- `/auth/callback` now accepts `token_hash` and calls `verifyOtp`, which needs
+  nothing stored client-side and therefore works on **any** device. It is tried
+  first; `code` remains the fallback.
+- A PKCE failure caused specifically by the missing verifier redirects to
+  `?error=other-device`, distinct from a genuinely expired or reused link.
+- The login page now explains both cases above the form.
+
+**Still needs you — a dashboard change.** The emailed URL is built from
+Supabase's own email template, so links keep arriving as `?code=` until the
+template is switched to `{{ .TokenHash }}` (Authentication → Email Templates →
+Magic Link). Until then cross-device links still fail, but they now say why
+instead of showing a blank form. After the change they should simply work; the
+route already handles both.
 
 ---
 
