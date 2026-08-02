@@ -1,0 +1,61 @@
+# Supabase CLI config — used ONLY to boot an ephemeral stack in CI.
+#
+# Readiness #9: the two integration suites (tenant isolation under RLS, and RSVP
+# correctness) are the only checks that exercise the database for real, and they
+# had never run in CI because there was no database to run them against. The
+# obvious fix — point TEST_SUPABASE_* secrets at a hosted project — was refused
+# on purpose: the only project that existed was PRODUCTION, and both suites
+# create and delete organisations and auth users. It would also have parked a
+# production service-role key inside GitHub Actions.
+#
+# So CI now boots its own throwaway Supabase per run. No secrets, nothing
+# pointed at production, and it works on pull requests from forks, where secrets
+# are unavailable by design.
+#
+# Nothing here affects local development or the deployed app.
+
+project_id = "simvites"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+# Matches production (17.6), so a version-sensitive difference fails in CI
+# rather than in front of a couple.
+major_version = 17
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = ["http://127.0.0.1:3000"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+# The isolation test creates users with email_confirm: true and then signs in
+# with a password, so no mailbox is involved.
+enable_confirmations = false
+
+# Everything below is off purely to keep the boot fast — none of it is exercised
+# by the suites. Turn a section on if a future test needs it.
+[studio]
+enabled = false
+
+[inbucket]
+enabled = false
+
+[storage]
+enabled = false
+
+[realtime]
+enabled = false
+
+[analytics]
+enabled = false
