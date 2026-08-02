@@ -41,20 +41,20 @@ export default function TermsPage() {
 
       <h3>How long your site stays online</h3>
       <p>
-        A published site stays online for <strong>18 months from the day you first
-        publish it</strong>. We will remind you before it expires, and you can ask us to
-        extend it.
+        A published site stays online for <strong>18 months after your wedding</strong>{' '}
+        — measured from your last event, so a weekend of celebrations counts as one
+        wedding. Publish as early as you like: bringing your save-the-date forward
+        doesn&rsquo;t shorten anything.
       </p>
-      <OpenQuestion>
-        <p>
-          Our homepage currently says 18 months <em>after the wedding</em>, which is not
-          what the product does — the clock starts at first publish. If you paid on the
-          strength of that wording, tell us and we will honour it. We are correcting the
-          claim.
-        </p>
-      </OpenQuestion>
       <p>
-        When a site expires it stops being publicly visible. Your data is not deleted at
+        If your wedding has already happened when you publish, or is very close, you
+        still get a full 18 months from the day you publish. And if you move your date,
+        the expiry moves with it the next time you publish — it can go later, never
+        earlier.
+      </p>
+      <p>
+        We&rsquo;ll remind you before it expires, and you can ask us to extend it. When a
+        site does expire it stops being publicly visible, but your data is not deleted at
         that moment — ask us and we can put it back or export it for you.
       </p>
 

@@ -175,19 +175,43 @@ suitable for a data controller: it cannot be handed over or monitored by anyone
 else, and a subject-access request landing in a personal inbox is its own
 weakness. Move to a role address on the business domain.
 
-### 5a. The homepage promises hosting we do not deliver
-`app/page.tsx` says a site "stays live for 18 months **after the wedding**", twice.
-`lib/publish.ts:59` starts an 18-month clock at **first publish**. For a couple who
-publishes a save-the-date 14 months out — the normal case — that is 4 months after
-the wedding, not 18. This is a pricing claim on the page where people decide to
-pay, so it is a consumer-protection problem, not a copy nit.
+### 5a. The homepage promises hosting we do not deliver — FIXED
+`app/page.tsx` said a site "stays live for 18 months **after the wedding**" in
+three places, including the pricing section. `lib/publish.ts` started an
+18-month clock at **first publish**. For a couple publishing a save-the-date a
+year out — the normal case — that delivered about four months after the
+wedding, not eighteen. A pricing claim on the page where people decide to pay,
+so a consumer-protection problem rather than a copy nit.
 
-Two ways to fix it and **they are not equivalent**, which is why neither has been
-done here: change the copy to match the code, or change the code to match the
-promise (expiry = wedding date + 18 months, falling back to publish + 18 months
-when no date is set). The second is what the marketing has been selling. Whoever
-decides should also decide what happens to couples who have already paid — the
-terms page currently says we will honour the advertised version if asked.
+**The promise won; the code moved.** `lib/site-expiry.ts` now computes:
+
+> 18 months after the **last** event, floored at 18 months from publish.
+
+- *Last* event, not first: this is a multi-event product, and a mehndi on Friday
+  with a reception on Sunday is one wedding. The clock starts when it is over.
+- *Floored*: publishing thank-yous after the day still buys a full term rather
+  than a site that is already expired.
+- *No upper cap.* A cap sounds prudent and breaks the case it exists for — cap
+  at 36 months from publish and a three-year engagement expires ON the wedding
+  day. A promise with an asterisk is also worse marketing than a simple one.
+  Long engagements are rare, static hosting is cheap, and admin can already
+  extend or archive any individual site.
+- *Recomputed on every publish*, so moving the date moves the expiry — but
+  through `laterOf`, so it can only ever extend. A manual admin extension is
+  never clawed back.
+
+The three homepage lines needed no edit: they are now true as written. The terms
+page was rewritten (it had documented the old rule and flagged the discrepancy).
+
+`0022_backfill_hosting_expiry.sql` applied the rule to sites published under the
+old one, since a finished wedding may never publish again. Verified: all 8
+published sites now sit exactly 18 months after their last event; the one with
+no dated events was left alone; nothing was shortened (`greatest`, so re-running
+is harmless). Before the backfill, `riya-and-arjun` had a 2027-05-02 wedding
+expiring 2028-01-04 — eight months, not eighteen.
+
+`npm run test:misuse` covers the rule: the wedding anchor, the publish floor,
+past weddings, missing and corrupt dates, and that `laterOf` never shortens.
 
 ### 6. No favicon or app icon — FIXED
 No `favicon.ico`, `icon.tsx`, or `icon.png`. Every browser tab — including the
@@ -328,8 +352,8 @@ lives only in the database.
 3. ~~Legal pages (#5)~~ **drafted** — now blocked on things only you can do:
    company details for `LEGAL_ENTITY`, a solicitor to settle the two flagged
    questions, then flip `LEGAL_REVIEWED`
-4. **The 18-month hosting claim (#5a)** — decide whether the copy or the code is
-   wrong. Cheap to fix, and it is a promise on the pricing section
+4. ~~The 18-month hosting claim (#5a)~~ **done** — the code now delivers what the
+   pricing page promises, and existing sites were backfilled
 5. **Click-through of guest list + editor** (#7) — the only way to find what
    review cannot
 6. ~~Favicon (#6), guest error page (#10), block tombstone (#10a)~~ **done** — **robots decision (#12)** remains

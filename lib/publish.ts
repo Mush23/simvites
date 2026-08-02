@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { track } from '@/lib/analytics'
+import { computeSiteExpiry, laterOf } from '@/lib/site-expiry'
 
 /**
  * Serialise pages + visible events + theme + labels into an immutable
@@ -65,12 +66,30 @@ export async function publishSnapshot(siteId: string, summary = 'Published from 
     .insert({ site_id: siteId, snapshot, summary, published_by: user?.id ?? null })
   if (insErr) return { error: insErr.message }
 
-  // Lifecycle: first publish starts the included-hosting clock (~18 months);
-  // renewals/extensions are managed in platform admin (and later, billing).
-  const { data: cur } = await supabase.from('sites').select('expires_at').eq('id', siteId).maybeSingle()
-  const expiry = new Date(); expiry.setMonth(expiry.getMonth() + 18)
+  // Lifecycle (readiness #5a): hosting runs for 18 months AFTER THE WEDDING,
+  // floored at 18 months from publish. This used to be 18 months from first
+  // publish, which for a save-the-date published a year ahead delivered about
+  // four months after the wedding — while three places on the marketing site
+  // promised eighteen. See lib/site-expiry.ts.
+  //
+  // Recomputed on EVERY publish rather than only the first, so moving the
+  // wedding date moves the expiry with it. `laterOf` means that can only ever
+  // extend: a manual extension from platform admin is never clawed back.
+  const [{ data: cur }, { data: dated }] = await Promise.all([
+    supabase.from('sites').select('expires_at').eq('id', siteId).maybeSingle(),
+    // ALL live events, not just the ones shown on the website — a private
+    // family dinner is still part of the wedding for lifecycle purposes.
+    supabase.from('events').select('starts_at').eq('site_id', siteId)
+      .is('archived_at', null).not('starts_at', 'is', null)
+      .order('starts_at', { ascending: false }).limit(1),
+  ])
+  const lastEventAt = (dated as { starts_at: string }[] | null)?.[0]?.starts_at ?? null
+  const expiry = laterOf(
+    cur?.expires_at as string | null,
+    computeSiteExpiry(lastEventAt ? new Date(lastEventAt) : null, new Date()),
+  )
   const { error: updErr } = await supabase.from('sites')
-    .update({ status: 'published', ...(cur?.expires_at ? {} : { expires_at: expiry.toISOString() }) })
+    .update({ status: 'published', expires_at: expiry.toISOString() })
     .eq('id', siteId)
   if (updErr) return { error: updErr.message }
 
