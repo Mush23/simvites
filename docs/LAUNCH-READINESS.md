@@ -382,11 +382,50 @@ Fixed in code:
 - The login page now explains both cases above the form.
 
 **Still needs you — a dashboard change.** The emailed URL is built from
-Supabase's own email template, so links keep arriving as `?code=` until the
-template is switched to `{{ .TokenHash }}` (Authentication → Email Templates →
-Magic Link). Until then cross-device links still fail, but they now say why
-instead of showing a blank form. After the change they should simply work; the
-route already handles both.
+Supabase's own email template, which lives in the project's control plane. The
+service-role key cannot reach it (that is data-plane only), and there is no
+Personal Access Token in this environment, so it cannot be changed from here.
+
+Dashboard → Authentication → Email Templates. Replace the link in each body:
+
+| Template | Link href |
+|---|---|
+| Magic Link | `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=magiclink` |
+| Confirm signup | `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=signup` |
+| Reset password | `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery` |
+| Invite user | `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=invite` |
+
+So the Magic Link body becomes:
+
+```html
+<h2>Sign in to Simvites</h2>
+<p>
+  <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=magiclink">
+    Sign in
+  </a>
+</p>
+<p>If you didn't ask for this, you can ignore it.</p>
+```
+
+Two things worth knowing before pasting:
+
+- **`&`, not `?`.** `{{ .RedirectTo }}` is the whole URL the client asked for,
+  and every call site already appends a query string —
+  `/auth/callback?next=…` at `app/login/page.tsx:74`, `:87` and `:103`. Starting
+  with `?` would produce two of them. Using `{{ .RedirectTo }}` rather than
+  `{{ .SiteURL }}` is also what preserves `next`, which is how a collaborator
+  invitation returns to `/invite/<token>` after sign-in.
+- **`type` must match the template.** The route allowlists
+  magiclink / signup / invite / recovery / email_change / email, and an
+  unrecognised value is ignored rather than forwarded.
+
+Safe to do at any time and in any order: `/auth/callback` accepts `token_hash`
+**and** `code`, so nothing breaks in the window before or after. Changing only
+the Magic Link template leaves password resets same-device — worth doing all
+four.
+
+Verify afterwards by requesting a link on one device and opening it on another;
+it should sign in rather than land on `/login?error=other-device`.
 
 ---
 
