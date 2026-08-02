@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Mail } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
@@ -138,7 +139,28 @@ export default function LoginPage() {
       {/* Left — the tool */}
       <div className="flex flex-col px-6 sm:px-12">
         <header className="flex items-center justify-between py-6">
-          <Link href="/" className="text-[13px] font-semibold tracking-tight">{BRAND_NAME}</Link>
+          {/* The monogram needs ~30px of HEIGHT to hold together — measured:
+              its hairlines break up below that, which is why the 32px favicon
+              stays a letterform. Here there is room, so the real mark shows. */}
+          <Link href="/" className="flex items-center gap-2.5" aria-label={BRAND_NAME}>
+            <Image
+              src="/brand/monogram-ink-320.png"
+              alt=""
+              width={53}
+              height={32}
+              priority
+              className="h-8 w-auto dark:hidden"
+            />
+            <Image
+              src="/brand/monogram-white-320.png"
+              alt=""
+              width={53}
+              height={32}
+              priority
+              className="hidden h-8 w-auto dark:block"
+            />
+            <span className="text-[13px] font-semibold tracking-tight">{BRAND_NAME}</span>
+          </Link>
           <ThemeToggle />
         </header>
 

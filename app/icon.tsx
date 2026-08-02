@@ -9,6 +9,15 @@ import { BRAND_NAME } from '@/lib/brand'
 // The letter is derived from BRAND_NAME rather than hardcoded: the rename to
 // Milestones left an "S" here, in the one place nobody looks at in a diff and
 // everybody looks at in a browser tab.
+//
+// ── Why this is NOT the MS monogram ──────────────────────────────────────
+// It was rendered at 32, 48 and 64px and looked at, magnified, side by side.
+// The monogram is a high-contrast serif: at 32px its hairlines and the swash
+// break up into a pink smudge, legible as neither M nor S. It is clean by
+// 64px. So the mark is used where it has room — app/apple-icon.png at 180px,
+// public/brand/* — and the letterform holds the 32px slot. A logo that is
+// unreadable at the size it is actually displayed is not a logo there.
+// Regenerate the assets with: node scripts/build-brand-assets.mjs
 
 export const size = { width: 32, height: 32 }
 export const contentType = 'image/png'
