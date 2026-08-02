@@ -121,6 +121,21 @@ the conditional-question case among them, so 0018's work survived. Tenant
 isolation still passes 7/7. `db:apply` sorts filenames, so 0019 lands after 0018
 and a fresh deploy ends on the restored function.*
 
+*Confirmed live 2026-08-02: all three restored guards are present in the
+deployed `submit_response` body, read back from `pg_proc` on the production
+database. The gap is closed in production, not just in the repo.*
+
+### 4b. Input bounds — FIXED, applied 2026-08-02
+`0020_input_bounds.sql` adds length and shape constraints to the guest-writable
+columns (misuse review M9). Applied to production after a read-only pre-flight
+showed zero violating rows; all six constraints verified present, validated and
+enforcing.
+
+Note for future migrations: `db-apply.mjs` records a migration in
+`schema_migrations` **only when run with no arguments**. Applying one file by
+name works but leaves the tracker behind — that is how 0019 and 0020 both ended
+up applied-but-unrecorded. Both have since been recorded.
+
 ### 5. No privacy policy, terms, or cookie notice — DRAFTED, still gated
 No `/privacy` or `/terms` route exists, and nothing in the marketing footer links
 to one. This is a paid UK product storing named guests, emails, phone numbers and

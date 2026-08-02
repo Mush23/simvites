@@ -45,16 +45,28 @@ needs no database, so it runs in CI on every push including fork PRs. The
 remaining findings are structural (a moved check, a bounded loop) and are
 covered by typecheck plus the existing suites.
 
-### Two things still need you
+### Database state
 
-1. **Apply `0020_input_bounds.sql`.** It has not been run — the only Supabase
-   project configured here is the live one, and I am not applying schema
-   changes to production unprompted. The app-level clamps are already in force,
-   so this is defence in depth rather than the only guard.
-   ```
-   node --env-file=.env.local scripts/db-apply.mjs supabase/migrations/0020_input_bounds.sql
-   ```
-2. **Collaborator consent is a product decision, not a bug fix.** M1's
+`0020_input_bounds.sql` is **applied to production** (2026-08-02). A read-only
+pre-flight found zero violating rows across all six constraints first, so the
+`validate` could not abort; each constraint was then confirmed present,
+`convalidated`, and actually rejecting a violating write (tested inside a
+transaction and rolled back).
+
+Two things surfaced while doing it:
+
+- **0019 was already live.** All three restored guards are present in the
+  deployed `submit_response` body, so the RSVP validation gap closed at some
+  point after the 25 July deploy of 0018.
+- **`schema_migrations` had drifted.** `db-apply.mjs` only records migrations
+  when run with no arguments; both 0019 and 0020 were applied by explicit
+  filename, so the tracker stopped at 0018 while the database was two ahead.
+  Both are now recorded. Worth knowing for next time: applying a single file by
+  name never updates the tracker.
+
+### One thing still needs you
+
+1. **Collaborator consent is a product decision, not a bug fix.** M1's
    *exploitable* half is closed: nobody can displace your workspace any more.
    But `addCollaborator` still adds a membership without the recipient
    accepting it, so a stranger can still make an unwanted site appear in your
