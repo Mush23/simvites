@@ -9,7 +9,8 @@ Status legend: ✅ connected · ⏳ needed now · 🔜 later phase
 ---
 
 ## ✅ GitHub — source control
-- **Repo:** https://github.com/Mush23/milestones (private)
+- **Repo:** https://github.com/Mush23/simvites (private — still the pre-rename
+  name; renaming the repo would break the Vercel link, so it stays for now)
 - **Auth:** `gh` CLI, logged in as `Mush23`. Nothing more to do.
 
 ## ✅ Supabase — database, storage, auth (project `rpkcrazictrjuxheugod`)
@@ -18,9 +19,10 @@ Already in `.env.local`:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — your **publishable** key (browser, safe)
 - `SUPABASE_SERVICE_ROLE_KEY` — your **secret** key (server only)
 
-### ⏳ DATABASE_URL — needed now, to create the tables
+### ✅ DATABASE_URL — done, migrations applied through 0025
 The API keys above can read/write data but can't *create tables*. For that I need
-the Postgres connection string (it contains the database password).
+the Postgres connection string (it contains the database password). This is set,
+and kept here because you will need it again if the password is ever rotated.
 
 **How to get it (≈30 seconds):**
 1. In your Supabase dashboard, click the green **Connect** button at the top.
@@ -40,25 +42,52 @@ the Postgres connection string (it contains the database password).
 > the gitignored `.env.local`, and you can rotate the password anytime from the
 > same settings page.
 
-## 🔜 Resend — invite & RSVP emails (Phase 4)
-- Sign up at resend.com → **API Keys** → create one (`re_…`).
-- Add your sending domain and the DNS records Resend shows (SPF/DKIM).
-- Give me the key → goes to `RESEND_API_KEY`.
+## ⏳ Resend — invite emails **and** login emails
+One signup, two jobs. The second one blocks launch.
 
-## 🔜 Stripe — payments (Phase 5)
-- Stripe dashboard (test mode) → **Developers → API keys**: publishable (`pk_…`)
-  and secret (`sk_…`).
-- After I add the webhook endpoint, **Developers → Webhooks** gives a signing
-  secret (`whsec_…`).
-- Give me all three → `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY`,
-  `STRIPE_WEBHOOK_SECRET`.
+- Sign up at resend.com → **Domains → Add Domain** → add the DNS records Resend
+  shows (DKIM/SPF) at your registrar and wait for verification.
+- **API Keys** → create one with *Sending access* (`re_…`). Shown once.
+- Give me the key → goes to `RESEND_API_KEY` + `RESEND_FROM`, which is what
+  makes **guest invitations** send.
+- **Then paste the same key into Supabase as custom SMTP** — see below. That is
+  a separate path and covers **login**.
+- Free tier: 3,000 emails/month, 100/day, one sending domain.
+
+## ⏳ Supabase custom SMTP — the actual launch blocker
+Supabase's built-in email sender is capped at **2 messages per hour** and their
+own docs call it best-effort and unsuitable for production. Login is a magic
+link, so without this the third person signing in within an hour cannot get in.
+
+- **Authentication → Emails → SMTP Settings**: host `smtp.resend.com`, port
+  `465`, username `resend`, password = your `re_…` key, sender
+  `noreply@<your-domain>`.
+- **Authentication → Rate Limits**: raise the email limit off the 30/hour
+  default that custom SMTP starts at.
+- **Authentication → URL Configuration**: Site URL + the redirect URL list in
+  `docs/DEPLOY.md`. Magic links silently fail to redirect without them.
+- No extra cost, no extra account.
+
+## 🔜 Stripe — payments
+- Stripe dashboard (test mode) → **Developers → API keys** → the **secret** key
+  (`sk_test_…`). Ignore the publishable key: nothing in this codebase reads it,
+  because checkout is a server-side redirect rather than Stripe.js.
+- **Developers → Webhooks** → add `https://<your-domain>/api/stripe/webhook`
+  subscribed to `checkout.session.completed`, which gives a signing secret
+  (`whsec_…`).
+- Give me both → `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`.
+- **No Products or Prices to create** — the line item is built inline from
+  `lib/pricing.ts` and the amount is editable from `/admin`.
+- No monthly fee; 1.5% + 20p on standard UK cards.
 
 ## 🔜 Vercel — hosting + wildcard/custom domains (at deploy)
-- Connect the GitHub repo at vercel.com (free Hobby for dev; Pro at commercial
-  launch, required for commercial use + wildcard domains).
-- For `*.simvites.co.uk`: add the domain in Vercel and set the DNS wildcard
-  record at your registrar. Custom-domain add-on uses the Vercel Domains API
-  (token → `VERCEL_API_TOKEN`), wired in a later phase.
+- Connect the GitHub repo at vercel.com. Hobby is **non-commercial only**, so
+  Pro ($20/mo) is required both for commercial use and for wildcard domains.
+- For `*.<your-domain>`: add the domain in Vercel and set the DNS wildcard
+  record at your registrar.
+- The per-couple custom-domain add-on would use the Vercel Domains API
+  (`VERCEL_API_TOKEN`) — **not built yet**, so that variable is currently read
+  by no code.
 
 ## 🔜 Anthropic — AI import + planning assistant
 Powers the **"Tidy & preview"** guest import and the **Assistant** module.
@@ -89,9 +118,15 @@ no external signup.
 
 ---
 
-### What I run once DATABASE_URL is set
+### Verifying the database at any time
 ```bash
-npm run db:apply    # all migrations + Template #1 seed
+npm run db:apply    # all migrations + Template #1 seed (idempotent)
 npm run db:verify   # confirms tables, RLS, seeded template
 ```
-Then Phase 1 begins: Supabase Auth → dashboard → create-site-from-template.
+Applied through `0025` against production. CI re-runs every migration from
+scratch on a throwaway Supabase per push, so a migration that no longer applies
+cleanly fails there rather than on a fresh deploy.
+
+### Still outstanding, and only you can do them
+The domain, the legal entity and the ICO registration — none of which are
+credentials. See the launch guide for the ordering and costs.
